@@ -64,3 +64,5 @@ uv pip install --python .local/whisper-service/bin/python -r service/requirement
 本地功能、真实模型、预览重启与客户端导入的边界见 [ACCEPTANCE.md](ACCEPTANCE.md)。上游代码 MIT；模型、PyAV/FFmpeg 等依赖的许可独立，见 [NOTICES.md](NOTICES.md)。没有在应用包里再分发模型或外部原生推理依赖。
 
 打包：`pnpm workbench package faster-whisper`。产物在本项目 `artifacts/`；Floatboat 中通过「我的 → 工作台 → 导入工作台」导入。客户端实际导入尚未验收。
+
+远程转写服务必须经 HTTPS 连接；HTTP 仅允许回环地址。迟到的轮询或提交错误不会覆盖已完成、失败、取消或中断状态。

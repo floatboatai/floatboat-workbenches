@@ -23,6 +23,8 @@ export function configuredService(
     base.pathname !== "/"
   )
     throw new Error("转写服务地址必须是无路径和凭据的 HTTP(S) 来源。");
+  if (base.protocol === "http:" && !["127.0.0.1", "localhost", "[::1]"].includes(base.hostname))
+    throw new Error("远程转写服务必须使用 HTTPS。");
   return base;
 }
 export function createJobs(
@@ -56,6 +58,7 @@ export function createJobs(
           chunks.push(part.value);
         }
       } finally {
+        await reader.cancel().catch(() => {});
         reader.releaseLock();
       }
     }
@@ -100,7 +103,9 @@ export function createJobs(
       value.language !== original.input.language
     )
       throw new Error("转写服务返回了不匹配的任务。");
+    if (["completed", "failed", "cancelled", "interrupted"].includes(original.status)) return original;
     const r = remoteResult(value);
+    if (original.status === "running" && r.status === "queued") return original;
     db.prepare(
       "UPDATE transcription_jobs SET status=?,error=?,model=?,segments=?,updated_at=? WHERE id=?",
     ).run(
@@ -114,6 +119,8 @@ export function createJobs(
     return get(id);
   }
   function unknown(id: string, error: unknown) {
+    const current = get(id);
+    if (["completed", "failed", "cancelled", "interrupted"].includes(current.status)) return current;
     db.prepare(
       "UPDATE transcription_jobs SET status=?,error=?,updated_at=? WHERE id=?",
     ).run(
@@ -150,7 +157,7 @@ export function createJobs(
         [400, 401, 403, 409, 413, 422].includes(e.status)
       ) {
         db.prepare(
-          "UPDATE transcription_jobs SET status=?,error=?,updated_at=? WHERE id=?",
+          "UPDATE transcription_jobs SET status=?,error=?,updated_at=? WHERE id=? AND status IN ('submitting','unknown')",
         ).run(
           "failed",
           "服务拒绝任务，请检查模型语言、服务授权与音频格式。",

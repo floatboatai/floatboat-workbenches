@@ -334,3 +334,24 @@ test("concurrent duplicate job requests share one durable operation", async () =
     db.close();
   }
 });
+
+test("late poll cannot resurrect cancelled transcription and remote cleartext is rejected", async()=>{
+ assert.throws(()=>configuredService('http://example.org'));
+ const db=await database();
+ try{
+  const project=createStore(db,validateTranscript).create('Audio',{...emptyTranscript,source});
+  let resolvePoll:((response:Response)=>void)|undefined;
+  const reply=(status:string)=>Response.json({id,audioSha256:source.id,language:'en',status,model:'tiny.en',segments:status==='completed'?[{start:0,end:1,text:'Late output'}]:undefined});
+  const jobs=createJobs(db,async()=>wav(),async(url,options)=>{
+   if(options?.method==='PUT')return reply('queued');
+   if(String(url).endsWith('/cancel'))return reply('cancelled');
+   return new Promise<Response>(resolve=>{resolvePoll=resolve;});
+  },new URL('http://127.0.0.1:8768'));
+  await jobs.create(id,project.id,{source,language:'en'});
+  const pending=jobs.reconcile(id);
+  assert.equal((await jobs.cancel(id)).status,'cancelled');
+  resolvePoll!(reply('completed'));
+  assert.equal((await pending).status,'cancelled');
+  assert.equal(jobs.get(id).segments,null);
+ }finally{db.close();}
+});
