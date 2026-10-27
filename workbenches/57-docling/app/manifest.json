@@ -16,10 +16,24 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "documents",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "documents",
+      "access": "read-write"
+    },
+    {
+      "id": "examples",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "fixtures"
+    }
+  ]
 }
