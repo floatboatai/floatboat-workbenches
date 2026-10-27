@@ -11,6 +11,7 @@
     "node": ">=22.16.0"
   },
   "dependencies": {
+    "grapesjs": "0.23.8",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
