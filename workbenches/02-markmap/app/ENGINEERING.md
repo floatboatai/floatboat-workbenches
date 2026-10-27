@@ -1,12 +1,7 @@
-# Engineering
+# 工程说明
 
-The business app root is this directory. Run the authoring commands from the repository root; see `../AGENTS.md`.
+contracts/mindmap.ts负责结构与大小校验；server/routes.ts和store.ts提供SQLite CRUD与版本保护、Host generateText生成JSON。ui/Studio.tsx负责编辑与文件操作，Mindmap.tsx按需加载实际markmap引擎并做HTML允许列表清理。
 
-- `src/server/` owns business routes, parameterized SQL, transactions and Host SDK calls. Register public page routes under `/api/` through the provided server.
-- `src/ui/` owns React components and the authenticated page connection. UI requests go through `page.fetch`; importing Node, database or Host implementations into the browser is rejected.
-- `src/contracts/` contains shared serializable data types and response validation. Validate external input as unknown and return structured results.
-- Append numbered SQL migrations. Applied migrations are immutable; preview data is persistent and must not be silently reset to accommodate changes.
-- Keep the fixed strict `tsconfig.json` and declarative manifest build profile. The compiler ignores executable project build config and env files. Source assets belong under `src/`.
-- Keep runtime dependency versions and lockfiles aligned; see `../docs/maintenance.md`. Native extensions do not belong in the application profile.
-- Add tests for business boundaries and persistence behavior, using temporary data rather than the user's preview database. Test files live under `tests/` and are run by `pnpm test` from the repository root.
-- Host calls are optional and require actual authorization. Show unavailable/error states and consult `../docs/platform.md`; preserve execution-unknown errors rather than retrying potentially completed external mutations blindly.
+固定markmap-lib/view 0.18.12，no-plugins入口显式补markmap-common 0.18.9。禁止远程插件资源，DOMPurify仅保留内联文字标签。SVG包含foreignObject，编辑器兼容性可能不同；Markdown为原始保存格式。
+
+数据库保持官方模板工作空间边界，导出默认不包含用户数据。验证命令为pnpm test与pnpm run package，实际浏览器验收记录在项目README。
