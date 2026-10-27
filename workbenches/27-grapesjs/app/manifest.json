@@ -19,5 +19,13 @@
   "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "third-party-notices",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "THIRD_PARTY_NOTICES.md"
+    }
+  ]
 }

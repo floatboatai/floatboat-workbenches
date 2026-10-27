@@ -34,3 +34,5 @@ No Host API is used. The preview launcher may report Host connectivity, which is
 - Targeted inspector check: component/property/field isolation, invalid numeric blur and reload retention, and valid correction clearing the draft all passed. Selection snapshots stable generated component IDs before draft references are persisted.
 - Offline check: a brand-new offline project can be switched away from, located as a local item, resumed, and automatically synchronized after reconnection.
 - Native drag was independently exercised with actual pointer movement across the canvas iframe. The browser scripts preserve the expected network-failure evidence separately from runtime failures.
+
+The BSD notice for the engine and adapted locale is a declared project file resource, so the official source exporter includes it instead of excluding an undeclared document at the app root.
