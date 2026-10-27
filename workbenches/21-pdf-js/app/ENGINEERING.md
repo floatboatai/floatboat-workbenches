@@ -8,6 +8,7 @@ The pinned template remains the compiler/runtime authority. All business code is
 - server/files.ts: managed resource chunk writes, SHA-256 verification, atomic finalized write, immutable original reuse and read/size verification.
 - server/routes.ts: project listing/detail/delete, existing autosave routes with resource verification, original PDF chunk/finalize/read, constrained bundled assets and sample resource routes.
 - ui/engine.ts: PDF.js browser worker and document loading. Bundled resource URLs use /api/pdfjs/:group/:file because this template does not assume Vite publicDir serving.
+- Image decoding explicitly uses PDF.js JavaScript fallbacks (`useWasm:false`) under the unchanged workbench CSP; decoder modules are served with JavaScript MIME. A JPEG2000 PDF fixture verifies decoded center pixels, avoiding a silently blank image when WASM eval or module loading is rejected.
 - ui/PdfPage.tsx: memoized canvas + actual PDF.js TextLayer; cancellable rendering, dedicated canvas per render, lazy thumbnail intersection observation; canvas backing store capped at 16 million pixels and DPR 2.
 - ui/App.tsx: reader/navigation/review, sequential bounded text index, file validation and imports, portable export and exact original download.
 - shared autosave modules: revisioned working copies, IndexedDB fallback, idempotent mutation replay, conflicts. Unique storage key pdf-js-reading-room-v1. PDF lifecycle keyed by documentKey + source hash, never current project ACK identity.

@@ -10,6 +10,8 @@ export function loadPdf(bytes: Uint8Array) {
     cMapPacked: true,
     standardFontDataUrl: "/api/pdfjs/standard_fonts/",
     wasmUrl: "/api/pdfjs/wasm/",
+    // The workbench CSP uses JavaScript image decoders without WebAssembly eval.
+    useWasm: false,
     useSystemFonts: true,
     enableXfa: false,
     maxImageSize: 16000000,

@@ -49,7 +49,9 @@ export function registerRoutes(app: WorkbenchServer) {
           headers: {
             "content-type": params.file.endsWith(".wasm")
               ? "application/wasm"
-              : "application/octet-stream",
+              : params.file.endsWith(".js")
+                ? "text/javascript; charset=utf-8"
+                : "application/octet-stream",
             "cache-control": "public, max-age=31536000, immutable",
           },
         },
