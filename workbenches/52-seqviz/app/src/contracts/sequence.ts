@@ -233,3 +233,22 @@ export function importProject(value: unknown) {
     throw new Error("项目 JSON 需要版本 1、1-based-inclusive 坐标和项目名称。");
   return { title: value.title.trim(), data: validateDocument(value.data) };
 }
+
+export function restoreSequenceDraft(value: unknown): SequenceDocument {
+  if (
+    isRecord(value) &&
+    value.sequence === "" &&
+    (value.topology === "linear" || value.topology === "circular") &&
+    Array.isArray(value.features) &&
+    value.features.length === 0 &&
+    Array.isArray(value.reviews) &&
+    value.reviews.length === 0
+  )
+    return {
+      sequence: "",
+      topology: value.topology,
+      features: [],
+      reviews: [],
+    };
+  return validateDocument(value);
+}

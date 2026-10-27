@@ -1,4 +1,14 @@
-import { lazy, Suspense, useCallback, useRef, useState } from "react";
+import { AutoStatus, AutoFeedback } from "./AutosaveStatus";
+import { isRecord } from "../contracts/project";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Dna, Download, FileUp, Plus, Save, Trash2 } from "lucide-react";
 import {
   extractSequence,
@@ -9,6 +19,7 @@ import {
   rangeLength,
   seed,
   validateDocument,
+  restoreSequenceDraft,
   validateRange,
   type Feature,
   type Range,
@@ -34,20 +45,89 @@ const colors = [
   { value: "#c76b84", name: "莓红" },
 ];
 export function Studio() {
-  const [draft, setDraft] = useState(""),
-    [featureName, setFeatureName] = useState(""),
-    [note, setNote] = useState("");
-  const [appliedSequence, setAppliedSequence] = useState("");
-  const sequenceDirty = draft !== appliedSequence,
+  const p = useProjects(seed, validateDocument, "未命名序列", {
+    storageKey: "seqviz",
+    restoreDraftData: restoreSequenceDraft,
+  });
+  const draft =
+    typeof p.draft.sequenceText === "string" &&
+    p.draft.sequenceText.length <= 100000
+      ? p.draft.sequenceText
+      : p.data.sequence;
+  const featureName =
+    typeof p.draft.featureName === "string" && p.draft.featureName.length <= 100
+      ? p.draft.featureName
+      : "";
+  const note =
+    typeof p.draft.note === "string" && p.draft.note.length <= 2000
+      ? p.draft.note
+      : "";
+  const editingSequence =
+    typeof p.draft.editingSequence === "boolean"
+      ? p.draft.editingSequence
+      : !p.data.sequence;
+  const editingFeature =
+    typeof p.draft.editingFeature === "string" ? p.draft.editingFeature : null;
+  const color =
+    typeof p.draft.color === "string" && /^#[0-9a-f]{6}$/i.test(p.draft.color)
+      ? p.draft.color
+      : colors[0].value;
+  const rawRange = p.draft.range;
+  const range: Range = useMemo(
+    () =>
+      isRecord(rawRange) &&
+      typeof rawRange.start === "number" &&
+      Number.isFinite(rawRange.start) &&
+      typeof rawRange.end === "number" &&
+      Number.isFinite(rawRange.end) &&
+      (rawRange.strand === 1 || rawRange.strand === -1)
+        ? { start: rawRange.start, end: rawRange.end, strand: rawRange.strand }
+        : {
+            start: 1,
+            end: Math.min(20, p.data.sequence.length) || 1,
+            strand: 1,
+          },
+    [rawRange, p.data.sequence.length],
+  );
+  const setDraft = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, sequenceText: value }));
+  const setFeatureName = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, featureName: value }));
+  const setNote = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, note: value }));
+  const setEditingSequence = (value: boolean) =>
+    p.setDraft((previous) => ({ ...previous, editingSequence: value }));
+  const setEditingFeature = (value: string | null) =>
+    p.setDraft((previous) => ({ ...previous, editingFeature: value }));
+  const setColor = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, color: value }));
+  const setRange = (value: Range) =>
+    p.setDraft((previous) => ({ ...previous, range: value }));
+  const sequenceDirty = draft !== p.data.sequence,
     pending = sequenceDirty || !!featureName || !!note;
-  const p = useProjects(seed, validateDocument, "未命名序列", pending);
-  const [editingSequence, setEditingSequence] = useState(true),
-    [importing, setImporting] = useState(false),
-    [view, setView] = useState<"circular" | "linear">("circular"),
-    [range, setRange] = useState<Range>({ start: 1, end: 1, strand: 1 }),
-    [color, setColor] = useState(colors[0].value),
-    [editingFeature, setEditingFeature] = useState<string | null>(null),
+  const [importing, setImporting] = useState(false),
+    [view, setView] = useState<"circular" | "linear" | "both">(() =>
+      matchMedia("(min-width:1001px)").matches ? "both" : "circular",
+    ),
     [format, setFormat] = useState("fasta");
+  useEffect(() => {
+    setView(
+      p.data.topology === "linear"
+        ? "linear"
+        : matchMedia("(min-width:1001px)").matches
+          ? "both"
+          : "circular",
+    );
+  }, [p.loadEpoch]);
+  useEffect(() => {
+    const query = matchMedia("(max-width:1000px)");
+    const resize = () => {
+      if (query.matches)
+        setView((value) => (value === "both" ? "circular" : value));
+    };
+    query.addEventListener("change", resize);
+    return () => query.removeEventListener("change", resize);
+  }, []);
   const file = useRef<HTMLInputElement>(null),
     locked = p.busy || importing,
     recordsLocked = locked || sequenceDirty;
@@ -63,7 +143,7 @@ export function Studio() {
       : "";
   function resetDrafts(data: SequenceDocument) {
     setDraft(data.sequence);
-    setAppliedSequence(data.sequence);
+
     setFeatureName("");
     setNote("");
     setEditingFeature(null);
@@ -73,14 +153,23 @@ export function Studio() {
       strand: 1,
     });
     setEditingSequence(!data.sequence);
-    setView(data.topology === "linear" ? "linear" : "circular");
+    setView(
+      data.topology === "linear"
+        ? "linear"
+        : matchMedia("(min-width:1001px)").matches
+          ? "both"
+          : "circular",
+    );
   }
   function applySequence() {
     try {
       const parsed = parseSequence(draft);
       if (
         parsed.sequence !== p.data.sequence &&
-        (p.data.features.length || p.data.reviews.length) &&
+        (p.data.features.length ||
+          p.data.reviews.length ||
+          featureName ||
+          note) &&
         !confirm("替换序列将清除旧序列的所有特征与审阅记录，继续吗？")
       )
         return;
@@ -95,7 +184,11 @@ export function Studio() {
             };
       p.setData(data);
       if (parsed.name) p.setTitle(parsed.name);
-      resetDrafts(data);
+      if (parsed.sequence !== p.data.sequence) resetDrafts(data);
+      else {
+        setDraft(parsed.sequence);
+        setEditingSequence(false);
+      }
       p.setError("");
     } catch (error) {
       p.report(error);
@@ -110,9 +203,8 @@ export function Studio() {
       return;
     if (editingSequence) {
       setDraft(p.data.sequence);
-      setAppliedSequence(p.data.sequence);
     }
-    setEditingSequence((value) => !value);
+    setEditingSequence(!editingSequence);
   }
   async function importFile(event: React.ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget,
@@ -125,16 +217,20 @@ export function Studio() {
       const text = await chosen.text();
       if (chosen.name.toLowerCase().endsWith(".json")) {
         const decoded = importProject(JSON.parse(text));
-        if (p.dirty && !confirm("当前有未保存的修改，确定替换为导入项目吗？"))
-          return;
-        p.setData(decoded.data);
-        p.setTitle(decoded.title);
-        resetDrafts(decoded.data);
+        await p.replace(decoded.data, decoded.title);
       } else {
-        parseSequence(text);
-        if (sequenceDirty && !confirm("确定替换尚未应用的序列草稿吗？")) return;
-        setDraft(text);
-        setEditingSequence(true);
+        const parsed = parseSequence(text);
+        await p.replace(
+          {
+            sequence: parsed.sequence,
+            topology: "circular",
+            features: [],
+            reviews: [],
+          },
+          parsed.name ||
+            chosen.name.replace(/\.[^.]+$/, "").slice(0, 120) ||
+            "导入序列",
+        );
       }
       p.setError("");
     } catch (error) {
@@ -160,18 +256,28 @@ export function Studio() {
       p.report(error);
     }
   }
-  const onSelection = useCallback(
-    (value: unknown) => {
-      if (sequenceDirty || featureName || note) return;
-      const next = fromViewerSelection(
-        value,
-        p.data.sequence.length,
-        p.data.topology,
-      );
-      if (next) setRange(next);
-    },
-    [sequenceDirty, featureName, note, p.data.sequence.length, p.data.topology],
-  );
+  const selectionContext = useRef({
+    sequenceDirty,
+    featureName,
+    note,
+    length: p.data.sequence.length,
+    topology: p.data.topology,
+  });
+  selectionContext.current = {
+    sequenceDirty,
+    featureName,
+    note,
+    length: p.data.sequence.length,
+    topology: p.data.topology,
+  };
+  const updateRange = useRef(setRange);
+  updateRange.current = setRange;
+  const onSelection = useCallback((value: unknown) => {
+    const c = selectionContext.current;
+    if (c.sequenceDirty || c.featureName || c.note) return;
+    const next = fromViewerSelection(value, c.length, c.topology);
+    if (next) updateRange.current(next);
+  }, []);
   function addFeature(event: React.FormEvent) {
     event.preventDefault();
     try {
@@ -305,28 +411,18 @@ export function Studio() {
             items={p.items}
             id={p.current?.id}
             disabled={locked}
-            onOpen={(id) => {
-              void p.open(id).then((result) => {
-                if (result) resetDrafts(result.data);
-              });
-            }}
+            onOpen={(id) => void p.open(id)}
           />
-          <button
-            disabled={locked}
-            onClick={() => {
-              if (p.fresh()) resetDrafts(seed);
-            }}
-          >
+          <button disabled={locked} onClick={() => void p.fresh()}>
             <Plus aria-hidden="true" size={15} />
             新建
           </button>
           <button
-            className="primary"
             disabled={locked || pending || !p.data.sequence}
             onClick={() => void p.save()}
           >
             <Save aria-hidden="true" size={15} />
-            {p.busy ? "保存中…" : "保存项目"}
+            {p.busy ? "保存中…" : "立即保存"}
           </button>
         </div>
       </header>
@@ -344,14 +440,11 @@ export function Studio() {
             disabled={locked}
             onChange={(event) => p.setTitle(event.target.value)}
           />
-          <p role="status">
-            {pending
-              ? "有尚未应用或提交的草稿"
-              : p.dirty
-                ? "有未保存的修改"
-                : p.current
-                  ? "已保存"
-                  : "导入自己的序列，开始审阅。"}
+          <p>
+            <AutoStatus state={p.autoState} loading={p.loading} />
+            {pending ? (
+              <span className="draft-note"> · 编辑草稿尚未应用</span>
+            ) : null}
           </p>
         </div>
         <div className="document-actions">
@@ -403,19 +496,24 @@ export function Studio() {
             className="danger"
             aria-label="删除序列项目"
             disabled={locked || !p.current}
-            onClick={() => {
-              void p.remove().then((removed) => {
-                if (removed) resetDrafts(seed);
-              });
-            }}
+            onClick={() => void p.remove()}
           >
             <Trash2 aria-hidden="true" size={15} />
           </button>
         </div>
       </section>
       <Notice error={p.error} notice={p.notice} />
+      <AutoFeedback
+        state={p.autoState}
+        onRetry={() => void p.save()}
+        onExport={p.exportDraft}
+        onReload={p.current ? () => void p.open(p.current!.id) : undefined}
+      />
       {editingSequence ? (
-        <section id="sequence-input" className="sequence-input">
+        <section
+          id="sequence-input"
+          className={`sequence-input ${p.data.sequence ? "floating-input" : ""}`}
+        >
           <div>
             <h1>输入 DNA 序列</h1>
             <p>
@@ -448,7 +546,6 @@ export function Studio() {
               disabled={locked}
               onClick={() => {
                 setDraft(p.data.sequence);
-                setAppliedSequence(p.data.sequence);
                 p.setError("");
               }}
             >
@@ -463,140 +560,150 @@ export function Studio() {
         </section>
       ) : null}
       {p.data.sequence ? (
-        <>
-          <section className="sequence-facts">
-            <span className="dna-tag">DNA</span>
-            <strong>
-              {p.data.sequence.length.toLocaleString()} <small>bp</small>
-            </strong>
-            <span>GC（全长）{gc}%</span>
-            <span>{p.data.features.length} 个特征</span>
-            <label>
-              拓扑
-              <select
-                name="topology"
-                aria-label="序列拓扑"
-                disabled={recordsLocked || !!featureName || !!note}
-                value={p.data.topology}
-                onChange={(event) =>
-                  setTopology(event.target.value as Topology)
-                }
-              >
-                <option value="circular">环形</option>
-                <option value="linear">线性</option>
-              </select>
-            </label>
-          </section>
-          <section className="viewer-section">
-            <div className="viewer-toolbar">
-              <h1>序列视图</h1>
-              <div role="group" aria-label="查看方式">
-                <button
-                  aria-pressed={view === "circular"}
-                  disabled={p.data.topology === "linear"}
-                  onClick={() => setView("circular")}
-                >
-                  环形图
-                </button>
-                <button
-                  aria-pressed={view === "linear"}
-                  onClick={() => setView("linear")}
-                >
-                  线性图
-                </button>
-              </div>
-              <span>坐标从 1 开始，含起止碱基</span>
-            </div>
-            <RenderBoundary key={p.current?.id ?? "new"}>
-              <Suspense
-                fallback={
-                  <div className="viewer-loading" role="status">
-                    正在加载序列查看器…
-                  </div>
-                }
-              >
-                <SequenceCanvas
-                  sequence={p.data.sequence}
-                  features={p.data.features}
-                  range={rangeError ? null : range}
-                  view={view}
-                  onSelection={onSelection}
-                />
-              </Suspense>
-            </RenderBoundary>
-          </section>
-          <section className="selection-panel" aria-label="当前选区">
-            <div className="range-controls">
-              <strong>当前区间</strong>
+        <div className="sequence-workspace">
+          <div className="sequence-main">
+            <section className="sequence-facts">
+              <span className="dna-tag">DNA</span>
+              <strong>
+                {p.data.sequence.length.toLocaleString()} <small>bp</small>
+              </strong>
+              <span>GC（全长）{gc}%</span>
+              <span>{p.data.features.length} 个特征</span>
               <label>
-                起点
-                <input
-                  name="start"
-                  type="number"
-                  min={1}
-                  max={p.data.sequence.length}
-                  value={range.start}
-                  onChange={(event) =>
-                    setRange({ ...range, start: Number(event.target.value) })
-                  }
-                />
-              </label>
-              <span>—</span>
-              <label>
-                终点
-                <input
-                  name="end"
-                  type="number"
-                  min={1}
-                  max={p.data.sequence.length}
-                  value={range.end}
-                  onChange={(event) =>
-                    setRange({ ...range, end: Number(event.target.value) })
-                  }
-                />
-              </label>
-              <label>
-                方向
+                拓扑
                 <select
-                  name="strand"
-                  aria-label="方向"
-                  value={range.strand}
+                  name="topology"
+                  aria-label="序列拓扑"
+                  disabled={recordsLocked || !!featureName || !!note}
+                  value={p.data.topology}
                   onChange={(event) =>
-                    setRange({
-                      ...range,
-                      strand: Number(event.target.value) as 1 | -1,
-                    })
+                    setTopology(event.target.value as Topology)
                   }
                 >
-                  <option value={1}>正向 +</option>
-                  <option value={-1}>反向 −</option>
+                  <option value="circular">环形</option>
+                  <option value="linear">线性</option>
                 </select>
               </label>
-              <span className="range-length">
-                {rangeError
-                  ? "区间无效"
-                  : `${rangeLength(range, p.data.sequence.length)} bp${range.start > range.end ? " · 跨原点" : ""}${range.strand === -1 ? " · 反向互补" : ""}`}
-              </span>
-            </div>
-            {rangeError ? (
-              <p role="alert" className="range-error">
-                {rangeError}
-              </p>
-            ) : (
-              <>
-                <label className="sr-only" htmlFor="selected-sequence">
-                  选区序列
+            </section>
+            <section className="viewer-section">
+              <div className="viewer-toolbar">
+                <h1>序列视图</h1>
+                <div role="group" aria-label="查看方式">
+                  <button
+                    className="linked-view"
+                    aria-pressed={view === "both"}
+                    disabled={p.data.topology === "linear"}
+                    onClick={() => setView("both")}
+                  >
+                    联动
+                  </button>
+                  <button
+                    aria-pressed={view === "circular"}
+                    disabled={p.data.topology === "linear"}
+                    onClick={() => setView("circular")}
+                  >
+                    环形图
+                  </button>
+                  <button
+                    aria-pressed={view === "linear"}
+                    onClick={() => setView("linear")}
+                  >
+                    线性图
+                  </button>
+                </div>
+                <span>坐标从 1 开始，含起止碱基</span>
+              </div>
+              <RenderBoundary key={p.documentKey}>
+                <Suspense
+                  fallback={
+                    <div className="viewer-loading" role="status">
+                      正在加载序列查看器…
+                    </div>
+                  }
+                >
+                  <SequenceCanvas
+                    sequence={p.data.sequence}
+                    features={p.data.features}
+                    range={rangeError ? null : range}
+                    view={view}
+                    onSelection={onSelection}
+                  />
+                </Suspense>
+              </RenderBoundary>
+            </section>
+            <section className="selection-panel" aria-label="当前选区">
+              <div className="range-controls">
+                <strong>当前区间</strong>
+                <label>
+                  起点
+                  <input
+                    name="start"
+                    type="number"
+                    min={1}
+                    max={p.data.sequence.length}
+                    value={range.start}
+                    onChange={(event) =>
+                      setRange({ ...range, start: Number(event.target.value) })
+                    }
+                  />
                 </label>
-                <textarea
-                  id="selected-sequence"
-                  name="selectedSequence"
-                  readOnly
-                  spellCheck={false}
-                  value={selectedSequence}
-                />
-              </>
-            )}
-          </section>
+                <span>—</span>
+                <label>
+                  终点
+                  <input
+                    name="end"
+                    type="number"
+                    min={1}
+                    max={p.data.sequence.length}
+                    value={range.end}
+                    onChange={(event) =>
+                      setRange({ ...range, end: Number(event.target.value) })
+                    }
+                  />
+                </label>
+                <label>
+                  方向
+                  <select
+                    name="strand"
+                    aria-label="方向"
+                    value={range.strand}
+                    onChange={(event) =>
+                      setRange({
+                        ...range,
+                        strand: Number(event.target.value) as 1 | -1,
+                      })
+                    }
+                  >
+                    <option value={1}>正向 +</option>
+                    <option value={-1}>反向 −</option>
+                  </select>
+                </label>
+                <span className="range-length">
+                  {rangeError
+                    ? "区间无效"
+                    : `${rangeLength(range, p.data.sequence.length)} bp${range.start > range.end ? " · 跨原点" : ""}${range.strand === -1 ? " · 反向互补" : ""}`}
+                </span>
+              </div>
+              {rangeError ? (
+                <p role="alert" className="range-error">
+                  {rangeError}
+                </p>
+              ) : (
+                <>
+                  <label className="sr-only" htmlFor="selected-sequence">
+                    选区序列
+                  </label>
+                  <textarea
+                    id="selected-sequence"
+                    name="selectedSequence"
+                    readOnly
+                    spellCheck={false}
+                    value={selectedSequence}
+                  />
+                </>
+              )}
+            </section>
+          </div>
           <div className="records-grid">
             <section className="feature-section">
               <header>
@@ -806,7 +913,7 @@ export function Studio() {
               ) : null}
             </section>
           </div>
-        </>
+        </div>
       ) : (
         <section className="empty-sequence">
           <Dna aria-hidden="true" size={60} />

@@ -15,7 +15,7 @@ export const SequenceCanvas = memo(function SequenceCanvas({
   sequence: string;
   features: Feature[];
   range: Range | null;
-  view: "circular" | "linear";
+  view: "circular" | "linear" | "both";
   onSelection: NonNullable<SeqVizProps["onSelection"]>;
 }) {
   const annotations = useMemo(

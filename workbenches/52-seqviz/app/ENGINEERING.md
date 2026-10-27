@@ -7,3 +7,7 @@ UI项目数据与未应用原文/未提交特征/意见草稿分离；externalDi
 序列原文和上限内标注存项目JSON。替换序列须显式清除旧坐标，模型不推断或生成序列。整个页面无任意脚本、WASM或原生模块；manifest 无模型能力。测试核对跨原点、方向、坐标往返、格式往返及磁盘恢复。
 
 真实浏览器已核对 SeqViz 的反向特征回调：其返回 clockwise=false，但不一定保留 direction/id。适配层先还原正向坐标边界，再将逆时针选区转换为反向互补，不依赖缺失的回调字段。整环图形以1–N显示，原始项目坐标保留。
+
+## 0.2.0 工作草稿
+
+使用公共 autosave contracts/client/cache/requests/server，追加独立迁移，不改原迁移。`documentId` 与 `mutationId` 去重；草稿 revision 与项目 revision 分别验证。UI 用 `documentKey`/`loadEpoch` 表示文档切换，后台保存不换 key。额外输入放 `draft`；宽松但限定类型的恢复器允许业务校验尚未通过的编辑值。

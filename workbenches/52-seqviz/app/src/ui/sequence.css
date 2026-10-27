@@ -694,3 +694,363 @@ fieldset {
   color: var(--ink);
   background: var(--bg);
 }
+
+/* 核酸审阅空间：环图/碱基联动主视图，右侧特征与审阅记录。 */
+.sequence-studio {
+  height: 100dvh;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.lab-header {
+  padding: 11px 20px;
+  min-height: 57px;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.lab-brand strong {
+  font-size: 14px;
+}
+.lab-brand span {
+  font-size: 8px;
+}
+.lab-brand > svg {
+  width: 25px;
+  height: 25px;
+}
+.project-actions button {
+  padding: 6px 9px;
+  min-height: 32px;
+  font-size: 11px;
+}
+.sequence-heading {
+  padding: 9px 20px;
+  gap: 15px;
+  flex-shrink: 0;
+  min-height: 57px;
+}
+.sequence-heading #project-title {
+  font-size: 16px;
+  max-width: 420px;
+}
+.sequence-heading p {
+  margin-top: 4px;
+  font-size: 10px;
+}
+.document-actions {
+  gap: 5px;
+}
+.document-actions button {
+  padding: 6px 9px;
+  min-height: 31px;
+  font-size: 10px;
+}
+.document-actions select {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.notice {
+  padding: 8px 20px;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.sequence-workspace {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 345px;
+  border-top: 1px solid var(--border);
+}
+.sequence-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sequence-facts {
+  margin: 0 16px;
+  padding: 11px 0;
+  gap: 22px;
+  border-top: 0;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.sequence-facts strong {
+  font-size: 17px;
+}
+.viewer-section {
+  margin: 0 14px;
+  flex: 1;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+}
+.viewer-toolbar {
+  padding: 10px 14px;
+  min-height: 44px;
+  flex-shrink: 0;
+  gap: 12px;
+}
+.viewer-toolbar h1 {
+  font-size: 12px;
+}
+.viewer-toolbar button {
+  padding: 5px 9px;
+  min-height: 28px;
+  font-size: 10px;
+}
+.viewer-toolbar > span {
+  font-size: 9px;
+}
+.sequence-canvas {
+  height: auto;
+  min-height: 0;
+  flex: 1;
+}
+.selection-panel {
+  margin: 0 14px 14px;
+  padding: 12px 14px;
+  flex-shrink: 0;
+  border-radius: 0 0 4px 4px;
+}
+.range-controls {
+  gap: 9px;
+}
+.range-controls > strong {
+  font-size: 11px;
+  margin-right: 5px;
+}
+.range-controls input {
+  padding: 6px 8px;
+  width: 75px;
+  font-size: 12px;
+}
+.range-controls select {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.range-length {
+  font-size: 10px;
+}
+.selection-panel textarea {
+  height: 55px;
+  margin-top: 10px;
+  font-size: 11px;
+}
+.records-grid {
+  margin: 0;
+  padding: 18px 16px;
+  display: block;
+  border-left: 1px solid var(--border);
+  overflow: auto;
+  background: var(--surface);
+  min-height: 0;
+}
+.records-grid header {
+  padding-bottom: 12px;
+  margin-bottom: 13px;
+}
+.records-grid h2 {
+  font-size: 13px;
+}
+.feature-section fieldset {
+  gap: 7px;
+}
+.feature-section form > p {
+  line-height: 1.7;
+  margin: 9px 0 14px;
+}
+.feature-list li {
+  gap: 6px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+.feature-list li > div {
+  flex-basis: calc(100% - 15px);
+}
+.feature-list button {
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 10px;
+}
+.feature-list button:first-of-type {
+  margin-left: 10px;
+}
+.review-section {
+  margin-top: 28px;
+}
+.review-list article {
+  padding-left: 12px;
+}
+.review-list footer {
+  flex-wrap: wrap;
+  font-size: 9px;
+}
+.empty-note {
+  padding: 16px 0;
+  font-size: 11px;
+}
+.sequence-input {
+  margin: 0 20px 20px;
+}
+.sequence-input.floating-input {
+  position: absolute;
+  z-index: 20;
+  top: 120px;
+  left: 20px;
+  right: 20px;
+  margin: 0;
+  max-width: 720px;
+  max-height: calc(100dvh - 150px);
+  overflow: auto;
+  box-shadow: 0 15px 45px #0003;
+}
+.empty-sequence {
+  flex: 1;
+  min-height: 0;
+}
+.empty-sequence > svg {
+  width: 40px;
+  height: 40px;
+}
+.empty-sequence h2 {
+  font-size: 16px;
+}
+.empty-sequence p {
+  max-width: 360px;
+}
+@media (max-width: 1000px) {
+  .sequence-studio {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .sequence-workspace {
+    display: block;
+  }
+  .sequence-main {
+    min-height: 600px;
+  }
+  .viewer-section {
+    height: 440px;
+    min-height: 440px;
+    flex: auto;
+  }
+  .sequence-canvas {
+    height: 390px;
+    min-height: 390px;
+  }
+  .records-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    overflow: visible;
+    padding: 22px;
+  }
+  .review-section {
+    margin-top: 0;
+  }
+  .linked-view {
+    display: none;
+  }
+  .sequence-heading {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+@media (max-width: 650px) {
+  .lab-header {
+    padding: 14px 18px;
+    gap: 14px;
+  }
+  .sequence-heading {
+    padding: 12px 18px;
+  }
+  .sequence-heading #project-title {
+    font-size: 17px;
+  }
+  .sequence-facts {
+    margin: 0 18px;
+    gap: 14px;
+    padding: 12px 0;
+  }
+  .sequence-facts label {
+    margin-left: 0;
+  }
+  .viewer-section {
+    margin: 0 12px;
+    height: 405px;
+    min-height: 405px;
+  }
+  .viewer-toolbar {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  .sequence-canvas {
+    height: 360px;
+    min-height: 360px;
+  }
+  .selection-panel {
+    margin: 0 12px 18px;
+    padding: 14px;
+  }
+  .range-controls > strong {
+    width: 100%;
+  }
+  .range-controls input {
+    font-size: 16px;
+    width: 77px;
+  }
+  .range-length {
+    width: 100%;
+  }
+  .selection-panel textarea {
+    height: 70px;
+    font-size: 12px;
+  }
+  .records-grid {
+    display: block;
+    padding: 20px 18px;
+  }
+  .review-section {
+    margin-top: 28px;
+  }
+  .feature-list li {
+    flex-wrap: nowrap;
+  }
+  .feature-list li > div {
+    flex-basis: auto;
+  }
+  .feature-list button:first-of-type {
+    margin-left: 0;
+  }
+  .feature-section input,
+  .feature-section select,
+  .review-section textarea {
+    font-size: 16px;
+  }
+  .sequence-input {
+    margin: 0 18px 18px;
+  }
+  .sequence-input.floating-input {
+    position: fixed;
+    top: 12vh;
+    left: 14px;
+    right: 14px;
+    max-height: 75vh;
+    max-width: none;
+  }
+  .sequence-main {
+    min-height: 0;
+  }
+  .empty-sequence {
+    min-height: 220px;
+    padding: 25px 18px;
+  }
+}

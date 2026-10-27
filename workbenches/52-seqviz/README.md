@@ -10,7 +10,7 @@
 
 总仓库：`pnpm workbench prepare seqviz`、`pnpm workbench dev seqviz`。检查/测试：`pnpm workbench test seqviz`。打包：`pnpm workbench package seqviz`。源包可在 Floatboat「我的 → 工作台 → 导入工作台」导入。
 
-## 本地验收
+## 初版验证记录（0.1.0）
 
 - `pnpm workbench:check` 与 6 项测试通过：FASTA/JSON 往返、非法输入、IUPAC互补、单碱基/跨原点/反向/整环坐标、真实磁盘重开及409冲突。
 - Chrome桌面/375px真实查看器、点击反向特征、原文草稿取消打开/新建/关闭、替换序列确认、特征编辑删除、审阅核对、导出并读回通过。
@@ -20,3 +20,9 @@
 - 源包排除业务数据，Host客户端导入尚未验收。未声明或使用LLM能力。
 
 关闭SeqViz远程字体，同源加载Roboto Mono。MIT/OFL及上游声明见NOTICE.md；未为整个仓库另选许可证。
+
+## 0.2.0 自动保存与产品布局
+
+环图与线性序列联动、选区及注释审阅栏。编辑后 700ms 防抖自动保存，提交串行且不锁定输入；IndexedDB 暂存、SQLite 工作草稿与合法项目分别保存。无效输入仍保留为草稿，网络失败和版本冲突明确提示并可导出恢复文件。导入创建新项目，打开/新建先同步旧草稿，只有需要放弃未同步内容时才确认。本项目保留序列原文、选区、未登记特征与审阅意见。
+
+本轮 `pnpm workbench:check`、`pnpm test`（7 项）通过；真实 Chrome 验证自动保存、刷新恢复、业务导出、375px、深色模式和 CSP 资源。桌面截图见 README 图片。最终 0.2.0 包由总仓库统一打包；Host 导入仍需在客户端验证。
