@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.83c37a21-cd08-4999-bac1-490b07a80acf",
   "registryName": "observable-plot-studio",
-  "name": "Observable Plot 工作台",
+  "name": "数据观察室",
   "description": "轻量数据探索台：快速分布图、趋势图、分组对比和异常分析",
   "version": "0.1.0",
-  "changelog": "Initial application.",
+  "changelog": "实现独立编辑、项目持久化、渲染导出与人工采用 AI 生成稿。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
