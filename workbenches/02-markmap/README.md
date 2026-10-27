@@ -10,7 +10,7 @@ Markdown 大纲实时转换为交互脑图；新建、保存、打开和删除�
 
 从总仓库运行 `pnpm workbench prepare markmap`，然后 `pnpm workbench dev markmap`。验证用 `pnpm workbench test markmap`，交付用 `pnpm workbench package markmap`。在 Floatboat 的「我的 → 工作台 → 导入工作台」导入生成的 `.fbworkbench`。
 
-## 验证
+## 初版验证记录（0.1.0）
 
 - 类型、构建和 3 项测试通过：输入边界、持久化重开、保存和删除版本冲突。
 - Chrome 1440px / 375px 真实编辑、保存刷新恢复、Markdown/SVG 下载通过。
@@ -27,3 +27,9 @@ Markdown 大纲实时转换为交互脑图；新建、保存、打开和删除�
 ## 许可
 
 Markmap 上游为 MIT，版权文本保存在 `app/src/notices/markmap.LICENSE`。DOMPurify 按其依赖包许可使用；这不为整个应用选择新的统一许可证。
+
+## 0.2.0 自动保存与产品布局
+
+脑图主体与可收起大纲、轻量工具条。编辑后 700ms 防抖自动保存，提交串行且不锁定输入；IndexedDB 暂存、SQLite 工作草稿与合法项目分别保存。无效输入仍保留为草稿，网络失败和版本冲突明确提示并可导出恢复文件。导入创建新项目，打开/新建先同步旧草稿，只有需要放弃未同步内容时才确认。本项目保留Markdown、AI 描述与待采用提纲。
+
+本轮 `pnpm workbench:check`、`pnpm test`（4 项）通过；真实 Chrome 验证自动保存、刷新恢复、业务导出、375px、深色模式和 CSP 资源。桌面截图见 README 图片。最终 0.2.0 包由总仓库统一打包；Host 导入仍需在客户端验证。

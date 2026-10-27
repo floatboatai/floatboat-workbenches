@@ -1,3 +1,4 @@
+import { AutoStatus, AutoFeedback } from "./AutosaveStatus";
 import { lazy, Suspense, useCallback, useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -5,12 +6,18 @@ import {
   FileText,
   Focus,
   Plus,
+  PanelLeftClose,
+  PanelLeftOpen,
   Save,
   Sparkles,
   Trash2,
   Upload,
 } from "lucide-react";
-import { seed, validateMindmap } from "../contracts/mindmap";
+import {
+  seed,
+  validateMindmap,
+  restoreMindmapDraft,
+} from "../contracts/mindmap";
 import {
   download,
   Notice,
@@ -22,13 +29,19 @@ const Mindmap = lazy(() =>
   import("./Mindmap").then((module) => ({ default: module.Mindmap })),
 );
 export function Studio() {
-  const p = useProjects(seed, validateMindmap, "未命名脑图");
+  const p = useProjects(seed, validateMindmap, "未命名脑图", {
+    storageKey: "markmap",
+    restoreDraftData: restoreMindmapDraft,
+  });
   const svg = useRef<SVGSVGElement | null>(null),
     file = useRef<HTMLInputElement | null>(null);
   const [fit, setFit] = useState(0),
-    [prompt, setPrompt] = useState(""),
     [ai, setAi] = useState(false);
-  const [pane, setPane] = useState<"outline" | "map">("outline");
+  const [pane, setPane] = useState<"outline" | "map">("map");
+  const [outlineOpen, setOutlineOpen] = useState(true);
+  const prompt = typeof p.draft.prompt === "string" ? p.draft.prompt : "";
+  const setPrompt = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, prompt: value }));
   const [rendered, setRendered] = useState<string | null>(null);
   const disabled = p.busy || p.aiBusy;
   const renderError = useCallback(
@@ -77,9 +90,8 @@ export function Studio() {
       if (input.size > 180000)
         throw new Error("文件过大，请控制在 50,000 字符以内。");
       const data = validateMindmap({ markdown: await input.text() });
-      if (p.dirty && !confirm("导入将替换当前大纲，是否继续？")) return;
-      p.setData(data);
-      p.setTitle(
+      await p.replace(
+        data,
         input.name.replace(/\.(md|markdown|txt)$/i, "").slice(0, 120) ||
           "导入脑图",
       );
@@ -88,7 +100,7 @@ export function Studio() {
     }
   }
   return (
-    <main className="notebook">
+    <main className={`notebook ${outlineOpen ? "" : "outline-collapsed"}`}>
       <a href="#outline" className="skip-link">
         跳到大纲编辑
       </a>
@@ -97,7 +109,6 @@ export function Studio() {
           <span className="brand-symbol">M</span>
           <div>
             <h1>思路图谱</h1>
-            <p>让材料有结构，让想法有去处</p>
           </div>
         </div>
         <div className="project-actions">
@@ -130,26 +141,27 @@ export function Studio() {
             maxLength={120}
             onChange={(e) => p.setTitle(e.target.value)}
           />
-          <span role="status">
-            {p.loading
-              ? "正在加载项目…"
-              : p.busy
-                ? "保存中…"
-                : p.dirty
-                  ? "有未保存的修改"
-                  : p.current
-                    ? "已保存"
-                    : "尚未保存"}
-          </span>
+          <AutoStatus state={p.autoState} loading={p.loading} />
         </div>
         <div className="tools">
-          <button
-            className="primary"
-            onClick={() => void p.save()}
-            disabled={disabled}
-          >
+          <button onClick={() => void p.save()} disabled={disabled}>
             <Save aria-hidden="true" size={16} />
-            保存
+            立即保存
+          </button>
+          <button
+            onClick={() => {
+              setOutlineOpen((value) => !value);
+              setFit((value) => value + 1);
+            }}
+            aria-expanded={outlineOpen}
+            aria-label={outlineOpen ? "收起大纲" : "展开大纲"}
+          >
+            {outlineOpen ? (
+              <PanelLeftClose size={16} aria-hidden="true" />
+            ) : (
+              <PanelLeftOpen size={16} aria-hidden="true" />
+            )}
+            大纲
           </button>
           <button onClick={() => setAi((value) => !value)} aria-expanded={ai}>
             <Sparkles aria-hidden="true" size={16} />
@@ -184,6 +196,12 @@ export function Studio() {
         </div>
       </div>
       <Notice error={p.error} notice={p.notice} />
+      <AutoFeedback
+        state={p.autoState}
+        onRetry={() => void p.save()}
+        onExport={p.exportDraft}
+        onReload={p.current ? () => void p.open(p.current!.id) : undefined}
+      />
       {ai ? (
         <section className="ai-panel">
           <form
@@ -215,7 +233,8 @@ export function Studio() {
               <button className="primary" onClick={p.applySuggestion}>
                 采用到大纲
               </button>
-              <p>采用后可继续编辑，再保存到项目。</p>
+              <button onClick={p.discardSuggestion}>放弃建议</button>
+              <p>采用后可继续编辑，修改会自动保存。</p>
             </div>
           ) : null}
         </section>
@@ -223,7 +242,10 @@ export function Studio() {
       <div className="mobile-tabs" role="group" aria-label="切换视图">
         <button
           aria-pressed={pane === "outline"}
-          onClick={() => setPane("outline")}
+          onClick={() => {
+            setOutlineOpen(true);
+            setPane("outline");
+          }}
         >
           编辑大纲
         </button>
@@ -234,7 +256,7 @@ export function Studio() {
       <div className={`split-view show-${pane}`}>
         <section className="outline-pane">
           <div className="pane-heading">
-            <h2>01 / 大纲</h2>
+            <h2>Markdown 大纲</h2>
             <span>{p.data.markdown.length.toLocaleString()} 字符</span>
           </div>
           <label className="sr-only" htmlFor="outline">
@@ -255,7 +277,7 @@ export function Studio() {
         </section>
         <section className="map-pane">
           <div className="pane-heading">
-            <h2>02 / 图谱</h2>
+            <h2>思路图谱</h2>
             <button
               onClick={() => setFit((value) => value + 1)}
               aria-label="适应脑图"

@@ -13,3 +13,15 @@ export const seed: MindmapDocument = {
   markdown:
     "# 把想法整理成路线\n\n## 明确目标\n- 想解决什么问题\n- 谁会使用结果\n\n## 收集线索\n- 事实与材料\n- 需要验证的假设\n\n## 决定下一步\n- 优先做什么\n- 如何判断完成",
 };
+
+export function restoreMindmapDraft(
+  value: unknown,
+): ReturnType<typeof validateMindmap> {
+  if (
+    !isRecord(value) ||
+    typeof value.markdown !== "string" ||
+    value.markdown.length > 50000
+  )
+    throw new Error("大纲草稿格式无效。");
+  return { markdown: value.markdown };
+}

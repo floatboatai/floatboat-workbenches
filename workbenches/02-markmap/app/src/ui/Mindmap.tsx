@@ -40,6 +40,7 @@ export function Mindmap({
 }) {
   const map = useRef<Markmap | null>(null);
   const epoch = useRef(0);
+  const hasData = useRef(false);
   useEffect(() => {
     if (!svgRef.current) return;
     const instance = Markmap.create(svgRef.current, {
@@ -52,12 +53,31 @@ export function Mindmap({
       autoFit: true,
     });
     map.current = instance;
+    let frame = 0;
+    const observer = new ResizeObserver((entries) => {
+      if (
+        !hasData.current ||
+        !entries.some(
+          (entry) =>
+            entry.contentRect.width > 0 && entry.contentRect.height > 0,
+        )
+      )
+        return;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        void instance.fit().catch(onError);
+      });
+    });
+    observer.observe(svgRef.current);
     return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      hasData.current = false;
       epoch.current++;
       instance.destroy();
       map.current = null;
     };
-  }, [svgRef]);
+  }, [svgRef, onError]);
   useEffect(() => {
     const token = ++epoch.current;
     const timer = setTimeout(() => {
@@ -72,6 +92,7 @@ export function Mindmap({
             .setData(root)
             .then(async () => {
               if (token === epoch.current) {
+                hasData.current = true;
                 await instance.fit();
                 if (token === epoch.current) onRendered(markdown);
               }
