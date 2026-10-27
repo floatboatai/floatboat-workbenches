@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.0ae28e0d-6148-4b55-864f-5b0d5f3e0f56",
+  "registryName": "farmos-map-studio",
+  "name": "farmOS-map 工作台",
+  "description": "地块边界 → 圈绘、面积核对、分区记录 → GeoJSON/WKT",
+  "version": "0.1.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

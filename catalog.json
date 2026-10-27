@@ -1548,5 +1548,120 @@
     "slug": "sqliteviz",
     "directory": "workbenches/50-sqliteviz",
     "status": "planned"
+  },
+  {
+    "id": 51,
+    "slug": "makerjs",
+    "name": "Maker.js",
+    "repo": "microsoft/maker.js",
+    "url": "https://github.com/microsoft/maker.js",
+    "category": "激光切割／机箱加工",
+    "group": "制造工程",
+    "kind": "行业核心库集成",
+    "workbench": "尺寸与孔位 → 参数化面板/刀模 → SVG、DXF",
+    "license": "Apache-2.0",
+    "caveat": "使用固定参数模板，避免任意脚本 Playground",
+    "effort": "低–中",
+    "priority": "A",
+    "directory": "workbenches/51-makerjs",
+    "status": "planned",
+    "checked_at": "2026-10-27",
+    "researchId": "V01",
+    "sources": [
+      "https://github.com/microsoft/maker.js",
+      "docs/research/niche-manufacturing.md"
+    ]
+  },
+  {
+    "id": 52,
+    "slug": "seqviz",
+    "name": "SeqViz",
+    "repo": "Lattice-Automation/seqviz",
+    "url": "https://github.com/Lattice-Automation/seqviz",
+    "category": "分子生物学／质粒资料",
+    "group": "实验室与科研",
+    "kind": "行业核心库集成",
+    "workbench": "序列与特征区间 → 环形/线性核对 → 选区序列、标注清单",
+    "license": "MIT",
+    "caveat": "查看器，不是完整编辑器；关闭外部字体并验证坐标",
+    "effort": "低–中",
+    "priority": "A",
+    "directory": "workbenches/52-seqviz",
+    "status": "planned",
+    "checked_at": "2026-10-27",
+    "researchId": "V19",
+    "sources": [
+      "https://github.com/Lattice-Automation/seqviz",
+      "docs/research/niche-laboratory.md"
+    ]
+  },
+  {
+    "id": 53,
+    "slug": "farmos-map",
+    "name": "farmOS-map",
+    "repo": "farmOS/farmOS-map",
+    "url": "https://github.com/farmOS/farmOS-map",
+    "category": "农业／牧场／塘口登记",
+    "group": "农业与专业运营",
+    "kind": "行业核心库集成",
+    "workbench": "地块边界 → 圈绘、面积核对、分区记录 → GeoJSON/WKT",
+    "license": "MIT",
+    "caveat": "底图及外部地图接口单独接入；不是养殖决策算法",
+    "effort": "中",
+    "priority": "A",
+    "directory": "workbenches/53-farmos-map",
+    "status": "planned",
+    "checked_at": "2026-10-27",
+    "researchId": "V10",
+    "sources": [
+      "https://github.com/farmOS/farmOS-map",
+      "docs/research/niche-operations.md"
+    ]
+  },
+  {
+    "id": 54,
+    "slug": "mirador",
+    "name": "Mirador",
+    "repo": "ProjectMirador/mirador",
+    "url": "https://github.com/ProjectMirador/mirador",
+    "category": "古籍／博物馆／档案",
+    "group": "农业与专业运营",
+    "kind": "行业核心库集成",
+    "workbench": "IIIF 清单或扫描页 → 并排校勘 → 对照会话、复核清单",
+    "license": "Apache-2.0",
+    "caveat": "需同源 IIIF 资源；新增批注编辑需开发",
+    "effort": "中",
+    "priority": "A",
+    "directory": "workbenches/54-mirador",
+    "status": "planned",
+    "checked_at": "2026-10-27",
+    "researchId": "V11",
+    "sources": [
+      "https://github.com/ProjectMirador/mirador",
+      "docs/research/niche-operations.md"
+    ]
+  },
+  {
+    "id": 55,
+    "slug": "opensheetmusicdisplay",
+    "name": "OpenSheetMusicDisplay",
+    "repo": "opensheetmusicdisplay/opensheetmusicdisplay",
+    "url": "https://github.com/opensheetmusicdisplay/opensheetmusicdisplay",
+    "category": "乐团／音乐出版",
+    "group": "演出与音乐",
+    "kind": "行业核心库集成",
+    "workbench": "MusicXML/MXL → 声部/版式审阅 → 乐谱图与批注清单",
+    "license": "BSD-3-Clause",
+    "caveat": "是渲染器；完整制谱和播放器不计入首版",
+    "effort": "中",
+    "priority": "A",
+    "directory": "workbenches/55-opensheetmusicdisplay",
+    "status": "planned",
+    "checked_at": "2026-10-27",
+    "researchId": "V27",
+    "sources": [
+      "https://github.com/opensheetmusicdisplay/opensheetmusicdisplay",
+      "docs/research/niche-creative.md"
+    ]
   }
 ]
