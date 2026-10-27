@@ -6,6 +6,7 @@ export function registerRoutes<T>(
   app: WorkbenchServer,
   validate: (value: unknown) => T,
   instructions: string,
+  validateGenerated: (value: unknown) => T = validate,
 ) {
   const store = createStore(app.database, validate);
   const fail = (error: unknown) =>
@@ -92,7 +93,7 @@ export function registerRoutes<T>(
       } catch {
         throw new Error("模型返回的内容不是完整 JSON，请调整要求重试。");
       }
-      return validate(value);
+      return validateGenerated(value);
     } catch (error) {
       return fail(error);
     }

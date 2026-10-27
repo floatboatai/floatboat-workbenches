@@ -208,3 +208,8 @@ export const seed: FlowDocument = {
     { id: "e3", source: "prefix", target: "output" },
   ],
 };
+
+export function validateGeneratedFlow(value: unknown): FlowDocument {
+  if (!isRecord(value)) throw new Error("流程配置无效。");
+  return validateFlow({ nodes: value.nodes, edges: value.edges });
+}

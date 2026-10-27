@@ -6,6 +6,7 @@ import {
   seed,
   signature,
   validateFlow,
+  validateGeneratedFlow,
 } from "../src/contracts/flow.ts";
 import { createStore, StoreError } from "../src/server/store.ts";
 test("真实单链按连接顺序执行并保留步骤输入输出", () => {
@@ -76,4 +77,15 @@ test("保存结果、恢复及并发版本检查", () => {
   } finally {
     db.close();
   }
+});
+
+test("AI 配置剔除模型伪造的运行结果，保存恢复仍保留真实结果", () => {
+  const value = { ...seed, lastRun: executeFlow(seed) };
+  assert.equal(validateGeneratedFlow(value).lastRun, undefined);
+  assert.deepEqual(validateGeneratedFlow(value).nodes, seed.nodes);
+  assert.equal(validateFlow(value).lastRun?.output, "结果：HELLO FLOATBOAT");
+  assert.equal(
+    validateGeneratedFlow({ ...seed, lastRun: { malformed: true } }).lastRun,
+    undefined,
+  );
 });
