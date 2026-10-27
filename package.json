@@ -9,6 +9,7 @@
   "scripts": {
     "workbench": "node scripts/workbench.mjs",
     "list": "node scripts/workbench.mjs list",
-    "batch": "node scripts/batch.mjs"
+    "batch": "node scripts/batch.mjs",
+    "test:tooling": "node --test scripts/tests/*.test.mjs"
   }
 }

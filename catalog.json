@@ -58,11 +58,21 @@
     "group": "图形媒体",
     "mode": "引擎封装",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 3,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "id": 2,
     "slug": "markmap",
     "directory": "workbenches/02-markmap",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "pdfme",
@@ -87,11 +97,21 @@
     "group": "办公文档",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 6,
+      "browser": "passed",
+      "hostLlm": "not-required",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "id": 3,
     "slug": "pdfme",
     "directory": "workbenches/03-pdfme",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "Tiptap",
@@ -116,11 +136,21 @@
     "group": "办公文档",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 6,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "id": 4,
     "slug": "tiptap",
     "directory": "workbenches/04-tiptap",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "PptxGenJS",
@@ -145,11 +175,21 @@
     "group": "办公文档",
     "mode": "引擎封装",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 5,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "id": 5,
     "slug": "pptxgenjs",
     "directory": "workbenches/05-pptxgenjs",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "React Flow",
@@ -174,11 +214,21 @@
     "group": "图形媒体",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 6,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "id": 6,
     "slug": "react-flow",
     "directory": "workbenches/06-react-flow",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "SurveyJS Form Library",
@@ -203,11 +253,21 @@
     "group": "业务信息",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 5,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "id": 7,
     "slug": "surveyjs-form-library",
     "directory": "workbenches/07-surveyjs-form-library",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "Mermaid",
@@ -231,11 +291,21 @@
     "group": "图形媒体",
     "mode": "引擎封装",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 3,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "id": 8,
     "slug": "mermaid",
     "directory": "workbenches/08-mermaid",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "Swagger UI",
@@ -258,13 +328,23 @@
       "https://github.com/swagger-api/swagger-ui/blob/main/docs/usage/installation.md"
     ],
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 4,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "group": "数据开发",
     "mode": "组件嵌入",
     "id": 9,
     "slug": "swagger-ui",
     "directory": "workbenches/09-swagger-ui",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "Vega-Lite",
@@ -287,13 +367,23 @@
       "https://github.com/vega/vega-lite/blob/main/package.json"
     ],
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 4,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "group": "数据开发",
     "mode": "引擎封装",
     "id": 10,
     "slug": "vega-lite",
     "directory": "workbenches/10-vega-lite",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "Observable Plot",
@@ -316,13 +406,23 @@
       "https://github.com/observablehq/plot/blob/main/package.json"
     ],
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 5,
+      "browser": "passed",
+      "hostLlm": "passed",
+      "sourcePackage": "passed",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/batch-02-11.md"
+    },
     "group": "数据开发",
     "mode": "引擎封装",
     "id": 11,
     "slug": "observable-plot",
     "directory": "workbenches/11-observable-plot",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.1.0"
   },
   {
     "name": "changedetection.io",

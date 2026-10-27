@@ -2,13 +2,13 @@ import { access, cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
+import { ensurePinnedTemplate } from "./template.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const catalog = JSON.parse(await readFile(join(root, "catalog.json"), "utf8"));
 for (const slug of process.argv.slice(2)) {
   const item = catalog.find((item) => item.slug === slug);
   if (!item) throw new Error(`Unknown workbench: ${slug}`);
-  const project = join(root, item.directory),
-    template = join(root, ".cache/template");
+  const project = join(root, item.directory);
   let exists = false;
   try {
     await access(join(project, "app/manifest.json"));
@@ -18,6 +18,8 @@ for (const slug of process.argv.slice(2)) {
     console.log(`${slug}: existing source preserved`);
     continue;
   }
+  const template = await ensurePinnedTemplate(root);
+  await mkdir(project, { recursive: true });
   await cp(join(template, "app"), join(project, "app"), { recursive: true });
   for (const file of ["package.json", "pnpm-lock.yaml", ".npmrc"])
     await cp(join(template, file), join(project, file));
