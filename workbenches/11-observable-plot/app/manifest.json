@@ -4,8 +4,8 @@
   "registryName": "observable-plot-studio",
   "name": "数据观察室",
   "description": "轻量数据探索台：快速分布图、趋势图、分组对比和异常分析",
-  "version": "0.1.0",
-  "changelog": "实现独立编辑、项目持久化、渲染导出与人工采用 AI 生成稿。",
+  "version": "0.2.0",
+  "changelog": "统一自动保存、工作草稿恢复、离线/冲突处理，以及按专业任务重组布局。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

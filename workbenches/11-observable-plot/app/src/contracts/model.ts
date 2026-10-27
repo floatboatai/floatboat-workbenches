@@ -157,3 +157,26 @@ export function plotData(model: Model) {
       : Array.from(new Set(rows.map((row) => String(row.xValue)))),
   };
 }
+
+export function restoreDraftData(value: unknown): Model {
+  if (
+    !isRecord(value) ||
+    (value.format !== "csv" && value.format !== "json") ||
+    !["bar", "line", "dot"].includes(String(value.kind)) ||
+    typeof value.kind !== "string" ||
+    typeof value.source !== "string" ||
+    value.source.length > 500000 ||
+    typeof value.x !== "string" ||
+    typeof value.y !== "string" ||
+    value.x.length > 500000 ||
+    value.y.length > 500000
+  )
+    throw new Error("数据草稿结构无效。");
+  return {
+    format: value.format,
+    source: value.source,
+    kind: value.kind as Model["kind"],
+    x: value.x,
+    y: value.y,
+  };
+}

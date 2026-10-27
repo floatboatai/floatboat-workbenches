@@ -1,3 +1,4 @@
+import { restoreDraftData } from "../src/contracts/model.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DatabaseSync } from "node:sqlite";
@@ -80,4 +81,14 @@ test("分类横轴保留输入顺序，数值横轴保持数值", () => {
   ]);
   assert.equal(plotData({ ...same, kind: "dot" }).domain, undefined);
   assert.throws(() => parseCsv('a,b\n"1"x,2'));
+});
+
+test("CSV和JSON未完成编辑可恢复，格式校验仍单独执行", () => {
+  for (const source of ["", "日期,访问量\n", "{broken"]) {
+    const draft = { ...seed, source };
+    assert.deepEqual(restoreDraftData(draft), draft);
+    assert.throws(() => validate(draft));
+  }
+  assert.throws(() => restoreDraftData({ ...seed, kind: ["bar"] }));
+  assert.throws(() => restoreDraftData({ ...seed, source: 42 }));
 });

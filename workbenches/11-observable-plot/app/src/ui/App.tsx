@@ -1,5 +1,12 @@
+import { AutosaveStatus } from "./AutosaveStatus";
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
-import { seed, validate, rowsFrom, type Model } from "../contracts/model";
+import {
+  seed,
+  validate,
+  restoreDraftData,
+  rowsFrom,
+  type Model,
+} from "../contracts/model";
 import {
   download,
   useProjects,
@@ -11,12 +18,27 @@ const PlotView = lazy(() =>
   import("./PlotView").then((module) => ({ default: module.PlotView })),
 );
 export function App() {
-  const project = useProjects(seed, validate, "本周访问趋势");
+  const project = useProjects(seed, validate, "本周访问趋势", {
+    storageKey: "observable-plot-studio",
+    restoreDraftData,
+  });
+  const prompt =
+    typeof project.draft.aiPrompt === "string" ? project.draft.aiPrompt : "";
+  const setPrompt = (text: string) =>
+    project.setDraft((old) => ({ ...old, aiPrompt: text }));
+  const ai = project.draft.aiPanel === true;
+  const setAi = (value: boolean | ((current: boolean) => boolean)) =>
+    project.setDraft((old) => ({
+      ...old,
+      aiPanel:
+        typeof value === "function" ? value(old.aiPanel === true) : value,
+    }));
+
   const [svg, setSvg] = useState(""),
-    [renderError, setRenderError] = useState(""),
-    [prompt, setPrompt] = useState(""),
-    [ai, setAi] = useState(false),
-    [tab, setTab] = useState<"source" | "table">("table");
+    [renderError, setRenderError] = useState("");
+  const tab = project.draft.dataTab === "source" ? "source" : "table";
+  const setTab = (value: "source" | "table") =>
+    project.setDraft((old) => ({ ...old, dataTab: value }));
   const file = useRef<HTMLInputElement>(null);
   const latestProject = useRef(project);
   latestProject.current = project;
@@ -73,14 +95,13 @@ export function App() {
         x: keys[0],
         y,
       });
-      if (
-        current.dirty &&
-        !confirm("有未保存的修改，确定导入并替换当前数据和字段映射吗？")
-      )
-        return;
-      current.setData(imported);
-      current.setError("");
-      setTab("table");
+      const title =
+        selected.name
+          .replace(/\.[^.]+$/, "")
+          .trim()
+          .slice(0, 120) || "导入观察";
+      if (await current.replace(imported, title, { dataTab: "table" }))
+        current.setError("");
     } catch (error) {
       project.report(error);
     }
@@ -110,7 +131,7 @@ export function App() {
       </header>
       <section className="title-row">
         <div>
-          <p className="eyebrow">让数据呈现它的形状</p>
+          <p className="eyebrow">观察记录 / OBSERVATION</p>
           <label>
             <span className="sr-only">项目名称</span>
             <input
@@ -124,15 +145,22 @@ export function App() {
           </label>
         </div>
         <div className="primary-actions">
-          <span role="status">
-            {project.dirty ? "尚未保存" : project.current ? "已保存" : "新项目"}
-          </span>
+          <AutosaveStatus
+            state={project.autoState}
+            onRetry={() => void project.save()}
+            onExport={project.exportDraft}
+            onReload={
+              project.current
+                ? () => void project.open(project.current!.id)
+                : undefined
+            }
+          />
           <button
             className="primary"
             onClick={() => void project.save()}
-            disabled={project.busy || !!valid.error}
+            disabled={project.busy}
           >
-            {project.busy ? "保存中…" : "保存观察"}
+            {project.busy ? "保存中…" : "立即保存"}
           </button>
           <button
             disabled={!svg || !!valid.error || !!renderError}
@@ -148,64 +176,7 @@ export function App() {
         </div>
       </section>
       <Notice error={project.error} notice={project.notice} />
-      <section className="plot-controls" aria-label="图表设置">
-        <div className="mark-switch" role="group" aria-label="图形类型">
-          {(
-            [
-              ["line", "趋势线"],
-              ["bar", "柱状图"],
-              ["dot", "散点图"],
-            ] as const
-          ).map(([kind, label]) => (
-            <button
-              key={kind}
-              aria-pressed={project.data.kind === kind}
-              onClick={() => update("kind", kind)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <label>
-          横轴
-          <select
-            name="xField"
-            aria-label="横轴字段"
-            value={project.data.x}
-            onChange={(e) => update("x", e.target.value)}
-          >
-            {!columns.includes(project.data.x) ? (
-              <option value={project.data.x}>{project.data.x}（不可用）</option>
-            ) : null}
-            {columns.map((column) => (
-              <option key={column}>{column}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          数值
-          <select
-            name="yField"
-            aria-label="数值字段"
-            value={project.data.y}
-            onChange={(e) => update("y", e.target.value)}
-          >
-            {!columns.includes(project.data.y) ? (
-              <option value={project.data.y}>{project.data.y}（不可用）</option>
-            ) : null}
-            {columns.map((column) => (
-              <option key={column}>{column}</option>
-            ))}
-          </select>
-        </label>
-        <button
-          className="ai-toggle"
-          aria-expanded={ai}
-          onClick={() => setAi((value) => !value)}
-        >
-          AI 准备数据
-        </button>
-      </section>
+
       {ai ? (
         <section className="ai-panel">
           <form
@@ -218,6 +189,7 @@ export function App() {
             <input
               id="prompt"
               name="prompt"
+              maxLength={12000}
               autoComplete="off"
               required
               value={prompt}
@@ -240,6 +212,81 @@ export function App() {
         </section>
       ) : null}
       <section className="chart-paper" aria-label="图表结果">
+        <header className="figure-heading">
+          <div>
+            <h1>
+              {project.data.y} <span>按 {project.data.x}</span>
+            </h1>
+            <p>
+              {valid.model
+                ? `${parsed.rows.length} 个观测值 · 数据来自当前${project.data.format.toUpperCase()}文件`
+                : "等待有效的图表数据"}
+            </p>
+          </div>
+          <span className="figure-number">FIG. 01</span>
+        </header>
+        <section className="plot-controls" aria-label="图表设置">
+          <div className="mark-switch" role="group" aria-label="图形类型">
+            {(
+              [
+                ["line", "趋势线"],
+                ["bar", "柱状图"],
+                ["dot", "散点图"],
+              ] as const
+            ).map(([kind, label]) => (
+              <button
+                key={kind}
+                aria-pressed={project.data.kind === kind}
+                onClick={() => update("kind", kind)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <label>
+            横轴
+            <select
+              name="xField"
+              aria-label="横轴字段"
+              value={project.data.x}
+              onChange={(e) => update("x", e.target.value)}
+            >
+              {!columns.includes(project.data.x) ? (
+                <option value={project.data.x}>
+                  {project.data.x}（不可用）
+                </option>
+              ) : null}
+              {columns.map((column) => (
+                <option key={column}>{column}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            数值
+            <select
+              name="yField"
+              aria-label="数值字段"
+              value={project.data.y}
+              onChange={(e) => update("y", e.target.value)}
+            >
+              {!columns.includes(project.data.y) ? (
+                <option value={project.data.y}>
+                  {project.data.y}（不可用）
+                </option>
+              ) : null}
+              {columns.map((column) => (
+                <option key={column}>{column}</option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="ai-toggle"
+            aria-expanded={ai}
+            onClick={() => setAi((value) => !value)}
+          >
+            AI 准备数据
+          </button>
+        </section>
         {valid.model ? (
           <RenderBoundary>
             <Suspense fallback={<p role="status">正在加载绘图引擎…</p>}>
@@ -268,7 +315,7 @@ export function App() {
       </section>
       <section className="data-section">
         <header>
-          <h1>观察数据</h1>
+          <h2>数据来源</h2>
           <div className="data-tabs">
             <button
               aria-pressed={tab === "table"}
