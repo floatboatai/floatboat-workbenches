@@ -7,15 +7,36 @@
     "start": "node --enable-source-maps dist/server/index.mjs",
     "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
-  "engines": { "node": ">=22.16.0" },
+  "engines": {
+    "node": ">=22.16.0"
+  },
   "dependencies": {
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "@pdfme/ui": "5.4.6",
+    "@pdfme/common": "5.4.6",
+    "@pdfme/schemas": "5.4.6",
+    "@pdfme/generator": "5.4.6",
+    "@pdfme/converter": "5.4.6",
+    "@pdfme/pdf-lib": "5.4.6"
   },
   "devDependencies": {
     "@types/node": "22.20.2",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@pdfme/ui": "5.4.6",
+      "@pdfme/common": "5.4.6",
+      "@pdfme/schemas": "5.4.6",
+      "@pdfme/generator": "5.4.6",
+      "@pdfme/converter": "5.4.6",
+      "@pdfme/pdf-lib": "5.4.6",
+      "pdfjs-dist@3.11.174>canvas": "-",
+      "pdfjs-dist@3.11.174>path2d-polyfill": "-",
+      "@pdfme/converter@5.4.6>canvas": "-"
+    }
   }
 }

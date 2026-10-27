@@ -1,13 +1,11 @@
-# pdfme 工作台
+# 纸张工坊
 
-状态：计划中，尚未实现。
+已实现并完成本地验收。编辑文本与矩形版式 → 填写中文字段 → 保存/恢复 → 导出真实 PDF；模板及字段值支持 JSON 导入/导出。
 
-目标：报价单、证书、标签与合同模板批量生成工作台
+在总仓库执行 `pnpm workbench prepare pdfme`，进入本目录执行 `pnpm workbench:check`、`pnpm test`、`pnpm dev`、`pnpm package`。在 Floatboat → My → Workbenches → Import workbench 导入生成包，默认不包含预览数据。
 
-上游：https://github.com/pdfme/pdfme
+2026-10-27 验收：严格模板构建与 6 项测试通过；Chrome 1500px/375px 中文填值与保存刷新恢复；Designer 的 customer X 坐标从 22 改为 28，填写→设计往返及保存刷新后仍为 28；148×210 mm 双页 JSON 导入、按真实尺寸和选定页预览。下载 PDF 解析确认 2 页、中文可提取，栅格图检查正常。 浏览器无页面异常、CSP 拒绝或失败资源。PDF 主流程无需模型或外部服务。 打包文件导入客户端的安装流程尚未验收。
 
-适配路线：DOM 容器挂载独立 UI bundle，模板 JSON 存 SQLite；表格数据映射输入并批量生成 PDF。
+边界：空白纸张 50–500 × 50–700 mm；1–10 页、80 个唯一命名字段，每个内容 5000 字符；1–20 份相同内容副本。只支持 text/rectangle，不支持任意 PDF 原文编辑、图片或 CSV 逐行映射。
 
-限制：模板填充不等于任意 PDF 原文编辑；UI 自带 React，当前源码内部版本高于模板，需验证独立 bundle 与锁版。
-
-许可：MIT
+[上游](https://github.com/pdfme/pdfme)；@pdfme/{ui,common,schemas,generator,converter,pdf-lib} 六包精确 5.4.6，root/app 两套清单与锁一致。来源见 [NOTICE.md](NOTICE.md)，设计与实现见 app/DESIGN.md、app/ENGINEERING.md。

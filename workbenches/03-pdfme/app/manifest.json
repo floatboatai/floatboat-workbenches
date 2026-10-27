@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.90e739b8-93ff-4a15-adba-c2c1a611a797",
   "registryName": "pdfme-studio",
-  "name": "pdfme 工作台",
+  "name": "纸张工坊",
   "description": "报价单、证书、标签与合同模板批量生成工作台",
   "version": "0.1.0",
-  "changelog": "Initial application.",
+  "changelog": "支持中文单据版式设计、字段填写、版本保存与 PDF/JSON 导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
