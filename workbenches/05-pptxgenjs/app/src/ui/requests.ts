@@ -1,7 +1,7 @@
 import { getPageConnection } from './connection';
 import { isRecord } from '../contracts/project';
 export async function request(path:string,options:RequestInit={}):Promise<unknown> {
-  if(typeof options.body==='string'&&new TextEncoder().encode(options.body).length>1950000)throw new Error('请求超过容量，请先导出并减少内容。');
+  if(typeof options.body==='string'&&new TextEncoder().encode(options.body).length>1950000)throw Object.assign(new Error('请求超过容量，请先导出并减少内容。'),{status:413});
   const page=await getPageConnection();
   const response=await page.fetch(path,{...options,headers:{'content-type':'application/json',...options.headers}});
   const value:unknown=await response.json();

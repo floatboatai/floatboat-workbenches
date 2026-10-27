@@ -1,5 +1,6 @@
 # 乐谱审校室 · OpenSheetMusicDisplay
 
+当前版本：**0.2.0**（自动保存与产品化布局）。
 导入已有 MusicXML/MXL，在真实乐谱上核对声部与版式，按小节留下审校记录。原文件、显示设置、当前审阅位置和批注一起保存，刷新后可重新打开。支持导出当前谱面 SVG、原始文件、MXL 中的 MusicXML，以及带原件 SHA-256 的批注报告 JSON。
 
 软件用于乐谱审阅，不编辑音符、不提供音频播放。内置《Morning Lines》为本项目原创双声部示例，没有复制第三方乐谱。
@@ -17,7 +18,7 @@ pnpm package
 
 打开预览命令打印的完整地址。新建或导入乐谱，选择显示声部；在小节索引中选择批注声部与小节，再添加记录、标记已核对。修改后自动保存，可从顶部稿件列表重新打开。窄屏使用小节选择和“转到批注区”，谱纸在独立区域横向滚动。
 
-`artifacts/opensheetmusicdisplay-studio-0.1.0.fbworkbench` 可通过 **Floatboat → My → Workbenches → Import workbench** 导入。源包不包含预览数据库；客户端安装流程尚未验收。
+`artifacts/opensheetmusicdisplay-studio-0.2.0.fbworkbench` 可通过 **Floatboat → My → Workbenches → Import workbench** 导入。源包不包含预览数据库；客户端安装流程尚未验收。
 
 ## 支持范围
 

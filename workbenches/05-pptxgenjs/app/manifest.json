@@ -4,7 +4,7 @@
   "registryName": "pptxgenjs-studio",
   "name": "演示编排室",
   "description": "周报、销售方案与经营数据 PPTX 生成工作台",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "changelog": "支持逐页编排、排序与备注、版本保存、PPTX 导出和 AI 大纲预览。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",

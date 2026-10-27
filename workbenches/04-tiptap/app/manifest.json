@@ -4,7 +4,7 @@
   "registryName": "tiptap-studio",
   "name": "写作台",
   "description": "AI 方案写作、SOP 与报告编辑工作台",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "changelog": "支持富文本写作、版本保存、HTML/JSON 导出与 AI 草稿预览。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",

@@ -1,3 +1,4 @@
+import { readDesignerDrafts, designerDraftApplied, applyDesignerDrafts, designerProperties, type DesignerDraft } from "../contracts/designer-draft";
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
 import type { Template } from "@pdfme/common";
 import {
@@ -25,25 +26,33 @@ export function PdfApp() {
       window.innerWidth < 600 ? "fill" : "design",
     ),
     [exporting, setExporting] = useState(false),
+    [designerEpoch, setDesignerEpoch] = useState(0),
     [previewPage, setPreviewPage] = useState(0);
   const copies = typeof p.draft.copies === "number" && Number.isInteger(p.draft.copies) && p.draft.copies >= 1 && p.draft.copies <= 20 ? p.draft.copies : 1;
   const setCopies = (value: number) => p.setDraft(draft => ({ ...draft, copies: value }));
   const file = useRef<HTMLInputElement>(null);
   const snapshot = useMemo(
     () => structuredClone(p.data.template),
-    [p.loadEpoch, mode],
+    [p.loadEpoch, mode, designerEpoch],
   );
   const onChange = useCallback(
     (template: Template) => {
       try {
         const checked = restorePdfDraft({ template, values: {} }).template;
         p.setData((data) => ({ ...data, template: checked }));
+        p.setDraft(draft => ({...draft, designerInputs: readDesignerDrafts(draft.designerInputs).filter(input => !designerDraftApplied(checked, input))}));
       } catch (error) {
         p.report(error);
       }
     },
     [p.setData, p.report],
   );
+  const designerInputs = readDesignerDrafts(p.draft.designerInputs);
+  const captureDraft = (input: DesignerDraft, applied: boolean) => p.setDraft(draft => {const remaining = readDesignerDrafts(draft.designerInputs).filter(item => item.field !== input.field || item.property !== input.property);return {...draft, designerInputs: applied ? remaining : [...remaining, input]};});
+  const pendingProperties = designerInputs.length > 0;
+  const displayPhase = pendingProperties && p.autoState.phase === "saved" ? "draft" : p.autoState.phase;
+  const displayStatus = pendingProperties && p.autoState.phase === "saved" ? "属性草稿已保存，待应用" : p.autoState.message;
+  const resetDesignerInputs = () => {p.setDraft(draft => ({...draft, designerInputs: []}));setDesignerEpoch(value => value + 1);};
   const fields = p.data.template.schemas
     .flat()
     .filter((field) => field.type === "text" && !field.readOnly);
@@ -115,8 +124,8 @@ export function PdfApp() {
             onChange={(event) => p.setTitle(event.target.value)}
           />
         </label>
-        <span className="save-state" role="status" data-autosave-phase={p.autoState.phase}>
-          {p.autoState.message}
+        <span className="save-state" role="status" data-autosave-phase={displayPhase}>
+          {displayStatus}
         </span>
         <details className="project-controls">
           <summary>文件</summary>
@@ -200,6 +209,7 @@ export function PdfApp() {
             导入 JSON
           </button>
           <button
+            disabled={pendingProperties}
             onClick={() =>
               download(
                 new Blob([JSON.stringify(p.data, null, 2)], {
@@ -214,13 +224,18 @@ export function PdfApp() {
           <button
             className="primary"
             onClick={() => void exportPdf()}
-            disabled={exporting || p.busy}
+            disabled={exporting || p.busy || pendingProperties}
           >
             {exporting ? "正在生成…" : "生成 PDF"}
           </button>
         </div>
       </section>
       <Notice error={p.error} notice={p.notice} />
+      {pendingProperties ? <section className="designer-drafts" aria-label="待应用的设计器属性">
+        <div><strong>待应用的属性输入</strong><p>这些输入已作为草稿保留，尚未改变模板。修正后应用，或丢弃并回到当前版式。</p></div>
+        {designerInputs.map((input, index) => <label key={`${input.field}-${input.property}`}>{input.field} · {designerProperties[input.property]}<input aria-label={`待应用 ${input.field} ${designerProperties[input.property]}`} value={input.value} maxLength={5000} onChange={event => p.setDraft(draft => ({...draft,designerInputs:readDesignerDrafts(draft.designerInputs).map((item,i) => i === index ? {...item,value:event.target.value} : item)}))}/></label>)}
+        <button onClick={() => {try {p.setData(applyDesignerDrafts(p.data, designerInputs));resetDesignerInputs();p.setError("");} catch(error) {p.report(error);}}}>应用属性草稿</button><button onClick={resetDesignerInputs}>丢弃属性草稿</button>
+      </section> : null}
       <section
         inert={p.loading || p.busy}
         id="paper-main"
@@ -229,11 +244,11 @@ export function PdfApp() {
         tabIndex={-1}
       >
         {mode === "design" ? (
-          <RenderBoundary key={p.documentKey}>
+          <RenderBoundary key={`${p.documentKey}-${designerEpoch}`}>
             <Suspense
               fallback={<p className="engine-state">正在加载设计器…</p>}
             >
-              <DesignerPane initial={snapshot} onChange={onChange} />
+              <DesignerPane initial={snapshot} onChange={onChange} onDraft={captureDraft} />
             </Suspense>
           </RenderBoundary>
         ) : (

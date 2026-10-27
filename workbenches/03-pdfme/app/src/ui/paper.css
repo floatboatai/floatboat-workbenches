@@ -671,3 +671,9 @@ summary {
     scroll-behavior: auto !important;
   }
 }
+
+.designer-drafts {display:flex;align-items:end;flex-wrap:wrap;gap:12px;padding:12px 20px;border-bottom:1px solid #c9ac67;background:#fff7dd;color:#5f4c20;font-size:12px;}
+.designer-drafts p {margin:4px 0 0;max-width:430px;line-height:1.5;}
+.designer-drafts label {display:grid;gap:5px;max-width:180px;min-width:0;overflow-wrap:anywhere;}
+.designer-drafts input {width:100%;padding:6px;border:1px solid #c6b584;background:#fff;color:#302b20;}
+@media(prefers-color-scheme:dark){.designer-drafts{background:#353023;color:#f0dbab;}.designer-drafts input{background:#272520;color:#f0dbab;}}

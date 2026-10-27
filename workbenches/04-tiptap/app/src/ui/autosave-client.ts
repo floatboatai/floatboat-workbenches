@@ -15,10 +15,11 @@ export function useWorkbenchState<T>(seed:T,validate:(value:unknown)=>T,defaultT
   const [loadEpoch,setLoadEpoch]=useState(0),[tick,setTick]=useState(0);
   const doc=useRef<{id:string;revision:number}>({id:crypto.randomUUID(),revision:0}),ack=useRef(fingerprint(initial)),pending=useRef<SaveRequest<T>|null>(null);
   const flight=useRef<Promise<SaveReceipt<T>|null>|null>(null),active=useRef(true),edited=useRef(false),conflicted=useRef(false),failures=useRef(0),loaded=useRef(false),epoch=useRef(0);
+  const blocked=useRef<string|null>(null);
   const restore=useRef(options.restoreDraftData??validate);restore.current=options.restoreDraftData??validate;
   const copyKey=()=>storageKey+':'+doc.current.id;
   const report=(e:unknown)=>setError(e instanceof Error?e.message:'操作失败，请重试。');
-  function markCurrent(value:Project<T>|null){currentRef.current=value;setCurrentState(value);}
+  function markCurrent(value:Project<T>|null){currentRef.current=value;setCurrentState(value);if(value)setItems(previous=>[{id:value.id,title:value.title,revision:value.revision,updatedAt:value.updatedAt},...previous.filter(p=>p.id!==value.id)]);}
   function update(value:SetStateAction<WorkingCopy<T>>,user=true){const next=typeof value==='function'?value(workRef.current):value;workRef.current=next;if(user&&fingerprint(next)!==fingerprint(work))edited.current=true;setWork(next);}
   const setData=(value:SetStateAction<T>)=>update(w=>({...w,data:typeof value==='function'?(value as (previous:T)=>T)(w.data):value}));
   const setTitle=(value:SetStateAction<string>)=>update(w=>({...w,title:typeof value==='function'?value(w.title):value}));
@@ -37,10 +38,10 @@ export function useWorkbenchState<T>(seed:T,validate:(value:unknown)=>T,defaultT
   }
   function validRecord(value:unknown):value is DraftRecord<T>{return isRecord(value)&&typeof value.documentId==='string'&&typeof value.revision==='number'&&isRecord(value.snapshot)&&isRecord(value.receipt);}
   function reset(snapshot:WorkingCopy<T>,project:Project<T>|null,saved:boolean,record?:DraftRecord<T>){
-    epoch.current++;doc.current={id:record?.documentId??crypto.randomUUID(),revision:record?.revision??0};pending.current=null;conflicted.current=record?.receipt.phase==='conflict';failures.current=0;
+    epoch.current++;blocked.current=null;doc.current={id:record?.documentId??crypto.randomUUID(),revision:record?.revision??0};pending.current=null;conflicted.current=record?.receipt.phase==='conflict';failures.current=0;
     ack.current=saved?fingerprint(snapshot):'';edited.current=!saved;update(snapshot,false);markCurrent(project);setLoadEpoch(x=>x+1);setError('');setNotice('');
     setAutoState({phase:record?.receipt.phase??(saved?(project?'saved':'idle'):'pending'),message:record?.receipt.message??(saved?(project?'已自动保存':'编辑后自动保存'):'等待自动保存…'),savedAt:record?.updatedAt??''});
-    void cache().catch(()=>{});
+    if(loaded.current)void cache().catch(()=>{});
   }
   useEffect(()=>{
     active.current=true;
@@ -103,19 +104,23 @@ export function useWorkbenchState<T>(seed:T,validate:(value:unknown)=>T,defaultT
         }
         if(receipt.phase!=='saved')setItems(previous=>[{id:'draft:'+doc.current.id,title:'草稿 · '+(command.snapshot.title.trim()||'未命名'),revision:receipt.draftRevision,updatedAt:receipt.savedAt},...previous.filter(p=>p.id!=='draft:'+doc.current.id)]);
         conflicted.current=receipt.phase==='conflict';setError('');setNotice('');
-        setAutoState({phase:fingerprint(workRef.current)!==ack.current&&!conflicted.current?'pending':receipt.phase,message:receipt.message,savedAt:receipt.savedAt});
+        const changed=fingerprint(workRef.current)!==ack.current&&!conflicted.current;
+        setAutoState({phase:changed?'pending':receipt.phase,message:changed?'有新更改，等待自动保存…':receipt.message,savedAt:receipt.savedAt});
         await cache().catch(()=>{});return receipt;
       }catch(e){
         if(generation!==epoch.current)return null;
-        const conflict=e instanceof Error&&'status' in e&&e.status===409;conflicted.current=conflict;failures.current++;
-        setAutoState({phase:conflict?'conflict':'offline',message:conflict?'草稿发生冲突，本机输入已保留。':local?'草稿已暂存本机，连接恢复后重试。':'自动保存未完成，请保持页面打开或导出草稿。',savedAt:''});
+        const status=e instanceof Error&&'status' in e&&typeof e.status==='number'?e.status:0;
+        const conflict=status===409, rejected=status>=400&&status<500&&status!==409&&status!==429;conflicted.current=conflict;failures.current++;
+        if(rejected){pending.current=null;blocked.current=fingerprint(command.snapshot);}
+        setAutoState({phase:conflict?'conflict':'offline',message:conflict?'草稿发生冲突，本机输入已保留。':rejected?(local?'草稿已暂存本机，暂不能同步。 ':'自动保存未完成。 ')+(e instanceof Error?e.message:'请检查输入。'):local?'草稿已暂存本机，连接恢复后重试。':'自动保存未完成，请保持页面打开或导出草稿。',savedAt:''});
         if(force)report(e);return null;
       }finally{flight.current=null;setTick(x=>x+1);}
     })();flight.current=task;return task;
   }
   const signature=fingerprint(work),dirty=signature!==ack.current;
   useEffect(()=>{
-    if(!loaded.current||!edited.current||conflicted.current||(!dirty&&!pending.current))return;
+    if(!loaded.current||!edited.current||conflicted.current||(!dirty&&!pending.current)||blocked.current===signature)return;
+    if(blocked.current!==signature)blocked.current=null;
     if(!flight.current)setAutoState(previous=>previous.phase==='offline'?previous:{...previous,phase:'pending',message:'等待自动保存…'});
     const local=setTimeout(()=>{void cache().catch(()=>{});},120);
     const delay=failures.current?Math.min(30000,1500*2**Math.min(failures.current-1,4)):700;
@@ -138,7 +143,7 @@ export function useWorkbenchState<T>(seed:T,validate:(value:unknown)=>T,defaultT
     if(!await leave())return false;setBusy(true);setError('');
     try{
       if(id.startsWith('draft:')){const d=await request('/api/autosave/'+id.slice(6));if(!validRecord(d))throw new Error('草稿不存在。');const project=d.receipt.project?decodeProject(d.receipt.project):d.projectId?decodeProject(await request('/api/projects/'+d.projectId)):null;reset(decodeWork(d.snapshot),project,true,d);}
-      else{const [raw,d]=await Promise.all([request('/api/projects/'+id),request('/api/autosave/project/'+id)]);const project=decodeProject(raw);if(validRecord(d)&&d.projectRevision===project.revision&&d.receipt.phase!=='conflict')reset(decodeWork(d.snapshot),project,true,{...d,documentId:crypto.randomUUID(),revision:0});else reset({title:project.title,data:project.data,extra:{}},project,true);}
+      else{const [raw,d]=await Promise.all([request('/api/projects/'+id),request('/api/autosave/project/'+id)]);const project=decodeProject(raw);if(validRecord(d)&&d.projectRevision===project.revision&&d.receipt.phase!=='conflict')reset(decodeWork(d.snapshot),project,true,d);else reset({title:project.title,data:project.data,extra:{}},project,true);}
       return true;
     }catch(e){report(e);return false;}finally{setBusy(false);}
   }
@@ -150,5 +155,5 @@ export function useWorkbenchState<T>(seed:T,validate:(value:unknown)=>T,defaultT
     try{const c=currentRef.current??selected;await request('/api/projects/'+c.id,{method:'DELETE',body:JSON.stringify({revision:c.revision})});await request('/api/autosave/'+doc.current.id,{method:'DELETE'}).catch(()=>{});reset({title:defaultTitle,data:structuredClone(seed),extra:{}},null,true);await refresh();return true;}catch(e){report(e);return false;}finally{setBusy(false);}
   }
   const exportDraft=()=>download(new Blob([JSON.stringify(cacheValue(),null,2)],{type:'application/json'}),'workbench-working-copy.json');
-  return {items,current,data:work.data,setData,title:work.title,setTitle,draft:work.extra,setDraft,busy,error,setError,report,notice,setNotice,loading,dirty,autoState,documentKey:doc.current.id,loadEpoch,refresh,save,open,fresh,replace,remove,exportDraft};
+  return {items,current,data:work.data,setData,title:work.title,setTitle,draft:work.extra,setDraft,busy,error,setError,report,notice,setNotice,loading,dirty,autoState,documentKey:doc.current.id+"-"+loadEpoch,loadEpoch,refresh,save,open,fresh,replace,remove,exportDraft};
 }

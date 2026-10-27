@@ -15,3 +15,5 @@ contracts/domain 验证外部 JSON；server/store 用参数化 SQLite 和 revisi
 新增 0003_autosave.sql，旧迁移保持不变。autosave-server 在事务中保存完整工作副本，并仅将通过业务验证的内容写入 projects；documentId/mutationId 支持丢失响应后的幂等重试。客户端串行提交、防抖、IndexedDB 回退，documentKey/loadEpoch 仅在文档切换时更新。保存返回时不覆盖期间继续输入的内容。草稿状态与正式内容状态明确区分。
 
 未完成业务输入由结构受限的恢复器处理；正文或设计器初始快照不依赖自动保存生成的项目 ID。
+
+pdfme 的属性表单仅在值通过其内部校验后触发 onChangeTemplate；DesignerPane 因此捕获同源容器内受支持属性框的原始 input，存入 working-copy.extra.designerInputs。模型回调只清除值已吻合的输入，不能清除未应用内容。恢复面板以原字段名称为锚点，字段删除后拒绝套用到其它字段；数值和名称再次经过业务校验后才应用。实例仅在主动应用/丢弃草稿时重建。

@@ -1,5 +1,6 @@
 # 演示编排室
 
+当前版本：**0.2.0**（自动保存与产品化布局）。
 已实现并完成本地验收。逐页编辑标题、页眉、要点与演讲备注 → 添加/删除/前后排序 → 三主题舞台预览 → 保存恢复 → 真实 PPTX 下载。JSON 可导入恢复。AI 大纲先预览、确认后采用。
 
 在总仓库执行 `pnpm workbench prepare pptxgenjs`，进入本目录执行 `pnpm workbench:check`、`pnpm test`、`pnpm dev`、`pnpm package`。在 Floatboat → My → Workbenches → Import workbench 导入生成包，默认不包含预览数据。

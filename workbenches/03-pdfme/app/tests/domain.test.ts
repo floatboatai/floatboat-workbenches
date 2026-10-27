@@ -72,3 +72,18 @@ test("恢复未完成字段名及越界位置草稿，不放宽字体与原型�
   draft.template.schemas[0][0].name = "constructor";
   assert.throws(() => restorePdfDraft(draft));
 });
+
+test("设计器未应用属性保留原字符串，修正后才变更模板", async()=>{
+ const {readDesignerDrafts,applyDesignerDrafts,designerDraftApplied}=await import('../src/contracts/designer-draft.ts');
+ const raw={field:'customer',property:'position_x',value:'-1'};
+ const draft=readDesignerDrafts([raw]);assert.equal(draft.length,1);
+ assert.throws(()=>applyDesignerDrafts(seed,draft));
+ assert.equal(seed.template.schemas[0].find(field=>field.name==='customer')?.position.x,22);
+ const applied=applyDesignerDrafts(seed,[{...draft[0],value:'28'}]);
+ assert.equal(applied.template.schemas[0].find(field=>field.name==='customer')?.position.x,28);
+ assert.equal(designerDraftApplied(applied.template,{...draft[0],value:'28'}),true);
+ assert.throws(()=>applyDesignerDrafts(seed,[{...draft[0],value:''}]));
+ assert.throws(()=>applyDesignerDrafts(seed,[{...draft[0],field:'missing',value:'28'}]));
+ assert.throws(()=>applyDesignerDrafts(seed,[{...draft[0],property:'name',value:'__proto__'}]));
+ assert.deepEqual(readDesignerDrafts([{...raw,property:'__proto__'}, {...raw,value:{}}]),[]);
+});

@@ -1,5 +1,6 @@
 # 写作台
 
+当前版本：**0.2.0**（自动保存与产品化布局）。
 已实现并完成本地验收。富文本写作与粗体/斜体/小标题/列表/引用/撤销重做 → 保存恢复 → JSON/HTML 导出。AI 草稿先预览，确认后替换正文，可放弃生成稿。
 
 在总仓库执行 `pnpm workbench prepare tiptap`，进入本目录执行 `pnpm workbench:check`、`pnpm test`、`pnpm dev`、`pnpm package`。在 Floatboat → My → Workbenches → Import workbench 导入生成包，默认不包含预览数据。
