@@ -1,102 +1,97 @@
-import { registerAutosaveRoutes } from "./autosave.ts";
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
-import { WorkbenchHostError } from "../../sdk/host.mjs";
-import { isRecord } from "../contracts/project";
-import { createStore, StoreError } from "./store";
-export function registerRoutes<T>(
-  app: WorkbenchServer,
-  validate: (value: unknown) => T,
-  instructions: string,
-) {
-  const store = createStore(app.database, validate);
-  registerAutosaveRoutes(app, validate);
-  const fail = (error: unknown) =>
+import { registerAutosaveRoutes } from "./autosave.ts";
+import { validateDeck } from "../contracts/deck.ts";
+import { isRecord } from "../contracts/project.ts";
+import { createStore, StoreError } from "./store.ts";
+import { configFrom, createPresenton } from "./presenton.ts";
+import { createJobs } from "./jobs.ts";
+export function registerRoutes(app: WorkbenchServer) {
+  const store = createStore(app.database, validateDeck);
+  registerAutosaveRoutes(app, validateDeck);
+  const service = () => {
+    const c = configFrom(process.env);
+    return c ? createPresenton(c) : null;
+  };
+  const jobs = createJobs(app.database, service, (name, write) =>
+    app.resources.path("generated-files", name, write ? "write" : "read"),
+  );
+  const fail = (e: unknown) =>
     Response.json(
       {
         error: {
-          message:
-            error instanceof WorkbenchHostError
-              ? "模型服务暂不可用，请打开 Floatboat 并检查登录和模型设置。"
-              : error instanceof Error
-                ? error.message
-                : "操作失败，请重试。",
+          message: e instanceof Error ? e.message : "操作失败，请重试。",
         },
       },
-      {
-        status:
-          error instanceof StoreError
-            ? error.status
-            : error instanceof WorkbenchHostError
-              ? 503
-              : 400,
-      },
+      { status: e instanceof StoreError ? e.status : 400 },
     );
+  const protect = (fn: () => unknown | Promise<unknown>) =>
+    Promise.resolve().then(fn).catch(fail);
   app.route("GET", "/api/projects", () => store.list());
-  app.route("GET", "/api/projects/:id", ({ params }) => {
-    try {
-      return store.get(params.id);
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("POST", "/api/projects", ({ body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
-      return Response.json(store.create(body.title, body.data), {
-        status: 201,
-      });
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("PUT", "/api/projects/:id", ({ params, body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
-      return store.update(params.id, body.title, body.data, body.revision);
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("DELETE", "/api/projects/:id", ({ params, body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
+  app.route("GET", "/api/projects/:id", ({ params }) =>
+    protect(() => store.get(params.id)),
+  );
+  app.route("DELETE", "/api/projects/:id", ({ params, body }) =>
+    protect(() => {
+      if (!isRecord(body)) throw new Error("请求无效。");
       return store.remove(params.id, body.revision);
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("POST", "/api/generate", async ({ body }) => {
-    try {
-      if (
-        !isRecord(body) ||
-        typeof body.prompt !== "string" ||
-        !body.prompt.trim() ||
-        body.prompt.length > 12000
-      )
-        throw new Error("请输入 1–12000 个字符的要求。");
-      const result = await app.host.llm.generateText(
-        {
-          prompt: body.prompt,
-          system:
-            instructions +
-            " 只返回一个完整 JSON 对象，不要附加 Markdown 围栏或解释文字。",
-          maxOutputTokens: 6000,
-        },
-        { timeoutMs: 90000 },
-      );
-      const text = result.text
-        .trim()
-        .replace(/^```(?:json)?\s*/, "")
-        .replace(/\s*```$/, "");
-      let value: unknown;
-      try {
-        value = JSON.parse(text);
-      } catch {
-        throw new Error("模型返回的内容不是完整 JSON，请调整要求重试。");
-      }
-      return validate(value);
-    } catch (error) {
-      return fail(error);
-    }
-  });
+    }),
+  );
+  app.route("GET", "/api/presenton", () =>
+    protect(() => {
+      const configured = Boolean(service());
+      return {
+        configured,
+        message: configured
+          ? "Presenton 已配置；连接将在查询或制作时验证。"
+          : "尚未连接 Presenton。可继续编排大纲、导入和复核已有文稿。",
+      };
+    }),
+  );
+  app.route("POST", "/api/presenton/check", () =>
+    protect(async () => {
+      const client = service();
+      if (!client) throw new Error("尚未配置 Presenton 服务。");
+      await client.health();
+      return {
+        configured: true,
+        message: "Presenton 服务可访问；模型生成尚未验证。",
+      };
+    }),
+  );
+  app.route("GET", "/api/jobs", () => jobs.list());
+  app.route("POST", "/api/jobs", ({ body }) =>
+    protect(() => jobs.submit(body)),
+  );
+  app.route("GET", "/api/jobs/:id", ({ params }) =>
+    protect(() => jobs.get(params.id)),
+  );
+  app.route("GET", "/api/jobs/:id/snapshot", ({ params }) =>
+    protect(() => jobs.snapshot(params.id)),
+  );
+  app.route("POST", "/api/jobs/:id/refresh", ({ params }) =>
+    protect(() => jobs.refresh(params.id)),
+  );
+  app.route("POST", "/api/jobs/:id/adopt", ({ params, body }) =>
+    protect(() =>
+      jobs.adopt(params.id, isRecord(body) ? body.taskId : undefined),
+    ),
+  );
+  app.route("POST", "/api/jobs/:id/stop", ({ params }) =>
+    protect(() => jobs.stop(params.id)),
+  );
+  app.route("GET", "/api/jobs/:id/presentation", ({ params }) =>
+    protect(() => jobs.presentation(params.id)),
+  );
+  app.route("GET", "/api/presentations/:id", ({ params }) =>
+    protect(() => jobs.fetchPresentation(params.id)),
+  );
+  app.route("POST", "/api/jobs/import", ({ body }) =>
+    protect(() => jobs.importResult(body)),
+  );
+  app.route("POST", "/api/jobs/:id/artifact", ({ params }) =>
+    protect(() => jobs.cacheArtifact(params.id)),
+  );
+  app.route("GET", "/api/jobs/:id/chunks/:index", ({ params }) =>
+    protect(() => jobs.chunk(params.id, Number(params.index))),
+  );
 }

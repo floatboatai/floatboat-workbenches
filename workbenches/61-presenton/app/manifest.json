@@ -16,10 +16,17 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "generated-files",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "generated-files",
+      "access": "read-write"
+    }
+  ]
 }
