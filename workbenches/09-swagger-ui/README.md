@@ -1,19 +1,17 @@
-# API 参考台
+# Swagger 接口参考台
 
-版本 0.1.0，本地与真实 Host 模型调用已验证；Floatboat 客户端导入未验收。
+版本 **0.2.0**。编辑后自动保存，不必反复点击保存按钮。
 
-从总仓库运行 `pnpm workbench prepare swagger-ui`，然后 `pnpm workbench dev swagger-ui`。
+端点目录、原生Swagger接口文档和Try it out console；JSON规格按需并排编辑。支持OpenAPI 3.0/3.1、本地同源GET试调和JSON导出。
 
-编辑或导入 OpenAPI 3.0/3.1 JSON，点击「应用 JSON」更新真实 Swagger UI 参考文档，再保存项目。支持重新打开、重命名、删除、JSON 导出和版本冲突保护。错误 JSON 保留原文；未应用草稿在离开/切换/覆盖前提示，避免丢失修改或误导出旧规格。
+未应用或错误JSON保留原文，只有点击应用才更新接口文档。导入创建新项目，保留原项目。
 
-「Try it out」只支持同源 GET，内置 `/api/demo/health` 可直接执行。外部 servers 与远程 $ref 不支持，无请求代理；授权信息不随项目保存。AI 起草返回候选，检查后明确采用。
+自动保存区分待同步、保存中、已保存、工作草稿、离线和版本冲突。网络失败会保留本机工作副本并重试；冲突不会覆盖服务器版本，可导出恢复草稿后打开服务器版本。“立即保存”用于手动触发同步。
 
-## 已验证
+从总仓库运行 `pnpm workbench prepare swagger-ui`、`pnpm workbench dev swagger-ui`。本目录执行 `pnpm workbench:check`、`pnpm test` 与 `pnpm run package`。
 
-`pnpm test` 4 项通过：业务校验、真实 SQLite 保存/冲突/删除、远程引用和服务器限制。Chrome 实测官方 Swagger UI 渲染、同源 GET 返回成功、保存刷新恢复、JSON 导出、无效 JSON 恢复和真实模型候选生成/采用。1440/375px、暗色、reduced-motion 无页面横向溢出；页面异常、console error、失败请求均 0。
+业务测试 4 项；自动保存另经真实Chrome验收：无需按钮创建、延迟回包不覆盖新输入、草稿刷新恢复、503/重试、响应丢失幂等、冲突保留、375px与暗色。AI草稿恢复测试使用明确注入的候选，未据此宣称新一轮真实模型调用成功。
 
-Swagger 官方浏览器包在同源 iframe 中运行，双向消息核对 origin/source；父页面保持 React 19.2.3，CSP 不包含 unsafe-eval。
-
-运行 `pnpm workbench package swagger-ui` 生成 artifacts/swagger-ui-studio-0.1.0.fbworkbench。通过 Floatboat「我的→工作台→导入工作台」安装。
+源包：`artifacts/swagger-ui-studio-0.2.0.fbworkbench`。通过Floatboat「我的→工作台→导入工作台」安装。源包不含项目数据；客户端实际导入尚未验收。
 
 上游与许可见 [NOTICE.md](NOTICE.md)。

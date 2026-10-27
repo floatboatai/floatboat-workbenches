@@ -1,3 +1,4 @@
+import { registerAutosaveRoutes } from "./autosave";
 import { createWorkbenchServer } from "../../sdk/runtime.mjs";
 import { registerRoutes } from "./routes";
 import { validate, instructions } from "../contracts/model";
@@ -10,4 +11,5 @@ app.route("GET", "/api/demo/health", () => ({
   service: "API 参考台",
   time: new Date().toISOString(),
 }));
+registerAutosaveRoutes(app, validate);
 await app.listen();

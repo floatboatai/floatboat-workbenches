@@ -9,3 +9,7 @@
 JSON 编辑稿独立于已应用规格。未应用修改阻止保存和导出旧规格；离开页面、打开、新建、删除和覆盖候选前保护草稿，取消保留原文。无效输入不覆盖可用文档。
 
 固定依赖同时记录在项目根和 app 的 package/lock 文件。使用官方固定 Vite/Node 模板，SDK、日志、本地数据不提交。未进行 Floatboat 客户端导入验收。
+
+## 0.2.0 自动保存与恢复
+
+使用主仓库统一autosave-contracts/server/client/cache/requests/workspace模块，追加0003_autosave迁移，不修改既有迁移。工作副本包括title、data及extra草稿；700ms防抖、串行提交、documentId/mutationId去重和revision冲突保护。只有合法业务模型写入projects；未完成输入保留在工作草稿。后台同步不锁定编辑器，自动保存状态与渲染/应用状态分别呈现。独立编辑器以documentKey/loadEpoch识别文档切换，禁止根据自动创建的current.id重置输入。
