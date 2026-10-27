@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.b08e76af-ab98-4abf-a2e5-f650238071b2",
   "registryName": "blocknote-studio",
-  "name": "BlockNote 工作台",
+  "name": "BlockNote 知识夹",
   "description": "团队手册、会议记录与项目知识页工作台",
   "version": "0.3.0",
-  "changelog": "Initial application.",
+  "changelog": "原生块编辑、知识页目录、自动保存与草稿恢复、JSON/Markdown/HTML 导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -19,5 +19,13 @@
   "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "licenses",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "licenses"
+    }
+  ]
 }

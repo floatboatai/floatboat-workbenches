@@ -11,6 +11,11 @@
     "node": ">=22.16.0"
   },
   "dependencies": {
+    "@blocknote/core": "0.56.0",
+    "@blocknote/mantine": "0.56.0",
+    "@blocknote/react": "0.56.0",
+    "@mantine/core": "9.0.2",
+    "@mantine/hooks": "9.0.2",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
