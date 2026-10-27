@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.09b09ca0-5e7c-4a2f-b695-341d89f45953",
+  "registryName": "swagger-ui-studio",
+  "name": "Swagger UI 工作台",
+  "description": "OpenAPI工作台：导入接口定义、浏览调用、Agent生成请求示例",
+  "version": "0.1.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

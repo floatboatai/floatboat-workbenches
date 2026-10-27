@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.132fa046-457e-4340-b34e-6636f164db04",
+  "registryName": "tiptap-studio",
+  "name": "Tiptap 工作台",
+  "description": "AI 方案写作、SOP 与报告编辑工作台",
+  "version": "0.1.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

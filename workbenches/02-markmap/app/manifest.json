@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.ad1fca6f-f7e7-4812-986c-20c4ca877148",
+  "registryName": "markmap-studio",
+  "name": "Markmap 工作台",
+  "description": "研究与会议脑图工作台：长文/纪要转大纲与交互思维导图",
+  "version": "0.1.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

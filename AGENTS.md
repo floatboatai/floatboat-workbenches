@@ -1,6 +1,6 @@
 # Workbench development
 
-Implement projects sequentially in the order recorded in `catalog.json`. Each project owns its application source, migrations, locks, design decisions and acceptance evidence. Update its status only after the corresponding checks pass.
+Implement the next catalog batch in isolated Git worktrees. Parallel agents own disjoint project directories; the primary agent integrates commits and updates the root catalog after verification. Each project owns its application source, migrations, locks, design decisions and acceptance evidence. Update its status only after the corresponding checks pass.
 
 Before React implementation or refactoring, read [.agents/skills/react-best-practices/SKILL.md](.agents/skills/react-best-practices/SKILL.md) and the applicable rules. Translate Next.js-specific examples to the supported React/Vite runtime; the template remains the build authority.
 

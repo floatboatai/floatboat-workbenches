@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.e397c704-d222-46a2-b294-21364b0ec7b2",
+  "registryName": "surveyjs-form-library-studio",
+  "name": "SurveyJS Form Library 工作台",
+  "description": "AI 问卷、需求采集与业务表单",
+  "version": "0.1.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}
