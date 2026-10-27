@@ -6,9 +6,9 @@
 
 ## 当前进度
 
-当前版本 **0.3.0** · **26 / 55 个工作台已完成本地验收**，其余 29 个为计划项目。各上游库的集成范围以项目 README 为准。Floatboat 客户端导入流程尚未实测。
+当前批次 **0.4.0** · **32 / 61 个工作台已完成本地功能验收**，其余29个为计划项目。新增6个AI工作台为0.4.0，既有26个保留0.3.0版本与验收记录。Floatboat客户端导入尚未实测。
 
-本轮由 **10 个子 agent、10 个独立 worktree** 完成第 18–27 项，按环境上限保持 3 个子 agent 同时运行并陆续补位。全部 26 项使用同一版自动保存修复：快速编辑后撤回时恢复正确的保存状态和本机内容，旧缓存、异步验证、失败重试与冲突分别处理。
+本批在6个独立worktree分批并行实现。自动保存、未完成草稿、冲突与容量边界是共同验收项；界面按产品任务分别设计。AI引擎、模型和外部服务的验证范围单列在[0.4.0验收](docs/release-0.4.0.md)，配置方式见[AI服务说明](docs/ai-services.md)。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
@@ -38,20 +38,26 @@
 | [farmOS-map](workbenches/53-farmos-map/) | 地块绘制、边界调整、备注与 GeoJSON 导出 | 地图与地块记录 |
 | [Mirador](workbenches/54-mirador/) | 本地图像、双页对照、逐页复核与报告导出 | 双图光台与复核账本 |
 | [OpenSheetMusicDisplay](workbenches/55-opensheetmusicdisplay/) | MusicXML/MXL 导入、谱面校审、批注及原件/SVG 导出 | 乐谱纸张与边注 |
+| [LangExtract](workbenches/56-langextract/) | 原文、JSONL证据定位、字段复核、人工修订与CSV/JSONL/项目导出 | 原文纸张与证据账本 |
+| [Docling](workbenches/57-docling/) | DoclingDocument结构树、文本/表格校订、顺序、JSON/Markdown/CSV与HTML连接器 | 结构轨、校样纸张与表格检查器 |
+| [LangGraph.js](workbenches/58-langgraph/) | 真实StateGraph、人工中断/恢复、SQLite检查点、交付与项目导出 | 三站复核流程与运行账本 |
+| [Promptfoo](workbenches/59-promptfoo/) | 真实评测结果矩阵、基线、人工复核、限定套件执行器与CSV/JSON导出 | 用例×版本矩阵与结果对照 |
+| [faster-whisper](workbenches/60-faster-whisper/) | 音频保存/回听、真实CPU转写、字幕时间编辑与SRT/VTT/完整项目导出 | 暗色波形、字幕行与任务队列 |
+| [Presenton](workbenches/61-presenton/) | 资料、大纲、页序、备注、审阅、便携稿与异步制作服务连接器 | 逐页缩略轨、演示舞台与资料简报 |
 
-统一验证：**26 项构建、208 项应用测试、3 项工具测试、26 个源包**通过；另有最终共享客户端的 9 组 Chrome/SQLite 核心回归及旧缓存/畸形响应补充检查。业务浏览器证据与范围见 [0.3.0 发布验收](docs/release-0.3.0.md)。
+本批统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
 
-历史批次：[0.2.0 自动保存与布局](docs/release-0.2.0.md)、[2–11 批次验收](docs/batch-02-11.md)。历史真实 Host 调用记录保留，此轮没有重新执行这些模型调用。
+既有26项的构建、208项应用测试与源码包记录见[0.3.0验收](docs/release-0.3.0.md)，本批未重跑未修改的既有应用。历史批次：[0.2.0](docs/release-0.2.0.md)、[2–11](docs/batch-02-11.md)。
 
 仓库级 React Best Practices 与 Web Design Guidelines 已安装，入口见 `AGENTS.md`；各产品的设计原则见 [设计说明](docs/design-principles.md)。
 
 行业补充调研：[28 个小众行业候选](docs/research/niche-industry-candidates.md)。Maker.js、SeqViz、farmOS-map、Mirador 与 OpenSheetMusicDisplay 已实现；其余候选仍处于研究或计划阶段。第12–17项的独立服务接入条件见各自目录。
 
-AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbench-candidates.md)。覆盖文档抽取、知识图谱、Agent、评测、字幕、配音、课件和视觉生成，另含 3 个通用组件；已列明接口、独立服务、模型许可和维护边界。首批建议验证 LangExtract、Docling、LangGraph.js、Promptfoo、faster-whisper、Presenton，目前均为研究状态，不计入已实现数量。
+AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbench-candidates.md)。覆盖文档抽取、知识图谱、Agent、评测、字幕、配音、课件和视觉生成，另含 3 个通用组件；已列明接口、独立服务、模型许可和维护边界。其中6项已完成本地功能验收，其余26项仍处于研究阶段；正式模型/外部服务范围以各项目说明为准。
 
 ## 工作台实景
 
-以下为 26 个已实现项目的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
+以下为 32 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
 
 | | |
 | --- | --- |
@@ -68,6 +74,9 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[GrapesJS · 页面设计](workbenches/27-grapesjs/)**<br>[<img src="docs/screenshots/grapesjs.png" alt="GrapesJS · 页面设计工作台实景" width="440">](workbenches/27-grapesjs/) | **[Maker.js · 参数制图](workbenches/51-makerjs/)**<br>[<img src="docs/screenshots/makerjs.png" alt="Maker.js · 参数制图工作台实景" width="440">](workbenches/51-makerjs/) |
 | **[SeqViz · 序列审阅](workbenches/52-seqviz/)**<br>[<img src="docs/screenshots/seqviz.png" alt="SeqViz · 序列审阅工作台实景" width="440">](workbenches/52-seqviz/) | **[farmOS-map · 地块](workbenches/53-farmos-map/)**<br>[<img src="docs/screenshots/farmos-map.png" alt="farmOS-map · 地块工作台实景" width="440">](workbenches/53-farmos-map/) |
 | **[Mirador · 文献对照](workbenches/54-mirador/)**<br>[<img src="docs/screenshots/mirador.png" alt="Mirador · 文献对照工作台实景" width="440">](workbenches/54-mirador/) | **[OpenSheetMusicDisplay · 乐谱校审](workbenches/55-opensheetmusicdisplay/)**<br>[<img src="docs/screenshots/opensheetmusicdisplay.png" alt="OpenSheetMusicDisplay · 乐谱校审工作台实景" width="440">](workbenches/55-opensheetmusicdisplay/) |
+| **[LangExtract · 原文纸张与证据账本](workbenches/56-langextract/)**<br>[<img src="docs/screenshots/langextract.png" alt="LangExtract 工作台实景" width="440">](workbenches/56-langextract/) | **[Docling · 结构轨、校样纸张与表格检查器](workbenches/57-docling/)**<br>[<img src="docs/screenshots/docling.png" alt="Docling 工作台实景" width="440">](workbenches/57-docling/) |
+| **[LangGraph.js · 三站复核流程与运行账本](workbenches/58-langgraph/)**<br>[<img src="docs/screenshots/langgraph.png" alt="LangGraph.js 工作台实景" width="440">](workbenches/58-langgraph/) | **[Promptfoo · 用例×版本矩阵与结果对照](workbenches/59-promptfoo/)**<br>[<img src="docs/screenshots/promptfoo.png" alt="Promptfoo 工作台实景" width="440">](workbenches/59-promptfoo/) |
+| **[faster-whisper · 暗色波形、字幕行与任务队列](workbenches/60-faster-whisper/)**<br>[<img src="docs/screenshots/faster-whisper.png" alt="faster-whisper 工作台实景" width="440">](workbenches/60-faster-whisper/) | **[Presenton · 逐页缩略轨、演示舞台与资料简报](workbenches/61-presenton/)**<br>[<img src="docs/screenshots/presenton.png" alt="Presenton 工作台实景" width="440">](workbenches/61-presenton/) |
 
 自动保存区分待保存、同步中、已保存、待完善草稿、离线和版本冲突。后台保存时仍可编辑；项目导入创建独立项目，未完成输入可恢复。浏览器本机缓存限定同一来源。
 

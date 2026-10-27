@@ -2056,12 +2056,12 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "证据字段抽取与人工复核台",
-    "core_features": "字段抽取复核：原文高亮与记录表联动",
+    "core_features": "原文、JSONL证据定位、字段复核、人工修订与CSV/JSONL/项目导出",
     "integration": "Python 核心＋自建任务服务；Apache-2.0",
     "effort": "中–高",
     "priority": "A",
     "license": "Apache-2.0",
-    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "caveat": "真实模型抽取、Host与客户端导入未验证。",
     "sources": [
       "https://github.com/google/langextract"
     ],
@@ -2069,15 +2069,25 @@
     "mode": "独立服务与结果审阅",
     "checked_at": "2026-10-27",
     "verification": {
-      "build": "pending",
-      "browser": "pending",
-      "upstream": "pending",
-      "hostImport": "unverified"
+      "build": "passed",
+      "tests": 17,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/langextract.png",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.4.0.md",
+      "acceptance": "workbenches/56-langextract/ACCEPTANCE.md",
+      "upstream": "真实LangExtract库＋明确stub提供者；真实模型未验证",
+      "hostLlm": "not-used"
     },
     "id": 56,
     "slug": "langextract",
     "directory": "workbenches/56-langextract",
-    "status": "planned",
+    "status": "local-verified",
     "version": "0.4.0"
   },
   {
@@ -2087,12 +2097,12 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "文档结构、文本与表格校对台",
-    "core_features": "文档解析校对：原页、结构树、表格修订",
+    "core_features": "DoclingDocument结构树、文本/表格校订、顺序、JSON/Markdown/CSV与HTML连接器",
     "integration": "官方 docling-serve；代码 MIT，模型单列",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "caveat": "当前上传仅HTML；无PDF/OCR/DOCX预览或转换；官方Serve live与客户端导入未验证。",
     "sources": [
       "https://github.com/docling-project/docling"
     ],
@@ -2100,15 +2110,25 @@
     "mode": "独立服务与结果审阅",
     "checked_at": "2026-10-27",
     "verification": {
-      "build": "pending",
-      "browser": "pending",
-      "upstream": "pending",
-      "hostImport": "unverified"
+      "build": "passed",
+      "tests": 23,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/docling.png",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.4.0.md",
+      "acceptance": "workbenches/57-docling/app/ACCEPTANCE.md",
+      "upstream": "真实Docling core HTML转换与原生JSON回读；官方Serve live未验证",
+      "hostLlm": "not-used"
     },
     "id": 57,
     "slug": "docling",
     "directory": "workbenches/57-docling",
-    "status": "planned",
+    "status": "local-verified",
     "version": "0.4.0"
   },
   {
@@ -2118,12 +2138,12 @@
     "category": "AI 工作台",
     "kind": "核心库",
     "workbench": "人工复核与可恢复的 Agent 流程台",
-    "core_features": "人工复核流程：执行图、待办卡、检查点时间线",
+    "core_features": "真实StateGraph、人工中断/恢复、SQLite检查点、交付与项目导出",
     "integration": "Node 核心＋自建模板 SQLite checkpointer；MIT",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "caveat": "固定资料复核流程；Host模型成功调用与客户端导入未验证。",
     "sources": [
       "https://github.com/langchain-ai/langgraphjs"
     ],
@@ -2131,15 +2151,25 @@
     "mode": "引擎封装",
     "checked_at": "2026-10-27",
     "verification": {
-      "build": "pending",
-      "browser": "pending",
-      "upstream": "pending",
-      "hostImport": "unverified"
+      "build": "passed",
+      "tests": 11,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/langgraph.png",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.4.0.md",
+      "acceptance": "workbenches/58-langgraph/ACCEPTANCE.md",
+      "upstream": "真实StateGraph/SQLite与进程重启；Host模型分支未验证",
+      "hostLlm": "unverified-host-disconnected"
     },
     "id": 58,
     "slug": "langgraph",
     "directory": "workbenches/58-langgraph",
-    "status": "planned",
+    "status": "local-verified",
     "version": "0.4.0"
   },
   {
@@ -2149,12 +2179,12 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "提示词与模型回归评测台",
-    "core_features": "评测台：用例×版本矩阵、失败差异、基线",
+    "core_features": "真实评测结果矩阵、基线、人工复核、限定套件执行器与CSV/JSON导出",
     "integration": "外部 runner/真实结果导入；MIT",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "caveat": "限定v3结果与安全JSON套件；执行器独立部署，外部模型与客户端导入未验证。",
     "sources": [
       "https://github.com/promptfoo/promptfoo"
     ],
@@ -2162,15 +2192,25 @@
     "mode": "独立服务与结果审阅",
     "checked_at": "2026-10-27",
     "verification": {
-      "build": "pending",
-      "browser": "pending",
-      "upstream": "pending",
-      "hostImport": "unverified"
+      "build": "passed",
+      "tests": 11,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/promptfoo.png",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.4.0.md",
+      "acceptance": "workbenches/59-promptfoo/ACCEPTANCE.md",
+      "upstream": "真实Promptfoo evaluator回显评测；外部模型未验证",
+      "hostLlm": "not-used"
     },
     "id": 59,
     "slug": "promptfoo",
     "directory": "workbenches/59-promptfoo",
-    "status": "planned",
+    "status": "local-verified",
     "version": "0.4.0"
   },
   {
@@ -2180,12 +2220,12 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "音频转录与字幕审校台",
-    "core_features": "字幕审校：波形、逐句回听、时间轴、术语表",
+    "core_features": "音频保存/回听、真实CPU转写、字幕时间编辑与SRT/VTT/完整项目导出",
     "integration": "自建 Python 任务服务，CPU 可起步；MIT",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "caveat": "真实推理仅验证tiny.en英语短录音CPU路线；Python/模型独立部署，其他语种/GPU/客户端导入未验证。",
     "sources": [
       "https://github.com/SYSTRAN/faster-whisper"
     ],
@@ -2193,15 +2233,25 @@
     "mode": "独立服务与结果审阅",
     "checked_at": "2026-10-27",
     "verification": {
-      "build": "pending",
-      "browser": "pending",
-      "upstream": "pending",
-      "hostImport": "unverified"
+      "build": "passed",
+      "tests": 15,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/faster-whisper.png",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.4.0.md",
+      "acceptance": "workbenches/60-faster-whisper/ACCEPTANCE.md",
+      "upstream": "真实tiny.en CPU INT8英语转写，主仓库完整链路复验",
+      "hostLlm": "not-used"
     },
     "id": 60,
     "slug": "faster-whisper",
     "directory": "workbenches/60-faster-whisper",
-    "status": "planned",
+    "status": "local-verified",
     "version": "0.4.0"
   },
   {
@@ -2211,12 +2261,12 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "资料、大纲与 AI 课件制作台",
-    "core_features": "课件制作：逐页大纲、幻灯片舞台、资料引用",
+    "core_features": "资料、大纲、页序、备注、审阅、便携稿与异步制作服务连接器",
     "integration": "外部 Docker/self-host API；Apache-2.0",
     "effort": "中–高",
     "priority": "A",
     "license": "Apache-2.0",
-    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "caveat": "实际生成及PPTX/PDF递送需要配置Presenton服务，尚未live验证；客户端导入未验证。",
     "sources": [
       "https://github.com/presenton/presenton"
     ],
@@ -2224,15 +2274,25 @@
     "mode": "独立服务与结果审阅",
     "checked_at": "2026-10-27",
     "verification": {
-      "build": "pending",
-      "browser": "pending",
-      "upstream": "pending",
-      "hostImport": "unverified"
+      "build": "passed",
+      "tests": 29,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/presenton.png",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.4.0.md",
+      "acceptance": "workbenches/61-presenton/app/ACCEPTANCE.md",
+      "upstream": "本地编辑/导出与官方API合同；真实生成和上游文件递送未验证",
+      "hostLlm": "not-used"
     },
     "id": 61,
     "slug": "presenton",
     "directory": "workbenches/61-presenton",
-    "status": "planned",
+    "status": "local-verified",
     "version": "0.4.0"
   }
 ]

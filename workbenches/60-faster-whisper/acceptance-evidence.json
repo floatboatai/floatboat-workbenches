@@ -71,9 +71,9 @@
     "path": "../../docs/screenshots/faster-whisper.png",
     "size": [
       1440,
-      1672
+      1392
     ],
-    "sha256": "87d893de1f12dd0bfc9679e53351800fc92bb7e9f5efe0e1cead59f45f6311bf"
+    "sha256": "f662dd5659d280b5555fcb9a61abaefca01ac07541fccbcbf23bfa5195628d32"
   },
   "package": {
     "file": "faster-whisper-studio-0.4.0.fbworkbench",
@@ -91,5 +91,21 @@
     "remote cleartext endpoints rejected",
     "response streams are cancelled after size limits",
     "oversized subtitle working copy persists and restores"
-  ]
+  ],
+  "capacityBrowser": {
+    "baseBytes": 749000,
+    "longCueCharacters": 7000,
+    "draftReload": true,
+    "portableRoundtrip": true,
+    "pageErrors": []
+  },
+  "canonicalRetest": {
+    "canonicalMain": true,
+    "actualInference": true,
+    "service": "tiny.en CPU INT8",
+    "cues": 3,
+    "saved": true,
+    "adoptedNewProject": true,
+    "pageErrors": []
+  }
 }

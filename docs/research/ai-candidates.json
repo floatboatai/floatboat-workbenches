@@ -1,6 +1,6 @@
 {
   "checked_at": "2026-10-27",
-  "scope": "Official source, documentation and license research only; no installation, model execution, integration or Host validation.",
+  "scope": "Official-source research snapshot, followed by six separately recorded local implementations. Model and external-service validation are stated per implementation; local verification does not imply live inference or Host import.",
   "projects": [
     {
       "id": "AI01",
@@ -8,12 +8,18 @@
       "repository": "google/langextract",
       "url": "https://github.com/google/langextract",
       "category": "knowledge",
-      "status": "research-only",
+      "status": "local-verified",
       "selection": "first-batch",
       "proposed_workbench": "字段抽取复核：原文高亮与记录表联动",
       "requirements_and_license_summary": "Python 核心＋自建任务服务；Apache-2.0",
       "decision": "首批；文本输入，保留证据区间与人工修订",
-      "evidence_document": "ai-knowledge-candidates.md"
+      "evidence_document": "ai-knowledge-candidates.md",
+      "implementation": {
+        "directory": "workbenches/56-langextract",
+        "version": "0.4.0",
+        "record": "../release-0.4.0.md",
+        "upstream": "真实LangExtract库＋明确stub提供者；真实模型未验证"
+      }
     },
     {
       "id": "AI02",
@@ -21,12 +27,18 @@
       "repository": "docling-project/docling",
       "url": "https://github.com/docling-project/docling",
       "category": "knowledge",
-      "status": "research-only",
+      "status": "local-verified",
       "selection": "first-batch",
       "proposed_workbench": "文档解析校对：原页、结构树、表格修订",
       "requirements_and_license_summary": "官方 docling-serve；代码 MIT，模型单列",
       "decision": "首批；CPU 服务可起步，处理部分解析失败",
-      "evidence_document": "ai-knowledge-candidates.md"
+      "evidence_document": "ai-knowledge-candidates.md",
+      "implementation": {
+        "directory": "workbenches/57-docling",
+        "version": "0.4.0",
+        "record": "../release-0.4.0.md",
+        "upstream": "真实Docling core HTML转换与原生JSON回读；官方Serve live未验证"
+      }
     },
     {
       "id": "AI03",
@@ -125,12 +137,18 @@
       "repository": "langchain-ai/langgraphjs",
       "url": "https://github.com/langchain-ai/langgraphjs",
       "category": "agents",
-      "status": "research-only",
+      "status": "local-verified",
       "selection": "first-batch",
       "proposed_workbench": "人工复核流程：执行图、待办卡、检查点时间线",
       "requirements_and_license_summary": "Node 核心＋自建模板 SQLite checkpointer；MIT",
       "decision": "首批；不能照搬 better-sqlite3 adapter",
-      "evidence_document": "ai-agent-candidates.md"
+      "evidence_document": "ai-agent-candidates.md",
+      "implementation": {
+        "directory": "workbenches/58-langgraph",
+        "version": "0.4.0",
+        "record": "../release-0.4.0.md",
+        "upstream": "真实StateGraph/SQLite与进程重启；Host模型分支未验证"
+      }
     },
     {
       "id": "AI11",
@@ -138,12 +156,18 @@
       "repository": "promptfoo/promptfoo",
       "url": "https://github.com/promptfoo/promptfoo",
       "category": "agents",
-      "status": "research-only",
+      "status": "local-verified",
       "selection": "first-batch",
       "proposed_workbench": "评测台：用例×版本矩阵、失败差异、基线",
       "requirements_and_license_summary": "外部 runner/真实结果导入；MIT",
       "decision": "首批；当前 Node 最低补丁与 libSQL 依赖须处理",
-      "evidence_document": "ai-agent-candidates.md"
+      "evidence_document": "ai-agent-candidates.md",
+      "implementation": {
+        "directory": "workbenches/59-promptfoo",
+        "version": "0.4.0",
+        "record": "../release-0.4.0.md",
+        "upstream": "真实Promptfoo evaluator回显评测；外部模型未验证"
+      }
     },
     {
       "id": "AI12",
@@ -255,12 +279,18 @@
       "repository": "SYSTRAN/faster-whisper",
       "url": "https://github.com/SYSTRAN/faster-whisper",
       "category": "creative",
-      "status": "research-only",
+      "status": "local-verified",
       "selection": "first-batch",
       "proposed_workbench": "字幕审校：波形、逐句回听、时间轴、术语表",
       "requirements_and_license_summary": "自建 Python 任务服务，CPU 可起步；MIT",
       "decision": "首批；导出 SRT/VTT/逐字稿，保存人工修订",
-      "evidence_document": "ai-creative-candidates.md"
+      "evidence_document": "ai-creative-candidates.md",
+      "implementation": {
+        "directory": "workbenches/60-faster-whisper",
+        "version": "0.4.0",
+        "record": "../release-0.4.0.md",
+        "upstream": "真实tiny.en CPU INT8英语转写，主仓库完整链路复验"
+      }
     },
     {
       "id": "AI21",
@@ -268,12 +298,18 @@
       "repository": "presenton/presenton",
       "url": "https://github.com/presenton/presenton",
       "category": "creative",
-      "status": "research-only",
+      "status": "local-verified",
       "selection": "first-batch",
       "proposed_workbench": "课件制作：逐页大纲、幻灯片舞台、资料引用",
       "requirements_and_license_summary": "外部 Docker/self-host API；Apache-2.0",
       "decision": "首批；Electron 版不提供外部 REST/MCP",
-      "evidence_document": "ai-creative-candidates.md"
+      "evidence_document": "ai-creative-candidates.md",
+      "implementation": {
+        "directory": "workbenches/61-presenton",
+        "version": "0.4.0",
+        "record": "../release-0.4.0.md",
+        "upstream": "本地编辑/导出与官方API合同；真实生成和上游文件递送未验证"
+      }
     },
     {
       "id": "AI22",
@@ -419,5 +455,5 @@
       "evidence_document": "ai-integration-components.md"
     }
   ],
-  "existing_catalog_entries": 55
+  "existing_catalog_entries": 61
 }
