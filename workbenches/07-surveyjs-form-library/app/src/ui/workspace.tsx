@@ -127,9 +127,18 @@ export function useProjects<T>(
         ),
       );
       setCurrent(result);
+      const { id, title: savedTitle, revision, updatedAt } = result;
+      setItems((previous) => [
+        { id, title: savedTitle, revision, updatedAt },
+        ...previous.filter((item) => item.id !== id),
+      ]);
       if (override !== undefined) setData(payload);
       setNotice("已保存");
-      await refresh();
+      try {
+        await refresh();
+      } catch {
+        setNotice("已保存，列表刷新暂不可用。");
+      }
       return result;
     } catch (error) {
       report(error);
