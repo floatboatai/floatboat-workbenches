@@ -21,23 +21,25 @@ export function WritingApp() {
     seed,
     validateWriting,
     "一份清晰的方案",
+    { storageKey: "tiptap" },
   );
   const [epoch, setEpoch] = useState(0),
     [assistant, setAssistant] = useState(false),
-    [prompt, setPrompt] = useState(""),
     [exporting, setExporting] = useState(false);
+  const prompt = typeof p.draft.prompt === "string" ? p.draft.prompt : "";
+  const setPrompt = (value: string) => p.setDraft(draft => ({...draft, prompt: value}));
   const file = useRef<HTMLInputElement>(null);
   const initial = useMemo(
     () => structuredClone(p.data.content),
-    [p.current?.id, epoch],
+    [p.loadEpoch, epoch],
   );
   const onChange = useCallback(
     (content: JSONContent) => p.setData({ content }),
     [p.setData],
   );
   const count = plainText(p.data.content).replace(/\s/g, "").length;
-  function fresh() {
-    if (p.fresh()) setEpoch((value) => value + 1);
+  async function fresh() {
+    await p.fresh();
   }
   async function exportHtml() {
     p.setError("");
@@ -62,9 +64,7 @@ export function WritingApp() {
     try {
       if (input.size > 900000) throw new Error("文件超过 900 KB。");
       const next = validateWriting(JSON.parse(await input.text()));
-      if (p.dirty && !confirm("使用导入的文档替换未保存内容吗？")) return;
-      p.setData(next);
-      setEpoch((value) => value + 1);
+      await p.replace(next, input.name.replace(/\.json$/i, "").slice(0, 120));
     } catch (error) {
       p.report(error);
     }
@@ -79,58 +79,78 @@ export function WritingApp() {
         <a className="wordmark" href="#writing-main" translate="no">
           文<span> / </span>写作台
         </a>
-        <div className="writing-projects">
-          <ProjectPicker
-            items={p.items}
-            id={p.current?.id}
-            disabled={p.busy}
-            onOpen={(id) => void p.open(id)}
-          />
-          <button onClick={fresh} disabled={p.busy}>
-            新建
-          </button>
-          <button
-            onClick={() => void p.remove()}
-            disabled={!p.current || p.busy}
-          >
-            删除
-          </button>
-        </div>
+        <details className="writing-projects file-menu">
+          <summary>文稿</summary>
+          <div className="menu-body">
+            <ProjectPicker
+              items={p.items}
+              id={p.current?.id}
+              disabled={p.busy}
+              onOpen={(id) => void p.open(id)}
+            />
+            <button onClick={() => void fresh()} disabled={p.busy}>
+              新建
+            </button>
+            <button
+              onClick={() => void p.remove()}
+              disabled={!p.current || p.busy}
+            >
+              删除
+            </button>
+          </div>
+        </details>
         <div className="writing-actions">
-          <button onClick={() => file.current?.click()} disabled={p.busy}>
-            导入
-          </button>
+          <span className="header-save-status" role="status" data-autosave-phase={p.autoState.phase}>
+            {p.autoState.message}
+          </span>
           <button
-            onClick={() =>
-              download(
-                new Blob([JSON.stringify(p.data, null, 2)], {
-                  type: "application/json",
-                }),
-                `${p.title}.json`,
-              )
-            }
+            className="assistant-toggle"
+            aria-expanded={assistant}
+            onClick={() => setAssistant((value) => !value)}
           >
-            JSON
+            写作助手
           </button>
-          <button onClick={() => void exportHtml()} disabled={exporting}>
-            HTML
-          </button>
-          <button
-            className="save-button"
-            disabled={p.busy}
-            onClick={() => void p.save()}
-          >
-            {p.busy ? "保存中…" : "保存文档"}
-          </button>
+          <details className="export-menu file-menu">
+            <summary>文件与导出</summary>
+            <div className="menu-body">
+              <button onClick={p.exportDraft}>导出恢复草稿</button>
+              {p.autoState.phase === "conflict" && p.current ? <button onClick={() => void p.open(p.current!.id)}>打开服务器版本</button> : null}
+              <button onClick={() => file.current?.click()} disabled={p.busy}>
+                导入
+              </button>
+              <button
+                onClick={() =>
+                  download(
+                    new Blob([JSON.stringify(p.data, null, 2)], {
+                      type: "application/json",
+                    }),
+                    `${p.title}.json`,
+                  )
+                }
+              >
+                JSON
+              </button>
+              <button onClick={() => void exportHtml()} disabled={exporting}>
+                HTML
+              </button>
+              <button
+                className="save-button"
+                disabled={p.busy}
+                onClick={() => void p.save()}
+              >
+                {p.busy ? "保存中…" : "立即保存"}
+              </button>
+            </div>
+          </details>
         </div>
       </header>
       <Notice error={p.error} notice={p.notice} />
       <div className="writing-layout">
         <section className="manuscript" id="writing-main" tabIndex={-1}>
           <div className="manuscript-top">
-            <span className="eyebrow">WORKING DRAFT</span>
+            <span className="eyebrow">正文</span>
             <span role="status">
-              {p.dirty ? "尚未保存" : "就绪"} ·{" "}
+              {p.autoState.message} ·{" "}
               {new Intl.NumberFormat("zh-CN").format(count)} 字符
             </span>
           </div>
@@ -138,6 +158,7 @@ export function WritingApp() {
             文档标题
           </label>
           <input
+            disabled={p.loading || p.busy}
             id="writing-title"
             name="documentTitle"
             autoComplete="off"
@@ -145,14 +166,20 @@ export function WritingApp() {
             maxLength={120}
             onChange={(event) => p.setTitle(event.target.value)}
           />
-          <p className="writing-subtitle">留出空间，让文字自己说话。</p>
-          <RenderBoundary key={`${p.current?.id}-${epoch}`}>
+
+          <RenderBoundary key={`${p.documentKey}-${epoch}`}>
             <Suspense fallback={<p role="status">正在准备编辑器…</p>}>
-              <RichEditor initial={initial} onChange={onChange} />
+              <RichEditor
+                initial={initial}
+                onChange={onChange}
+                disabled={p.loading || p.busy}
+              />
             </Suspense>
           </RenderBoundary>
           <footer className="manuscript-footer">
-            <span>文档在当前工作空间保存</span>
+            <span>
+              {new Intl.NumberFormat("zh-CN").format(count)} 字符 · 当前工作空间
+            </span>
             <button
               onClick={() => setAssistant((value) => !value)}
               aria-expanded={assistant}

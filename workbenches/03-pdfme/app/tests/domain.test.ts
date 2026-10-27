@@ -61,3 +61,14 @@ test("拒绝重复字段、外部PDF背景、远程字体和非有限尺寸", ()
   invalid.template.schemas[0][0].position.x = Infinity;
   assert.throws(() => validatePdf(invalid));
 });
+
+test("恢复未完成字段名及越界位置草稿，不放宽字体与原型保留名称", async () => {
+  const { restorePdfDraft } = await import("../src/contracts/domain.ts");
+  const draft = structuredClone(seed);
+  draft.template.schemas[0][0].name = "";
+  draft.template.schemas[0][0].position.x = -1;
+  assert.equal(restorePdfDraft(draft).template.schemas[0][0].name, "");
+  assert.throws(() => validatePdf(draft));
+  draft.template.schemas[0][0].name = "constructor";
+  assert.throws(() => restorePdfDraft(draft));
+});

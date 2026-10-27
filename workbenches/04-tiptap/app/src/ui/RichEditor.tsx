@@ -1,4 +1,4 @@
-import { memo, useRef } from "react";
+import { memo, useRef, useEffect } from "react";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import type { JSONContent } from "@tiptap/core";
@@ -11,9 +11,11 @@ const extensions = [
 export const RichEditor = memo(function RichEditor({
   initial,
   onChange,
+  disabled = false,
 }: {
   initial: JSONContent;
   onChange: (content: JSONContent) => void;
+  disabled?: boolean;
 }) {
   const callback = useRef(onChange);
   callback.current = onChange;
@@ -35,6 +37,9 @@ export const RichEditor = memo(function RichEditor({
     },
     [initial],
   );
+  useEffect(() => {
+    editor?.setEditable(!disabled);
+  }, [editor, disabled]);
   const state = useEditorState({
     editor,
     selector: ({ editor }) =>
@@ -57,7 +62,7 @@ export const RichEditor = memo(function RichEditor({
           type="button"
           aria-label="加粗"
           aria-pressed={state?.bold ?? false}
-          disabled={!editor}
+          disabled={disabled || !editor}
           onClick={() => editor?.chain().focus().toggleBold().run()}
         >
           <strong>B</strong>
@@ -66,7 +71,7 @@ export const RichEditor = memo(function RichEditor({
           type="button"
           aria-label="斜体"
           aria-pressed={state?.italic ?? false}
-          disabled={!editor}
+          disabled={disabled || !editor}
           onClick={() => editor?.chain().focus().toggleItalic().run()}
         >
           <em>I</em>
@@ -75,7 +80,7 @@ export const RichEditor = memo(function RichEditor({
         <button
           type="button"
           aria-pressed={state?.heading ?? false}
-          disabled={!editor}
+          disabled={disabled || !editor}
           onClick={() =>
             editor?.chain().focus().toggleHeading({ level: 2 }).run()
           }
@@ -85,7 +90,7 @@ export const RichEditor = memo(function RichEditor({
         <button
           type="button"
           aria-pressed={state?.list ?? false}
-          disabled={!editor}
+          disabled={disabled || !editor}
           onClick={() => editor?.chain().focus().toggleBulletList().run()}
         >
           列表
@@ -93,7 +98,7 @@ export const RichEditor = memo(function RichEditor({
         <button
           type="button"
           aria-pressed={state?.quote ?? false}
-          disabled={!editor}
+          disabled={disabled || !editor}
           onClick={() => editor?.chain().focus().toggleBlockquote().run()}
         >
           引用
@@ -102,7 +107,7 @@ export const RichEditor = memo(function RichEditor({
         <button
           type="button"
           aria-label="撤销"
-          disabled={!state?.canUndo}
+          disabled={disabled || !state?.canUndo}
           onClick={() => editor?.chain().focus().undo().run()}
         >
           ↶
@@ -110,7 +115,7 @@ export const RichEditor = memo(function RichEditor({
         <button
           type="button"
           aria-label="重做"
-          disabled={!state?.canRedo}
+          disabled={disabled || !state?.canRedo}
           onClick={() => editor?.chain().focus().redo().run()}
         >
           ↷

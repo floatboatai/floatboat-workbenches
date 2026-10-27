@@ -4,8 +4,12 @@
 
 在总仓库执行 `pnpm workbench prepare pdfme`，进入本目录执行 `pnpm workbench:check`、`pnpm test`、`pnpm dev`、`pnpm package`。在 Floatboat → My → Workbenches → Import workbench 导入生成包，默认不包含预览数据。
 
-2026-10-27 验收：严格模板构建与 6 项测试通过；Chrome 1500px/375px 中文填值与保存刷新恢复；Designer 的 customer X 坐标从 22 改为 28，填写→设计往返及保存刷新后仍为 28；148×210 mm 双页 JSON 导入、按真实尺寸和选定页预览。下载 PDF 解析确认 2 页、中文可提取，栅格图检查正常。 浏览器无页面异常、CSP 拒绝或失败资源。PDF 主流程无需模型或外部服务。 打包文件导入客户端的安装流程尚未验收。
+2026-10-27 验收：严格模板构建与 8 项测试通过；Chrome 1500px/375px 中文填值与保存刷新恢复；Designer 的 customer X 坐标从 22 改为 28，填写→设计往返及保存刷新后仍为 28；148×210 mm 双页 JSON 导入、按真实尺寸和选定页预览。下载 PDF 解析确认 2 页、中文可提取，栅格图检查正常。 浏览器无页面异常、CSP 拒绝或失败资源。PDF 主流程无需模型或外部服务。 打包文件导入客户端的安装流程尚未验收。
 
 边界：空白纸张 50–500 × 50–700 mm；1–10 页、80 个唯一命名字段，每个内容 5000 字符；1–20 份相同内容副本。只支持 text/rectangle，不支持任意 PDF 原文编辑、图片或 CSV 逐行映射。
 
 [上游](https://github.com/pdfme/pdfme)；@pdfme/{ui,common,schemas,generator,converter,pdf-lib} 六包精确 5.4.6，root/app 两套清单与锁一致。来源见 [NOTICE.md](NOTICE.md)，设计与实现见 app/DESIGN.md、app/ENGINEERING.md。
+
+自动保存：停止输入约 700 ms 后保存，后台请求不锁编辑。未完成字段名及尺寸可在刷新后恢复；不合法的业务输入显示“草稿已自动保存，待完善输入”，不会覆盖最后的合法内容。网络失败时保留本机副本，版本冲突提供恢复草稿导出与服务器版本入口。导入先验证，再创建独立项目。
+
+当前布局：灰色排版台、页面缩略图与当前页字段栏；375px、暗色与减少动画偏好保持可用。

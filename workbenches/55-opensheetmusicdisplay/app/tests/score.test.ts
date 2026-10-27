@@ -214,3 +214,33 @@ test("报告包含原件哈希与小节锚点，不把压缩包原文误当报�
   assert.equal(report.annotations[0].partName, "Flute");
   assert.equal("originalBase64" in report.source, false);
 });
+
+test("恢复未完成的空白批注草稿，但不放宽XML安全或锚点", async () => {
+  const { restoreScoreDraft } = await import("../src/contracts/domain.ts");
+  const draft = {
+    ...seed,
+    annotations: [
+      {
+        id: "draft-note",
+        partId: "P1",
+        measureIndex: 0,
+        text: "",
+        resolved: false,
+      },
+    ],
+  };
+  assert.equal(restoreScoreDraft(draft).annotations[0].text, "");
+  assert.throws(() => validateScore(draft));
+  assert.throws(() =>
+    restoreScoreDraft({
+      ...draft,
+      annotations: [{ ...draft.annotations[0], partId: "absent" }],
+    }),
+  );
+  assert.throws(() =>
+    restoreScoreDraft({
+      ...draft,
+      source: { ...draft.source, xml: "<!DOCTYPE evil><score-partwise/>" },
+    }),
+  );
+});

@@ -3,6 +3,7 @@ import type { Template } from "@pdfme/common";
 import {
   seed,
   validatePdf,
+  restorePdfDraft,
   pdfInput,
   type PdfProject,
 } from "../contracts/domain";
@@ -19,21 +20,23 @@ const DesignerPane = lazy(() =>
   import("./DesignerPane").then((module) => ({ default: module.DesignerPane })),
 );
 export function PdfApp() {
-  const p = useProjects<PdfProject>(seed, validatePdf, "项目报价单");
-  const [mode, setMode] = useState<"fill" | "design">("fill"),
+  const p = useProjects<PdfProject>(seed, validatePdf, "项目报价单", {storageKey: "pdfme", restoreDraftData: restorePdfDraft});
+  const [mode, setMode] = useState<"fill" | "design">(() =>
+      window.innerWidth < 600 ? "fill" : "design",
+    ),
     [exporting, setExporting] = useState(false),
-    [epoch, setEpoch] = useState(0),
-    [copies, setCopies] = useState(1),
     [previewPage, setPreviewPage] = useState(0);
+  const copies = typeof p.draft.copies === "number" && Number.isInteger(p.draft.copies) && p.draft.copies >= 1 && p.draft.copies <= 20 ? p.draft.copies : 1;
+  const setCopies = (value: number) => p.setDraft(draft => ({ ...draft, copies: value }));
   const file = useRef<HTMLInputElement>(null);
   const snapshot = useMemo(
     () => structuredClone(p.data.template),
-    [p.current?.id, epoch, mode],
+    [p.loadEpoch, mode],
   );
   const onChange = useCallback(
     (template: Template) => {
       try {
-        const checked = validatePdf({ template, values: {} }).template;
+        const checked = restorePdfDraft({ template, values: {} }).template;
         p.setData((data) => ({ ...data, template: checked }));
       } catch (error) {
         p.report(error);
@@ -50,8 +53,8 @@ export function PdfApp() {
       ? base
       : { width: 210, height: 297 };
   const pageIndex = Math.min(previewPage, p.data.template.schemas.length - 1);
-  function fresh() {
-    if (p.fresh()) setEpoch((value) => value + 1);
+  async function fresh() {
+    if (await p.fresh()) setPreviewPage(0);
   }
   async function exportPdf() {
     setExporting(true);
@@ -83,9 +86,7 @@ export function PdfApp() {
     try {
       if (input.size > 900000) throw new Error("模板文件超过 900 KB。");
       const next = validatePdf(JSON.parse(await input.text()));
-      if (p.dirty && !confirm("导入会替换当前未保存内容，是否继续？")) return;
-      p.setData(next);
-      setEpoch((value) => value + 1);
+      if (await p.replace(next, input.name.replace(/\.json$/i, "").slice(0, 120))) setPreviewPage(0);
     } catch (error) {
       p.report(error);
     }
@@ -97,34 +98,15 @@ export function PdfApp() {
       </a>
       <header className="paper-header">
         <div className="paper-brand">
-          <span aria-hidden="true">P</span>
+          <span aria-hidden="true">PDF</span>
           <div>
-            <p>DOCUMENT STUDIO</p>
-            <h1>纸张工坊</h1>
+            <h1>版式编辑器</h1>
           </div>
         </div>
-        <div className="project-controls">
-          <ProjectPicker
-            items={p.items}
-            id={p.current?.id}
-            disabled={p.busy || exporting}
-            onOpen={(id) => void p.open(id)}
-          />
-          <button onClick={fresh} disabled={p.busy}>
-            新建模板
-          </button>
-          <button
-            onClick={() => void p.remove()}
-            disabled={!p.current || p.busy}
-          >
-            删除
-          </button>
-        </div>
-      </header>
-      <section className="document-bar">
         <label>
           <span className="sr-only">模板名称</span>
           <input
+            disabled={p.loading || p.busy}
             aria-label="模板名称"
             name="templateTitle"
             autoComplete="off"
@@ -133,12 +115,86 @@ export function PdfApp() {
             onChange={(event) => p.setTitle(event.target.value)}
           />
         </label>
-        <span className="save-state" role="status">
-          {p.busy ? "保存中…" : p.dirty ? "有未保存修改" : "内容已就绪"}
+        <span className="save-state" role="status" data-autosave-phase={p.autoState.phase}>
+          {p.autoState.message}
         </span>
+        <details className="project-controls">
+          <summary>文件</summary>
+          <div className="project-menu">
+            <button onClick={p.exportDraft}>导出恢复草稿</button>
+            {p.autoState.phase === "conflict" && p.current ? <button onClick={() => void p.open(p.current!.id)}>打开服务器版本</button> : null}
+            <ProjectPicker
+              items={p.items}
+              id={p.current?.id}
+              disabled={p.busy || exporting}
+              onOpen={(id) => void p.open(id)}
+            />
+            <button onClick={() => void fresh()} disabled={p.busy}>
+              新建模板
+            </button>
+            <button
+              onClick={() => void p.remove()}
+              disabled={!p.current || p.busy}
+            >
+              删除
+            </button>
+          </div>
+        </details>
+      </header>
+      <section className="document-bar">
+        <div className="mode-bar">
+          <div
+            role="tablist"
+            aria-label="工作模式"
+            onKeyDown={(event) => {
+              if (
+                !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
+              )
+                return;
+              event.preventDefault();
+              const next =
+                event.key === "Home"
+                  ? "fill"
+                  : event.key === "End"
+                    ? "design"
+                    : mode === "fill"
+                      ? "design"
+                      : "fill";
+              setMode(next);
+              event.currentTarget
+                .querySelectorAll("button")
+                [next === "fill" ? 0 : 1]?.focus();
+            }}
+          >
+            <button
+              role="tab"
+              id="fill-tab"
+              aria-controls="paper-main"
+              tabIndex={mode === "fill" ? 0 : -1}
+              aria-selected={mode === "fill"}
+              onClick={() => setMode("fill")}
+            >
+              填写字段
+            </button>
+            <button
+              role="tab"
+              id="design-tab"
+              aria-controls="paper-main"
+              tabIndex={mode === "design" ? 0 : -1}
+              aria-selected={mode === "design"}
+              onClick={() => setMode("design")}
+            >
+              设计版式
+            </button>
+          </div>
+          <p>
+            {p.data.template.schemas.length} 页模板 · {fields.length}{" "}
+            个可填写字段
+          </p>
+        </div>
         <div className="document-actions">
           <button onClick={() => void p.save()} disabled={p.busy || exporting}>
-            保存模板
+            立即保存
           </button>
           <button onClick={() => file.current?.click()} disabled={p.busy}>
             导入 JSON
@@ -165,61 +221,15 @@ export function PdfApp() {
         </div>
       </section>
       <Notice error={p.error} notice={p.notice} />
-      <div className="mode-bar">
-        <div
-          role="tablist"
-          aria-label="工作模式"
-          onKeyDown={(event) => {
-            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
-              return;
-            event.preventDefault();
-            const next =
-              event.key === "Home"
-                ? "fill"
-                : event.key === "End"
-                  ? "design"
-                  : mode === "fill"
-                    ? "design"
-                    : "fill";
-            setMode(next);
-            event.currentTarget
-              .querySelectorAll("button")
-              [next === "fill" ? 0 : 1]?.focus();
-          }}
-        >
-          <button
-            role="tab"
-            id="fill-tab"
-            aria-controls="paper-main"
-            tabIndex={mode === "fill" ? 0 : -1}
-            aria-selected={mode === "fill"}
-            onClick={() => setMode("fill")}
-          >
-            填写字段
-          </button>
-          <button
-            role="tab"
-            id="design-tab"
-            aria-controls="paper-main"
-            tabIndex={mode === "design" ? 0 : -1}
-            aria-selected={mode === "design"}
-            onClick={() => setMode("design")}
-          >
-            设计版式
-          </button>
-        </div>
-        <p>
-          {p.data.template.schemas.length} 页模板 · {fields.length} 个可填写字段
-        </p>
-      </div>
       <section
+        inert={p.loading || p.busy}
         id="paper-main"
         role="tabpanel"
         aria-labelledby={mode === "fill" ? "fill-tab" : "design-tab"}
         tabIndex={-1}
       >
         {mode === "design" ? (
-          <RenderBoundary key={`${p.current?.id}-${epoch}`}>
+          <RenderBoundary key={p.documentKey}>
             <Suspense
               fallback={<p className="engine-state">正在加载设计器…</p>}
             >
@@ -228,34 +238,65 @@ export function PdfApp() {
           </RenderBoundary>
         ) : (
           <div className="fill-layout">
+            <nav className="page-rail" aria-label="模板页面">
+              <h2>页面</h2>
+              {p.data.template.schemas.map((page, index) => (
+                <button
+                  key={index}
+                  aria-label={`显示第 ${index + 1} 页`}
+                  aria-current={pageIndex === index ? "page" : undefined}
+                  onClick={() => setPreviewPage(index)}
+                >
+                  <span
+                    className="mini-page"
+                    style={{ aspectRatio: `${size.width}/${size.height}` }}
+                  >
+                    {page.map((field) => (
+                      <i
+                        key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`}
+                        style={{
+                          left: `${(field.position.x / size.width) * 100}%`,
+                          top: `${(field.position.y / size.height) * 100}%`,
+                          width: `${(field.width / size.width) * 100}%`,
+                          height: `${Math.max(1, (field.height / size.height) * 100)}%`,
+                        }}
+                      />
+                    ))}
+                  </span>
+                  <strong>{index + 1}</strong>
+                </button>
+              ))}
+            </nav>
             <aside className="field-panel">
-              <p className="eyebrow">填写一次，保持版式</p>
-              <h2>内容与数据</h2>
+              <p className="eyebrow">第 {pageIndex + 1} 页</p>
+              <h2>数据字段</h2>
               <p className="hint">
                 修改字段内容，或切换到设计版式调整位置与样式。
               </p>
-              {fields.map((field) => (
-                <label key={field.name} className="field">
-                  <span>{field.name}</span>
-                  <textarea
-                    aria-label={`字段 ${field.name}`}
-                    name={field.name}
-                    autoComplete="off"
-                    rows={2}
-                    value={p.data.values[field.name] ?? field.content ?? ""}
-                    maxLength={5000}
-                    onChange={(event) =>
-                      p.setData((data) => ({
-                        ...data,
-                        values: {
-                          ...data.values,
-                          [field.name]: event.target.value,
-                        },
-                      }))
-                    }
-                  />
-                </label>
-              ))}
+              {p.data.template.schemas[pageIndex]
+                .filter((field) => field.type === "text" && !field.readOnly)
+                .map((field) => (
+                  <label key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`} className="field">
+                    <span>{field.name}</span>
+                    <textarea
+                      aria-label={`字段 ${field.name}`}
+                      name={field.name}
+                      autoComplete="off"
+                      rows={2}
+                      value={p.data.values[field.name] ?? field.content ?? ""}
+                      maxLength={5000}
+                      onChange={(event) =>
+                        p.setData((data) => ({
+                          ...data,
+                          values: {
+                            ...data.values,
+                            [field.name]: event.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                ))}
               <label className="copy-count">
                 <span>生成份数</span>
                 <input
@@ -306,7 +347,7 @@ export function PdfApp() {
                 {p.data.template.schemas[pageIndex].map((field) =>
                   field.type === "text" ? (
                     <div
-                      key={field.name}
+                      key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`}
                       className="preview-text"
                       style={{
                         left: `${(field.position.x / size.width) * 100}%`,
@@ -336,7 +377,7 @@ export function PdfApp() {
                     </div>
                   ) : (
                     <div
-                      key={field.name}
+                      key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`}
                       className="preview-rule"
                       style={{
                         left: `${(field.position.x / size.width) * 100}%`,

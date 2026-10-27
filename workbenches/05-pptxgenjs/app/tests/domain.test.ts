@@ -29,3 +29,19 @@ test("拒绝重复ID、空文稿、过多条目和超宽正文", () => {
   );
   assert.throws(() => validateDeck({ ...seed, theme: "unknown" }));
 });
+
+test("未完成标题与过长要点作为草稿恢复，仍禁止非法页面标识", async () => {
+  const { restoreDeckDraft } = await import("../src/contracts/domain.ts");
+  const draft = {
+    ...seed,
+    slides: [{ ...seed.slides[0], title: "", body: "字".repeat(36) }],
+  };
+  assert.equal(restoreDeckDraft(draft).slides[0].title, "");
+  assert.throws(() => validateDeck(draft));
+  assert.throws(() =>
+    restoreDeckDraft({
+      ...draft,
+      slides: [{ ...draft.slides[0], id: "bad/id" }],
+    }),
+  );
+});

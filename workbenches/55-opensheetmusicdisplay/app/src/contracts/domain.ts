@@ -41,6 +41,12 @@ export function originalBytes(source: SourceFile): Uint8Array {
   return Uint8Array.from(text, (c) => c.charCodeAt(0));
 }
 export function validateScore(value: unknown): ScoreProject {
+  return parseScore(value, false);
+}
+export function restoreScoreDraft(value: unknown): ScoreProject {
+  return parseScore(value, true);
+}
+function parseScore(value: unknown, draft: boolean): ScoreProject {
   if (!isRecord(value) || !isRecord(value.source))
     throw new Error("项目需要乐谱原文件。");
   const input = value.source;
@@ -114,7 +120,7 @@ export function validateScore(value: unknown): ScoreProject {
     )
       throw new Error("批注的小节或声部不存在。");
     const text = boundedText(item.text, 1000);
-    if (!text.trim()) throw new Error("批注不能为空。");
+    if (!draft && !text.trim()) throw new Error("批注不能为空。");
     return {
       id: item.id,
       partId: item.partId,

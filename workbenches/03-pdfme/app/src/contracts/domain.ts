@@ -18,6 +18,12 @@ export function pdfInput(document: PdfProject): Record<string, string> {
 const finite = (v: unknown, min: number, max: number) =>
   typeof v === "number" && Number.isFinite(v) && v >= min && v <= max;
 export function validatePdf(value: unknown): PdfProject {
+  return parsePdf(value, false);
+}
+export function restorePdfDraft(value: unknown): PdfProject {
+  return parsePdf(value, true);
+}
+function parsePdf(value: unknown, draft: boolean): PdfProject {
   if (
     !isRecord(value) ||
     !isRecord(value.template) ||
@@ -46,18 +52,18 @@ export function validatePdf(value: unknown): PdfProject {
       if (
         !isRecord(field) ||
         typeof field.name !== "string" ||
-        !field.name.trim() ||
+        (!draft && !field.name.trim()) ||
         field.name.length > 80 ||
         field.name in Object.prototype ||
         !["text", "rectangle"].includes(String(field.type)) ||
         !isRecord(field.position) ||
-        !finite(field.position.x, 0, 500) ||
-        !finite(field.position.y, 0, 700) ||
-        !finite(field.width, 0.1, 500) ||
-        !finite(field.height, 0.1, 700)
+        !finite(field.position.x, draft ? -500 : 0, 500) ||
+        !finite(field.position.y, draft ? -700 : 0, 700) ||
+        !finite(field.width, draft ? 0 : 0.1, 500) ||
+        !finite(field.height, draft ? 0 : 0.1, 700)
       )
         throw new Error("字段名称、类型或尺寸无效。");
-      if (keys.has(field.name)) throw new Error("字段名称不能重复。");
+      if (!draft && keys.has(field.name)) throw new Error("字段名称不能重复。");
       keys.add(field.name);
       if (field.content !== undefined) boundedText(field.content, 5000);
       if (

@@ -9,3 +9,9 @@ contracts/domain 验证节点父子语法、深度、文本总量、标记及 UR
 contracts/domain 验证外部 JSON；server/store 用参数化 SQLite 和 revision 乐观并发，409 保留当前内容。ui/workspace 通过 SDK page.fetch 调 /api/projects，Node/SQL/Host 仅在服务端。测试使用内存数据库，不接触预览数据。数据、凭据、SDK 和生成输出不提交源码。
 
 验证顺序：pnpm workbench:check → pnpm test → pnpm dev 实际浏览器 → pnpm package。Chrome 1440px/375px 输入并加粗→保存刷新恢复→JSON/HTML 导出，导出的 HTML 包含真实 strong 标记。危险链接、非法节点语法、空项目与数据库冲突测试通过。 真实 Floatboat llm.generateText 成功返回中文草稿并停留在预览区，未自动覆盖正文。另明确注入 HTTP 503 验证失败时要求和正文保留；注入结果不作为真实模型成功证据。
+
+## 自动保存与工作草稿
+
+新增 0003_autosave.sql，旧迁移保持不变。autosave-server 在事务中保存完整工作副本，并仅将通过业务验证的内容写入 projects；documentId/mutationId 支持丢失响应后的幂等重试。客户端串行提交、防抖、IndexedDB 回退，documentKey/loadEpoch 仅在文档切换时更新。保存返回时不覆盖期间继续输入的内容。草稿状态与正式内容状态明确区分。
+
+未完成业务输入由结构受限的恢复器处理；正文或设计器初始快照不依赖自动保存生成的项目 ID。

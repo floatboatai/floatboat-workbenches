@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import {
   seed,
   validateDeck,
+  restoreDeckDraft,
   moveSlide,
   type Deck,
   type Slide,
@@ -9,11 +10,12 @@ import {
 import { download, Notice, ProjectPicker, useProjects } from "./workspace";
 import { colors } from "./export-deck";
 export function DeckApp() {
-  const p = useProjects<Deck>(seed, validateDeck, "季度行动计划");
+  const p = useProjects<Deck>(seed, validateDeck, "季度行动计划", {storageKey: "pptxgenjs", restoreDraftData: restoreDeckDraft});
   const [selected, setSelected] = useState(0),
     [exporting, setExporting] = useState(false),
-    [assistant, setAssistant] = useState(false),
-    [prompt, setPrompt] = useState("");
+    [assistant, setAssistant] = useState(false);
+  const prompt = typeof p.draft.prompt === "string" ? p.draft.prompt : "";
+  const setPrompt = (value: string) => p.setDraft(draft => ({...draft, prompt: value}));
   const file = useRef<HTMLInputElement>(null);
   const index = Math.min(selected, p.data.slides.length - 1),
     slide = p.data.slides[index],
@@ -83,9 +85,7 @@ export function DeckApp() {
     try {
       if (input.size > 900000) throw new Error("文件超过 900 KB。");
       const next = validateDeck(JSON.parse(await input.text()));
-      if (p.dirty && !confirm("使用导入的文稿替换未保存内容吗？")) return;
-      p.setData(next);
-      setSelected(0);
+      if (await p.replace(next, input.name.replace(/\.json$/i, "").slice(0, 120))) setSelected(0);
     } catch (error) {
       p.report(error);
     }
@@ -109,14 +109,13 @@ export function DeckApp() {
             id={p.current?.id}
             disabled={p.busy || exporting}
             onOpen={(id) => {
-              setSelected(0);
-              void p.open(id);
+              void p.open(id).then(opened => { if (opened) setSelected(0); });
             }}
           />
           <button
             disabled={p.busy}
             onClick={() => {
-              if (p.fresh()) setSelected(0);
+              void p.fresh().then(opened => { if (opened) setSelected(0); });
             }}
           >
             新建
@@ -138,6 +137,7 @@ export function DeckApp() {
       </header>
       <div className="deck-document">
         <input
+          disabled={p.loading || p.busy}
           aria-label="文稿名称"
           name="deckTitle"
           autoComplete="off"
@@ -145,12 +145,12 @@ export function DeckApp() {
           maxLength={120}
           onChange={(event) => p.setTitle(event.target.value)}
         />
-        <span role="status">
-          {p.dirty ? "未保存" : "就绪"} · {p.data.slides.length} 页
+        <span role="status" data-autosave-phase={p.autoState.phase}>
+          {p.autoState.message} · {p.data.slides.length} 页
         </span>
         <div>
           <button onClick={() => void p.save()} disabled={p.busy}>
-            {p.busy ? "保存中…" : "保存文稿"}
+            {p.busy ? "保存中…" : "立即保存"}
           </button>
           <button onClick={() => file.current?.click()}>导入 JSON</button>
           <button
@@ -174,8 +174,18 @@ export function DeckApp() {
         </div>
       </div>
       <Notice error={p.error} notice={p.notice} />
+      {["offline", "conflict", "draft"].includes(p.autoState.phase) ? <div className="recovery-actions"><button onClick={p.exportDraft}>导出恢复草稿</button>{p.autoState.phase === "conflict" && p.current ? <button onClick={() => void p.open(p.current!.id)}>打开服务器版本</button> : null}</div> : null}
       {assistant ? (
         <section className="deck-ai">
+          <header>
+            <h2>大纲助手</h2>
+            <button
+              aria-label="关闭大纲助手"
+              onClick={() => setAssistant(false)}
+            >
+              ×
+            </button>
+          </header>
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -203,7 +213,17 @@ export function DeckApp() {
               <ol>
                 {p.suggestion.slides.map((item) => (
                   <li key={item.id}>
-                    <strong>{item.title}</strong>
+                    <div
+                      className="mini-slide"
+                      style={{
+                        background: "#" + palette.background,
+                        color: "#" + palette.foreground,
+                      }}
+                    >
+                      <small>{item.kicker}</small>
+                      <strong>{item.title}</strong>
+                      <p>{item.body.split("\n").slice(0, 2).join(" / ")}</p>
+                    </div>
                     <p>{item.body}</p>
                   </li>
                 ))}
@@ -223,137 +243,153 @@ export function DeckApp() {
           ) : null}
         </section>
       ) : null}
-      <nav className="filmstrip" aria-label="页面缩略图">
-        {p.data.slides.map((item, i) => (
-          <button
-            key={item.id}
-            className={i === index ? "active" : ""}
-            aria-current={i === index ? "page" : undefined}
-            onClick={() => setSelected(i)}
-          >
-            <span>{String(i + 1).padStart(2, "0")}</span>
-            <strong>{item.title}</strong>
-          </button>
-        ))}
-        <button className="add-slide" onClick={add}>
-          ＋<span>添加页面</span>
-        </button>
-      </nav>
-      <section className="stage-area" id="deck-stage" tabIndex={-1}>
-        <div className="stage-top">
-          <span>
-            第 {index + 1} 页 / 共 {p.data.slides.length} 页
-          </span>
-          <label>
-            主题{" "}
-            <select
-              aria-label="演示主题"
-              value={p.data.theme}
-              onChange={(event) =>
-                p.setData((deck) => ({
-                  ...deck,
-                  theme: event.target.value as Deck["theme"],
-                }))
-              }
-            >
-              <option value="ember">暖橙 · 深夜</option>
-              <option value="ink">蓝墨 · 清晨</option>
-              <option value="paper">米白 · 纸张</option>
-            </select>
-          </label>
-          <div>
-            <button disabled={index === 0} onClick={() => reorder(-1)}>
-              前移
-            </button>
+      <div className="deck-workspace" inert={p.loading || p.busy}>
+        <nav className="filmstrip" aria-label="页面缩略图">
+          {p.data.slides.map((item, i) => (
             <button
-              disabled={index === p.data.slides.length - 1}
-              onClick={() => reorder(1)}
+              key={item.id}
+              className={i === index ? "active" : ""}
+              aria-current={i === index ? "page" : undefined}
+              onClick={() => setSelected(i)}
             >
-              后移
+              <span>{String(i + 1).padStart(2, "0")}</span>
+              <div
+                className="mini-slide"
+                style={{
+                  background: "#" + palette.background,
+                  color: "#" + palette.foreground,
+                }}
+              >
+                <small>{item.kicker}</small>
+                <strong>{item.title}</strong>
+                <p>{item.body.split("\n").slice(0, 2).join(" / ")}</p>
+              </div>
             </button>
-            <button onClick={remove}>删除页面</button>
+          ))}
+          <button className="add-slide" onClick={add}>
+            ＋<span>添加页面</span>
+          </button>
+        </nav>
+        <section className="stage-area" id="deck-stage" tabIndex={-1}>
+          <div className="stage-top">
+            <span>
+              第 {index + 1} 页 / 共 {p.data.slides.length} 页
+            </span>
+            <label>
+              主题{" "}
+              <select
+                aria-label="演示主题"
+                value={p.data.theme}
+                onChange={(event) =>
+                  p.setData((deck) => ({
+                    ...deck,
+                    theme: event.target.value as Deck["theme"],
+                  }))
+                }
+              >
+                <option value="ember">暖橙 · 深夜</option>
+                <option value="ink">蓝墨 · 清晨</option>
+                <option value="paper">米白 · 纸张</option>
+              </select>
+            </label>
+            <div>
+              <button disabled={index === 0} onClick={() => reorder(-1)}>
+                前移
+              </button>
+              <button
+                disabled={index === p.data.slides.length - 1}
+                onClick={() => reorder(1)}
+              >
+                后移
+              </button>
+              <button onClick={remove}>删除页面</button>
+            </div>
           </div>
-        </div>
-        <div
-          className="slide-stage"
-          style={{
-            background: `#${palette.background}`,
-            color: `#${palette.foreground}`,
-          }}
-        >
-          <p className="slide-kicker" style={{ color: `#${palette.accent}` }}>
-            {slide.kicker}
-          </p>
-          <h2>{slide.title}</h2>
           <div
-            className="slide-rule"
-            style={{ background: `#${palette.accent}` }}
-          />
-          <ul style={{ color: `#${palette.muted}` }}>
-            {slide.body
-              .split("\n")
-              .filter((line) => line.trim())
-              .map((line, i) => (
-                <li key={i}>{line}</li>
-              ))}
-          </ul>
-          <span className="slide-number">
-            {String(index + 1).padStart(2, "0")}
-          </span>
-        </div>
-        <p className="preview-hint">
-          舞台用于内容编排，最终字体与排版以演示软件打开的 PPTX 为准。
-        </p>
-      </section>
-      <section className="slide-fields" aria-label="当前页面内容">
-        <label>
-          页眉
-          <input
-            aria-label="页面页眉"
-            name="slideKicker"
-            autoComplete="off"
-            maxLength={60}
-            value={slide.kicker}
-            onChange={(event) => update("kicker", event.target.value)}
-          />
-        </label>
-        <label>
-          标题
-          <input
-            aria-label="页面标题"
-            name="slideTitle"
-            autoComplete="off"
-            maxLength={80}
-            value={slide.title}
-            onChange={(event) => update("title", event.target.value)}
-          />
-        </label>
-        <label className="body-field">
-          要点
-          <textarea
-            aria-label="页面要点"
-            name="slideBody"
-            autoComplete="off"
-            maxLength={1000}
-            rows={5}
-            value={slide.body}
-            onChange={(event) => update("body", event.target.value)}
-          />
-          <small>每行一个要点，最多 7 行，每行约 35 个汉字。</small>
-        </label>
-        <label className="notes-field">
-          演讲备注
-          <textarea
-            aria-label="演讲备注"
-            name="slideNotes"
-            autoComplete="off"
-            maxLength={4000}
-            rows={5}
-            value={slide.notes}
-            onChange={(event) => update("notes", event.target.value)}
-          />
-        </label>
-      </section>
+            className="slide-stage"
+            style={{
+              background: `#${palette.background}`,
+              color: `#${palette.foreground}`,
+            }}
+          >
+            <p className="slide-kicker" style={{ color: `#${palette.accent}` }}>
+              {slide.kicker}
+            </p>
+            <h2>{slide.title}</h2>
+            <div
+              className="slide-rule"
+              style={{ background: `#${palette.accent}` }}
+            />
+            <ul style={{ color: `#${palette.muted}` }}>
+              {slide.body
+                .split("\n")
+                .filter((line) => line.trim())
+                .map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+            </ul>
+            <span className="slide-number">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+          </div>
+          <p className="preview-hint">
+            舞台用于内容编排，最终字体与排版以演示软件打开的 PPTX 为准。
+          </p>
+          <section className="speaker-notes" aria-label="演讲备注编辑区">
+            {" "}
+            <label className="notes-field">
+              演讲备注
+              <textarea
+                aria-label="演讲备注"
+                name="slideNotes"
+                autoComplete="off"
+                maxLength={4000}
+                rows={5}
+                value={slide.notes}
+                onChange={(event) => update("notes", event.target.value)}
+              />
+            </label>
+          </section>
+        </section>
+        <section className="slide-fields" aria-label="当前页面内容">
+          <h2>页面内容</h2>
+          <label>
+            页眉
+            <input
+              aria-label="页面页眉"
+              name="slideKicker"
+              autoComplete="off"
+              maxLength={60}
+              value={slide.kicker}
+              onChange={(event) => update("kicker", event.target.value)}
+            />
+          </label>
+          <label>
+            标题
+            <input
+              aria-label="页面标题"
+              name="slideTitle"
+              autoComplete="off"
+              maxLength={80}
+              value={slide.title}
+              onChange={(event) => update("title", event.target.value)}
+            />
+          </label>
+          <label className="body-field">
+            要点
+            <textarea
+              aria-label="页面要点"
+              name="slideBody"
+              autoComplete="off"
+              maxLength={1000}
+              rows={5}
+              value={slide.body}
+              onChange={(event) => update("body", event.target.value)}
+            />
+            <small>每行一个要点，最多 7 行，每行约 35 个汉字。</small>
+          </label>
+        </section>
+      </div>
       <input
         className="sr-only"
         type="file"

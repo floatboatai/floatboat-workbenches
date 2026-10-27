@@ -11,6 +11,12 @@ export interface Deck {
   theme: "ember" | "ink" | "paper";
 }
 export function validateDeck(value: unknown): Deck {
+  return parseDeck(value, false);
+}
+export function restoreDeckDraft(value: unknown): Deck {
+  return parseDeck(value, true);
+}
+function parseDeck(value: unknown, draft: boolean): Deck {
   if (
     !isRecord(value) ||
     !Array.isArray(value.slides) ||
@@ -29,21 +35,23 @@ export function validateDeck(value: unknown): Deck {
     )
       throw new Error("页面标识无效或重复。");
     ids.add(item.id);
-    const title = boundedText(item.title, 80).trim(),
+    const rawTitle = boundedText(item.title, 80),
+      title = draft ? rawTitle : rawTitle.trim(),
       kicker = boundedText(item.kicker, 60),
       body = boundedText(item.body, 1000),
       notes = boundedText(item.notes, 4000);
-    if (!title) throw new Error(`第 ${index + 1} 页需要标题。`);
+    if (!draft && !title) throw new Error(`第 ${index + 1} 页需要标题。`);
     const lines = body.split("\n").filter((line) => line.trim());
     if (
-      lines.length > 7 ||
-      lines.some(
-        (line) =>
-          [...line].reduce(
-            (n, char) => n + (char.charCodeAt(0) > 255 ? 2 : 1),
-            0,
-          ) > 70,
-      )
+      !draft &&
+      (lines.length > 7 ||
+        lines.some(
+          (line) =>
+            [...line].reduce(
+              (n, char) => n + (char.charCodeAt(0) > 255 ? 2 : 1),
+              0,
+            ) > 70,
+        ))
     )
       throw new Error(
         `第 ${index + 1} 页要点过长：最多 7 行，每行约 35 个汉字或 70 个英文字母。`,

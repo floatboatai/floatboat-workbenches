@@ -23,3 +23,9 @@ MusicXML 不是任意 XML 查看器；不加载外部 DTD、实体、图片、�
 pnpm workbench:check → pnpm test → pnpm dev Chrome 主流程 → pnpm package。测试覆盖 XML/实体/外部资源、ZIP 路径/大小/伪报长度、原件一致性、批注锚点、报告哈希、SQLite 恢复和409冲突。浏览器覆盖真实文件与导出、刷新恢复、暗色/375px/reduced-motion、无失败资源与CSP错误。没有音频、模型或其他 Host 能力；客户端导入安装不由本地预览代替。
 
 scripts/collect-licenses.mjs 可重新生成生产依赖许可证汇编；它是维护脚本，不参与工作台运行或自定义编译。
+
+## 自动保存与工作草稿
+
+新增 0003_autosave.sql，旧迁移保持不变。autosave-server 在事务中保存完整工作副本，并仅将通过业务验证的内容写入 projects；documentId/mutationId 支持丢失响应后的幂等重试。客户端串行提交、防抖、IndexedDB 回退，documentKey/loadEpoch 仅在文档切换时更新。保存返回时不覆盖期间继续输入的内容。草稿状态与正式内容状态明确区分。
+
+音乐原件通过 verifySource 在事务之前进行异步字节对应校验；恢复器仅放宽空批注，XML/ZIP 安全和锚点检查保持。

@@ -6,6 +6,7 @@ import { seed } from "../contracts/seed";
 import { inspectScore } from "../contracts/musicxml";
 import {
   validateScore,
+  restoreScoreDraft,
   originalBytes,
   type ScoreProject,
 } from "../contracts/domain";
@@ -22,7 +23,7 @@ const ScoreView = lazy(() =>
   })),
 );
 export function App() {
-  const p = useProjects<ScoreProject>(seed, validateScore, "晨间练习 · 审校");
+  const p = useProjects<ScoreProject>(seed, validateScore, "晨间练习 · 审校", {storageKey: "opensheetmusicdisplay", restoreDraftData: restoreScoreDraft});
   const [importing, setImporting] = useState(false),
     [svg, setSvg] = useState(""),
     [allNotes, setAllNotes] = useState(false),
@@ -50,8 +51,6 @@ export function App() {
       p.setError("原文件不能超过 200 KB，请导出短谱或分段审阅。");
       return;
     }
-    if (p.dirty && !confirm("导入会替换当前未保存的原件与批注，是否继续？"))
-      return;
     setImporting(true);
     p.setError("");
     try {
@@ -75,10 +74,10 @@ export function App() {
           measureIndex: 0,
         },
       });
-      p.setData(next);
-      p.setTitle(inspectScore(source.xml).title.slice(0, 120));
-      setSvg("");
-      setAllNotes(false);
+      if (await p.replace(next, inspectScore(source.xml).title.slice(0, 120))) {
+        setSvg("");
+        setAllNotes(false);
+      }
     } catch (error) {
       p.report(error);
     } finally {
@@ -148,8 +147,8 @@ export function App() {
     p.setData((data) => ({ ...data, focus: { partId, measureIndex } }));
     setAllNotes(false);
   }
-  function newScore() {
-    if (p.fresh()) {
+  async function newScore() {
+    if (await p.fresh()) {
       setAllNotes(false);
     }
   }
@@ -162,66 +161,64 @@ export function App() {
         <div className="brand">
           <span aria-hidden="true">𝄞</span>
           <div>
-            <p>SCORE READING ROOM</p>
-            <h1>乐谱审校室</h1>
+            <h1>谱校</h1>
           </div>
         </div>
-        <div className="project-actions">
-          <ProjectPicker
-            items={p.items}
-            id={p.current?.id}
-            disabled={locked}
-            onOpen={(id) => void p.open(id)}
-          />
-          <button disabled={locked} onClick={newScore}>
-            新建审校
-          </button>
-          <button
-            disabled={locked || !p.current}
-            onClick={() => void p.remove()}
-          >
-            删除项目
-          </button>
-        </div>
+        <section className="document-heading">
+          <div>
+            <label htmlFor="project-title">审校项目</label>
+            <input
+              id="project-title"
+              name="projectTitle"
+              autoComplete="off"
+              value={p.title}
+              maxLength={120}
+              disabled={locked}
+              onChange={(event) => p.setTitle(event.target.value)}
+            />
+            <p>
+              {info.composer || "未注明作者"} <span aria-hidden="true">/</span>{" "}
+              {info.parts.length} 个声部 · 最长 {info.measureCount} 小节
+            </p>
+          </div>
+          <div className="save-area">
+            <span role="status" data-autosave-phase={p.autoState.phase}>
+              {importing ? "正在检查并试排…" : p.autoState.message}
+            </span>
+            <button
+              className="primary"
+              disabled={locked}
+              onClick={() => void p.save()}
+            >
+              立即保存
+            </button>
+          </div>
+        </section>{" "}
+        <details className="project-actions">
+          <summary>稿件</summary>
+          <div className="project-menu">
+            <button onClick={p.exportDraft}>导出恢复草稿</button>
+            {p.autoState.phase === "conflict" && p.current ? <button onClick={() => void p.open(p.current!.id)}>打开服务器版本</button> : null}
+            <ProjectPicker
+              items={p.items}
+              id={p.current?.id}
+              disabled={locked}
+              onOpen={(id) => void p.open(id)}
+            />
+            <button disabled={locked} onClick={() => void newScore()}>
+              新建审校
+            </button>
+            <button
+              disabled={locked || !p.current}
+              onClick={() => void p.remove()}
+            >
+              删除项目
+            </button>
+          </div>
+        </details>
       </header>
-      <section className="document-heading">
-        <div>
-          <label htmlFor="project-title">审校项目</label>
-          <input
-            id="project-title"
-            name="projectTitle"
-            autoComplete="off"
-            value={p.title}
-            maxLength={120}
-            disabled={locked}
-            onChange={(event) => p.setTitle(event.target.value)}
-          />
-          <p>
-            {info.composer || "未注明作者"} <span aria-hidden="true">/</span>{" "}
-            {info.parts.length} 个声部 · 最长 {info.measureCount} 小节
-          </p>
-        </div>
-        <div className="save-area">
-          <span role="status">
-            {importing
-              ? "正在检查并试排…"
-              : p.busy
-                ? "正在保存…"
-                : p.dirty
-                  ? "有未保存修改"
-                  : p.current
-                    ? "已保存"
-                    : "原创示例 · 未保存"}
-          </span>
-          <button
-            className="primary"
-            disabled={locked}
-            onClick={() => void p.save()}
-          >
-            保存审校
-          </button>
-        </div>
-      </section>
+
+      <p className="mobile-save-status" role="status" data-autosave-phase={p.autoState.phase}>{p.autoState.message}</p>
       <Notice error={p.error} notice={p.notice} />
       <section className="file-toolbar" aria-label="乐谱文件操作">
         <div>
@@ -343,19 +340,12 @@ export function App() {
             ))}
           </select>
         </label>
-        <p>纸面保留原谱布局，批注单独保存</p>
+        <a className="mobile-notes-link" href="#review-notes">
+          小节批注 ↗
+        </a>
+        <p>校样 · 原谱与批注分离</p>
       </section>
       <div id="score-content" className="reading-layout" tabIndex={-1}>
-        <MeasureIndex
-          parts={info.parts}
-          part={part}
-          measureIndex={measureIndex}
-          annotations={p.data.annotations}
-          allNotes={allNotes}
-          locked={locked}
-          onSelect={selectLocation}
-          onToggleAll={() => setAllNotes(!allNotes)}
-        />
         <section className="paper-desk" aria-label="乐谱审阅区">
           <div className="paper-caption">
             <span>{info.title}</span>
@@ -385,19 +375,31 @@ export function App() {
             </RenderBoundary>
           </div>
         </section>
-        <AnnotationBook
-          notesRef={notes}
-          allNotes={allNotes}
-          part={part}
-          measureIndex={measureIndex}
-          annotations={allNotes ? p.data.annotations : locationNotes}
-          parts={info.parts}
-          locked={locked}
-          addNote={addNote}
-          updateNote={updateNote}
-          removeNote={removeNote}
-          onSelect={selectLocation}
-        />
+        <aside className="review-sidebar">
+          <MeasureIndex
+            parts={info.parts}
+            part={part}
+            measureIndex={measureIndex}
+            annotations={p.data.annotations}
+            allNotes={allNotes}
+            locked={locked}
+            onSelect={selectLocation}
+            onToggleAll={() => setAllNotes(!allNotes)}
+          />
+          <AnnotationBook
+            notesRef={notes}
+            allNotes={allNotes}
+            part={part}
+            measureIndex={measureIndex}
+            annotations={allNotes ? p.data.annotations : locationNotes}
+            parts={info.parts}
+            locked={locked}
+            addNote={addNote}
+            updateNote={updateNote}
+            removeNote={removeNote}
+            onSelect={selectLocation}
+          />
+        </aside>
       </div>
       <footer className="app-footer">
         原件与批注保存在当前工作空间 · 示例旋律为本项目原创
