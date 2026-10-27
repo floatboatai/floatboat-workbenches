@@ -8,6 +8,7 @@
   },
   "scripts": {
     "workbench": "node scripts/workbench.mjs",
-    "list": "node scripts/workbench.mjs list"
+    "list": "node scripts/workbench.mjs list",
+    "batch": "node scripts/batch.mjs"
   }
 }
