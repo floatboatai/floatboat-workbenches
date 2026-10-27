@@ -518,9 +518,9 @@ export function App() {
             source: p.data.source,
             cues,
             language: p.data.language,
-            origin: `导入 · ${file.name}`,
+            origin: `导入 · ${file.name}`.slice(0,240),
           },
-          file.name.replace(/\.[^.]+$/, ""),
+          file.name.replace(/\.[^.]+$/, "").slice(0,120),
         );
       }
       p.setNotice("已导入为新项目。");
@@ -642,7 +642,7 @@ export function App() {
           cues: segmentCues(result.segments),
           origin: `faster-whisper · ${result.model} · ${result.id}`,
         },
-        result.input.source.name.replace(/\.[^.]+$/, "") + " · 转写稿",
+        (result.input.source.name.replace(/\.[^.]+$/, "") + " · 转写稿").slice(0,120),
       );
       p.setNotice("已采用为新项目，原项目的人工修订保持不变。");
     } catch (e) {
@@ -674,6 +674,7 @@ export function App() {
           className="project-title"
           aria-label="项目名称"
           name="project-title"
+          maxLength={120}
           autoComplete="off"
           value={p.title}
           onChange={(e) => p.setTitle(e.target.value)}
