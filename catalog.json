@@ -33,14 +33,18 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 1,
     "slug": "excalidraw",
     "directory": "workbenches/01-excalidraw",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "Markmap",
@@ -76,14 +80,18 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 2,
     "slug": "markmap",
     "directory": "workbenches/02-markmap",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "pdfme",
@@ -119,13 +127,17 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md"
+      "record": "docs/release-0.3.0.md",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 3,
     "slug": "pdfme",
     "directory": "workbenches/03-pdfme",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "Tiptap",
@@ -161,14 +173,18 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 4,
     "slug": "tiptap",
     "directory": "workbenches/04-tiptap",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "PptxGenJS",
@@ -204,14 +220,18 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 5,
     "slug": "pptxgenjs",
     "directory": "workbenches/05-pptxgenjs",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "React Flow",
@@ -247,14 +267,18 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 6,
     "slug": "react-flow",
     "directory": "workbenches/06-react-flow",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "SurveyJS Form Library",
@@ -290,14 +314,18 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 7,
     "slug": "surveyjs-form-library",
     "directory": "workbenches/07-surveyjs-form-library",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "Mermaid",
@@ -332,14 +360,18 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "id": 8,
     "slug": "mermaid",
     "directory": "workbenches/08-mermaid",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "Swagger UI",
@@ -373,8 +405,12 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "group": "数据开发",
     "mode": "组件嵌入",
@@ -382,7 +418,7 @@
     "slug": "swagger-ui",
     "directory": "workbenches/09-swagger-ui",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "Vega-Lite",
@@ -416,8 +452,12 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "group": "数据开发",
     "mode": "引擎封装",
@@ -425,7 +465,7 @@
     "slug": "vega-lite",
     "directory": "workbenches/10-vega-lite",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "Observable Plot",
@@ -459,8 +499,12 @@
       "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md",
-      "priorHostLlm": "passed in earlier batch"
+      "record": "docs/release-0.3.0.md",
+      "priorHostLlm": "passed in earlier batch",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     },
     "group": "数据开发",
     "mode": "引擎封装",
@@ -468,7 +512,7 @@
     "slug": "observable-plot",
     "directory": "workbenches/11-observable-plot",
     "status": "local-verified",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   {
     "name": "changedetection.io",
@@ -667,11 +711,33 @@
     "group": "办公文档",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 10,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 18,
     "slug": "blocknote",
     "directory": "workbenches/18-blocknote",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "@blocknote/core": "0.56.0",
+      "@blocknote/react": "0.56.0",
+      "@blocknote/mantine": "0.56.0"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "MDXEditor",
@@ -696,11 +762,31 @@
     "group": "办公文档",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 9,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 19,
     "slug": "mdxeditor",
     "directory": "workbenches/19-mdxeditor",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "@mdxeditor/editor": "4.3.3"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "Milkdown",
@@ -725,11 +811,32 @@
     "group": "办公文档",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 8,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 20,
     "slug": "milkdown",
     "directory": "workbenches/20-milkdown",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "@milkdown/crepe": "7.23.0",
+      "@milkdown/kit": "7.23.0"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "PDF.js",
@@ -737,7 +844,7 @@
     "url": "https://github.com/mozilla/pdf.js",
     "category": "PDF 与表单",
     "kind": "基础引擎",
-    "workbench": "PDF 阅读、逐页摘要与资料审阅工作台",
+    "workbench": "本地 PDF 阅读、全文检索与逐页笔记",
     "core_features": "JavaScript PDF 解析、渲染和查看器；display API 提供页面显示及文档信息。",
     "integration": "取 pdfjs-dist 的浏览器 display API，用 React 做文件列表与批注/摘要侧栏；worker、cmaps、字体等按资源接口分发。",
     "effort": "中",
@@ -754,11 +861,31 @@
     "group": "办公文档",
     "mode": "引擎封装",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 7,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 21,
     "slug": "pdf-js",
     "directory": "workbenches/21-pdf-js",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "pdfjs-dist": "6.4.299"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "reveal.js",
@@ -766,7 +893,7 @@
     "url": "https://github.com/hakimel/reveal.js",
     "category": "演示与汇报",
     "kind": "基础引擎",
-    "workbench": "产品演示、培训讲义与网页汇报工作台",
+    "workbench": "Markdown 幻灯片编排、讲者备注与网页演示",
     "core_features": "HTML 演示框架；Markdown、纵向幻灯片、动画、演讲备注、数学与代码高亮、PDF 打印。",
     "integration": "在 React 页面挂载发布 JS/CSS 或隔离展示区域；保存 Markdown/HTML 幻灯片和主题，补充提纲编辑与预览。",
     "effort": "中",
@@ -783,11 +910,31 @@
     "group": "办公文档",
     "mode": "引擎封装",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 11,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 22,
     "slug": "reveal-js",
     "directory": "workbenches/22-reveal-js",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "reveal.js": "6.0.2"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "Univer",
@@ -812,11 +959,32 @@
     "group": "办公文档",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 9,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 23,
     "slug": "univer",
     "directory": "workbenches/23-univer",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "@univerjs/presets": "1.2.0",
+      "@univerjs/preset-sheets-core": "1.2.0"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "Vditor",
@@ -824,13 +992,13 @@
     "url": "https://github.com/Vanessa219/vditor",
     "category": "文档与知识",
     "kind": "编辑器组件",
-    "workbench": "中文 Markdown 写作、技术笔记与内容排版工作台",
+    "workbench": "用三种 Markdown 模式写作，检查文章排版并导出",
     "core_features": "浏览器 Markdown 编辑器；所见即所得、即时渲染和分屏三种模式；TypeScript 实现并支持 React 等框架。",
     "integration": "在 React 容器实例化 Vditor，保存 Markdown；加载发布 dist/CSS，按工作台资源接口托管按需资产。",
     "effort": "中",
     "priority": "B",
     "license": "MIT",
-    "caveat": "默认按需资源走 unpkg CDN；离线及受限环境需配置 cdn/emoji/theme 和图表、数学等插件资源。",
+    "caveat": "资源已改为同源打包；Lute另用Mulan PSL v2。长文/超长单行暂缓排版，原始正文和完整项目仍可保存导出。",
     "archived": false,
     "pushed_at": "2026-10-18T05:18:57Z",
     "sources": [
@@ -841,18 +1009,39 @@
     "group": "办公文档",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 10,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 24,
     "slug": "vditor",
     "directory": "workbenches/24-vditor",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "vditor": "4.0.1",
+      "bundled-lute": "1.7.6"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "Fabric.js",
     "repo": "fabricjs/fabric.js",
     "category": "白板与图形",
     "kind": "基础引擎",
-    "workbench": "海报与标注工作台：对象化编辑、批量改文案、模板出图",
+    "workbench": "文字与形状排版、精确变换、图层、模板和 PNG/SVG 出图",
     "core_features": "Canvas 对象交互、缩放/旋转/分组、图形/画笔/滤镜，JPG/PNG/JSON/SVG 输入输出。",
     "integration": "使用浏览器包在 React 容器创建画布；以 JSON 保存对象模型，Agent 修改文本和坐标，浏览器完成渲染导出。",
     "effort": "中",
@@ -869,24 +1058,44 @@
     "group": "图形媒体",
     "mode": "引擎封装",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 13,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 25,
     "slug": "fabric-js",
     "directory": "workbenches/25-fabric-js",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "fabric": "7.4.0"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "Filerobot Image Editor",
     "repo": "scaleflex/filerobot-image-editor",
     "category": "图片与媒体",
     "kind": "编辑器组件",
-    "workbench": "商品素材处理工作台：改尺寸、标注、滤镜、水印与版本保存",
+    "workbench": "本地照片裁剪、调色、标注与尺寸调整，自动保存原图和可编辑工程",
     "core_features": "图片调整、裁切、缩放、标注、滤镜、水印、历史记录，提供 React 与 Vanilla JS 接口。",
     "integration": "嵌入 React 发布组件，用 onSave 保存图片及编辑状态；工作台统一提供素材、批处理队列和操作预设。",
     "effort": "中",
     "priority": "B",
     "license": "MIT",
-    "caveat": "README 兼容表仅列 React 17/18，需验证 React 19 与 react-konva；恢复编辑状态标为实验功能。",
+    "caveat": "采用 React 19 兼容的 5.0.0-beta.159；恢复接口仍属实验功能，已验证裁剪/滤镜/标注。原图上限1MB，不含云端与图片叠加。",
     "url": "https://github.com/scaleflex/filerobot-image-editor",
     "archived": false,
     "pushed_at": "2026-06-16T10:27:27Z",
@@ -898,18 +1107,38 @@
     "group": "图形媒体",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 11,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 26,
     "slug": "filerobot-image-editor",
     "directory": "workbenches/26-filerobot-image-editor",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "react-filerobot-image-editor": "5.0.0-beta.159"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "GrapesJS",
     "repo": "GrapesJS/grapesjs",
     "category": "可视化设计",
     "kind": "编辑器组件",
-    "workbench": "邮件/落地页设计工作台：拖拽模板、AI 文案、HTML/CSS 导出",
+    "workbench": "可视化单页网站构建：组件、图层、响应式样式与网页导出",
     "core_features": "可视化 Web 模板构建框架，块管理、样式管理、图层管理和可扩展插件，提供官方 React wrapper。",
     "integration": "嵌入 GrapesJS 核心与发布 CSS；使用存储适配将项目 JSON 存 SQLite，Host LLM 生成区块文案，导出交付文件。",
     "effort": "中",
@@ -926,11 +1155,31 @@
     "group": "图形媒体",
     "mode": "组件嵌入",
     "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "verification": {
+      "build": "passed",
+      "tests": 6,
+      "package": "passed",
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.3.0.md",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
+      "hostLlm": "not-used"
+    },
     "id": 27,
     "slug": "grapesjs",
     "directory": "workbenches/27-grapesjs",
-    "status": "planned"
+    "status": "local-verified",
+    "upstreamVersions": {
+      "grapesjs": "0.23.8"
+    },
+    "version": "0.3.0"
   },
   {
     "name": "Konva",
@@ -1617,7 +1866,7 @@
       "https://github.com/microsoft/maker.js",
       "docs/research/niche-manufacturing.md"
     ],
-    "version": "0.2.0",
+    "version": "0.3.0",
     "verification": {
       "build": "passed",
       "tests": 6,
@@ -1626,10 +1875,14 @@
       "workingDraftRecovery": "passed",
       "productLayout": "passed",
       "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-required",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md"
+      "record": "docs/release-0.3.0.md",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     }
   },
   {
@@ -1654,7 +1907,7 @@
       "https://github.com/Lattice-Automation/seqviz",
       "docs/research/niche-laboratory.md"
     ],
-    "version": "0.2.0",
+    "version": "0.3.0",
     "verification": {
       "build": "passed",
       "tests": 7,
@@ -1663,10 +1916,14 @@
       "workingDraftRecovery": "passed",
       "productLayout": "passed",
       "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-required",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md"
+      "record": "docs/release-0.3.0.md",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     }
   },
   {
@@ -1691,7 +1948,7 @@
       "https://github.com/farmOS/farmOS-map",
       "docs/research/niche-operations.md"
     ],
-    "version": "0.2.0",
+    "version": "0.3.0",
     "verification": {
       "build": "passed",
       "tests": 9,
@@ -1700,10 +1957,14 @@
       "workingDraftRecovery": "passed",
       "productLayout": "passed",
       "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-required",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md"
+      "record": "docs/release-0.3.0.md",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     }
   },
   {
@@ -1728,7 +1989,7 @@
       "https://github.com/ProjectMirador/mirador",
       "docs/research/niche-operations.md"
     ],
-    "version": "0.2.0",
+    "version": "0.3.0",
     "verification": {
       "build": "passed",
       "tests": 15,
@@ -1737,10 +1998,14 @@
       "workingDraftRecovery": "passed",
       "productLayout": "passed",
       "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-required",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md"
+      "record": "docs/release-0.3.0.md",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     }
   },
   {
@@ -1765,7 +2030,7 @@
       "https://github.com/opensheetmusicdisplay/opensheetmusicdisplay",
       "docs/research/niche-creative.md"
     ],
-    "version": "0.2.0",
+    "version": "0.3.0",
     "verification": {
       "build": "passed",
       "tests": 12,
@@ -1774,10 +2039,14 @@
       "workingDraftRecovery": "passed",
       "productLayout": "passed",
       "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-required",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.2.0.md"
+      "record": "docs/release-0.3.0.md",
+      "package": "passed",
+      "sharedAutosaveRevert": "passed",
+      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     }
   }
 ]

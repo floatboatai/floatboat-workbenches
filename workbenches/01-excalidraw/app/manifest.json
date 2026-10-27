@@ -4,8 +4,8 @@
   "registryName": "excalidraw-studio",
   "name": "白板工作台",
   "description": "用可编辑白板整理流程、方案与想法，保存项目并导出图像。",
-  "changelog": "自动保存与草稿恢复；按产品任务重新组织界面。",
-  "version": "0.2.0",
+  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
+  "version": "0.3.0",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

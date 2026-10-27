@@ -4,8 +4,8 @@
   "registryName": "opensheetmusicdisplay-studio",
   "name": "乐谱审校室",
   "description": "MusicXML/MXL 原件留存、声部与版式审阅、小节批注和 SVG 导出",
-  "version": "0.2.0",
-  "changelog": "支持安全乐谱导入、原件与审校状态保存、小节批注和真实 SVG 导出。",
+  "version": "0.3.0",
+  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

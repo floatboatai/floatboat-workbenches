@@ -4,8 +4,8 @@
   "registryName": "vega-lite-studio",
   "name": "图表规格实验台",
   "description": "AI图表制作：输入数据和意图，生成可编辑图表规格",
-  "version": "0.2.0",
-  "changelog": "统一自动保存、工作草稿恢复、离线/冲突处理，以及按专业任务重组布局。",
+  "version": "0.3.0",
+  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

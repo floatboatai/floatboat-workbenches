@@ -1,6 +1,6 @@
 # 馆藏对照室（Mirador）
 
-版本 **0.2.0**。专业双图光台：左侧资料抽屉、中央图像对照、右侧复核账本。使用真实 Mirador，支持缩放、平移、旋转和页级复核。
+版本 **0.3.0**。专业双图光台：左侧资料抽屉、中央图像对照、右侧复核账本。使用真实 Mirador，支持缩放、平移、旋转和页级复核。
 
 从总仓库运行 `pnpm workbench prepare mirador`，再运行 `pnpm workbench dev mirador`。添加 PNG/JPEG，选择左右资料页并记录意见。页名、视图、复核记录和未添加的意见草稿自动保存；导入完整项目会创建独立项目。保存失败或冲突有明确状态，后台保存保持编辑可用。
 
@@ -17,3 +17,7 @@
 运行 `pnpm workbench package mirador` 生成 `.fbworkbench`，在 Floatboat「我的 → 工作台 → 导入工作台」使用。源包不含用户扫描页或预览数据库；客户端实际导入安装仍未实测。
 
 上游 [Mirador](https://github.com/ProjectMirador/mirador) 固定4.3.0，Apache-2.0。详见 [NOTICE.md](NOTICE.md)、app/DESIGN.md和app/ENGINEERING.md。
+
+## 0.3.0 保存基础修复
+
+快速编辑后撤回到已确认内容时，保存状态和本机工作副本一起恢复；服务端草稿回执与缓存重试按统一协议处理。整合验收见 [0.3.0 发布记录](../../docs/release-0.3.0.md)。

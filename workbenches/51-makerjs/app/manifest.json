@@ -4,8 +4,8 @@
   "registryName": "makerjs-studio",
   "name": "参数制图工房",
   "description": "尺寸与孔位 → 参数化面板/刀模 → SVG、DXF",
-  "version": "0.2.0",
-  "changelog": "自动保存与草稿恢复；按产品任务重新组织界面。",
+  "version": "0.3.0",
+  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -28,7 +28,19 @@ import {
   clearCache,
 } from "./autosave-cache";
 import { request, download } from "./requests";
-type LocalCopy<T> = CachedDraft<T> & { conflicted?: boolean };
+type AutoState = { phase: SavePhase; message: string; savedAt: string };
+type LocalCopy<T> = CachedDraft<T> & {
+  conflicted?: boolean;
+  // Paired with `acknowledged` in the same IndexedDB transaction. Never infer
+  // server verification from the presence of an older accepted project.
+  acknowledgedState?: AutoState;
+};
+const initialState: AutoState = { phase: "idle", message: "编辑后自动保存", savedAt: "" };
+const unknownAcknowledgement = (): AutoState => ({
+  phase: "offline",
+  message: "已恢复本机草稿，尚未确认服务端保存结果。",
+  savedAt: "",
+});
 const validLocalId = (value: unknown): value is string =>
   typeof value === "string" &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -76,11 +88,10 @@ export function useWorkbenchState<T>(
     if (owned !== null)
       setErrorState((previous) => (previous === owned ? "" : previous));
   };
-  const [autoState, setAutoState] = useState<{
-    phase: SavePhase;
-    message: string;
-    savedAt: string;
-  }>({ phase: "idle", message: "编辑后自动保存", savedAt: "" });
+  const [autoState, setAutoState] = useState<AutoState>(initialState);
+  const acknowledgedState = useRef<AutoState>(initialState);
+  const cacheRepairPending = useRef(false), cacheFailures = useRef(0);
+  const cacheRepairFlight = useRef<Promise<boolean> | null>(null);
   const [loadEpoch, setLoadEpoch] = useState(0),
     [tick, setTick] = useState(0);
   const doc = useRef<{ id: string; revision: number }>({
@@ -146,6 +157,7 @@ export function useWorkbenchState<T>(
       snapshot: workRef.current,
       current: currentRef.current,
       acknowledged: ack.current,
+      acknowledgedState: acknowledgedState.current,
       pending: pending.current,
       savedAt: new Date().toISOString(),
       conflicted: conflicted.current,
@@ -180,9 +192,10 @@ export function useWorkbenchState<T>(
     ];
   }
   async function cache() {
-    const copy = cacheValue();
+    const copy = cacheValue(), generation = epoch.current;
     await writeDraftCache(storageKey, copy.documentId, copy);
-    if (active.current) setItems((previous) => mergeLocal(previous, [copy]));
+    if (!active.current || generation !== epoch.current) return;
+    setItems((previous) => mergeLocal(previous, [copy]));
     try {
       sessionStorage.setItem(storageKey + ":active", copy.documentId);
     } catch {
@@ -280,12 +293,22 @@ export function useWorkbenchState<T>(
         snapshot: structuredClone(pending.snapshot) as WorkingCopy<T>,
       };
     }
+    const status = value.acknowledgedState;
+    const acknowledgedState: AutoState | undefined =
+      isRecord(status) && typeof status.phase === "string" &&
+      ["idle", "saved", "draft", "conflict", "offline"].includes(status.phase) &&
+      typeof status.message === "string" && typeof status.savedAt === "string" &&
+      (status.savedAt === "" || Number.isFinite(Date.parse(status.savedAt))) &&
+      (status.phase !== "saved" || current !== null)
+        ? { phase: status.phase as SavePhase, message: status.message, savedAt: status.savedAt }
+        : undefined;
     return {
       documentId: value.documentId,
       revision: value.revision,
       snapshot,
       current,
       acknowledged: value.acknowledged,
+      acknowledgedState,
       pending: command,
       savedAt: value.savedAt,
       conflicted: value.conflicted === true,
@@ -296,26 +319,19 @@ export function useWorkbenchState<T>(
     reset(copy.snapshot, copy.current, true, undefined, false);
     doc.current = { id: copy.documentId, revision: copy.revision };
     ack.current = copy.acknowledged;
+    acknowledgedState.current = copy.acknowledgedState ?? unknownAcknowledgement();
     pending.current = copy.pending;
     conflicted.current = copy.conflicted === true;
     edited.current = unsynced(copy);
-    setAutoState({
-      phase: conflicted.current
-        ? "conflict"
-        : offline
-          ? "offline"
-          : edited.current
-            ? "pending"
-            : "saved",
-      message: conflicted.current
-        ? "草稿已保留，项目有版本冲突。请打开服务器版本或导出草稿。"
-        : offline
-          ? "已恢复本机草稿，等待重新连接。"
-          : edited.current
-            ? "正在恢复待同步草稿…"
-            : "已恢复本机草稿。",
+    setAutoState(conflicted.current ? {
+      phase: "conflict",
+      message: "草稿已保留，项目有版本冲突。请打开服务器版本或导出草稿。",
       savedAt: copy.savedAt,
-    });
+    } : edited.current ? {
+      phase: offline ? "offline" : "pending",
+      message: offline ? "已恢复本机草稿，等待重新连接。" : "正在恢复待同步草稿…",
+      savedAt: copy.savedAt,
+    } : acknowledgedState.current);
     if (loaded.current) void cache().catch(() => {});
   }
   async function localCopy(id: string) {
@@ -339,6 +355,9 @@ export function useWorkbenchState<T>(
     write = true,
   ) {
     epoch.current++;
+    cacheRepairPending.current = false;
+    cacheFailures.current = 0;
+    cacheRepairFlight.current = null;
     blocked.current = null;
     doc.current = {
       id: record?.documentId ?? crypto.randomUUID(),
@@ -354,15 +373,13 @@ export function useWorkbenchState<T>(
     setLoadEpoch((x) => x + 1);
     setError("");
     setNotice("");
-    setAutoState({
-      phase:
-        record?.receipt.phase ??
-        (saved ? (project ? "saved" : "idle") : "pending"),
-      message:
-        record?.receipt.message ??
-        (saved ? (project ? "已自动保存" : "编辑后自动保存") : "等待自动保存…"),
-      savedAt: record?.updatedAt ?? "",
-    });
+    const state: AutoState = {
+      phase: record?.receipt.phase ?? (saved ? (project ? "saved" : "idle") : "pending"),
+      message: record?.receipt.message ?? (saved ? (project ? "已自动保存" : "编辑后自动保存") : "等待自动保存…"),
+      savedAt: record?.receipt.savedAt ?? project?.updatedAt ?? "",
+    };
+    acknowledgedState.current = saved ? state : initialState;
+    setAutoState(state);
     if (loaded.current && write) void cache().catch(() => {});
   }
   useEffect(() => {
@@ -430,19 +447,73 @@ export function useWorkbenchState<T>(
       active.current = false;
     };
   }, [storageKey, refresh]);
+  // Reverting a working copy can leave an intermediate value in IndexedDB.
+  // Repair that cache without inventing a server receipt or a new mutation.
+  async function repairCleanCache(): Promise<boolean> {
+    if (pending.current || flight.current || conflicted.current ||
+        fingerprint(workRef.current) !== ack.current) return false;
+    if (cacheRepairFlight.current) return cacheRepairFlight.current;
+    const generation = epoch.current, signature = ack.current;
+    const stillClean = () => active.current && generation === epoch.current &&
+      signature === ack.current && fingerprint(workRef.current) === signature &&
+      !pending.current && !flight.current && !conflicted.current;
+    cacheRepairPending.current = true;
+    const task = (async () => {
+      try {
+        await cache();
+        if (!stillClean()) return false;
+        cacheRepairPending.current = false;
+        cacheFailures.current = 0;
+        edited.current = false;
+        blocked.current = null;
+        failures.current = 0;
+        clearSaveError();
+        setAutoState(acknowledgedState.current);
+        return true;
+      } catch {
+        if (active.current && generation === epoch.current) {
+          cacheFailures.current++;
+          if (stillClean()) setAutoState({
+            phase: "offline",
+            message: "当前内容已恢复，但本机缓存更新失败，请保持页面打开并重试。",
+            savedAt: acknowledgedState.current.savedAt,
+          });
+        }
+        return false;
+      } finally {
+        if (active.current && generation === epoch.current) {
+          cacheRepairFlight.current = null;
+          setTick((x) => x + 1);
+        }
+      }
+    })();
+    cacheRepairFlight.current = task;
+    return task;
+  }
   async function persist(force = false): Promise<SaveReceipt<T> | null> {
+    const entryEpoch = epoch.current;
     while (flight.current) await flight.current;
+    if (!active.current || entryEpoch !== epoch.current) return null;
     if (conflicted.current) {
       saveReport("项目存在版本冲突，请先导出草稿或打开服务器版本。");
       return null;
     }
+    if (!pending.current && fingerprint(workRef.current) === ack.current &&
+        (edited.current || cacheRepairPending.current)) {
+      if (!(await repairCleanCache())) return null;
+      if (entryEpoch !== epoch.current) return null;
+    }
     const now = fingerprint(workRef.current);
+    const confirmUnknown = force && acknowledgedState.current.phase === "offline";
     if (
       !pending.current &&
       now === ack.current &&
-      (!force || currentRef.current)
+      (!force || currentRef.current) && !confirmUnknown
     )
       return null;
+    // Legacy caches have no authoritative receipt. Revalidate optimistically
+    // with their original versions; keep failures in the normal retry queue.
+    if (confirmUnknown) edited.current = true;
     const generation = epoch.current;
     if (!pending.current)
       pending.current = {
@@ -470,7 +541,8 @@ export function useWorkbenchState<T>(
         });
         if (
           !isRecord(raw) ||
-          !["saved", "draft", "conflict"].includes(String(raw.phase)) ||
+          typeof raw.phase !== "string" ||
+          !["saved", "draft", "conflict"].includes(raw.phase) ||
           typeof raw.draftRevision !== "number" ||
           typeof raw.message !== "string" ||
           typeof raw.savedAt !== "string"
@@ -482,6 +554,9 @@ export function useWorkbenchState<T>(
         doc.current.revision = receipt.draftRevision;
         pending.current = null;
         ack.current = fingerprint(command.snapshot);
+        acknowledgedState.current = {
+          phase: receipt.phase, message: receipt.message, savedAt: receipt.savedAt,
+        };
         failures.current = 0;
         if (receipt.phase === "saved" && receipt.project) {
           markCurrent(receipt.project);
@@ -581,6 +656,15 @@ export function useWorkbenchState<T>(
   const signature = fingerprint(work),
     dirty = signature !== ack.current;
   useEffect(() => {
+    const generation = epoch.current;
+    const currentDocument = () => active.current && generation === epoch.current;
+    if (loaded.current && (edited.current || cacheRepairPending.current) &&
+        !dirty && !pending.current && !flight.current && !conflicted.current) {
+      const timer = setTimeout(() => {
+        if (currentDocument()) void repairCleanCache();
+      }, cacheFailures.current ? Math.min(30000, 1500 * 2 ** Math.min(cacheFailures.current - 1, 4)) : 0);
+      return () => clearTimeout(timer);
+    }
     if (
       !loaded.current ||
       !edited.current ||
@@ -597,13 +681,13 @@ export function useWorkbenchState<T>(
           : { ...previous, phase: "pending", message: "等待自动保存…" },
       );
     const local = setTimeout(() => {
-      void cache().catch(() => {});
+      if (currentDocument()) void cache().catch(() => {});
     }, 120);
     const delay = failures.current
       ? Math.min(30000, 1500 * 2 ** Math.min(failures.current - 1, 4))
       : 700;
     const timer = setTimeout(() => {
-      void persist();
+      if (currentDocument()) void persist();
     }, delay);
     return () => {
       clearTimeout(local);
@@ -611,13 +695,17 @@ export function useWorkbenchState<T>(
     };
   }, [signature, loading, loadEpoch, tick]);
   useEffect(() => {
-    const wake = () => setTick((x) => x + 1);
+    const wake = () => {
+      if (cacheRepairPending.current) cacheFailures.current = 0;
+      setTick((x) => x + 1);
+    };
     window.addEventListener("online", wake);
     return () => window.removeEventListener("online", wake);
   }, []);
   useEffect(() => {
     const before = (e: BeforeUnloadEvent) => {
-      if (fingerprint(workRef.current) !== ack.current || pending.current) {
+      if (fingerprint(workRef.current) !== ack.current || pending.current ||
+          cacheRepairPending.current || edited.current) {
         void cache().catch(() => {});
         e.preventDefault();
         e.returnValue = "";
@@ -627,10 +715,14 @@ export function useWorkbenchState<T>(
     return () => window.removeEventListener("beforeunload", before);
   }, []);
   async function leave() {
-    if (!dirty && !pending.current && !conflicted.current) return true;
+    if (!dirty && !pending.current && !conflicted.current &&
+        !cacheRepairPending.current && !edited.current) return true;
     if (!conflicted.current) await persist();
-    if (fingerprint(workRef.current) === ack.current && !conflicted.current)
-      return true;
+    if (fingerprint(workRef.current) === ack.current && !conflicted.current &&
+        !pending.current) {
+      if (!cacheRepairPending.current && !edited.current) return true;
+      return confirm("当前内容已恢复，但本机缓存尚未修复。切换后可能恢复旧的中间稿；建议取消并重试，或先导出恢复草稿。仍要切换吗？");
+    }
     try {
       await cache();
       return confirm(
@@ -656,8 +748,8 @@ export function useWorkbenchState<T>(
         }
         return receipt.project;
       }
-      return autoState.phase === "draft" ||
-        conflicted.current ||
+      return acknowledgedState.current.phase !== "saved" ||
+        cacheRepairPending.current || conflicted.current ||
         pending.current ||
         fingerprint(workRef.current) !== ack.current
         ? null

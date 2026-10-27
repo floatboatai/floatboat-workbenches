@@ -4,8 +4,8 @@
   "registryName": "pdfme-studio",
   "name": "纸张工坊",
   "description": "报价单、证书、标签与合同模板批量生成工作台",
-  "version": "0.2.0",
-  "changelog": "支持中文单据版式设计、字段填写、版本保存与 PDF/JSON 导出。",
+  "version": "0.3.0",
+  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

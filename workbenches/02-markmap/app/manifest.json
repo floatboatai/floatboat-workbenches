@@ -4,8 +4,8 @@
   "registryName": "markmap-studio",
   "name": "Markmap 工作台",
   "description": "研究与会议脑图工作台：长文/纪要转大纲与交互思维导图",
-  "version": "0.2.0",
-  "changelog": "自动保存与草稿恢复；按产品任务重新组织界面。",
+  "version": "0.3.0",
+  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
