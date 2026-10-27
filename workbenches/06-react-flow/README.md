@@ -1,13 +1,28 @@
-# React Flow 工作台
+# 流程实验室（React Flow）
 
-状态：计划中，尚未实现。
+已实现并完成本地验收，使用 @xyflow/react 12.12.0。上游：https://github.com/xyflow/xyflow。
 
-目标：可视化业务流程工作台：节点配置、执行记录、运行状态展示
+## 功能
 
-上游：https://github.com/xyflow/xyflow
+编辑节点与连接、参数检查器、键盘可操作的步骤选择与连接表单。当前执行器支持输入文本、转大写、添加前缀、输出四类操作，运行真实单链变换并保存每步输入/输出和配置签名。配置变化时旧结果标记为需要重新运行。可以导出配置 JSON 和上次结果文本。
 
-适配路线：使用 @xyflow/react 与发行 CSS；节点/边 JSON 存 SQLite，由服务器将获准节点映射到 Floatboat Workflow/Agent 调用。
+AI 生成的是待检查的配置，先预览再采用；采用不自动运行。执行不是模拟动画，也不会调用任意外部服务。
 
-限制：主要提供编辑界面；执行语义、权限、重试与节点校验需要自行实现。
+## 运行
 
-许可：MIT
+总仓库：`pnpm workbench prepare react-flow` → `pnpm workbench dev react-flow`。测试：`pnpm workbench test react-flow`。打包：`pnpm workbench package react-flow`，在 Floatboat「我的 → 工作台 → 导入工作台」使用源包。
+
+## 验证
+
+- 类型/构建和 5 项测试通过，涵盖真实执行、无效拓扑、配置签名、持久化与版本冲突。
+- Chrome 1440px 与 375px：编辑参数、实际运行、保存刷新恢复、JSON 导出、非法分支拒绝通过。
+- 测试输入 hello 宇宙，实际输出「通知：HELLO 宇宙」，4 个步骤输入输出与预期一致。
+- 真实 Floatboat LLM 生成配置成功（200），建议先预览。
+- 页面异常 0，失败请求 0，窄屏横向溢出 0；reduced-motion 已检查。
+- 源包导出通过，Host 客户端导入尚未验收。
+
+## 范围
+
+仅支持单链，最多 30 个步骤、60 条连接，结果最多 20,000 字符。分支、断链、回路、缺失或多个输入输出会被拒绝。它不是任意代码执行器，也不替代 Floatboat 的通用 Workflow。
+
+上游 React Flow 为 MIT，版权文本见 `app/src/notices/react-flow.LICENSE`。本仓库未为所有新增应用统一选定许可证。
