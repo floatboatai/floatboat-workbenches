@@ -1,5 +1,6 @@
-import { lazy, Suspense, useState } from "react";
-import { seed, validate } from "../contracts/model";
+import { AutosaveStatus } from "./AutosaveStatus";
+import { lazy, Suspense, useState, useRef } from "react";
+import { seed, validate, restoreDraftData } from "../contracts/model";
 import {
   download,
   useProjects,
@@ -11,12 +12,27 @@ const Diagram = lazy(() =>
   import("./Diagram").then((module) => ({ default: module.Diagram })),
 );
 export function App() {
-  const project = useProjects(seed, validate, "需求处理流程");
+  const project = useProjects(seed, validate, "需求处理流程", {
+    storageKey: "mermaid-studio",
+    restoreDraftData,
+  });
+  const prompt =
+    typeof project.draft.aiPrompt === "string" ? project.draft.aiPrompt : "";
+  const setPrompt = (text: string) =>
+    project.setDraft((old) => ({ ...old, aiPrompt: text }));
+  const ai = project.draft.aiPanel === true;
+  const setAi = (value: boolean | ((current: boolean) => boolean)) =>
+    project.setDraft((old) => ({
+      ...old,
+      aiPanel:
+        typeof value === "function" ? value(old.aiPanel === true) : value,
+    }));
+
   const [svg, setSvg] = useState(""),
-    [status, setStatus] = useState("正在渲染…"),
-    [prompt, setPrompt] = useState(""),
-    [ai, setAi] = useState(false);
+    [status, setStatus] = useState("正在渲染…");
   const ready = status === "预览已更新";
+  const gutter = useRef<HTMLPreElement>(null);
+  const lines = project.data.source.split("\n").length;
   return (
     <main className="mermaid-shell">
       <a className="skip" href="#source">
@@ -41,7 +57,7 @@ export function App() {
             onClick={() => void project.save()}
             disabled={project.busy}
           >
-            {project.busy ? "保存中…" : "保存草稿"}
+            {project.busy ? "保存中…" : "立即保存"}
           </button>
           <button onClick={() => setAi((value) => !value)} aria-expanded={ai}>
             AI 起草
@@ -60,13 +76,16 @@ export function App() {
             onChange={(e) => project.setTitle(e.target.value)}
           />
         </label>
-        <span className="save-status">
-          {project.dirty
-            ? "有未保存修改"
-            : project.current
-              ? "已保存"
-              : "新草稿"}
-        </span>
+        <AutosaveStatus
+          state={project.autoState}
+          onRetry={() => void project.save()}
+          onExport={project.exportDraft}
+          onReload={
+            project.current
+              ? () => void project.open(project.current!.id)
+              : undefined
+          }
+        />
         <div className="exports">
           <button
             onClick={() =>
@@ -111,6 +130,7 @@ export function App() {
             <input
               id="prompt"
               name="prompt"
+              maxLength={12000}
               autoComplete="off"
               required
               value={prompt}
@@ -135,26 +155,42 @@ export function App() {
       <div className="editor-grid">
         <section className="source-panel">
           <div className="panel-heading">
-            <h1>图形源码</h1>
+            <h1 title={project.title + ".mmd"}>
+              {project.title || "untitled"}.mmd
+            </h1>
             <span>{project.data.source.split("\n").length} 行</span>
           </div>
           <label className="sr-only" htmlFor="source">
             Mermaid 源码
           </label>
-          <textarea
-            id="source"
-            name="mermaidSource"
-            spellCheck={false}
-            autoComplete="off"
-            wrap="off"
-            value={project.data.source}
-            onChange={(e) => project.setData({ source: e.target.value })}
-          />
-          <footer>Flowchart · Sequence · Class · State</footer>
+          <div className="code-editor">
+            <pre ref={gutter} className="line-numbers" aria-hidden="true">
+              {Array.from({ length: lines }, (_, i) => i + 1).join("\n")}
+            </pre>
+            <textarea
+              id="source"
+              name="mermaidSource"
+              spellCheck={false}
+              autoComplete="off"
+              wrap="off"
+              onScroll={(event) => {
+                if (gutter.current)
+                  gutter.current.scrollTop = event.currentTarget.scrollTop;
+              }}
+              value={project.data.source}
+              onChange={(e) => project.setData({ source: e.target.value })}
+            />
+          </div>
+          <footer>
+            <span>Mermaid · UTF-8</span>
+            <span>
+              {lines} 行 / {project.data.source.length} 字符
+            </span>
+          </footer>
         </section>
         <section className="preview-panel">
           <div className="panel-heading">
-            <h2>画布预览</h2>
+            <h2>图形预览</h2>
             <span className={ready ? "ready" : "pending"} role="status">
               {ready ? "已同步" : "待更新"}
             </span>
@@ -177,7 +213,7 @@ export function App() {
               />
             </Suspense>
           </RenderBoundary>
-          <footer>修改左侧文字，图形在这里更新。</footer>
+          <footer>源码编辑后自动更新预览 · 错误时保留上一版图形</footer>
         </section>
       </div>
     </main>

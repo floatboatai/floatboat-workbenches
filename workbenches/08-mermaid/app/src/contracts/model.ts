@@ -16,3 +16,13 @@ export function validate(value: unknown): Model {
 }
 export const instructions =
   '将要求整理为 Mermaid 图形。只返回 JSON {"source":"Mermaid源码"}。优先 flowchart LR 或 sequenceDiagram。使用简短中文节点，不要使用图片、HTML、链接回调或初始化指令。';
+
+export function restoreDraftData(value: unknown): Model {
+  if (
+    !isRecord(value) ||
+    typeof value.source !== "string" ||
+    value.source.length > 40000
+  )
+    throw new Error("图形草稿格式无效。");
+  return { source: value.source };
+}

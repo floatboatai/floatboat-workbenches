@@ -1,19 +1,17 @@
 # Mermaid 图形工坊
 
-版本 0.1.0。本地与真实 Host 模型调用已验证；客户端导入尚未验收。
+版本 **0.2.0**。编辑后自动保存，不必反复点击保存按钮。
 
-## 使用
+源码IDE与图形预览分屏，支持同步行号、源码/SVG导出及人工采用AI候选。图形引擎保持严格模式。
 
-从总仓库运行 `pnpm workbench prepare mermaid`，然后 `pnpm workbench dev mermaid`。编辑源码即更新实际 Mermaid 图形；可保存草稿、打开/重命名/删除项目，导出 .mmd 源码与 SVG。语法错误保留原文和上一份预览，并明确标为未更新，SVG导出暂停。
+空白或错误源码、AI提示词和待采用候选均保留；源码已保存与预览是否成功分别显示。
 
-AI生成先显示候选源码，点击采用后才替换当前内容。生成服务失败时不会插入示例图。
+自动保存区分待同步、保存中、已保存、工作草稿、离线和版本冲突。网络失败会保留本机工作副本并重试；冲突不会覆盖服务器版本，可导出恢复草稿后打开服务器版本。“立即保存”用于手动触发同步。
 
-## 验证
+从总仓库运行 `pnpm workbench prepare mermaid`、`pnpm workbench dev mermaid`。本目录执行 `pnpm workbench:check`、`pnpm test` 与 `pnpm run package`。
 
-`pnpm test`：3项通过，含真实SQLite持久化、版本冲突和删除。Chrome实测渲染、保存刷新恢复、源码/SVG下载、无效语法恢复、真实Host生成与采用；1440px/375px及深色/reduced-motion通过。页面异常、失败请求、console error均为0。
+业务测试 4 项；自动保存另经真实Chrome验收：无需按钮创建、延迟回包不覆盖新输入、草稿刷新恢复、503/重试、响应丢失幂等、冲突保留、375px与暗色。AI草稿恢复测试使用明确注入的候选，未据此宣称新一轮真实模型调用成功。
 
-`pnpm workbench package mermaid` 生成 artifacts/mermaid-studio-0.1.0.fbworkbench，在 Floatboat「我的→工作台→导入工作台」安装。包默认不携带本地数据。
+源包：`artifacts/mermaid-studio-0.2.0.fbworkbench`。通过Floatboat「我的→工作台→导入工作台」安装。源包不含项目数据；客户端实际导入尚未验收。
 
-## 范围
-
-40,000字符、300边上限；严格模式，系统字体，不加载外部图像/图标包。当前验收覆盖流程图；其它Mermaid图形需按实际输入验证。
+上游与许可见 [NOTICE.md](NOTICE.md)。

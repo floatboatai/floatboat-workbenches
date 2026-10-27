@@ -1,3 +1,4 @@
+import { restoreDraftData } from "../src/contracts/model.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DatabaseSync } from "node:sqlite";
@@ -43,4 +44,20 @@ test("真实 SQLite 持久化、冲突及删除", () => {
     db.close();
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("无效或空源码草稿可恢复，正式模型仍保留输入约束", () => {
+  for (const source of [
+    "",
+    "this is not Mermaid",
+    'flowchart LR\nA@{img: \"https://example.com/a.png\"}',
+  ])
+    assert.equal(restoreDraftData({ source }).source, source);
+  assert.throws(() => validate({ source: "" }));
+  assert.throws(() =>
+    validate({
+      source: 'flowchart LR\nA@{img: \"https://example.com/a.png\"}',
+    }),
+  );
+  assert.throws(() => restoreDraftData({ source: 123 }));
 });

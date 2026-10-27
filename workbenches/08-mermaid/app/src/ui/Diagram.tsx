@@ -1,3 +1,4 @@
+import {validate} from "../contracts/model";
 import { useEffect, useRef } from "react";
 type Props = {
   source: string;
@@ -30,6 +31,7 @@ export function Diagram({ source, onSvg, onStatus }: Props) {
     const timer = setTimeout(() => {
       void (async () => {
         try {
+          validate({source});
           const mermaid = await load();
           await mermaid.parse(source);
           const result = await mermaid.render(id, source);
