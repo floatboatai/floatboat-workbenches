@@ -3,9 +3,9 @@
   "appId": "workbench.aa560584-7514-48cc-ab26-59b010756b40",
   "registryName": "filerobot-image-editor-studio",
   "name": "Filerobot Image Editor 工作台",
-  "description": "商品素材处理工作台：改尺寸、标注、滤镜、水印与版本保存",
+  "description": "本地照片裁剪、调色、标注与尺寸调整，自动保存原图和可编辑工程",
   "version": "0.3.0",
-  "changelog": "Initial application.",
+  "changelog": "真实 Filerobot 图片编辑器、原图资源、自动恢复及便携工程导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -19,5 +19,21 @@
   "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "originals",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "originals",
+      "access": "read-write"
+    },
+    {
+      "id": "third-party-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "licenses"
+    }
+  ]
 }
