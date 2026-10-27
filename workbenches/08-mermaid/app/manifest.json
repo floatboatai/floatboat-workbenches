@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.2ebaf4fa-c0dc-4c6a-81c9-f66b262540b2",
   "registryName": "mermaid-studio",
-  "name": "Mermaid 工作台",
+  "name": "Mermaid 图形工坊",
   "description": "文字生成图表工作台：自然语言生成流程图、时序图并保存版本",
   "version": "0.1.0",
-  "changelog": "Initial application.",
+  "changelog": "实现独立编辑、项目持久化、渲染导出与人工采用 AI 生成稿。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -1,12 +1,7 @@
-# Engineering
+# 工程说明
 
-The business app root is this directory. Run the authoring commands from the repository root; see `../AGENTS.md`.
+`contracts/model.ts` 定义并校验业务输入；`server/routes.ts`、`store.ts` 提供 SQLite 项目和 revision 乐观锁。`server/index.ts` 注册当前业务与真实 Host LLM。`ui/App.tsx` 管理页面，重型渲染按需加载。
 
-- `src/server/` owns business routes, parameterized SQL, transactions and Host SDK calls. Register public page routes under `/api/` through the provided server.
-- `src/ui/` owns React components and the authenticated page connection. UI requests go through `page.fetch`; importing Node, database or Host implementations into the browser is rejected.
-- `src/contracts/` contains shared serializable data types and response validation. Validate external input as unknown and return structured results.
-- Append numbered SQL migrations. Applied migrations are immutable; preview data is persistent and must not be silently reset to accommodate changes.
-- Keep the fixed strict `tsconfig.json` and declarative manifest build profile. The compiler ignores executable project build config and env files. Source assets belong under `src/`.
-- Keep runtime dependency versions and lockfiles aligned; see `../docs/maintenance.md`. Native extensions do not belong in the application profile.
-- Add tests for business boundaries and persistence behavior, using temporary data rather than the user's preview database. Test files live under `tests/` and are run by `pnpm test` from the repository root.
-- Host calls are optional and require actual authorization. Show unavailable/error states and consult `../docs/platform.md`; preserve execution-unknown errors rather than retrying potentially completed external mutations blindly.
+source 为 Mermaid 字符串，40,000 字符上限；严格模式渲染；源文件与 SVG 分开导出。
+
+固定依赖同时记录在项目根和 app 的 package/lock 文件。源码构建使用官方固定模板，SDK 与本地数据不提交。运行、测试与打包命令见项目 README，验收范围由实际测试结果记录。

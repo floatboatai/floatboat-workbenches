@@ -1,13 +1,19 @@
-# Mermaid 工作台
+# Mermaid 图形工坊
 
-状态：计划中，尚未实现。
+版本 0.1.0。本地与真实 Host 模型调用已验证；客户端导入尚未验收。
 
-目标：文字生成图表工作台：自然语言生成流程图、时序图并保存版本
+## 使用
 
-上游：https://github.com/mermaid-js/mermaid
+从总仓库运行 `pnpm workbench prepare mermaid`，然后 `pnpm workbench dev mermaid`。编辑源码即更新实际 Mermaid 图形；可保存草稿、打开/重命名/删除项目，导出 .mmd 源码与 SVG。语法错误保留原文和上一份预览，并明确标为未更新，SVG导出暂停。
 
-适配路线：React 页面调用 mermaid 渲染；Floatboat LLM 生成图表文本，服务端保存源码、版本和导出结果。
+AI生成先显示候选源码，点击采用后才替换当前内容。生成服务失败时不会插入示例图。
 
-限制：不是所见即所得拖拽编辑器；模型输出需要语法校验及错误提示。
+## 验证
 
-许可：MIT
+`pnpm test`：3项通过，含真实SQLite持久化、版本冲突和删除。Chrome实测渲染、保存刷新恢复、源码/SVG下载、无效语法恢复、真实Host生成与采用；1440px/375px及深色/reduced-motion通过。页面异常、失败请求、console error均为0。
+
+`pnpm workbench package mermaid` 生成 artifacts/mermaid-studio-0.1.0.fbworkbench，在 Floatboat「我的→工作台→导入工作台」安装。包默认不携带本地数据。
+
+## 范围
+
+40,000字符、300边上限；严格模式，系统字体，不加载外部图像/图标包。当前验收覆盖流程图；其它Mermaid图形需按实际输入验证。
