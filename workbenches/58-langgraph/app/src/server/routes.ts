@@ -1,102 +1,127 @@
-import { registerAutosaveRoutes } from "./autosave.ts";
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { WorkbenchHostError } from "../../sdk/host.mjs";
-import { isRecord } from "../contracts/project";
-import { createStore, StoreError } from "./store";
-export function registerRoutes<T>(
-  app: WorkbenchServer,
-  validate: (value: unknown) => T,
-  instructions: string,
-) {
-  const store = createStore(app.database, validate);
-  registerAutosaveRoutes(app, validate);
+import { isRecord, titleValue } from "../contracts/project.ts";
+import {
+  projectValue,
+  recordValue,
+  recordSchema,
+  idValue,
+} from "../contracts/review.ts";
+import { createStore, StoreError } from "./store.ts";
+import { registerAutosaveRoutes } from "./autosave.ts";
+import { createRunService } from "./runs.ts";
+
+export function registerRoutes(app: WorkbenchServer) {
+  const store = createStore(app.database, projectValue);
+  const runs = createRunService(
+    app.database,
+    async (source, signal, operationId) => {
+      try {
+        const result = await app.host.llm.generateObject(
+          {
+            prompt: source,
+            schema: recordSchema,
+            system:
+              "从用户资料中整理交付事项。只依据原文，缺少的日期留空；负责人未知时写待确认，不编造事实。checklist 是需人工检查的事项。",
+            maxOutputTokens: 3000,
+          },
+          { timeoutMs: 90000, signal, requestId: operationId },
+        );
+        return recordValue(result.object);
+      } catch (error) {
+        if (error instanceof WorkbenchHostError)
+          throw new Error(
+            "模型整理未完成，请打开 Floatboat 并检查模型连接。输入和运行记录已保留；也可使用填写资料模式。",
+          );
+        throw error;
+      }
+    },
+  );
+  registerAutosaveRoutes(app, projectValue);
   const fail = (error: unknown) =>
     Response.json(
       {
         error: {
           message:
-            error instanceof WorkbenchHostError
-              ? "模型服务暂不可用，请打开 Floatboat 并检查登录和模型设置。"
-              : error instanceof Error
-                ? error.message
-                : "操作失败，请重试。",
+            error instanceof Error ? error.message : "操作失败，请重试。",
         },
       },
-      {
-        status:
-          error instanceof StoreError
-            ? error.status
-            : error instanceof WorkbenchHostError
-              ? 503
-              : 400,
-      },
+      { status: error instanceof StoreError ? error.status : 400 },
     );
+  const guarded = async (work: () => unknown | Promise<unknown>) => {
+    try {
+      return await work();
+    } catch (error) {
+      return fail(error);
+    }
+  };
+  const command = (body: unknown) => {
+    if (!isRecord(body)) throw new Error("请求格式无效。");
+    return body;
+  };
+  const version = (body: Record<string, unknown>) => {
+    if (
+      typeof body.version !== "number" ||
+      !Number.isInteger(body.version) ||
+      body.version < 1
+    )
+      throw new Error("运行版本无效。");
+    return body.version;
+  };
   app.route("GET", "/api/projects", () => store.list());
-  app.route("GET", "/api/projects/:id", ({ params }) => {
-    try {
-      return store.get(params.id);
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("POST", "/api/projects", ({ body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
-      return Response.json(store.create(body.title, body.data), {
-        status: 201,
-      });
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("PUT", "/api/projects/:id", ({ params, body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
-      return store.update(params.id, body.title, body.data, body.revision);
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("DELETE", "/api/projects/:id", ({ params, body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
-      return store.remove(params.id, body.revision);
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("POST", "/api/generate", async ({ body }) => {
-    try {
-      if (
-        !isRecord(body) ||
-        typeof body.prompt !== "string" ||
-        !body.prompt.trim() ||
-        body.prompt.length > 12000
-      )
-        throw new Error("请输入 1–12000 个字符的要求。");
-      const result = await app.host.llm.generateText(
-        {
-          prompt: body.prompt,
-          system:
-            instructions +
-            " 只返回一个完整 JSON 对象，不要附加 Markdown 围栏或解释文字。",
-          maxOutputTokens: 6000,
-        },
-        { timeoutMs: 90000 },
+  app.route("GET", "/api/projects/:id", ({ params }) =>
+    guarded(() => store.get(params.id)),
+  );
+  app.route("GET", "/api/projects/:id/runs", ({ params }) =>
+    guarded(() => runs.list(params.id)),
+  );
+  app.route("GET", "/api/runs/:id", ({ params }) =>
+    guarded(() => runs.view(params.id)),
+  );
+  app.route("POST", "/api/runs", ({ body }) =>
+    guarded(() => {
+      const input = command(body);
+      return runs.start(
+        idValue(input.operationId),
+        idValue(input.projectId),
+        titleValue(input.title),
+        input.input,
       );
-      const text = result.text
-        .trim()
-        .replace(/^```(?:json)?\s*/, "")
-        .replace(/\s*```$/, "");
-      let value: unknown;
-      try {
-        value = JSON.parse(text);
-      } catch {
-        throw new Error("模型返回的内容不是完整 JSON，请调整要求重试。");
-      }
-      return validate(value);
-    } catch (error) {
-      return fail(error);
+    }),
+  );
+  app.route("POST", "/api/runs/:id/review", ({ params, body }) =>
+    guarded(() => {
+      const input = command(body);
+      return runs.resume(
+        params.id,
+        idValue(input.operationId),
+        version(input),
+        input.review,
+      );
+    }),
+  );
+  app.route("POST", "/api/runs/:id/recover", ({ params, body }) =>
+    guarded(() => runs.recover(params.id, version(command(body)))),
+  );
+  app.route("POST", "/api/runs/:id/cancel", ({ params, body }) =>
+    guarded(() => runs.cancel(params.id, version(command(body)))),
+  );
+  app.route("GET", "/api/model-status", async () => {
+    try {
+      const status = await app.host.capabilities.list({ domain: "llm" });
+      return {
+        available: status.capabilities.some(
+          (entry) =>
+            entry.operation === "generateObject" &&
+            entry.status === "available",
+        ),
+        message: "Floatboat 模型服务已连接",
+      };
+    } catch {
+      return {
+        available: false,
+        message: "模型服务未连接；填写资料与人工复核可正常使用",
+      };
     }
   });
 }

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.ef17668e-d3cf-41a9-bb2c-9b3160402d80",
   "registryName": "langgraph-studio",
-  "name": "LangGraph.js 工作台",
-  "description": "人工复核与可恢复的 Agent 流程台",
+  "name": "交付复核 · LangGraph",
+  "description": "资料整理、人工复核、检查点恢复与交付记录",
   "version": "0.4.0",
-  "changelog": "AI 工作台：业务项目自动保存、结果复核和上游服务接入。",
+  "changelog": "真实 LangGraph 流程与 SQLite 检查点，自动保存复核草稿与独立运行记录。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -21,5 +21,13 @@
   ],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
 }

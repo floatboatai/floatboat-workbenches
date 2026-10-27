@@ -22,6 +22,8 @@
     "workbench:catalog": "node tooling/catalog.mjs"
   },
   "dependencies": {
+    "@langchain/langgraph": "1.5.3",
+    "@langchain/langgraph-checkpoint": "1.2.1",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
