@@ -1,3 +1,4 @@
+import { AutoStatus, AutoFeedback } from "./AutosaveStatus";
 import { useEffect, useRef, useState } from "react";
 import {
   Download,
@@ -13,6 +14,7 @@ import {
   importProject,
   seed,
   validateDrawing,
+  restoreDrawingDraft,
   type Drawing,
   type DrawingResult,
   type Template,
@@ -30,7 +32,10 @@ const templates: { id: Template; name: string; caption: string }[] = [
   { id: "frame", name: "框形刀模", caption: "外轮廓 · 内开口" },
 ];
 export function Studio() {
-  const p = useProjects(seed, validateDrawing, "安装面板 01"),
+  const p = useProjects(seed, validateDrawing, "安装面板 01", {
+      storageKey: "makerjs",
+      restoreDraftData: restoreDrawingDraft,
+    }),
     file = useRef<HTMLInputElement>(null);
   const [rendered, setRendered] = useState<{
       signature: string;
@@ -106,10 +111,7 @@ export function Studio() {
     try {
       if (chosen.size > 100000) throw new Error("项目文件不能超过 100 KB。");
       const decoded = importProject(JSON.parse(await chosen.text()));
-      if (p.dirty && !confirm("当前有未保存的修改，确定用导入参数替换吗？"))
-        return;
-      p.setData(decoded.data);
-      p.setTitle(decoded.title);
+      await p.replace(decoded.data, decoded.title);
       p.setError("");
     } catch (error) {
       p.report(error);
@@ -152,12 +154,11 @@ export function Studio() {
             新建
           </button>
           <button
-            className="primary"
             disabled={locked || !!validation}
             onClick={() => void p.save()}
           >
             <Save size={15} aria-hidden="true" />
-            {p.busy ? "保存中…" : "保存图纸"}
+            {p.busy ? "保存中…" : "立即保存"}
           </button>
         </div>
       </header>
@@ -173,15 +174,7 @@ export function Studio() {
             onChange={(event) => p.setTitle(event.target.value)}
           />
         </label>
-        <span role="status">
-          {p.loading
-            ? "读取项目…"
-            : p.dirty
-              ? "● 有未保存修改"
-              : p.current
-                ? "已保存"
-                : "新图纸"}
-        </span>
+        <AutoStatus state={p.autoState} loading={p.loading} />
         <div className="project-tools">
           <button onClick={() => file.current?.click()} disabled={locked}>
             <FolderOpen size={15} aria-hidden="true" />
@@ -226,6 +219,12 @@ export function Studio() {
         </div>
       </div>
       <Notice error={p.error} notice={p.notice} />
+      <AutoFeedback
+        state={p.autoState}
+        onRetry={() => void p.save()}
+        onExport={p.exportDraft}
+        onReload={p.current ? () => void p.open(p.current!.id) : undefined}
+      />
       <div className="work-area">
         <section className="parameters" id="parameters">
           <h1>

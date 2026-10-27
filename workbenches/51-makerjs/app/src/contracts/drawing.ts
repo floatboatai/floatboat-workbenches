@@ -127,3 +127,31 @@ export function importProject(value: unknown) {
     throw new Error("项目 JSON 需要 schemaVersion:1、项目名称和 parameters。");
   return { title: value.title.trim(), data: validateDrawing(value.parameters) };
 }
+
+export function restoreDrawingDraft(value: unknown): Drawing {
+  if (
+    !isRecord(value) ||
+    !["panel", "perforated", "frame"].includes(String(value.template))
+  )
+    throw new Error("图纸草稿格式无效。");
+  const keys = [
+    "width",
+    "height",
+    "radius",
+    "diameter",
+    "inset",
+    "columns",
+    "rows",
+    "pitchX",
+    "pitchY",
+    "wall",
+  ] as const;
+  const draft = { ...seed, template: value.template as Template };
+  for (const key of keys) {
+    const n = value[key];
+    if (typeof n !== "number" || !Number.isFinite(n) || Math.abs(n) > 1000000)
+      throw new Error("草稿尺寸格式无效。");
+    draft[key] = n;
+  }
+  return draft;
+}
