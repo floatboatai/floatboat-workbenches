@@ -25,6 +25,18 @@ export function App() {
   }, [project.data]);
   const changed = draft !== JSON.stringify(project.data.spec, null, 2),
     ready = status === "图表已更新" && !changed;
+  useEffect(() => {
+    if (!changed) return;
+    const before = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", before);
+    return () => window.removeEventListener("beforeunload", before);
+  }, [changed]);
+  function discardDraft() {
+    return !changed || confirm("有尚未应用的 JSON 修改，确定放弃吗？");
+  }
   const data =
     isRecord(project.data.spec.data) &&
     Array.isArray(project.data.spec.data.values)
@@ -57,10 +69,17 @@ export function App() {
           items={project.items}
           id={project.current?.id}
           disabled={project.busy}
-          onOpen={(id) => void project.open(id)}
+          onOpen={(id) => {
+            if (project.dirty || discardDraft()) void project.open(id);
+          }}
         />
         <div className="header-actions">
-          <button onClick={project.fresh} disabled={project.busy}>
+          <button
+            onClick={() => {
+              if (project.dirty || discardDraft()) project.fresh();
+            }}
+            disabled={project.busy}
+          >
             新建
           </button>
           <button
@@ -92,6 +111,7 @@ export function App() {
             AI 拟定规格
           </button>
           <button
+            disabled={changed}
             onClick={() =>
               download(
                 new Blob([JSON.stringify(project.data.spec, null, 2)], {
@@ -117,7 +137,9 @@ export function App() {
           <button
             className="danger"
             disabled={!project.current || project.busy}
-            onClick={() => void project.remove()}
+            onClick={() => {
+              if (discardDraft()) void project.remove();
+            }}
           >
             删除
           </button>
@@ -149,7 +171,12 @@ export function App() {
           {project.suggestion ? (
             <div className="proposal">
               <pre>{JSON.stringify(project.suggestion.spec, null, 2)}</pre>
-              <button className="accent" onClick={project.applySuggestion}>
+              <button
+                className="accent"
+                onClick={() => {
+                  if (discardDraft()) project.applySuggestion();
+                }}
+              >
                 采用候选规格
               </button>
             </div>

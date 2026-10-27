@@ -13,3 +13,5 @@
 使用 `vega.parse(spec, undefined, {ast:true})` 与 `expressionInterpreter`，无需 unsafe-eval；图形、数据表和导出均来自内嵌data.values。仅支持基础单视图，1–10000行、500000字符；外部数据URL、图片、href拒绝。
 
 `pnpm workbench package vega-lite` 生成 artifacts/vega-lite-studio-0.1.0.fbworkbench，使用Floatboat「我的→工作台→导入工作台」。
+
+未应用 JSON 草稿也有离开保护；新建、切换、删除或采用候选前取消可保留原文，关闭页面触发浏览器提示。草稿未应用时禁止导出旧规格。
