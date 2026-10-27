@@ -2,6 +2,7 @@ import { area, type Plot } from "../contracts/model";
 const numeric = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 });
 interface Props {
   plots: Plot[];
+  draftIds?:string[];
   selected: string;
   busy: boolean;
   onSelect: (id: string) => void;
@@ -10,6 +11,7 @@ interface Props {
 }
 export function PlotRegister({
   plots,
+  draftIds=[],
   selected,
   busy,
   onSelect,
@@ -45,7 +47,7 @@ export function PlotRegister({
                 {plot.name || "未命名分区"}
                 <small>
                   {numeric.format(area(plot.coordinates) / 10000)} ha ·{" "}
-                  {plot.coordinates.length - 1}个顶点
+                  {plot.coordinates.length - 1}个顶点{draftIds.includes(plot.id)?" · 坐标草稿":""}
                 </small>
               </span>
               <span aria-hidden="true">↗</span>

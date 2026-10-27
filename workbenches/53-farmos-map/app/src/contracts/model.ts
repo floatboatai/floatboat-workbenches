@@ -260,3 +260,31 @@ export function areaCsv(model: Model) {
     ].join("\r\n")
   );
 }
+
+export function restoreDraftData(value: unknown): Model {
+  if (!isRecord(value) || !Array.isArray(value.plots))
+    throw new Error("地块草稿结构无效。");
+  const names = value.plots.map((plot) => {
+    if (
+      !isRecord(plot) ||
+      typeof plot.name !== "string" ||
+      plot.name.length > 80
+    )
+      throw new Error("地块草稿名称无效。");
+    return plot.name;
+  });
+  const clean = validate({
+    ...value,
+    plots: value.plots.map((plot, index) => {
+      if (!isRecord(plot)) throw new Error("地块草稿无效。");
+      return {
+        ...plot,
+        name: names[index].trim() ? names[index] : "未命名分区",
+      };
+    }),
+  });
+  return {
+    ...clean,
+    plots: clean.plots.map((plot, index) => ({ ...plot, name: names[index] })),
+  };
+}

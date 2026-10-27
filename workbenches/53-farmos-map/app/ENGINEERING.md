@@ -9,3 +9,7 @@ server/routes.ts 为同源CRUD；store.ts 使用SQLite参数化SQL与revision乐
 ui/App.tsx 编排项目和未应用坐标，PlotRegister/MapSheet/CoordinateEditor/ExportBar分担展示。地图懒加载，ResizeObserver、交互、Map实例在卸载清理。坐标草稿与圈绘状态有beforeunload及新建/切换/导入保护；未应用时禁止导出旧数据。地图编辑期间锁定坐标编辑，避免两种输入互相覆盖；持久化忙碌期间主工作区inert。
 
 验证：pnpm workbench:check、pnpm test；7项测试覆盖实际面积公式/OpenLayers交叉对照、输入边界、往返导入导出、CSV与SQLite重开/版本冲突。Chrome验证真实圈绘、拖点、键盘坐标、错误恢复、保存重开、导出独立解析、375px及dark/reduced-motion。CSP不变且无外部资源请求。版本冲突回归刻意产生一次HTTP409（UI保留输入），不计为未处理异常。Floatboat客户端导入尚未验证。
+
+## 0.2.0 自动保存与恢复
+
+使用主仓库统一autosave-contracts/server/client/cache/requests/workspace模块，追加0003_autosave迁移，不修改既有迁移。工作副本包括title、data及extra草稿；700ms防抖、串行提交、documentId/mutationId去重和revision冲突保护。只有合法业务模型写入projects；未完成输入保留在工作草稿。后台同步不锁定编辑器，自动保存状态与渲染/应用状态分别呈现。独立编辑器以documentKey/loadEpoch识别文档切换，禁止根据自动创建的current.id重置输入。

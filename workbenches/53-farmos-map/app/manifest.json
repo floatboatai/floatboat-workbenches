@@ -4,8 +4,8 @@
   "registryName": "farmos-map-studio",
   "name": "田块记录台",
   "description": "地块圈绘与坐标编辑、分区面积核对、GeoJSON/项目/面积表导出",
-  "version": "0.1.0",
-  "changelog": "首版：离线地块地图、边界编辑、SQLite记录与导入导出。",
+  "version": "0.2.0",
+  "changelog": "统一自动保存、工作草稿恢复、离线/冲突处理，以及按专业任务重组布局。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

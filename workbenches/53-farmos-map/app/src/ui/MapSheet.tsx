@@ -109,7 +109,7 @@ export function MapSheet({
       <div className="map-instruction" role="status">
         {mode === "draw" ? (
           <>
-            <span>点击添加至少3个顶点，双击或点「完成圈绘」闭合。</span>
+            <span>点击添加至少3个顶点，完成圈绘后自动记录；未闭合可取消。</span>
             <div>
               <button onClick={() => mapRef.current?.undo()}>撤销上一点</button>
               <button

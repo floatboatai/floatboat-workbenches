@@ -94,6 +94,7 @@ export function FieldMap({ ref, ...props }: Props) {
     instance.map.getView().setZoom(16);
     const grid = new Graticule({
       showLabels: true,
+      lonLabelPosition: 0.09,
       wrapX: false,
       targetSize: 160,
       intervals: [1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001],

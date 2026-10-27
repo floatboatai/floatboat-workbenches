@@ -1,3 +1,5 @@
+import { AutosaveStatus } from "./AutosaveStatus";
+import { coordinateEditor } from "./coordinate-draft";
 import { RecordFields } from "./RecordFields";
 import { MapSheet } from "./MapSheet";
 import { PlotRegister } from "./PlotRegister";
@@ -8,36 +10,44 @@ import {
   importDocument,
   seed,
   validate,
+  restoreDraftData,
   type Model,
-  type Plot,
   type Position,
 } from "../contracts/model";
 import { useProjects, ProjectPicker, Notice } from "./workspace";
 import type { MapHandle, MapMode } from "./FieldMap";
-const rowsFor = (plot: Plot | undefined): [string, string][] =>
-  plot
-    ? plot.coordinates
-        .slice(0, -1)
-        .map((point) => [String(point[0]), String(point[1])])
-    : [];
 export function App() {
-  const project = useProjects(seed, validate, "河湾地块记录（示例）");
-  const [selected, setSelected] = useState(seed.plots[0].id),
-    [mode, setMode] = useState<MapMode>("browse"),
+  const project = useProjects(seed, validate, "河湾地块记录（示例）", {
+    storageKey: "farmos-map-studio",
+    restoreDraftData,
+  });
+  const [mode, setMode] = useState<MapMode>("browse"),
     [fitToken, setFitToken] = useState(0),
     [ready, setReady] = useState(false),
     [feedback, setFeedback] = useState(""),
-    [coordinateError, setCoordinateError] = useState(""),
-    [vertices, setVertices] = useState<[string, string][]>(() =>
-      rowsFor(seed.plots[0]),
-    );
+    [coordinateError, setCoordinateError] = useState("");
+  const {
+    selected,
+    setSelected,
+    active,
+    vertices,
+    draftIds,
+    coordinateDirty,
+    setVertices,
+    clearCoordinates,
+  } = coordinateEditor(project);
+  const pending = draftIds.length > 0 || mode === "draw";
   const map = useRef<MapHandle>(null),
     file = useRef<HTMLInputElement>(null),
     latest = useRef({ project, pending: false });
-  const active = project.data.plots.find((plot) => plot.id === selected),
-    coordinateDirty =
-      JSON.stringify(vertices) !== JSON.stringify(rowsFor(active)),
-    pending = coordinateDirty || mode === "draw";
+  const saveState =
+    draftIds.length > 0 && project.autoState.phase === "saved"
+      ? {
+          ...project.autoState,
+          phase: "draft" as const,
+          message: `${draftIds.length}个分区的坐标草稿已自动保存，尚未应用边界。`,
+        }
+      : project.autoState;
   latest.current = { project, pending };
   const valid = useMemo(() => {
     try {
@@ -50,57 +60,49 @@ export function App() {
     }
   }, [project.data]);
   useEffect(() => {
-    if (!project.data.plots.some((plot) => plot.id === selected))
-      setSelected(project.data.plots[0]?.id ?? "");
-  }, [project.data, selected]);
-  useEffect(() => {
-    setVertices(rowsFor(active));
-    setCoordinateError("");
-  }, [active?.id, active?.coordinates]);
-  useEffect(() => {
     setFitToken((value) => value + 1);
     setMode("browse");
-  }, [project.current?.id]);
+    setCoordinateError("");
+  }, [project.documentKey, project.loadEpoch]);
   useEffect(() => {
-    if (!pending) return;
+    setCoordinateError("");
+  }, [selected]);
+  useEffect(() => {
+    if (mode !== "draw") return;
     const before = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", before);
     return () => window.removeEventListener("beforeunload", before);
-  }, [pending]);
+  }, [mode]);
   function report(error: unknown) {
     project.report(error);
   }
-  function discardPending() {
-    if (pending && !confirm("有未应用的坐标或未完成的圈绘，确定放弃吗？"))
+  function cancelSketch() {
+    if (mode === "draw" && !confirm("当前圈绘尚未闭合，确定取消这次圈绘吗？"))
       return false;
-    setVertices(rowsFor(active));
-    setCoordinateError("");
     map.current?.cancel();
     setMode("browse");
     return true;
   }
-  function leaveProject() {
+  function discardPending() {
     if (
-      (project.dirty || pending) &&
-      !confirm("有未保存或未应用的修改，确定放弃并切换项目吗？")
+      coordinateDirty &&
+      !confirm("当前分区坐标尚未应用，确定还原后编辑地图吗？")
     )
       return false;
-    map.current?.cancel();
-    setMode("browse");
-    setVertices(rowsFor(active));
+    if (!cancelSketch()) return false;
+    clearCoordinates(selected);
     setCoordinateError("");
-    setFeedback("");
     return true;
   }
   function selectPlot(id: string) {
-    if (id === selected || !discardPending()) return;
+    if (id === selected || !cancelSketch()) return;
     setSelected(id);
   }
   function applyModel(data: Model, message: string) {
-    project.setData(validate(data));
+    project.setData(restoreDraftData(data));
     project.setError("");
     setFeedback(message);
   }
@@ -129,7 +131,7 @@ export function App() {
             },
           ],
         },
-        "分区已加入，请命名并保存。",
+        "分区已加入，可继续编辑名称和备注。",
       );
       setSelected(id);
     } catch (error) {
@@ -139,7 +141,7 @@ export function App() {
     }
   }
   function newCoordinates() {
-    if (!discardPending()) return;
+    if (!cancelSketch()) return;
     const [x, y] = active?.coordinates[0] ?? [120.15, 30.25];
     const dx = x < 179.998 ? 0.001 : -0.001,
       dy = y < 84.998 ? 0.001 : -0.001;
@@ -174,6 +176,7 @@ export function App() {
         },
         "坐标已应用，面积已重新计算。",
       );
+      clearCoordinates(selected);
       setCoordinateError("");
       setFitToken((value) => value + 1);
     } catch (error) {
@@ -183,28 +186,29 @@ export function App() {
     }
   }
   async function importFile(selectedFile: File) {
-    const targetId = latest.current.project.current?.id;
+    const targetId = latest.current.project.documentKey;
     try {
       if (selectedFile.size > 700000)
         throw new Error("文件超过700KB，请减少分区或顶点。");
       const raw: unknown = JSON.parse(await selectedFile.text());
       const imported = importDocument(raw);
       const state = latest.current;
-      if (state.project.current?.id !== targetId)
+      if (state.project.documentKey !== targetId)
         throw new Error("项目已切换，请在当前项目重新导入文件。");
+      if (!cancelSketch()) return;
+      const title =
+        imported.title ??
+        (selectedFile.name
+          .replace(/\.[^.]+$/, "")
+          .trim()
+          .slice(0, 120) ||
+          "导入地块");
       if (
-        (state.project.dirty || state.pending) &&
-        !confirm("导入将替换当前全部分区和未应用修改，是否继续？")
+        await state.project.replace(imported.data, title, {
+          selectedId: imported.data.plots[0]?.id ?? "",
+        })
       )
-        return;
-      map.current?.cancel();
-      setMode("browse");
-      state.project.setData(imported.data);
-      if (imported.title) state.project.setTitle(imported.title);
-      setSelected(imported.data.plots[0]?.id ?? "");
-      setFitToken((value) => value + 1);
-      setFeedback(`已导入${imported.data.plots.length}个分区，请检查后保存。`);
-      state.project.setError("");
+        setFeedback(`已导入${imported.data.plots.length}个分区为新项目。`);
     } catch (error) {
       report(
         error instanceof SyntaxError
@@ -233,33 +237,39 @@ export function App() {
           id={project.current?.id}
           disabled={project.busy}
           onOpen={(id) => {
-            if (leaveProject()) void project.open(id, true);
+            if (cancelSketch())
+              void project.open(id).then((opened) => {
+                if (opened) setFeedback("");
+              });
           }}
         />
         <div className="header-buttons">
           <button
             disabled={project.busy}
             onClick={() => {
-              if (leaveProject()) project.fresh(true);
+              if (cancelSketch())
+                void project.fresh().then((opened) => {
+                  if (opened) setFeedback("");
+                });
             }}
           >
             新建项目
           </button>
           <button
             className="primary"
-            disabled={project.busy || blocked}
+            disabled={project.busy}
             onClick={() => {
               setFeedback("");
               void project.save();
             }}
           >
-            {project.busy ? "处理中…" : "保存记录"}
+            {project.busy ? "处理中…" : "立即保存"}
           </button>
         </div>
       </header>
       <section className="project-heading">
         <div>
-          <p className="eyebrow">地块边界 · 分区记录 · 面积核对</p>
+          <p className="eyebrow">当前地块项目</p>
           <label>
             <span className="sr-only">项目名称</span>
             <input
@@ -273,20 +283,16 @@ export function App() {
             />
           </label>
         </div>
-        <div className="project-state" role="status">
-          <span
-            className={
-              project.dirty || pending ? "state-dot changed" : "state-dot"
-            }
-          />
-          {pending
-            ? "有编辑尚未应用"
-            : project.dirty
-              ? "有未保存的修改"
-              : project.current
-                ? "记录已保存"
-                : "示例项目，尚未保存"}
-        </div>
+        <AutosaveStatus
+          state={saveState}
+          onRetry={() => void project.save()}
+          onExport={project.exportDraft}
+          onReload={
+            project.current
+              ? () => void project.open(project.current!.id)
+              : undefined
+          }
+        />
       </section>
       <Notice
         error={
@@ -301,14 +307,6 @@ export function App() {
         </p>
       ) : null}
       <div className="workspace-grid" inert={project.busy}>
-        <PlotRegister
-          plots={project.data.plots}
-          selected={selected}
-          busy={project.busy}
-          onSelect={selectPlot}
-          onNew={newCoordinates}
-          onImport={() => file.current?.click()}
-        />
         <MapSheet
           mapRef={map}
           data={project.data}
@@ -342,59 +340,74 @@ export function App() {
             }
           }}
         />
+        <div className="field-sidebar">
+          <PlotRegister
+            plots={project.data.plots}
+            draftIds={draftIds}
+            selected={selected}
+            busy={project.busy}
+            onSelect={selectPlot}
+            onNew={newCoordinates}
+            onImport={() => file.current?.click()}
+          />
+          <section
+            id="plot-record"
+            className="plot-record"
+            inert={project.busy}
+          >
+            <header>
+              <div>
+                <p className="eyebrow">FIELD NOTES</p>
+                <h2>{active ? "分区记录" : "新增或选择一个分区"}</h2>
+              </div>
+              {active ? (
+                <button
+                  className="danger"
+                  onClick={() => {
+                    if (confirm("删除此分区及未应用的坐标修改？")) {
+                      applyModel(
+                        {
+                          ...project.data,
+                          plots: project.data.plots.filter(
+                            (plot) => plot.id !== selected,
+                          ),
+                        },
+                        "分区已移除。",
+                      );
+                      setMode("browse");
+                    }
+                  }}
+                >
+                  移除分区
+                </button>
+              ) : null}
+            </header>
+            {active ? (
+              <>
+                <RecordFields active={active} onChange={updateRecord} />
+                <CoordinateEditor
+                  vertices={vertices}
+                  onVertices={setVertices}
+                  dirty={coordinateDirty}
+                  error={coordinateError}
+                  drawing={mode !== "browse"}
+                  onApply={applyCoordinates}
+                  onReset={() => {
+                    clearCoordinates(selected);
+                    setCoordinateError("");
+                  }}
+                />
+                <p className="area-method">
+                  面积按半径6,371,008.8m的球面计算，1ha =
+                  10,000m²。结果用于边界核对，不替代实地测绘；显示投影不参与面积计算。
+                </p>
+              </>
+            ) : (
+              <p>使用「坐标新增分区」创建可编辑边界，或在地图上圈绘。</p>
+            )}
+          </section>
+        </div>
       </div>
-      <section id="plot-record" className="plot-record" inert={project.busy}>
-        <header>
-          <div>
-            <p className="eyebrow">FIELD NOTES</p>
-            <h2>{active ? "分区记录" : "新增或选择一个分区"}</h2>
-          </div>
-          {active ? (
-            <button
-              className="danger"
-              onClick={() => {
-                if (confirm("删除此分区及未应用的坐标修改？")) {
-                  applyModel(
-                    {
-                      ...project.data,
-                      plots: project.data.plots.filter(
-                        (plot) => plot.id !== selected,
-                      ),
-                    },
-                    "分区已移除，保存后生效。",
-                  );
-                  setMode("browse");
-                }
-              }}
-            >
-              移除分区
-            </button>
-          ) : null}
-        </header>
-        {active ? (
-          <>
-            <RecordFields active={active} onChange={updateRecord} />
-            <CoordinateEditor
-              vertices={vertices}
-              onVertices={setVertices}
-              dirty={coordinateDirty}
-              error={coordinateError}
-              drawing={mode !== "browse"}
-              onApply={applyCoordinates}
-              onReset={() => {
-                setVertices(rowsFor(active));
-                setCoordinateError("");
-              }}
-            />
-            <p className="area-method">
-              面积按半径6,371,008.8m的球面计算，1ha =
-              10,000m²。结果用于边界核对，不替代实地测绘；显示投影不参与面积计算。
-            </p>
-          </>
-        ) : (
-          <p>使用「坐标新增分区」创建可编辑边界，或在地图上圈绘。</p>
-        )}
-      </section>
       <ExportBar
         title={project.title}
         data={project.data}

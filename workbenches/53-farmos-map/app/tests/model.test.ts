@@ -1,3 +1,5 @@
+import {readRows,withRows,withoutRows,pendingCoordinates,rowsFor} from "../src/ui/coordinate-draft.ts";
+import { restoreDraftData } from "../src/contracts/model.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DatabaseSync } from "node:sqlite";
@@ -182,3 +184,14 @@ test("SQLite重开恢复与revision更新删除冲突不覆盖记录", () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("未命名分区草稿可恢复但正式校验仍拒绝空名称", () => {
+  const draft = { ...seed, plots: [{ ...seed.plots[0], name: "" }] };
+  assert.equal(restoreDraftData(draft).plots[0].name, "");
+  assert.throws(() => validate(draft));
+  assert.throws(() =>
+    restoreDraftData({ ...draft, plots: [{ ...draft.plots[0], name: 42 }] }),
+  );
+});
+
+test("各分区未应用坐标独立保存并可序列化恢复",()=>{const first=rowsFor(seed.plots[0]);first[0][0]='120.15bad';const second=rowsFor(seed.plots[1]);second[1][1]='尚未填完';let extra=withRows({},seed.plots[0].id,first);extra=withRows(extra,seed.plots[1].id,second);extra=JSON.parse(JSON.stringify(extra));assert.deepEqual(readRows(extra,seed.plots[0]),first);assert.deepEqual(readRows(extra,seed.plots[1]),second);assert.deepEqual(pendingCoordinates(extra,seed),seed.plots.map(plot=>plot.id));const reset=withoutRows(extra,seed.plots[0].id);assert.deepEqual(readRows(reset,seed.plots[0]),rowsFor(seed.plots[0]));assert.deepEqual(readRows(reset,seed.plots[1]),second);});

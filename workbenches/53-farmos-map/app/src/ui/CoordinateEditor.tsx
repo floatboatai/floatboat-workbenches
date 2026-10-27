@@ -18,7 +18,7 @@ export function CoordinateEditor({
   onReset,
 }: Props) {
   return (
-    <details className="coordinate-editor">
+    <details className="coordinate-editor" open={dirty || undefined}>
       <summary>
         坐标编辑 · {vertices.length}个顶点{" "}
         <span>{dirty ? "待应用" : "键盘可操作"}</span>
@@ -50,6 +50,7 @@ export function CoordinateEditor({
                     name={`lon-${index}`}
                     autoComplete="off"
                     inputMode="decimal"
+                        maxLength={64}
                     disabled={drawing}
                     value={point[0]}
                     onChange={(event) =>
@@ -67,6 +68,7 @@ export function CoordinateEditor({
                     name={`lat-${index}`}
                     autoComplete="off"
                     inputMode="decimal"
+                        maxLength={64}
                     disabled={drawing}
                     value={point[1]}
                     onChange={(event) =>
