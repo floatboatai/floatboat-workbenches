@@ -485,3 +485,206 @@ select:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* 节点IDE：固定画布、可收起检查器与独立滚动的运行控制台。 */
+.flow-studio {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.command-bar {
+  padding: 10px 18px;
+  gap: 15px;
+  min-height: 54px;
+  flex-shrink: 0;
+}
+.flow-brand {
+  min-width: 155px;
+  gap: 9px;
+}
+.flow-brand h1 {
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.flow-brand span {
+  font:
+    9px ui-monospace,
+    monospace;
+}
+.project-picker select {
+  max-width: 200px;
+  padding: 7px 9px;
+}
+.command-actions {
+  gap: 5px;
+}
+.command-actions button {
+  padding: 6px 9px;
+  min-height: 32px;
+  font-size: 11px;
+}
+.flow-title {
+  padding: 9px 18px;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+.flow-title input {
+  font:
+    13px ui-monospace,
+    monospace;
+}
+.flow-title span {
+  font-size: 10px;
+}
+.flow-layout {
+  min-height: 240px;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) 290px;
+}
+.flow-layout.without-inspector {
+  grid-template-columns: minmax(0, 1fr);
+}
+.without-inspector .inspector {
+  display: none;
+}
+.flow-canvas {
+  height: 100%;
+  min-height: 240px;
+}
+.inspector {
+  min-height: 0;
+  max-height: none;
+  padding: 17px;
+  overflow: auto;
+}
+.run-log {
+  flex: 0 0 225px;
+  min-height: 0;
+  max-height: 35dvh;
+  overflow: auto;
+  padding: 12px 18px;
+  background: #101820;
+}
+.run-log[hidden] {
+  display: none;
+}
+.run-log > header {
+  position: sticky;
+  top: -12px;
+  background: #101820;
+  z-index: 2;
+  padding: 7px 0 10px;
+  border-bottom: 1px solid var(--line);
+  gap: 12px;
+}
+.run-log h2 {
+  font:
+    12px ui-monospace,
+    monospace;
+  color: var(--accent);
+}
+.run-log header > span {
+  font-size: 10px;
+}
+.run-log header > button {
+  font-size: 10px;
+  min-height: 28px;
+  padding: 5px 8px;
+}
+.run-output {
+  font-size: 13px;
+  margin: 10px 0;
+  padding: 10px 12px;
+}
+.step-results {
+  gap: 6px;
+}
+.step-results details {
+  border-radius: 2px;
+  padding: 8px 10px;
+  min-width: 140px;
+}
+.step-results summary {
+  font-size: 11px;
+}
+.notice {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  font-size: 11px;
+}
+.ai-flow {
+  position: absolute;
+  z-index: 10;
+  right: 18px;
+  top: 60px;
+  max-height: calc(100dvh - 90px);
+  overflow: auto;
+  width: min(520px, calc(100% - 36px));
+  display: block;
+  padding: 20px;
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 35px #0004;
+}
+.ai-flow > div {
+  margin-top: 20px;
+}
+.react-flow__node-step {
+  border-radius: 5px;
+}
+.flow-step {
+  padding: 14px 16px;
+}
+@media (max-width: 650px) {
+  .flow-studio {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .command-bar {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .command-actions {
+    flex-wrap: wrap;
+  }
+  .command-actions button {
+    min-height: 36px;
+  }
+  .flow-title {
+    padding: 10px 14px;
+  }
+  .flow-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .flow-canvas {
+    height: 360px;
+    min-height: 360px;
+  }
+  .inspector {
+    max-height: 500px;
+    border-left: 0;
+  }
+  .run-log {
+    flex: auto;
+    max-height: none;
+    padding: 14px;
+  }
+  .run-log > header {
+    position: static;
+  }
+  .notice {
+    padding: 10px 14px;
+  }
+  .ai-flow {
+    position: fixed;
+    top: 15vh;
+    right: 14px;
+    width: calc(100% - 28px);
+    max-height: 70vh;
+  }
+}

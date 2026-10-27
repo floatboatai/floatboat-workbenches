@@ -1,3 +1,4 @@
+import { AutoStatus, AutoFeedback } from "./AutosaveStatus";
 import { lazy, Suspense, useState } from "react";
 import {
   Activity,
@@ -13,6 +14,7 @@ import {
   seed,
   signature,
   validateFlow,
+  restoreFlowDraft,
   type Operation,
   type RunResult,
 } from "../contracts/flow";
@@ -34,14 +36,21 @@ const operationLabels: Record<Operation, string> = {
   output: "输出",
 };
 export function Studio() {
-  const p = useProjects(seed, validateFlow, "文本处理流程");
+  const p = useProjects(seed, validateFlow, "文本处理流程", {
+    storageKey: "react-flow",
+    restoreDraftData: restoreFlowDraft,
+  });
   const [selected, setSelected] = useState("input"),
     [operation, setOperation] = useState<Operation>("uppercase"),
     [from, setFrom] = useState("input"),
     [to, setTo] = useState("output"),
     [running, setRunning] = useState(false),
-    [prompt, setPrompt] = useState(""),
     [showAi, setShowAi] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(true),
+    [consoleOpen, setConsoleOpen] = useState(true);
+  const prompt = typeof p.draft.prompt === "string" ? p.draft.prompt : "";
+  const setPrompt = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, prompt: value }));
   const locked = p.busy || p.aiBusy || running,
     node =
       p.data.nodes.find((value) => value.id === selected) || p.data.nodes[0];
@@ -125,6 +134,7 @@ export function Studio() {
   }
   async function runFlow() {
     setRunning(true);
+    setConsoleOpen(true);
     p.setError("");
     try {
       const value = await request("/api/run", {
@@ -151,7 +161,7 @@ export function Studio() {
           <Activity aria-hidden="true" size={25} />
           <div>
             <h1>流程实验室</h1>
-            <span>文本进入，结果出来</span>
+            <span>TEXT FLOW</span>
           </div>
         </div>
         <ProjectPicker
@@ -167,7 +177,7 @@ export function Studio() {
           </button>
           <button onClick={() => void p.save()} disabled={locked}>
             <Save aria-hidden="true" size={15} />
-            保存
+            立即保存
           </button>
           <button
             onClick={() =>
@@ -188,6 +198,19 @@ export function Studio() {
           >
             <Sparkles aria-hidden="true" size={15} />
             生成配置
+          </button>
+          <button
+            aria-expanded={inspectorOpen}
+            aria-controls="inspector"
+            onClick={() => setInspectorOpen((value) => !value)}
+          >
+            {inspectorOpen ? "收起参数" : "步骤参数"}
+          </button>
+          <button
+            aria-expanded={consoleOpen}
+            onClick={() => setConsoleOpen((value) => !value)}
+          >
+            {consoleOpen ? "收起控制台" : "运行控制台"}
           </button>
           <button
             className="run-button"
@@ -212,22 +235,18 @@ export function Studio() {
           disabled={locked}
           onChange={(event) => p.setTitle(event.target.value)}
         />
-        <span role="status">
-          {p.loading
-            ? "正在加载…"
-            : p.busy
-              ? "正在保存…"
-              : p.dirty
-                ? "尚未保存"
-                : p.current
-                  ? "已保存"
-                  : "新流程"}
-        </span>
+        <AutoStatus state={p.autoState} loading={p.loading} />
         <span className="flow-count">
           {p.data.nodes.length} 个步骤 / {p.data.edges.length} 条连接
         </span>
       </div>
       <Notice error={p.error} notice={p.notice} />
+      <AutoFeedback
+        state={p.autoState}
+        onRetry={() => void p.save()}
+        onExport={p.exportDraft}
+        onReload={p.current ? () => void p.open(p.current!.id) : undefined}
+      />
       {showAi ? (
         <section className="ai-flow">
           <form
@@ -265,12 +284,15 @@ export function Studio() {
               <button className="run-button" onClick={p.applySuggestion}>
                 采用配置
               </button>
+              <button onClick={p.discardSuggestion}>放弃建议</button>
               <p>采用后检查连接，再运行。</p>
             </div>
           ) : null}
         </section>
       ) : null}
-      <div className="flow-layout">
+      <div
+        className={`flow-layout ${inspectorOpen ? "" : "without-inspector"}`}
+      >
         <section className="canvas-region" aria-label="流程画布">
           <RenderBoundary>
             <Suspense
@@ -281,10 +303,13 @@ export function Studio() {
               }
             >
               <FlowCanvas
-                key={p.current?.id || "new"}
+                key={p.documentKey}
                 data={p.data}
                 onChange={p.setData}
-                onSelect={setSelected}
+                onSelect={(id) => {
+                  setSelected(id);
+                  setInspectorOpen(true);
+                }}
                 locked={locked}
               />
             </Suspense>
@@ -435,9 +460,9 @@ export function Studio() {
           </ul>
         </aside>
       </div>
-      <section className="run-log">
+      <section className="run-log" hidden={!consoleOpen}>
         <header>
-          <h2>执行结果</h2>
+          <h2>运行控制台</h2>
           {run ? (
             <span>
               {stale

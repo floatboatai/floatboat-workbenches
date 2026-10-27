@@ -213,3 +213,29 @@ export function validateGeneratedFlow(value: unknown): FlowDocument {
   if (!isRecord(value)) throw new Error("流程配置无效。");
   return validateFlow({ nodes: value.nodes, edges: value.edges });
 }
+
+// Preserve an unfinished step name while retaining the graph and payload checks.
+export function restoreFlowDraft(value: unknown): FlowDocument {
+  if (!isRecord(value) || !Array.isArray(value.nodes))
+    throw new Error("流程草稿格式无效。");
+  const labels = value.nodes.map((node) => {
+    if (!isRecord(node) || !isRecord(node.data))
+      throw new Error("步骤草稿格式无效。");
+    return boundedText(node.data.label, 80);
+  });
+  const restored = validateFlow({
+    ...value,
+    nodes: value.nodes.map((node) => {
+      if (!isRecord(node) || !isRecord(node.data))
+        throw new Error("步骤草稿格式无效。");
+      return { ...node, data: { ...node.data, label: "草稿" } };
+    }),
+  });
+  return {
+    ...restored,
+    nodes: restored.nodes.map((node, i) => ({
+      ...node,
+      data: { ...node.data, label: labels[i] },
+    })),
+  };
+}

@@ -1,3 +1,4 @@
+import { registerAutosaveRoutes } from "./autosave";
 import { createWorkbenchServer } from "../../sdk/runtime.mjs";
 import { registerRoutes } from "./routes";
 import { isRecord } from "../contracts/project";
@@ -28,4 +29,5 @@ app.route("POST", "/api/run", ({ body }) => {
     );
   }
 });
+registerAutosaveRoutes(app, validateFlow);
 await app.listen();
