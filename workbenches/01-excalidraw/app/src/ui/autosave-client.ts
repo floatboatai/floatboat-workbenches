@@ -20,8 +20,20 @@ import {
   type SaveRequest,
   type WorkingCopy,
 } from "../contracts/autosave";
-import { readCache, writeCache } from "./autosave-cache";
+import {
+  readCache,
+  writeDraftCache,
+  readActiveCache,
+  listDraftCache,
+  clearCache,
+} from "./autosave-cache";
 import { request, download } from "./requests";
+type LocalCopy<T> = CachedDraft<T> & { conflicted?: boolean };
+const validLocalId = (value: unknown): value is string =>
+  typeof value === "string" &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 export interface AutosaveOptions<T> {
   storageKey?: string;
   restoreDraftData?: (value: unknown) => T;
@@ -46,8 +58,24 @@ export function useWorkbenchState<T>(
   const [items, setItems] = useState<ProjectSummary[]>([]),
     [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false);
-  const [error, setError] = useState(""),
+  const [error, setErrorState] = useState(""),
     [notice, setNotice] = useState("");
+  const saveError = useRef<string | null>(null);
+  const setError = useCallback((value: SetStateAction<string>) => {
+    saveError.current = null;
+    setErrorState(value);
+  }, []);
+  const saveReport = (value: unknown) => {
+    const message = value instanceof Error ? value.message : String(value);
+    saveError.current = message;
+    setErrorState(message);
+  };
+  const clearSaveError = () => {
+    const owned = saveError.current;
+    saveError.current = null;
+    if (owned !== null)
+      setErrorState((previous) => (previous === owned ? "" : previous));
+  };
   const [autoState, setAutoState] = useState<{
     phase: SavePhase;
     message: string;
@@ -71,7 +99,6 @@ export function useWorkbenchState<T>(
   const blocked = useRef<string | null>(null);
   const restore = useRef(options.restoreDraftData ?? validate);
   restore.current = options.restoreDraftData ?? validate;
-  const copyKey = () => storageKey + ":" + doc.current.id;
   const report = (e: unknown) =>
     setError(e instanceof Error ? e.message : "操作失败，请重试。");
   function markCurrent(value: Project<T> | null) {
@@ -112,7 +139,7 @@ export function useWorkbenchState<T>(
       ...w,
       extra: typeof value === "function" ? value(w.extra) : value,
     }));
-  function cacheValue(): CachedDraft<T> {
+  function cacheValue(): LocalCopy<T> {
     return {
       documentId: doc.current.id,
       revision: doc.current.revision,
@@ -121,29 +148,80 @@ export function useWorkbenchState<T>(
       acknowledged: ack.current,
       pending: pending.current,
       savedAt: new Date().toISOString(),
+      conflicted: conflicted.current,
     };
   }
+  function unsynced(copy: LocalCopy<T>) {
+    return (
+      !!copy.pending ||
+      copy.conflicted === true ||
+      fingerprint(copy.snapshot) !== copy.acknowledged
+    );
+  }
+  function mergeLocal(previous: ProjectSummary[], copies: LocalCopy<T>[]) {
+    const known = new Set(copies.map((copy) => "local:" + copy.documentId));
+    const waiting = copies.filter(unsynced),
+      hidden = new Set(
+        waiting.flatMap((copy) => [
+          "draft:" + copy.documentId,
+          // An unacknowledged create may already exist remotely. Known projects stay
+          // selectable while a newer local draft is pending; their identity must not blink.
+          ...(!copy.current ? [copy.documentId] : []),
+        ]),
+      );
+    return [
+      ...waiting.map((copy) => ({
+        id: "local:" + copy.documentId,
+        title: "本机草稿 · " + (copy.snapshot.title.trim() || "未命名"),
+        revision: copy.revision,
+        updatedAt: copy.savedAt,
+      })),
+      ...previous.filter((item) => !known.has(item.id) && !hidden.has(item.id)),
+    ];
+  }
   async function cache() {
-    const key = copyKey();
-    await writeCache(key, cacheValue());
+    const copy = cacheValue();
+    await writeDraftCache(storageKey, copy.documentId, copy);
+    if (active.current) setItems((previous) => mergeLocal(previous, [copy]));
     try {
-      sessionStorage.setItem(storageKey + ":active", doc.current.id);
+      sessionStorage.setItem(storageKey + ":active", copy.documentId);
     } catch {
-      /* IndexedDB still contains the working copy. */
+      /* The IndexedDB active pointer remains available in another same-origin tab. */
     }
   }
   const refresh = useCallback(async () => {
-    const [list, drafts] = await Promise.all([
+    const [projects, drafts, local] = await Promise.allSettled([
       request("/api/projects"),
       request("/api/autosave/list"),
+      listDraftCache(storageKey),
     ]);
-    if (!Array.isArray(list) || !list.every(isSummary))
-      throw new Error("项目列表无效。");
-    setItems([
-      ...list,
-      ...(Array.isArray(drafts) ? drafts.filter(isSummary) : []),
-    ]);
-  }, []);
+    const copies: LocalCopy<T>[] = [];
+    if (local.status === "fulfilled")
+      for (const entry of local.value)
+        try {
+          copies.push(decodeCache(entry.value, entry.id));
+        } catch {
+          /* Never replay malformed cached requests. */
+        }
+    const list =
+      projects.status === "fulfilled" &&
+      Array.isArray(projects.value) &&
+      projects.value.every(isSummary)
+        ? projects.value
+        : null;
+    const serverDrafts =
+      drafts.status === "fulfilled" && Array.isArray(drafts.value)
+        ? drafts.value.filter(isSummary)
+        : null;
+    setItems((previous) =>
+      mergeLocal(
+        list && serverDrafts ? [...list, ...serverDrafts] : previous,
+        copies,
+      ),
+    );
+    if (!list || !serverDrafts)
+      throw new Error("项目列表暂不可用；本机草稿仍可打开。");
+  }, [storageKey]);
   function decodeProject(value: unknown): Project<T> {
     if (!isSummary(value) || !isRecord(value))
       throw new Error("项目响应无效。");
@@ -163,6 +241,87 @@ export function useWorkbenchState<T>(
       extra: value.extra,
     };
   }
+  function decodeCache(value: unknown, expectedId?: string): LocalCopy<T> {
+    if (
+      !isRecord(value) ||
+      !validLocalId(value.documentId) ||
+      (expectedId !== undefined && value.documentId !== expectedId) ||
+      !Number.isInteger(value.revision) ||
+      typeof value.revision !== "number" ||
+      value.revision < 0 ||
+      typeof value.acknowledged !== "string" ||
+      typeof value.savedAt !== "string" ||
+      !Number.isFinite(Date.parse(value.savedAt)) ||
+      (value.conflicted !== undefined && typeof value.conflicted !== "boolean")
+    )
+      throw new Error("本机草稿格式无效，请导出恢复文件。");
+    const snapshot = decodeWork(value.snapshot),
+      current = value.current === null ? null : decodeProject(value.current);
+    let command: SaveRequest<T> | null = null;
+    if (value.pending !== null) {
+      const pending = value.pending;
+      if (
+        !isRecord(pending) ||
+        pending.documentId !== value.documentId ||
+        !validLocalId(pending.mutationId) ||
+        pending.draftRevision !== value.revision ||
+        pending.projectId !== (current?.id ?? null) ||
+        pending.projectRevision !== (current?.revision ?? null)
+      )
+        throw new Error("本机待同步请求格式无效，已阻止自动重放。");
+      decodeWork(pending.snapshot);
+      command = {
+        documentId: value.documentId,
+        mutationId: pending.mutationId,
+        draftRevision: value.revision,
+        projectId: current?.id ?? null,
+        projectRevision: current?.revision ?? null,
+        // Preserve the original wire content and key order for idempotent replay.
+        snapshot: structuredClone(pending.snapshot) as WorkingCopy<T>,
+      };
+    }
+    return {
+      documentId: value.documentId,
+      revision: value.revision,
+      snapshot,
+      current,
+      acknowledged: value.acknowledged,
+      pending: command,
+      savedAt: value.savedAt,
+      conflicted: value.conflicted === true,
+    };
+  }
+  function restoreLocal(copy: LocalCopy<T>, offline = false) {
+    // Keep the original project revision and mutation. Fetching a newer project here would bypass conflicts.
+    reset(copy.snapshot, copy.current, true, undefined, false);
+    doc.current = { id: copy.documentId, revision: copy.revision };
+    ack.current = copy.acknowledged;
+    pending.current = copy.pending;
+    conflicted.current = copy.conflicted === true;
+    edited.current = unsynced(copy);
+    setAutoState({
+      phase: conflicted.current
+        ? "conflict"
+        : offline
+          ? "offline"
+          : edited.current
+            ? "pending"
+            : "saved",
+      message: conflicted.current
+        ? "草稿已保留，项目有版本冲突。请打开服务器版本或导出草稿。"
+        : offline
+          ? "已恢复本机草稿，等待重新连接。"
+          : edited.current
+            ? "正在恢复待同步草稿…"
+            : "已恢复本机草稿。",
+      savedAt: copy.savedAt,
+    });
+    if (loaded.current) void cache().catch(() => {});
+  }
+  async function localCopy(id: string) {
+    if (!validLocalId(id)) throw new Error("本机草稿标识无效。");
+    return decodeCache(await readCache(storageKey + ":" + id), id);
+  }
   function validRecord(value: unknown): value is DraftRecord<T> {
     return (
       isRecord(value) &&
@@ -177,6 +336,7 @@ export function useWorkbenchState<T>(
     project: Project<T> | null,
     saved: boolean,
     record?: DraftRecord<T>,
+    write = true,
   ) {
     epoch.current++;
     blocked.current = null;
@@ -203,67 +363,48 @@ export function useWorkbenchState<T>(
         (saved ? (project ? "已自动保存" : "编辑后自动保存") : "等待自动保存…"),
       savedAt: record?.updatedAt ?? "",
     });
-    if (loaded.current) void cache().catch(() => {});
+    if (loaded.current && write) void cache().catch(() => {});
   }
   useEffect(() => {
     active.current = true;
     void (async () => {
-      let cached: unknown;
+      let cached: LocalCopy<T> | undefined;
       try {
-        const id = sessionStorage.getItem(storageKey + ":active");
-        if (id) cached = await readCache(storageKey + ":" + id);
+        let id: string | null = null;
+        try {
+          id = sessionStorage.getItem(storageKey + ":active");
+        } catch {
+          /* Use the persistent active pointer. */
+        }
+        const raw = validLocalId(id)
+          ? await readCache(storageKey + ":" + id)
+          : undefined;
+        const value = raw ?? (await readActiveCache(storageKey));
+        if (value !== undefined) cached = decodeCache(value);
       } catch {
-        /* Remote draft recovery remains available. */
+        /* Server recovery and valid local list entries remain available. */
       }
       try {
         await refresh();
         if (edited.current) return;
         const recent = await request("/api/autosave/recent");
         if (!active.current || edited.current) return;
-        if (
-          isRecord(cached) &&
-          typeof cached.documentId === "string" &&
-          isRecord(cached.snapshot)
-        ) {
-          const snapshot = decodeWork(cached.snapshot),
-            project = cached.current ? decodeProject(cached.current) : null;
+        if (cached) {
           const remote = await request("/api/autosave/" + cached.documentId);
           if (
             validRecord(remote) &&
-            remote.revision >= Number(cached.revision) &&
-            !cached.pending &&
-            fingerprint(cached.snapshot) === cached.acknowledged
-          ) {
+            remote.revision >= cached.revision &&
+            !unsynced(cached)
+          )
             reset(
               decodeWork(remote.snapshot),
               remote.receipt.project
                 ? decodeProject(remote.receipt.project)
-                : project,
+                : cached.current,
               true,
               remote,
             );
-          } else {
-            reset(snapshot, project, true);
-            doc.current = {
-              id: cached.documentId,
-              revision: Number(cached.revision) || 0,
-            };
-            ack.current =
-              typeof cached.acknowledged === "string"
-                ? cached.acknowledged
-                : "";
-            pending.current = isRecord(cached.pending)
-              ? (cached.pending as unknown as SaveRequest<T>)
-              : null;
-            if (pending.current || fingerprint(snapshot) !== ack.current) {
-              edited.current = true;
-              setAutoState({
-                phase: "pending",
-                message: "正在恢复待同步草稿…",
-                savedAt: "",
-              });
-            }
-          }
+          else restoreLocal(cached);
         } else if (validRecord(recent)) {
           const project = recent.receipt.project
             ? decodeProject(recent.receipt.project)
@@ -275,33 +416,7 @@ export function useWorkbenchState<T>(
           reset(decodeWork(recent.snapshot), project, true, recent);
         }
       } catch (e) {
-        if (isRecord(cached) && isRecord(cached.snapshot) && !edited.current)
-          try {
-            const snapshot = decodeWork(cached.snapshot);
-            reset(
-              snapshot,
-              cached.current ? decodeProject(cached.current) : null,
-              true,
-            );
-            if (typeof cached.documentId === "string")
-              doc.current.id = cached.documentId;
-            doc.current.revision = Number(cached.revision) || 0;
-            ack.current =
-              typeof cached.acknowledged === "string"
-                ? cached.acknowledged
-                : "";
-            pending.current = isRecord(cached.pending)
-              ? (cached.pending as unknown as SaveRequest<T>)
-              : null;
-            edited.current = true;
-            setAutoState({
-              phase: "offline",
-              message: "已恢复本机草稿，等待重新连接。",
-              savedAt: "",
-            });
-          } catch {
-            report(e);
-          }
+        if (cached && !edited.current) restoreLocal(cached, true);
         else report(e);
       } finally {
         if (active.current) {
@@ -318,7 +433,7 @@ export function useWorkbenchState<T>(
   async function persist(force = false): Promise<SaveReceipt<T> | null> {
     while (flight.current) await flight.current;
     if (conflicted.current) {
-      setError("项目存在版本冲突，请先导出草稿或打开服务器版本。");
+      saveReport("项目存在版本冲突，请先导出草稿或打开服务器版本。");
       return null;
     }
     const now = fingerprint(workRef.current);
@@ -413,8 +528,7 @@ export function useWorkbenchState<T>(
             ...previous.filter((p) => p.id !== "draft:" + doc.current.id),
           ]);
         conflicted.current = receipt.phase === "conflict";
-        setError("");
-        setNotice("");
+        clearSaveError();
         const changed =
           fingerprint(workRef.current) !== ack.current && !conflicted.current;
         setAutoState({
@@ -453,7 +567,8 @@ export function useWorkbenchState<T>(
                 : "自动保存未完成，请保持页面打开或导出草稿。",
           savedAt: "",
         });
-        if (force) report(e);
+        await cache().catch(() => {});
+        if (force) saveReport(e);
         return null;
       } finally {
         flight.current = null;
@@ -516,18 +631,27 @@ export function useWorkbenchState<T>(
     if (!conflicted.current) await persist();
     if (fingerprint(workRef.current) === ack.current && !conflicted.current)
       return true;
-    await cache().catch(() => {});
-    return confirm("草稿尚未完全同步。保留本机草稿并切换项目吗？");
+    try {
+      await cache();
+      return confirm(
+        "草稿尚未完全同步。已保留本机草稿，可从项目列表找回。切换项目吗？",
+      );
+    } catch {
+      saveReport("草稿尚未同步，且无法写入本机存储。请导出恢复草稿。");
+      return confirm(
+        "草稿尚未同步，且无法暂存本机。切换将丢失当前更改；建议先取消并导出恢复草稿。仍要放弃并切换吗？",
+      );
+    }
   }
   async function save(override?: T) {
     if (override !== undefined) setData(override);
     setBusy(true);
-    setError("");
+    clearSaveError();
     try {
       const receipt = await persist(true);
       if (receipt) {
         if (receipt.phase !== "saved") {
-          setError(receipt.message);
+          saveReport(receipt.message);
           return null;
         }
         return receipt.project;
@@ -547,7 +671,9 @@ export function useWorkbenchState<T>(
     setBusy(true);
     setError("");
     try {
-      if (id.startsWith("draft:")) {
+      if (id.startsWith("local:")) {
+        restoreLocal(await localCopy(id.slice(6)));
+      } else if (id.startsWith("draft:")) {
         const d = await request("/api/autosave/" + id.slice(6));
         if (!validRecord(d)) throw new Error("草稿不存在。");
         const project = d.receipt.project
@@ -620,6 +746,7 @@ export function useWorkbenchState<T>(
       await request("/api/autosave/" + doc.current.id, {
         method: "DELETE",
       }).catch(() => {});
+      await clearCache(storageKey + ":" + doc.current.id).catch(() => {});
       reset(
         { title: defaultTitle, data: structuredClone(seed), extra: {} },
         null,

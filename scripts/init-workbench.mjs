@@ -60,6 +60,11 @@ for (const slug of process.argv.slice(2)) {
     "store.ts": "src/server/store.ts",
     "routes.ts": "src/server/routes.ts",
     "workspace.tsx": "src/ui/workspace.tsx",
+    "autosave-contracts.ts": "src/contracts/autosave.ts",
+    "autosave-server.ts": "src/server/autosave.ts",
+    "autosave-client.ts": "src/ui/autosave-client.ts",
+    "autosave-cache.ts": "src/ui/autosave-cache.ts",
+    "requests.ts": "src/ui/requests.ts",
   };
   for (const [source, target] of Object.entries(copies))
     await cp(
@@ -70,9 +75,10 @@ for (const slug of process.argv.slice(2)) {
     join(project, "app/migrations/0002_projects.sql"),
     "CREATE TABLE projects(id TEXT PRIMARY KEY,title TEXT NOT NULL,payload TEXT NOT NULL,revision INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL);\n",
   );
+  await cp(join(root, "scripts/blueprints/autosave-migration.sql"), join(project,"app/migrations/0003_autosave.sql"));
   await writeFile(
     join(project, "app/REQUIREMENTS.md"),
-    `# ${item.name} 工作台\n\n目标：${item.workbench}\n\n必须提供真实核心操作、项目保存与恢复、合法格式导出、明确的失败状态。模型生成的结果需用户检查后采用。\n\n应用独立部署和打包，不依赖其他工作台目录。尚未验收。\n`,
+    `# ${item.name} 工作台\n\n目标：${item.workbench}\n\n必须提供真实核心操作、自动保存与完整工作草稿恢复、合法格式导出、明确的失败状态。模型生成的结果需用户检查后采用。\n\n应用独立部署和打包，不依赖其他工作台目录。尚未验收。\n`,
   );
   await writeFile(
     join(project, "app/DESIGN.md"),

@@ -11,13 +11,13 @@
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
 | [Excalidraw](workbenches/01-excalidraw/) | 白板编辑、保存恢复、PNG/SVG/源文件导入导出 | 画布 |
-| [Markmap](workbenches/02-markmap/) | Markdown 大纲、交互脑图、独立 SVG 导出 | 纸质笔记与双栏图谱 |
+| [Markmap](workbenches/02-markmap/) | Markdown 大纲、交互脑图、独立 SVG 导出 | 脑图主屏与可收起大纲 |
 | [pdfme](workbenches/03-pdfme/) | 文本/矩形版式设计、中文字段、多页 PDF 导出 | 灰色排版台、页面缩略图与字段栏 |
 | [Tiptap](workbenches/04-tiptap/) | 富文本编辑、JSON/HTML 导出 | 专注写作页 |
 | [PptxGenJS](workbenches/05-pptxgenjs/) | 幻灯片编排、主题、演讲备注、PPTX 导出 | 黑色演示舞台、缩略图与演讲备注 |
-| [React Flow](workbenches/06-react-flow/) | 节点编辑、单链文本变换、实际运行结果 | 流程画布与参数检查器 |
+| [React Flow](workbenches/06-react-flow/) | 节点编辑、单链文本变换、实际运行结果 | 节点 IDE、参数检查器与运行控制台 |
 | [SurveyJS](workbenches/07-surveyjs-form-library/) | 问卷设计、填写、答卷保存与导出 | 分阶段表单 |
-| [Mermaid](workbenches/08-mermaid/) | 源码绘图、错误恢复、源码/SVG 导出 | 图形工坊 |
+| [Mermaid](workbenches/08-mermaid/) | 源码绘图、错误恢复、源码/SVG 导出 | 源码 IDE 与图形预览 |
 | [Swagger UI](workbenches/09-swagger-ui/) | OpenAPI 文档、JSON 编辑、同源 GET 试调 | API 参考台 |
 | [Vega-Lite](workbenches/10-vega-lite/) | JSON 图表规格、内嵌数据绘图、SVG 导出 | 规格实验台 |
 | [Observable Plot](workbenches/11-observable-plot/) | CSV/JSON 数据、字段映射、三种图表、SVG 导出 | 数据观察室 |
@@ -27,7 +27,9 @@
 | [Mirador](workbenches/54-mirador/) | 本地资料图像、双页对照、逐页复核记录与报告导出 | 文献对照与复核台 |
 | [OpenSheetMusicDisplay](workbenches/55-opensheetmusicdisplay/) | MusicXML/MXL 导入、谱面校审、小节批注、SVG/原件/报告导出 | 乐谱纸张与边注 |
 
-首批 2–11 使用三个独立 worktree 并行实现，再逐项合并。10 项构建、47 项应用测试、3 项公共工具测试和真实浏览器验收通过；详见 [批次验收](docs/batch-02-11.md)。除 pdfme 主流程无需模型外，这一批其余 9 项已完成真实 Host 模型调用。
+0.1.0 的 2–11 批次使用三个独立 worktree 并行实现，再逐项合并。10 项构建、47 项应用测试、3 项公共工具测试和真实浏览器验收通过；详见 [批次验收](docs/batch-02-11.md)。除 pdfme 主流程无需模型外，这一批其余 9 项已完成真实 Host 模型调用。
+
+本次0.2.0的16项构建、114项应用测试、3项公共工具测试和各项目浏览器回归通过，详见 [发布验收](docs/release-0.2.0.md)。
 
 已安装仓库级 React Best Practices 与 Web Design Guidelines，入口见 `AGENTS.md`。各工作台分别制定设计方案，参见 `docs/design-principles.md`。
 
@@ -62,10 +64,10 @@ pnpm workbench test excalidraw
 pnpm workbench dev excalidraw
 pnpm workbench package excalidraw
 
-# 批量构建、测试和打包第二批
-pnpm batch check --from 2 --to 11
-pnpm batch test --from 2 --to 11
-pnpm batch package --from 2 --to 11
+# 批量验证并打包所有已验收项目
+pnpm batch check
+pnpm batch test
+pnpm batch package
 pnpm test:tooling
 ```
 

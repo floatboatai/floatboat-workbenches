@@ -1,7 +1,7 @@
 {
   "checkedAt": "2026-10-27",
   "count": 28,
-  "scope": "Source and documentation research; no candidate builds performed",
+  "scope": "Original research snapshots retained; five selected projects now implemented and locally verified at 0.2.0.",
   "candidates": [
     {
       "group": "制造工程",
@@ -16,7 +16,10 @@
       "note": "niche-manufacturing.md",
       "id": "V01",
       "url": "https://github.com/microsoft/maker.js",
-      "status": "researched-not-built"
+      "status": "local-verified",
+      "implementation": "workbenches/51-makerjs",
+      "version": "0.2.0",
+      "verificationRecord": "docs/release-0.2.0.md"
     },
     {
       "group": "制造工程",
@@ -151,7 +154,10 @@
       "note": "niche-operations.md",
       "id": "V10",
       "url": "https://github.com/farmOS/farmOS-map",
-      "status": "researched-not-built"
+      "status": "local-verified",
+      "implementation": "workbenches/53-farmos-map",
+      "version": "0.2.0",
+      "verificationRecord": "docs/release-0.2.0.md"
     },
     {
       "group": "农业与专业运营",
@@ -166,7 +172,10 @@
       "note": "niche-operations.md",
       "id": "V11",
       "url": "https://github.com/ProjectMirador/mirador",
-      "status": "researched-not-built"
+      "status": "local-verified",
+      "implementation": "workbenches/54-mirador",
+      "version": "0.2.0",
+      "verificationRecord": "docs/release-0.2.0.md"
     },
     {
       "group": "农业与专业运营",
@@ -287,7 +296,10 @@
       "note": "niche-laboratory.md",
       "id": "V19",
       "url": "https://github.com/Lattice-Automation/seqviz",
-      "status": "researched-not-built"
+      "status": "local-verified",
+      "implementation": "workbenches/52-seqviz",
+      "version": "0.2.0",
+      "verificationRecord": "docs/release-0.2.0.md"
     },
     {
       "group": "实验室与科研",
@@ -407,7 +419,10 @@
       "note": "niche-creative.md",
       "id": "V27",
       "url": "https://github.com/opensheetmusicdisplay/opensheetmusicdisplay",
-      "status": "researched-not-built"
+      "status": "local-verified",
+      "implementation": "workbenches/55-opensheetmusicdisplay",
+      "version": "0.2.0",
+      "verificationRecord": "docs/release-0.2.0.md"
     },
     {
       "group": "演出与音乐",

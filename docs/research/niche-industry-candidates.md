@@ -2,7 +2,9 @@
 
 核查日期：2026-10-27。三个研究子代理与主线程并行阅读官方仓库、许可证、包清单和文档。与原有 50 项去重后，本表收录 **28 个新项目，其中 2 个为维护/迁站观察项**；不包含下文排除项。GeoTIFF.js 跨农业和地学，仅计一次。
 
-**9 个优先原型**：Maker.js、DXF Viewer、farmOS-map、Mirador、GPX Studio、SeqViz、OpenChemLib JS、3Dmol.js、OpenSheetMusicDisplay。它们的专业输入输出与嵌入接口较明确；这个排序是工程判断，尚未运行候选或完成工作台验收。
+**实现更新**：Maker.js、SeqViz、farmOS-map、Mirador、OpenSheetMusicDisplay 已完成0.2.0本地验收，见 [发布验收](../release-0.2.0.md)。下文保留初筛时的能力/风险判断。
+
+**初筛的9个优先方向**：Maker.js、DXF Viewer、farmOS-map、Mirador、GPX Studio、SeqViz、OpenChemLib JS、3Dmol.js、OpenSheetMusicDisplay。它们的专业输入输出与嵌入接口较明确；这个排序是工程判断，尚未运行候选或完成工作台验收。
 
 下表“工作台”是建议新增的产品流程，不能视为上游现成完整功能。每项上游现有能力、具体接口、许可原文及新增部分都在分领域笔记中区分。业务项目管理、SQLite 持久化、版本、批注与报告往往需要我们实现。
 
@@ -82,6 +84,6 @@
 - [农业、测绘、路线、文博与船舶运维](niche-operations.md)：9 项。
 - [实验室、科研与专业影像](niche-laboratory.md)：9 项，与上一组共用 GeoTIFF.js。
 - [演出与音乐](niche-creative.md)：2 项。
-- [结构化清单](niche-candidates.json)：28 个唯一仓库，状态均为 researched-not-built。
+- [结构化清单](niche-candidates.json)：28 个唯一仓库，其中5项为 local-verified，其余23项保留研究状态。
 
-调研仅完成源码与文档核查；全部候选的实际构建、浏览器流程、专业样本正确性和 Floatboat 客户端导入仍待实施验收。
+初筛仅核查源码与文档。上述5项的实现另有构建、测试和浏览器记录；其余候选尚待实施，Floatboat客户端导入均未实测。

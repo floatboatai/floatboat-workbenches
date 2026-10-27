@@ -1,3 +1,4 @@
+import { registerAutosaveRoutes } from "./autosave.ts";
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { WorkbenchHostError } from "../../sdk/host.mjs";
 import { isRecord } from "../contracts/project";
@@ -8,6 +9,7 @@ export function registerRoutes<T>(
   instructions: string,
 ) {
   const store = createStore(app.database, validate);
+  registerAutosaveRoutes(app, validate);
   const fail = (error: unknown) =>
     Response.json(
       {

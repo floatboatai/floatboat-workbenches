@@ -70,6 +70,9 @@ test("initialization fetches a missing pinned cache and preserves existing sourc
     );
     assert.notEqual(manifest.appId, "workbench.starter");
     assert.equal(manifest.registryName, "fixture-studio");
+    assert.match(await readFile(join(app,"src/ui/autosave-client.ts"),"utf8"), /useWorkbenchState/);
+    assert.match(await readFile(join(app,"migrations/0003_autosave.sql"),"utf8"), /CREATE TABLE autosave_drafts/);
+
     await writeFile(join(app, "REQUIREMENTS.md"), "preserve this user edit");
     await exec(
       process.execPath,

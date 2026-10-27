@@ -24,16 +24,23 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 4,
+      "tests": 6,
       "browser": "passed",
-      "hostLlm": "passed",
-      "hostImport": "unverified"
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "id": 1,
     "slug": "excalidraw",
     "directory": "workbenches/01-excalidraw",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "Markmap",
@@ -60,19 +67,23 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 3,
+      "tests": 4,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "id": 2,
     "slug": "markmap",
     "directory": "workbenches/02-markmap",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "pdfme",
@@ -99,19 +110,22 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 6,
+      "tests": 9,
       "browser": "passed",
-      "hostLlm": "not-required",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md"
     },
     "id": 3,
     "slug": "pdfme",
     "directory": "workbenches/03-pdfme",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "Tiptap",
@@ -138,19 +152,23 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 6,
+      "tests": 7,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "id": 4,
     "slug": "tiptap",
     "directory": "workbenches/04-tiptap",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "PptxGenJS",
@@ -177,19 +195,23 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 5,
+      "tests": 7,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "id": 5,
     "slug": "pptxgenjs",
     "directory": "workbenches/05-pptxgenjs",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "React Flow",
@@ -216,19 +238,23 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 6,
+      "tests": 7,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "id": 6,
     "slug": "react-flow",
     "directory": "workbenches/06-react-flow",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "SurveyJS Form Library",
@@ -255,19 +281,23 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 5,
+      "tests": 7,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "id": 7,
     "slug": "surveyjs-form-library",
     "directory": "workbenches/07-surveyjs-form-library",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "Mermaid",
@@ -293,19 +323,23 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 3,
+      "tests": 4,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "id": 8,
     "slug": "mermaid",
     "directory": "workbenches/08-mermaid",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "Swagger UI",
@@ -332,11 +366,15 @@
       "build": "passed",
       "tests": 4,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "group": "数据开发",
     "mode": "组件嵌入",
@@ -344,7 +382,7 @@
     "slug": "swagger-ui",
     "directory": "workbenches/09-swagger-ui",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "Vega-Lite",
@@ -371,11 +409,15 @@
       "build": "passed",
       "tests": 4,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "group": "数据开发",
     "mode": "引擎封装",
@@ -383,7 +425,7 @@
     "slug": "vega-lite",
     "directory": "workbenches/10-vega-lite",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "Observable Plot",
@@ -408,13 +450,17 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 5,
+      "tests": 6,
       "browser": "passed",
-      "hostLlm": "passed",
-      "sourcePackage": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-retested",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/batch-02-11.md"
+      "record": "docs/release-0.2.0.md",
+      "priorHostLlm": "passed in earlier batch"
     },
     "group": "数据开发",
     "mode": "引擎封装",
@@ -422,7 +468,7 @@
     "slug": "observable-plot",
     "directory": "workbenches/11-observable-plot",
     "status": "local-verified",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "name": "changedetection.io",
@@ -1564,13 +1610,27 @@
     "effort": "低–中",
     "priority": "A",
     "directory": "workbenches/51-makerjs",
-    "status": "planned",
+    "status": "local-verified",
     "checked_at": "2026-10-27",
     "researchId": "V01",
     "sources": [
       "https://github.com/microsoft/maker.js",
       "docs/research/niche-manufacturing.md"
-    ]
+    ],
+    "version": "0.2.0",
+    "verification": {
+      "build": "passed",
+      "tests": 6,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-required",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.2.0.md"
+    }
   },
   {
     "id": 52,
@@ -1587,13 +1647,27 @@
     "effort": "低–中",
     "priority": "A",
     "directory": "workbenches/52-seqviz",
-    "status": "planned",
+    "status": "local-verified",
     "checked_at": "2026-10-27",
     "researchId": "V19",
     "sources": [
       "https://github.com/Lattice-Automation/seqviz",
       "docs/research/niche-laboratory.md"
-    ]
+    ],
+    "version": "0.2.0",
+    "verification": {
+      "build": "passed",
+      "tests": 7,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-required",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.2.0.md"
+    }
   },
   {
     "id": 53,
@@ -1610,13 +1684,27 @@
     "effort": "中",
     "priority": "A",
     "directory": "workbenches/53-farmos-map",
-    "status": "planned",
+    "status": "local-verified",
     "checked_at": "2026-10-27",
     "researchId": "V10",
     "sources": [
       "https://github.com/farmOS/farmOS-map",
       "docs/research/niche-operations.md"
-    ]
+    ],
+    "version": "0.2.0",
+    "verification": {
+      "build": "passed",
+      "tests": 9,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-required",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.2.0.md"
+    }
   },
   {
     "id": 54,
@@ -1633,13 +1721,27 @@
     "effort": "中",
     "priority": "A",
     "directory": "workbenches/54-mirador",
-    "status": "planned",
+    "status": "local-verified",
     "checked_at": "2026-10-27",
     "researchId": "V11",
     "sources": [
       "https://github.com/ProjectMirador/mirador",
       "docs/research/niche-operations.md"
-    ]
+    ],
+    "version": "0.2.0",
+    "verification": {
+      "build": "passed",
+      "tests": 15,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-required",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.2.0.md"
+    }
   },
   {
     "id": 55,
@@ -1656,12 +1758,26 @@
     "effort": "中",
     "priority": "A",
     "directory": "workbenches/55-opensheetmusicdisplay",
-    "status": "planned",
+    "status": "local-verified",
     "checked_at": "2026-10-27",
     "researchId": "V27",
     "sources": [
       "https://github.com/opensheetmusicdisplay/opensheetmusicdisplay",
       "docs/research/niche-creative.md"
-    ]
+    ],
+    "version": "0.2.0",
+    "verification": {
+      "build": "passed",
+      "tests": 12,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "screenshot": "README.md#工作台实景",
+      "hostLlm": "not-required",
+      "hostImport": "unverified",
+      "verifiedAt": "2026-10-27",
+      "record": "docs/release-0.2.0.md"
+    }
   }
 ]

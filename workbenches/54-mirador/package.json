@@ -1,7 +1,7 @@
 {
   "name": "floatboat-mirador",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "packageManager": "pnpm@10.22.0",
   "engines": {
@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "lucide-react": "0.562.0",
+    "mirador": "4.3.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.d5d1b826-078d-40f8-90fe-56b203898dc5",
   "registryName": "mirador-studio",
-  "name": "Mirador 工作台",
-  "description": "IIIF 清单或扫描页 → 并排校勘 → 对照会话、复核清单",
-  "version": "0.1.0",
-  "changelog": "Initial application.",
+  "name": "馆藏对照室",
+  "description": "本地扫描页双窗口对照、复核记录与可移植项目",
+  "version": "0.2.0",
+  "changelog": "专业双图光台；扫描原图、视图、复核记录与未完成输入自动保存；含原图的项目导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,10 +16,24 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "samples",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "src/assets"
+    },
+    {
+      "id": "scans",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "scans",
+      "access": "read-write"
+    }
+  ]
 }

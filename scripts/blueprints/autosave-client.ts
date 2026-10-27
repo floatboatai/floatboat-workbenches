@@ -163,9 +163,10 @@ export function useWorkbenchState<T>(
     const waiting = copies.filter(unsynced),
       hidden = new Set(
         waiting.flatMap((copy) => [
-          copy.documentId,
           "draft:" + copy.documentId,
-          ...(copy.current ? [copy.current.id] : []),
+          // An unacknowledged create may already exist remotely. Known projects stay
+          // selectable while a newer local draft is pending; their identity must not blink.
+          ...(!copy.current ? [copy.documentId] : []),
         ]),
       );
     return [
