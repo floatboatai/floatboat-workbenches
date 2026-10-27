@@ -1,12 +1,11 @@
-# Engineering
+# 工程说明
 
-The business app root is this directory. Run the authoring commands from the repository root; see `../AGENTS.md`.
+contracts/form.ts允许列表校验问卷和答案。server/routes.ts提供项目版本存储；responses.ts独立保存答卷、模式快照与幂等提交ID。提交前检查项目revision，避免用旧问题提交新版本。
 
-- `src/server/` owns business routes, parameterized SQL, transactions and Host SDK calls. Register public page routes under `/api/` through the provided server.
-- `src/ui/` owns React components and the authenticated page connection. UI requests go through `page.fetch`; importing Node, database or Host implementations into the browser is rejected.
-- `src/contracts/` contains shared serializable data types and response validation. Validate external input as unknown and return structured results.
-- Append numbered SQL migrations. Applied migrations are immutable; preview data is persistent and must not be silently reset to accommodate changes.
-- Keep the fixed strict `tsconfig.json` and declarative manifest build profile. The compiler ignores executable project build config and env files. Source assets belong under `src/`.
-- Keep runtime dependency versions and lockfiles aligned; see `../docs/maintenance.md`. Native extensions do not belong in the application profile.
-- Add tests for business boundaries and persistence behavior, using temporary data rather than the user's preview database. Test files live under `tests/` and are run by `pnpm test` from the repository root.
-- Host calls are optional and require actual authorization. Show unavailable/error states and consult `../docs/platform.md`; preserve execution-unknown errors rather than retrying potentially completed external mutations blindly.
+SurveyRunner.tsx按需加载survey-core/react-ui 3.2.2，使用核心CSS和系统字体；模型完成事件触发真实API写入，失败保留待重试数据。onProcessHtml通过DOMPurify限制标签。
+
+答卷不嵌入项目定义，修改问题不会改写历史答案。并发提交由SQLite主键幂等保证。全部服务请求同源。公开问卷链接、远程收集和商业Creator不在当前范围。
+
+JSON 编辑保存独立草稿基线，并接入本目录 useProjects 的外部 dirty 状态。未应用草稿阻止保存、定义导出和进入填写页；取消新建、打开、关闭编辑器会保留原文。项目切换仅在操作成功后重置编辑器。答卷加载有请求序号，防止切换时旧请求覆盖新项目结果。
+
+SurveyJS 3.x 使用 --sjs2-* CSS 变量，设置在 sd-theme-root 上；仅引用系统字体。textUpdateMode=onTyping 使输入即进入未提交状态。允许列表不保留表达式、脚本、HTML 题型、远程选项、外链或文件上传，因此不需要 unsafe-eval 或额外 CSP 放行。

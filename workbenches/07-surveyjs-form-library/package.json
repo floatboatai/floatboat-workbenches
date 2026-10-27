@@ -22,9 +22,12 @@
     "workbench:catalog": "node tooling/catalog.mjs"
   },
   "dependencies": {
+    "dompurify": "3.4.17",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "survey-core": "3.2.2",
+    "survey-react-ui": "3.2.2"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

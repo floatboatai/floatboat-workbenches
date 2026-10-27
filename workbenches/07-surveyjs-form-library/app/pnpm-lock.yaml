@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      dompurify:
+        specifier: 3.4.17
+        version: 3.4.17
       lucide-react:
         specifier: 0.562.0
         version: 0.562.0(react@19.2.3)
@@ -17,6 +20,12 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
+      survey-core:
+        specifier: 3.2.2
+        version: 3.2.2
+      survey-react-ui:
+        specifier: 3.2.2
+        version: 3.2.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(survey-core@3.2.2)
     devDependencies:
       '@types/node':
         specifier: 22.20.2
@@ -41,8 +50,14 @@ packages:
   '@types/react@19.2.8':
     resolution: {integrity: sha512-3MbSL37jEchWZz2p2mjntRZtPt837ij10ApxKfgmXCTuHWagYg7iA5bqPw6C8BMPfwidlvfPI/fxOc42HLhcyg==}
 
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  dompurify@3.4.17:
+    resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
 
   lucide-react@0.562.0:
     resolution: {integrity: sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw==}
@@ -61,6 +76,16 @@ packages:
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
 
+  survey-core@3.2.2:
+    resolution: {integrity: sha512-S3YSPFywObmObHz/4VLnGof+I0R21IlBcrzLuhocIeISbv2I/MSvBUrIwCq2Bx6r34dxCOrJZ0H7i54b+gFxlQ==}
+
+  survey-react-ui@3.2.2:
+    resolution: {integrity: sha512-xr70p6uN2CYmiQNqLqxLJ/1ZE4rajdcpvNS5COJKVbzC2nIIg6ISU47AzeUTNRmb5+ouGmtL6DNJcaM0K3WGOg==}
+    peerDependencies:
+      react: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      react-dom: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      survey-core: 3.2.2
+
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
@@ -78,7 +103,14 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
+  '@types/trusted-types@2.0.7':
+    optional: true
+
   csstype@3.2.3: {}
+
+  dompurify@3.4.17:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
 
   lucide-react@0.562.0(react@19.2.3):
     dependencies:
@@ -92,5 +124,13 @@ snapshots:
   react@19.2.3: {}
 
   scheduler@0.27.0: {}
+
+  survey-core@3.2.2: {}
+
+  survey-react-ui@3.2.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(survey-core@3.2.2):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      survey-core: 3.2.2
 
   undici-types@6.21.0: {}

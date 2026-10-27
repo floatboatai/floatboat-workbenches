@@ -7,11 +7,16 @@
     "start": "node --enable-source-maps dist/server/index.mjs",
     "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
-  "engines": { "node": ">=22.16.0" },
+  "engines": {
+    "node": ">=22.16.0"
+  },
   "dependencies": {
+    "dompurify": "3.4.17",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "survey-core": "3.2.2",
+    "survey-react-ui": "3.2.2"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      dompurify:
+        specifier: 3.4.17
+        version: 3.4.17
       lucide-react:
         specifier: 0.562.0
         version: 0.562.0(react@19.2.3)
@@ -17,6 +20,12 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
+      survey-core:
+        specifier: 3.2.2
+        version: 3.2.2
+      survey-react-ui:
+        specifier: 3.2.2
+        version: 3.2.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(survey-core@3.2.2)
     devDependencies:
       '@types/node':
         specifier: 22.20.2
@@ -364,6 +373,9 @@ packages:
   '@types/react@19.2.8':
     resolution: {integrity: sha512-3MbSL37jEchWZz2p2mjntRZtPt837ij10ApxKfgmXCTuHWagYg7iA5bqPw6C8BMPfwidlvfPI/fxOc42HLhcyg==}
 
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
@@ -383,6 +395,9 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  dompurify@3.4.17:
+    resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
 
   entities@6.0.1:
     resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
@@ -458,6 +473,16 @@ packages:
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
+
+  survey-core@3.2.2:
+    resolution: {integrity: sha512-S3YSPFywObmObHz/4VLnGof+I0R21IlBcrzLuhocIeISbv2I/MSvBUrIwCq2Bx6r34dxCOrJZ0H7i54b+gFxlQ==}
+
+  survey-react-ui@3.2.2:
+    resolution: {integrity: sha512-xr70p6uN2CYmiQNqLqxLJ/1ZE4rajdcpvNS5COJKVbzC2nIIg6ISU47AzeUTNRmb5+ouGmtL6DNJcaM0K3WGOg==}
+    peerDependencies:
+      react: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      react-dom: ^16.5.0 || ^17.0.1 || ^18.1.0 || ^19.0.0
+      survey-core: 3.2.2
 
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
@@ -698,6 +723,9 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
+  '@types/trusted-types@2.0.7':
+    optional: true
+
   '@types/yauzl@2.10.3':
     dependencies:
       '@types/node': 22.20.2
@@ -715,6 +743,10 @@ snapshots:
       readdirp: 5.1.1
 
   csstype@3.2.3: {}
+
+  dompurify@3.4.17:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
 
   entities@6.0.1: {}
 
@@ -820,6 +852,14 @@ snapshots:
   scheduler@0.27.0: {}
 
   source-map-js@1.2.1: {}
+
+  survey-core@3.2.2: {}
+
+  survey-react-ui@3.2.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(survey-core@3.2.2):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      survey-core: 3.2.2
 
   tinyglobby@0.2.17:
     dependencies:
