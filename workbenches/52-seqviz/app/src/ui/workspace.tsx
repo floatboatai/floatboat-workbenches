@@ -50,6 +50,7 @@ export function useProjects<T>(
   seed: T,
   validate: (value: unknown) => T,
   defaultTitle: string,
+  externalDirty = false,
 ) {
   const [items, setItems] = useState<ProjectSummary[]>([]),
     [current, setCurrent] = useState<Project<T> | null>(null),
@@ -58,14 +59,15 @@ export function useProjects<T>(
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
-    [loading, setLoading] = useState(true),
-    [aiBusy, setAiBusy] = useState(false),
-    [suggestion, setSuggestion] = useState<T | null>(null);
+    [loading, setLoading] = useState(true);
   const epoch = useRef(0);
-  const dirty = current
-    ? title !== current.title ||
-      JSON.stringify(data) !== JSON.stringify(current.data)
-    : JSON.stringify(data) !== JSON.stringify(seed) || title !== defaultTitle;
+  const dirty =
+    externalDirty ||
+    (current
+      ? title !== current.title ||
+        JSON.stringify(data) !== JSON.stringify(current.data)
+      : JSON.stringify(data) !== JSON.stringify(seed) ||
+        title !== defaultTitle);
   const report = (error: unknown) =>
     setError(error instanceof Error ? error.message : "操作失败，请重试。");
   const refresh = useCallback(async () => {
@@ -144,36 +146,38 @@ export function useProjects<T>(
     }
   }
   async function open(id: string) {
-    if (dirty && !confirm("有未保存的修改，确定放弃并打开其他项目吗？")) return;
+    if (dirty && !confirm("有未保存的修改，确定放弃并打开其他项目吗？"))
+      return null;
     setBusy(true);
     setError("");
     epoch.current++;
-    setSuggestion(null);
     try {
       const result = decode(await request(`/api/projects/${id}`));
       setCurrent(result);
       setTitle(result.title);
       setData(result.data);
       setNotice("");
+      return result;
     } catch (error) {
       report(error);
+      return null;
     } finally {
       setBusy(false);
     }
   }
   function fresh() {
-    if (dirty && !confirm("有未保存的修改，确定放弃并新建吗？")) return;
+    if (dirty && !confirm("有未保存的修改，确定放弃并新建吗？")) return false;
     epoch.current++;
     setCurrent(null);
     setData(structuredClone(seed));
     setTitle(defaultTitle);
-    setSuggestion(null);
     setError("");
     setNotice("");
+    return true;
   }
   async function remove() {
     if (!current || !confirm(`删除「${current.title}」？此操作不能撤销。`))
-      return;
+      return false;
     setBusy(true);
     setError("");
     try {
@@ -185,38 +189,18 @@ export function useProjects<T>(
       setCurrent(null);
       setData(structuredClone(seed));
       setTitle(defaultTitle);
-      setSuggestion(null);
-      await refresh();
+      setItems((previous) => previous.filter((item) => item.id !== current.id));
+      try {
+        await refresh();
+      } catch {
+        setNotice("已删除，列表刷新暂不可用。");
+      }
+      return true;
     } catch (error) {
       report(error);
+      return false;
     } finally {
       setBusy(false);
-    }
-  }
-  async function generate(prompt: string) {
-    const token = ++epoch.current;
-    setAiBusy(true);
-    setError("");
-    setSuggestion(null);
-    try {
-      const result = validate(
-        await request("/api/generate", {
-          method: "POST",
-          body: JSON.stringify({ prompt }),
-        }),
-      );
-      if (epoch.current === token) setSuggestion(result);
-    } catch (error) {
-      if (epoch.current === token) report(error);
-    } finally {
-      setAiBusy(false);
-    }
-  }
-  function applySuggestion() {
-    if (suggestion) {
-      setData(suggestion);
-      setSuggestion(null);
-      setNotice("已采用生成稿，请检查后保存。");
     }
   }
   return {
@@ -233,15 +217,11 @@ export function useProjects<T>(
     notice,
     loading,
     dirty,
-    aiBusy,
-    suggestion,
     refresh,
     save,
     open,
     fresh,
     remove,
-    generate,
-    applySuggestion,
   };
 }
 export function ProjectPicker({

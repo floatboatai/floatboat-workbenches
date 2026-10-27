@@ -7,11 +7,15 @@
     "start": "node --enable-source-maps dist/server/index.mjs",
     "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
-  "engines": { "node": ">=22.16.0" },
+  "engines": {
+    "node": ">=22.16.0"
+  },
   "dependencies": {
+    "@fontsource/roboto-mono": "5.2.8",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "seqviz": "3.10.25"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

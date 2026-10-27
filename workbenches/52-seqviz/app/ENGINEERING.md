@@ -1,12 +1,9 @@
-# Engineering
+# 工程说明
 
-The business app root is this directory. Run the authoring commands from the repository root; see `../AGENTS.md`.
+contracts/sequence.ts 负责单条 FASTA、IUPAC DNA、区间坐标、反向互补、文档允许列表与导出。SeqViz 3.10.25 按需加载，在 adapter 中统一坐标转换。disableExternalFonts=true；Roboto Mono 使用同源 fontsource 静态字重。
 
-- `src/server/` owns business routes, parameterized SQL, transactions and Host SDK calls. Register public page routes under `/api/` through the provided server.
-- `src/ui/` owns React components and the authenticated page connection. UI requests go through `page.fetch`; importing Node, database or Host implementations into the browser is rejected.
-- `src/contracts/` contains shared serializable data types and response validation. Validate external input as unknown and return structured results.
-- Append numbered SQL migrations. Applied migrations are immutable; preview data is persistent and must not be silently reset to accommodate changes.
-- Keep the fixed strict `tsconfig.json` and declarative manifest build profile. The compiler ignores executable project build config and env files. Source assets belong under `src/`.
-- Keep runtime dependency versions and lockfiles aligned; see `../docs/maintenance.md`. Native extensions do not belong in the application profile.
-- Add tests for business boundaries and persistence behavior, using temporary data rather than the user's preview database. Test files live under `tests/` and are run by `pnpm test` from the repository root.
-- Host calls are optional and require actual authorization. Show unavailable/error states and consult `../docs/platform.md`; preserve execution-unknown errors rather than retrying potentially completed external mutations blindly.
+UI项目数据与未应用原文/未提交特征/意见草稿分离；externalDirty纳入通用项目hook，所有项目切换仅成功后重置草稿。导出与保存不忽略草稿。Node同源API与SQLite存储文档，版本保护保留，保存成功后的列表刷新失败不改变成功结果。
+
+序列原文和上限内标注存项目JSON。替换序列须显式清除旧坐标，模型不推断或生成序列。整个页面无任意脚本、WASM或原生模块；manifest 无模型能力。测试核对跨原点、方向、坐标往返、格式往返及磁盘恢复。
+
+真实浏览器已核对 SeqViz 的反向特征回调：其返回 clockwise=false，但不一定保留 direction/id。适配层先还原正向坐标边界，再将逆时针选区转换为反向互补，不依赖缺失的回调字段。整环图形以1–N显示，原始项目坐标保留。

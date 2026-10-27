@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.8f097e92-daec-492e-9b73-58540c2044b5",
   "registryName": "seqviz-studio",
-  "name": "SeqViz 工作台",
+  "name": "DNA 序列审阅台",
   "description": "序列与特征区间 → 环形/线性核对 → 选区序列、标注清单",
   "version": "0.1.0",
-  "changelog": "Initial application.",
+  "changelog": "增加序列导入、真实查看器、区间标注和审阅记录。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,9 +16,7 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
   "resources": []
