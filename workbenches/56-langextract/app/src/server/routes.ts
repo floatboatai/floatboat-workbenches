@@ -85,6 +85,7 @@ export function registerRoutes(app: WorkbenchServer) {
       try {
         const result = serviceResult(
           await callService(config, `jobs/${id}`, "PUT", { input }),
+          id,
         );
         return jobs.update(id, result.status, result.message, result.result);
       } catch {
@@ -110,6 +111,7 @@ export function registerRoutes(app: WorkbenchServer) {
       try {
         const remote = serviceResult(
           await callService(config, `jobs/${job.id}`),
+          job.id,
         );
         return jobs.update(
           job.id,
@@ -135,6 +137,7 @@ export function registerRoutes(app: WorkbenchServer) {
       if (!config) throw Error("服务未连接，无法确认停止接收结果。");
       const remote = serviceResult(
         await callService(config, `jobs/${job.id}/cancel`, "POST", {}),
+        job.id,
       );
       return jobs.update(job.id, remote.status, remote.message, remote.result);
     } catch (e) {

@@ -190,13 +190,14 @@ export async function callService(
   }
   return JSON.parse(new TextDecoder().decode(data));
 }
-export function serviceResult(value: unknown): {
+export function serviceResult(value: unknown, expectedId: string): {
   status: JobStatus;
   message: string;
   result: unknown[] | null;
 } {
   if (
     !isRecord(value) ||
+    value.id !== expectedId ||
     ![
       "queued",
       "running",

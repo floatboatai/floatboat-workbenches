@@ -208,8 +208,8 @@ test("Service connector rejects insecure remote URLs and response status mismatc
         LANGEXTRACT_SERVICE_TOKEN: token,
       }),
     );
-  assert.throws(() => serviceResult({ status: "succeeded" }));
-  assert.throws(() => serviceResult({ status: "invented" }));
+  assert.throws(() => serviceResult({ id: "expected", status: "succeeded" }, "expected"));
+  assert.throws(() => serviceResult({ id: "expected", status: "invented" }, "expected"));
 });
 test("Autosave stores full review and invalid JSON editor draft; same mutation replay is idempotent", async () => {
   const db = database();
@@ -302,4 +302,9 @@ test("Late polling cannot resurrect cancelled work and mismatched source results
   } finally {
     db.close();
   }
+});
+
+test("Service reply must match the requested job identity", () => {
+  assert.throws(() => serviceResult({ id: "different", status: "running" }, "expected"));
+  assert.equal(serviceResult({ id: "expected", status: "running" }, "expected").status, "running");
 });

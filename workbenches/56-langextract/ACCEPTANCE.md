@@ -7,7 +7,7 @@
 | 检查 | 结果与范围 |
 | --- | --- |
 | `pnpm workbench:check` | manifest、依赖、TypeScript、构建通过；有3个大模块提示（evidence领域契约、页面组件、共享autosave），不是失败 |
-| `pnpm test` | 13项通过：Unicode区间、多文档往返、未定位/畸形区间、原文变更、CSV安全转义、容量与标识、运行前校验、幂等任务、来源绑定、连接器边界、草稿恢复/冲突、终态竞态 |
+| `pnpm test` | 14项通过：Unicode区间、多文档往返、未定位/畸形区间、原文变更、CSV安全转义、容量与标识、运行前校验、幂等任务、来源绑定、连接器边界、草稿恢复/冲突、终态竞态、服务返回任务ID匹配 |
 | `python3 -m unittest discover -s service -v` | 7项通过：重复提交、重启中断、结果落盘、取消后不恢复、错误不泄露凭据、输入验证、实际HTTP鉴权与未配置状态 |
 | 实际安装的 LangExtract 管线 | `verify_upstream.py` 使用真实 `lx.extract` + 显式 deterministic stub model；2条记录准确落在含emoji的Python字符区间，并经官方 JSONL 保存/加载往返。**不是实际模型推理或质量评测** |
 | Node→Python连接器 | 实际 loopback HTTP：health、Bearer认证失败、未配置模型的503均按契约处理；没有调用模型 |
