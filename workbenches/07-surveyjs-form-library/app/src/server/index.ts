@@ -1,3 +1,4 @@
+import { registerAutosaveRoutes } from "./autosave";
 import { createWorkbenchServer } from "../../sdk/runtime.mjs";
 import { registerRoutes } from "./routes";
 import { validateForm } from "../contracts/form";
@@ -33,4 +34,5 @@ app.route("POST", "/api/projects/:id/responses", ({ params, body }) => {
     return fail(error);
   }
 });
+registerAutosaveRoutes(app, validateForm);
 await app.listen();

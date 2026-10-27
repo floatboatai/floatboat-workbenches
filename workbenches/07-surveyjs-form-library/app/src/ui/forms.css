@@ -730,3 +730,180 @@ summary:focus-visible {
   --sjs2-color-fg-basic-primary: var(--ink);
   --sjs2-color-border-basic-secondary: var(--line);
 }
+
+/* 按设计、填写和答卷阶段组织真实表单任务。 */
+:root {
+  color: var(--ink);
+  background: var(--bg);
+}
+.form-studio {
+  max-width: none;
+}
+.form-header {
+  padding: 12px 22px;
+  gap: 16px;
+  min-height: 60px;
+}
+.form-brand {
+  font-size: 14px;
+  gap: 9px;
+}
+.header-actions {
+  gap: 6px;
+}
+.header-actions button {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.form-heading {
+  padding: 10px 22px;
+  display: block;
+  border-bottom: 1px solid var(--line);
+}
+.project-meta {
+  width: 100%;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+.project-meta label {
+  margin: 0;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.project-meta input {
+  max-width: 420px;
+  font-size: 14px;
+  padding: 6px 10px;
+}
+.project-meta p {
+  margin: 0;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.view-tabs {
+  padding: 0 22px;
+  gap: 25px;
+  background: var(--surface);
+}
+.view-tabs button {
+  padding: 12px 5px;
+  font-size: 12px;
+}
+.design-tools {
+  padding: 14px 22px;
+}
+.schema-meta {
+  padding: 0 22px 20px;
+  gap: 22px;
+}
+.question-layout {
+  padding: 0 22px 24px;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 20px;
+}
+.question-list > button {
+  border-radius: 3px;
+  padding: 12px 10px;
+  border-right: 0;
+  border-left: 3px solid transparent;
+}
+.question-list > button.selected {
+  border-left-color: var(--accent);
+}
+.question-editor {
+  border-radius: 4px;
+  padding: 23px;
+  max-width: 900px;
+}
+.question-number {
+  font-family: ui-monospace, monospace;
+}
+.fill-view {
+  padding: 20px 22px 40px;
+}
+.response-view {
+  padding: 22px;
+}
+.notice {
+  padding: 9px 22px;
+}
+.form-ai,
+.json-panel {
+  padding: 20px 22px;
+}
+@media (max-width: 650px) {
+  .form-header {
+    padding: 14px 18px;
+    align-items: stretch;
+  }
+  .form-heading {
+    padding: 10px 18px;
+  }
+  .project-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .project-meta input {
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+  }
+  .project-meta p {
+    width: 100%;
+    margin-left: 0;
+  }
+  .view-tabs {
+    padding: 0 18px;
+    gap: 15px;
+  }
+  .design-tools {
+    padding: 14px 18px;
+  }
+  .schema-meta {
+    padding: 0 18px 18px;
+  }
+  .question-layout {
+    grid-template-columns: 1fr;
+    padding: 0 18px 24px;
+  }
+  .question-editor {
+    padding: 18px;
+  }
+  .fill-view {
+    padding: 18px 12px 35px;
+  }
+  .response-view {
+    padding: 18px;
+  }
+  .form-ai,
+  .json-panel {
+    padding: 18px;
+  }
+  .notice {
+    padding: 10px 18px;
+  }
+}
+.submitted-answer {
+  padding: 35px;
+  text-align: center;
+}
+.submitted-answer h2 {
+  font-size: 21px;
+}
+.submitted-answer p {
+  font-size: 13px;
+  color: var(--muted);
+}
+.fill-caption {
+  flex-wrap: wrap;
+}
+.fill-caption button {
+  font-size: 10px;
+  min-height: 28px;
+  padding: 5px 8px;
+}
+.project-meta .autosave-status {
+  font-size: 10px;
+}

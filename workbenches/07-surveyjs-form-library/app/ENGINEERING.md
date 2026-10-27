@@ -11,3 +11,7 @@ JSON 编辑保存独立草稿基线，并接入本目录 useProjects 的外部 d
 SurveyJS 3.x 使用 --sjs2-* CSS 变量，设置在 sd-theme-root 上；仅引用系统字体。textUpdateMode=onTyping 使输入即进入未提交状态。允许列表不保留表达式、脚本、HTML 题型、远程选项、外链或文件上传，因此不需要 unsafe-eval 或额外 CSP 放行。
 
 项目 POST/PUT 成功后立即更新 current 和项目列表摘要。后续列表刷新失败仅显示已保存提示，仍返回保存结果，让填写流程安全继续，避免重新创建项目。
+
+## 0.2.0 工作草稿
+
+使用公共 autosave contracts/client/cache/requests/server，追加独立迁移，不改原迁移。`documentId` 与 `mutationId` 去重；草稿 revision 与项目 revision 分别验证。UI 用 `documentKey`/`loadEpoch` 表示文档切换，后台保存不换 key。额外输入放 `draft`；宽松但限定类型的恢复器允许业务校验尚未通过的编辑值。填写草稿绑定开始填写时的问卷定义快照；提交前先持久化稳定答卷 ID，重试复用该 ID。定义变化时保留旧答案并禁止提交到新定义。

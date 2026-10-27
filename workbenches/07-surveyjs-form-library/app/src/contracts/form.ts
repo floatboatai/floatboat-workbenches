@@ -215,3 +215,83 @@ export const seed: FormDocument = {
     ],
   },
 };
+
+export function restoreFormDraft(value: unknown): FormDocument {
+  if (
+    !isRecord(value) ||
+    !isRecord(value.schema) ||
+    !Array.isArray(value.schema.elements) ||
+    value.schema.elements.length < 1 ||
+    value.schema.elements.length > 50
+  )
+    throw new Error("问卷草稿结构无效。");
+  const elements = value.schema.elements.map((item): Question => {
+    if (
+      !isRecord(item) ||
+      typeof item.type !== "string" ||
+      !types.has(item.type) ||
+      typeof item.isRequired !== "boolean"
+    )
+      throw new Error("题目草稿格式无效。");
+    let choices: string[] | undefined;
+    if (item.choices !== undefined) {
+      if (!Array.isArray(item.choices) || item.choices.length > 20)
+        throw new Error("选项草稿格式无效。");
+      choices = item.choices.map((value) => boundedText(value, 150));
+    }
+    return {
+      name: boundedText(item.name, 50),
+      type: item.type as QuestionType,
+      title: boundedText(item.title, 200),
+      isRequired: item.isRequired,
+      ...(choices ? { choices } : {}),
+    };
+  });
+  return {
+    schema: {
+      title: boundedText(value.schema.title, 200),
+      description: boundedText(value.schema.description, 3000),
+      elements,
+    },
+  };
+}
+export interface FillDraft {
+  schema: FormSchema;
+  answers: Record<string, Answer>;
+  id: string;
+  revision: number;
+  submitted: boolean;
+}
+export function partialAnswers(schema: FormSchema, value: unknown) {
+  return validateAnswers(
+    {
+      ...schema,
+      elements: schema.elements.map((question) => ({
+        ...question,
+        isRequired: false,
+      })),
+    },
+    value,
+  );
+}
+export function readFillDraft(value: unknown): FillDraft | null {
+  if (value === undefined || value === null) return null;
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    !/^[0-9a-f-]{36}$/i.test(value.id) ||
+    typeof value.revision !== "number" ||
+    !Number.isInteger(value.revision) ||
+    value.revision < 1 ||
+    typeof value.submitted !== "boolean"
+  )
+    throw new Error("填写草稿格式无效，请导出恢复草稿。");
+  const schema = validateForm({ schema: value.schema }).schema;
+  return {
+    schema,
+    answers: partialAnswers(schema, value.answers),
+    id: value.id,
+    revision: value.revision,
+    submitted: value.submitted,
+  };
+}

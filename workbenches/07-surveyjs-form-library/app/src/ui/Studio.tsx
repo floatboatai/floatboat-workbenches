@@ -1,3 +1,4 @@
+import { AutoStatus, AutoFeedback } from "./AutosaveStatus";
 import {
   lazy,
   Suspense,
@@ -20,6 +21,10 @@ import {
   seed,
   responseValue,
   validateForm,
+  restoreFormDraft,
+  readFillDraft,
+  partialAnswers,
+  type FillDraft,
   type Question,
   type QuestionType,
   type ResponseRecord,
@@ -47,35 +52,76 @@ const typeNames: Record<QuestionType, string> = {
 const choicesType = (type: QuestionType) =>
   ["radiogroup", "checkbox", "dropdown"].includes(type);
 export function Studio() {
-  const [jsonOpen, setJsonOpen] = useState(false),
-    [json, setJson] = useState(""),
-    [jsonBase, setJsonBase] = useState("");
+  const p = useProjects(seed, validateForm, "产品需求调研", {
+    storageKey: "surveyjs-form-library",
+    restoreDraftData: restoreFormDraft,
+  });
+  const jsonOpen = p.draft.jsonOpen === true,
+    json =
+      typeof p.draft.json === "string" && p.draft.json.length < 900000
+        ? p.draft.json
+        : "",
+    jsonBase = typeof p.draft.jsonBase === "string" ? p.draft.jsonBase : "";
   const jsonDirty = jsonOpen && json !== jsonBase;
-  const p = useProjects(seed, validateForm, "产品需求调研", jsonDirty);
-  const [tab, setTab] = useState<"design" | "fill" | "responses">("design"),
-    [selected, setSelected] = useState(0),
-    [newType, setNewType] = useState<QuestionType>("text");
-  const [showAi, setShowAi] = useState(false),
-    [prompt, setPrompt] = useState("");
+  const setJsonOpen = (value: boolean) =>
+    p.setDraft((previous) => ({ ...previous, jsonOpen: value }));
+  const setJson = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, json: value }));
+  const setJsonBase = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, jsonBase: value }));
+  let valid = true;
+  try {
+    validateForm(p.data);
+  } catch {
+    valid = false;
+  }
+  const tab: "design" | "fill" | "responses" =
+    p.draft.tab === "responses"
+      ? "responses"
+      : p.draft.tab === "fill" && valid
+        ? "fill"
+        : "design";
+  const setTab = (value: "design" | "fill" | "responses") =>
+    p.setDraft((previous) => ({ ...previous, tab: value }));
+  const selected =
+    typeof p.draft.selected === "number" && Number.isInteger(p.draft.selected)
+      ? Math.max(
+          0,
+          Math.min(p.draft.selected, p.data.schema.elements.length - 1),
+        )
+      : 0;
+  const setSelected = (value: number) =>
+    p.setDraft((previous) => ({ ...previous, selected: value }));
+  const [newType, setNewType] = useState<QuestionType>("text"),
+    [showAi, setShowAi] = useState(false);
+  const prompt =
+    typeof p.draft.prompt === "string" && p.draft.prompt.length <= 12000
+      ? p.draft.prompt
+      : "";
+  const setPrompt = (value: string) =>
+    p.setDraft((previous) => ({ ...previous, prompt: value }));
   const responseRequest = useRef(0);
   const [responses, setResponses] = useState<ResponseRecord[]>([]),
     [fetching, setFetching] = useState(false),
-    [responseDirty, setResponseDirty] = useState(false),
     [cycle, setCycle] = useState(0);
   const locked = p.busy || p.aiBusy,
     managementLocked = locked || tab === "fill";
   const question =
     p.data.schema.elements[selected] || p.data.schema.elements[0];
+  let fillDraft: FillDraft | null = null,
+    fillError = "";
+  try {
+    fillDraft = readFillDraft(p.draft.fill);
+  } catch (error) {
+    fillError = error instanceof Error ? error.message : "填写草稿无法读取。";
+  }
+  const fillingSchema = fillDraft?.schema ?? p.data.schema;
+  const sameSchema =
+    JSON.stringify(fillingSchema) === JSON.stringify(p.data.schema);
   useEffect(() => {
-    const guard = (event: BeforeUnloadEvent) => {
-      if (responseDirty) {
-        event.preventDefault();
-        event.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", guard);
-    return () => window.removeEventListener("beforeunload", guard);
-  }, [responseDirty]);
+    setResponses([]);
+    setShowAi(!!p.draft.__aiSuggestion || !!p.draft.prompt);
+  }, [p.loadEpoch]);
   const loadResponses = useCallback(async () => {
     const token = ++responseRequest.current;
     if (!p.current) {
@@ -101,27 +147,28 @@ export function Studio() {
       responseRequest.current++;
     };
   }, [tab, loadResponses]);
-  function resetEditor() {
-    setJsonOpen(false);
-    setJson("");
-    setJsonBase("");
-    setSelected(0);
-    setResponses([]);
-  }
   function toggleJson() {
     if (jsonOpen) {
-      if (jsonDirty && !confirm("JSON 尚未应用，确定放弃这份草稿吗？")) return;
-      setJsonOpen(false);
+      if (jsonDirty && !confirm("JSON 草稿已保留。确定放弃这份未应用草稿吗？"))
+        return;
+      p.setDraft((previous) => ({
+        ...previous,
+        jsonOpen: false,
+        json: "",
+        jsonBase: "",
+      }));
     } else {
       const text = JSON.stringify(p.data.schema, null, 2);
-      setJson(text);
-      setJsonBase(text);
-      setJsonOpen(true);
+      p.setDraft((previous) => ({
+        ...previous,
+        jsonOpen: true,
+        json: text,
+        jsonBase: text,
+      }));
     }
   }
   async function changeTab(next: typeof tab) {
     if (next === tab) return;
-    if (responseDirty && !confirm("答卷尚未提交，确定离开填写页吗？")) return;
     if (next === "fill") {
       if (jsonDirty) {
         p.report(new Error("请先应用或放弃 JSON 草稿，再填写问卷。"));
@@ -133,25 +180,108 @@ export function Studio() {
         p.report(error);
         return;
       }
-      if (p.dirty || !p.current) {
-        if (!(await p.save())) return;
-      }
+      const saved = await p.save();
+      if (!saved) return;
+      const existing = fillDraft;
+      if (!existing)
+        p.setDraft((previous) => ({
+          ...previous,
+          tab: "fill",
+          fill: {
+            schema: saved.data.schema,
+            answers: {},
+            id: crypto.randomUUID(),
+            revision: saved.revision,
+            submitted: false,
+          },
+        }));
+      else
+        p.setDraft((previous) => ({
+          ...previous,
+          tab: "fill",
+          fill: {
+            ...existing,
+            revision:
+              JSON.stringify(existing.schema) ===
+              JSON.stringify(saved.data.schema)
+                ? saved.revision
+                : existing.revision,
+          },
+        }));
       setCycle((value) => value + 1);
-    }
-    setResponseDirty(false);
-    setTab(next);
+    } else setTab(next);
   }
-  const submit = useCallback(
-    async (answers: unknown, id: string) => {
-      if (!p.current) throw new Error("请先保存问卷。");
-      const result = await request(`/api/projects/${p.current.id}/responses`, {
-        method: "POST",
-        body: JSON.stringify({ id, revision: p.current.revision, answers }),
-      });
-      responseValue(result);
-    },
-    [p.current?.id, p.current?.revision],
-  );
+  function captureAnswers(answers: unknown, id: string) {
+    try {
+      const clean = partialAnswers(fillingSchema, answers);
+      p.setDraft((previous) => ({
+        ...previous,
+        fill: {
+          schema: fillingSchema,
+          answers: clean,
+          id,
+          revision: fillDraft?.revision ?? p.current?.revision ?? 1,
+          submitted: false,
+        },
+      }));
+    } catch (error) {
+      p.report(error);
+    }
+  }
+  async function submit(answers: unknown, id: string) {
+    if (!sameSchema)
+      throw new Error(
+        "问卷定义已修改，原答案草稿已保留。请导出恢复草稿或重新填写当前版本。",
+      );
+    const clean = partialAnswers(fillingSchema, answers);
+    p.setDraft((previous) => ({
+      ...previous,
+      fill: {
+        schema: fillingSchema,
+        answers: clean,
+        id,
+        revision: fillDraft?.revision ?? p.current?.revision ?? 1,
+        submitted: false,
+      },
+    }));
+    const saved = await p.save();
+    if (!saved) throw new Error("填写草稿尚未同步，请恢复连接后重试提交。");
+    const result = await request(`/api/projects/${saved.id}/responses`, {
+      method: "POST",
+      body: JSON.stringify({ id, revision: saved.revision, answers: clean }),
+    });
+    responseValue(result);
+    p.setDraft((previous) => ({
+      ...previous,
+      fill: {
+        schema: fillingSchema,
+        answers: clean,
+        id,
+        revision: saved.revision,
+        submitted: true,
+      },
+    }));
+  }
+  function again() {
+    if (
+      fillDraft &&
+      !fillDraft.submitted &&
+      Object.keys(fillDraft.answers).length &&
+      !confirm("确定放弃当前未提交答案并开始新答卷吗？")
+    )
+      return;
+    p.setDraft((previous) => ({
+      ...previous,
+      fill: {
+        schema: p.data.schema,
+        answers: {},
+        id: crypto.randomUUID(),
+        revision: p.current?.revision ?? 1,
+        submitted: false,
+      },
+    }));
+    setCycle((value) => value + 1);
+  }
   function updateQuestion(patch: Partial<Question>) {
     p.setData({
       schema: {
@@ -187,7 +317,12 @@ export function Studio() {
       const value: unknown = JSON.parse(json);
       p.setData(validateForm({ schema: value }));
       setSelected(0);
-      setJsonOpen(false);
+      p.setDraft((previous) => ({
+        ...previous,
+        jsonOpen: false,
+        json: "",
+        jsonBase: "",
+      }));
     } catch (error) {
       p.report(error);
     }
@@ -208,18 +343,9 @@ export function Studio() {
             items={p.items}
             id={p.current?.id}
             disabled={managementLocked}
-            onOpen={(id) => {
-              void p.open(id).then((opened) => {
-                if (opened) resetEditor();
-              });
-            }}
+            onOpen={(id) => void p.open(id)}
           />
-          <button
-            onClick={() => {
-              if (p.fresh()) resetEditor();
-            }}
-            disabled={managementLocked}
-          >
+          <button onClick={() => void p.fresh()} disabled={managementLocked}>
             <Plus aria-hidden="true" size={15} />
             新建
           </button>
@@ -229,7 +355,7 @@ export function Studio() {
             disabled={managementLocked || jsonDirty}
           >
             <Save aria-hidden="true" size={15} />
-            {p.busy ? "保存中…" : "保存问卷"}
+            {p.busy ? "保存中…" : "立即保存"}
           </button>
           <button
             disabled={jsonDirty}
@@ -249,14 +375,7 @@ export function Studio() {
         </div>
       </header>
       <section className="form-heading">
-        <div>
-          <span className="eyebrow">从问题到洞察</span>
-          <h1>
-            让每一个回答
-            <br />
-            都有清楚的来处。
-          </h1>
-        </div>
+        <h1 className="sr-only">问卷设计、填写与答卷</h1>
         <div className="project-meta">
           <label htmlFor="title">项目名称</label>
           <input
@@ -268,17 +387,10 @@ export function Studio() {
             disabled={managementLocked}
             onChange={(event) => p.setTitle(event.target.value)}
           />
-          <p role="status">
-            {p.loading
-              ? "正在加载项目…"
-              : jsonDirty
-                ? "JSON 草稿尚未应用"
-                : p.dirty
-                  ? "有未保存的修改"
-                  : p.current
-                    ? "已保存"
-                    : "尚未保存"}{" "}
-            · {p.data.schema.elements.length} 道题
+          <p>
+            <AutoStatus state={p.autoState} loading={p.loading} />
+            {jsonDirty ? " · JSON 草稿尚未应用" : ""} ·{" "}
+            {p.data.schema.elements.length} 道题
           </p>
         </div>
       </section>
@@ -305,7 +417,13 @@ export function Studio() {
           03 查看答卷
         </button>
       </nav>
-      <Notice error={p.error} notice={p.notice} />
+      <Notice error={p.error || fillError} notice={p.notice} />
+      <AutoFeedback
+        state={p.autoState}
+        onRetry={() => void p.save()}
+        onExport={p.exportDraft}
+        onReload={p.current ? () => void p.open(p.current!.id) : undefined}
+      />
       <div id="form-content">
         {tab === "design" ? (
           <>
@@ -328,11 +446,7 @@ export function Studio() {
               </button>
               <button
                 className="danger"
-                onClick={() => {
-                  void p.remove().then((removed) => {
-                    if (removed) resetEditor();
-                  });
-                }}
+                onClick={() => void p.remove()}
                 disabled={locked || !p.current}
                 aria-label="删除问卷项目"
               >
@@ -406,6 +520,7 @@ export function Studio() {
                     >
                       采用问卷
                     </button>
+                    <button onClick={p.discardSuggestion}>放弃建议</button>
                   </div>
                 ) : null}
               </section>
@@ -628,16 +743,22 @@ export function Studio() {
           <section className="fill-view">
             <div className="fill-caption">
               <Check aria-hidden="true" size={16} />
-              填写的是已保存版本，提交后可在答卷页查看。
+              {sameSchema
+                ? "填写内容自动保留，提交后进入答卷列表。"
+                : "问卷定义已改变，当前保留旧版本答案草稿。"}
+              <button onClick={again}>开始新答卷</button>
             </div>
             <RenderBoundary>
               <Suspense fallback={<p role="status">正在准备问卷…</p>}>
                 <SurveyRunner
-                  key={`${p.current?.id}-${p.current?.revision}-${cycle}`}
-                  schema={p.data.schema}
+                  key={`${p.documentKey}-${cycle}`}
+                  schema={fillingSchema}
+                  initialAnswers={fillDraft?.answers}
+                  initialId={fillDraft?.id}
+                  initialSubmitted={fillDraft?.submitted}
                   onSubmit={submit}
-                  onDirty={setResponseDirty}
-                  onAgain={() => setCycle((value) => value + 1)}
+                  onDraft={captureAnswers}
+                  onAgain={again}
                 />
               </Suspense>
             </RenderBoundary>
