@@ -135,3 +135,25 @@ export function validate(value: unknown): Model {
 }
 export const instructions =
   '生成轻量图表配置，返回 {"format":"csv","source":"CSV数据","kind":"bar或line或dot","x":"横轴列名","y":"数值列名"}。CSV表头唯一，每行列数一致，y列全部为有限数字。最多30行。只返回JSON，不返回JavaScript代码。';
+
+export function plotData(model: Model) {
+  const source = rowsFrom(model);
+  const numeric =
+    model.kind !== "bar" &&
+    source.every(
+      (row) =>
+        row[model.x] !== null &&
+        String(row[model.x]).trim() !== "" &&
+        Number.isFinite(Number(row[model.x])),
+    );
+  const rows = source.map((row) => ({
+    xValue: numeric ? Number(row[model.x]) : String(row[model.x] ?? ""),
+    yValue: Number(row[model.y]),
+  }));
+  return {
+    rows,
+    domain: numeric
+      ? undefined
+      : Array.from(new Set(rows.map((row) => String(row.xValue)))),
+  };
+}

@@ -45,7 +45,7 @@ test("真实 SQLite 持久化、冲突及删除", () => {
   }
 });
 
-import { parseCsv } from "../src/contracts/model.ts";
+import { parseCsv, plotData } from "../src/contracts/model.ts";
 test("CSV引号与边界", () => {
   assert.deepEqual(parseCsv('名称,值\n"甲,乙",2'), [
     { 名称: "甲,乙", 值: "2" },
@@ -57,4 +57,27 @@ test("CSV引号与边界", () => {
   assert.throws(() =>
     validate({ ...seed, source: "日期,访问量\n周一,不是数字" }),
   );
+});
+
+test("分类横轴保留输入顺序，数值横轴保持数值", () => {
+  assert.deepEqual(plotData(seed).domain, [
+    "周一",
+    "周二",
+    "周三",
+    "周四",
+    "周五",
+  ]);
+  const same = {
+    format: "csv",
+    source: "数值\n1\n2",
+    kind: "bar",
+    x: "数值",
+    y: "数值",
+  } as const;
+  assert.deepEqual(plotData(same).rows, [
+    { xValue: "1", yValue: 1 },
+    { xValue: "2", yValue: 2 },
+  ]);
+  assert.equal(plotData({ ...same, kind: "dot" }).domain, undefined);
+  assert.throws(() => parseCsv('a,b\n"1"x,2'));
 });

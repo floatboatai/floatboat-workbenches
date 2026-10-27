@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { plot, barY, lineY, dot, ruleY } from "@observablehq/plot";
-import { rowsFrom, type Model } from "../contracts/model";
+import { plotData, type Model } from "../contracts/model";
 export function PlotView({
   model,
   onSvg,
@@ -23,36 +23,30 @@ export function PlotView({
   }, []);
   useEffect(() => {
     if (!root.current) return;
+    onSvg("");
     let chart: SVGSVGElement | HTMLElement | undefined;
     const timer = setTimeout(() => {
       try {
-        const rows = rowsFrom(model).map((row) => ({
-          ...row,
-          [model.y]: Number(row[model.y]),
-        }));
-        const numericX =
-          model.kind === "dot" &&
-          rows.every(
-            (row) =>
-              row[model.x] !== "" && Number.isFinite(Number(row[model.x])),
-          );
-        const data = numericX
-          ? rows.map((row) => ({ ...row, [model.x]: Number(row[model.x]) }))
-          : rows;
+        const { rows: data, domain } = plotData(model);
         const mark =
           model.kind === "bar"
-            ? barY(data, { x: model.x, y: model.y, fill: "#388377", tip: true })
+            ? barY(data, {
+                x: "xValue",
+                y: "yValue",
+                fill: "#388377",
+                tip: true,
+              })
             : model.kind === "line"
               ? lineY(data, {
-                  x: model.x,
-                  y: model.y,
+                  x: "xValue",
+                  y: "yValue",
                   stroke: "#388377",
                   strokeWidth: 2.5,
                   tip: true,
                 })
               : dot(data, {
-                  x: model.x,
-                  y: model.y,
+                  x: "xValue",
+                  y: "yValue",
                   fill: "#388377",
                   r: 5,
                   tip: true,
@@ -68,7 +62,7 @@ export function PlotView({
             fontFamily: "Arial, sans-serif",
             fontSize: "12px",
           },
-          x: { label: model.x },
+          x: { label: model.x, domain },
           y: { label: model.y, grid: true },
           marks: [ruleY([0], { stroke: "#cedbd4" }), mark],
         });
