@@ -11,6 +11,7 @@ import {
   importTranscript,
   validateTranscript,
   restoreTranscript,
+  transcriptDraft,
   seconds,
   clock,
   splitCue,
@@ -18,6 +19,7 @@ import {
 import { jobInput, parseJob } from "../src/contracts/job.ts";
 import { createAudioFiles, digest, detectMime } from "../src/server/files.ts";
 import { configuredService, createJobs } from "../src/server/jobs.ts";
+import { createAutosaveStore } from "../src/server/autosave.ts";
 import { createStore, StoreError } from "../src/server/store.ts";
 const id = "33333333-3333-4333-8333-333333333333";
 function wav() {
@@ -335,23 +337,112 @@ test("concurrent duplicate job requests share one durable operation", async () =
   }
 });
 
-test("late poll cannot resurrect cancelled transcription and remote cleartext is rejected", async()=>{
- assert.throws(()=>configuredService('http://example.org'));
- const db=await database();
- try{
-  const project=createStore(db,validateTranscript).create('Audio',{...emptyTranscript,source});
-  let resolvePoll:((response:Response)=>void)|undefined;
-  const reply=(status:string)=>Response.json({id,audioSha256:source.id,language:'en',status,model:'tiny.en',segments:status==='completed'?[{start:0,end:1,text:'Late output'}]:undefined});
-  const jobs=createJobs(db,async()=>wav(),async(url,options)=>{
-   if(options?.method==='PUT')return reply('queued');
-   if(String(url).endsWith('/cancel'))return reply('cancelled');
-   return new Promise<Response>(resolve=>{resolvePoll=resolve;});
-  },new URL('http://127.0.0.1:8768'));
-  await jobs.create(id,project.id,{source,language:'en'});
-  const pending=jobs.reconcile(id);
-  assert.equal((await jobs.cancel(id)).status,'cancelled');
-  resolvePoll!(reply('completed'));
-  assert.equal((await pending).status,'cancelled');
-  assert.equal(jobs.get(id).segments,null);
- }finally{db.close();}
+test("late poll cannot resurrect cancelled transcription and remote cleartext is rejected", async () => {
+  assert.throws(() => configuredService("http://example.org"));
+  const db = await database();
+  try {
+    const project = createStore(db, validateTranscript).create("Audio", {
+      ...emptyTranscript,
+      source,
+    });
+    let resolvePoll: ((response: Response) => void) | undefined;
+    const reply = (status: string) =>
+      Response.json({
+        id,
+        audioSha256: source.id,
+        language: "en",
+        status,
+        model: "tiny.en",
+        segments:
+          status === "completed"
+            ? [{ start: 0, end: 1, text: "Late output" }]
+            : undefined,
+      });
+    const jobs = createJobs(
+      db,
+      async () => wav(),
+      async (url, options) => {
+        if (options?.method === "PUT") return reply("queued");
+        if (String(url).endsWith("/cancel")) return reply("cancelled");
+        return new Promise<Response>((resolve) => {
+          resolvePoll = resolve;
+        });
+      },
+      new URL("http://127.0.0.1:8768"),
+    );
+    await jobs.create(id, project.id, { source, language: "en" });
+    const pending = jobs.reconcile(id);
+    assert.equal((await jobs.cancel(id)).status, "cancelled");
+    resolvePoll!(reply("completed"));
+    assert.equal((await pending).status, "cancelled");
+    assert.equal(jobs.get(id).segments, null);
+  } finally {
+    db.close();
+  }
+});
+
+test("oversized subtitle notes and incomplete long cues survive draft storage", async () => {
+  const cues = Array.from({ length: 200 }, (_, i) => ({
+    id: "cue-" + i,
+    start: "00:00:00.000",
+    end: "00:00:01.000",
+    text: "x".repeat(3600),
+    reviewed: false,
+  }));
+  const initial = { ...emptyTranscript, cues };
+  const baseBytes = Buffer.byteLength(JSON.stringify(initial));
+  const base = validateTranscript({
+    ...initial,
+    notes: "x".repeat(749000 - baseBytes),
+  });
+  const edited = {
+    ...base,
+    cues: base.cues.map((c, i) =>
+      i === 0 ? { ...c, text: "复".repeat(7000) } : c,
+    ),
+  };
+  assert.throws(() => validateTranscript(edited));
+  assert.equal(restoreTranscript(edited).cues[0].text.length, 7000);
+  const db = await database();
+  db.exec(
+    await readFile(
+      new URL("../migrations/0003_autosave.sql", import.meta.url),
+      "utf8",
+    ),
+  );
+  try {
+    const store = createAutosaveStore(db, validateTranscript),
+      documentId = crypto.randomUUID();
+    const receipt = await store.commit({
+      documentId,
+      mutationId: crypto.randomUUID(),
+      draftRevision: 0,
+      projectId: null,
+      projectRevision: null,
+      snapshot: {
+        title: "Subtitle draft",
+        data: edited,
+        extra: transcriptDraft({ importText: "00:00:" }),
+      },
+    });
+    assert.equal(receipt.phase, "draft");
+    assert.equal(
+      restoreTranscript(store.get(documentId)!.snapshot.data).cues[0].text
+        .length,
+      7000,
+    );
+    const portable = JSON.parse(
+      JSON.stringify({
+        data: edited,
+        draft: { importText: "字".repeat(100000) },
+      }),
+    );
+    assert.equal(restoreTranscript(portable.data).cues[0].text.length, 7000);
+    assert.equal(
+      transcriptDraft(portable.draft).importText,
+      portable.draft.importText,
+    );
+  } finally {
+    db.close();
+  }
 });

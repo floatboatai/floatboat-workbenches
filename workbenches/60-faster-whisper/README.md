@@ -66,3 +66,5 @@ uv pip install --python .local/whisper-service/bin/python -r service/requirement
 打包：`pnpm workbench package faster-whisper`。产物在本项目 `artifacts/`；Floatboat 中通过「我的 → 工作台 → 导入工作台」导入。客户端实际导入尚未验收。
 
 远程转写服务必须经 HTTPS 连接；HTTP 仅允许回环地址。迟到的轮询或提交错误不会覆盖已完成、失败、取消或中断状态。
+
+正式字幕模型上限750KB；超过此上限的可恢复工作稿最大1.25MB，单行编辑最多8000字符（正式字幕4000），未完成粘贴输入最多100000字符。达到工作稿上限会明确提示先导出并拆分，已有输入保持不变。

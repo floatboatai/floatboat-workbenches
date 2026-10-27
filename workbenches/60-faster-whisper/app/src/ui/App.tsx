@@ -29,6 +29,7 @@ import {
   importTranscript,
   languages,
   restoreTranscript,
+  transcriptDraft,
   seconds,
   segmentCues,
   splitCue,
@@ -104,6 +105,7 @@ const CueRow = memo(function CueRow({
             name={`start-${cue.id}`}
             autoComplete="off"
             spellCheck={false}
+            maxLength={24}
             value={cue.start}
             aria-invalid={!!error}
             onChange={(e) => onChange(cue.id, "start", e.target.value)}
@@ -116,6 +118,7 @@ const CueRow = memo(function CueRow({
             name={`end-${cue.id}`}
             autoComplete="off"
             spellCheck={false}
+            maxLength={24}
             value={cue.end}
             aria-invalid={!!error}
             onChange={(e) => onChange(cue.id, "end", e.target.value)}
@@ -129,6 +132,7 @@ const CueRow = memo(function CueRow({
           name={`text-${cue.id}`}
           autoComplete="off"
           rows={2}
+          maxLength={8000}
           value={cue.text}
           onChange={(e) => onChange(cue.id, "text", e.target.value)}
         />
@@ -200,6 +204,20 @@ export function App() {
   epoch.current = p.documentKey;
   const latest = useRef(p);
   latest.current = p;
+  const changeData = useCallback(
+    (change: (value: Transcript) => Transcript) => {
+      try {
+        latest.current.setData((previous) => {
+          const next = change(previous);
+          restoreTranscript(next);
+          return next;
+        });
+      } catch (error) {
+        latest.current.report(error);
+      }
+    },
+    [],
+  );
   const source = p.data.source,
     selected = typeof p.draft.selected === "string" ? p.draft.selected : "",
     importText =
@@ -229,7 +247,7 @@ export function App() {
   );
   const update = useCallback(
     (id: string, field: Field, value: string | boolean) =>
-      latest.current.setData((d) => ({
+      changeData((d) => ({
         ...d,
         cues: d.cues.map((c) =>
           c.id === id
@@ -381,7 +399,7 @@ export function App() {
       if (p.data.cues.length >= MAX_CUES)
         throw new Error("字幕已达到行数上限。");
       const pair = splitCue(cue);
-      p.setData((d) => ({
+      changeData((d) => ({
         ...d,
         cues: d.cues.flatMap((c) => (c.id === id ? pair : [c])),
       }));
@@ -398,7 +416,7 @@ export function App() {
       if (!next) throw new Error("已经是最后一句。");
       if (cueError(first) || cueError(next))
         throw new Error("请先修正时间格式。");
-      p.setData((d) => ({
+      changeData((d) => ({
         ...d,
         cues: d.cues.flatMap((c, i) =>
           i === index
@@ -421,7 +439,7 @@ export function App() {
   }, []);
   const remove = useCallback((id: string) => {
     if (confirm("删除这行字幕？"))
-      latest.current.setData((d) => ({
+      changeData((d) => ({
         ...d,
         cues: d.cues.filter((c) => c.id !== id),
       }));
@@ -432,7 +450,7 @@ export function App() {
       return;
     }
     const start = Math.max(lastEnd, time);
-    p.setData((d) => ({
+    changeData((d) => ({
       ...d,
       cues: [
         ...d.cues,
@@ -456,7 +474,7 @@ export function App() {
         source = await sourceFor(file, bytes);
       await upload(bytes, source, setProgress);
       if (epoch.current === key) {
-        p.setData((d) => ({ ...d, source }));
+        changeData((d) => ({ ...d, source }));
         p.setNotice("音频已保存，可以回听或开始转写。");
       }
     } catch (e) {
@@ -484,10 +502,7 @@ export function App() {
           setUploading(true);
           await upload(unbase64(raw.audioBase64), data.source, setProgress);
         }
-        const extra =
-          isRecord(raw.draft) && JSON.stringify(raw.draft).length < 750000
-            ? raw.draft
-            : {};
+        const extra = transcriptDraft(raw.draft);
         await p.replace(
           data,
           typeof raw.title === "string"
@@ -544,7 +559,7 @@ export function App() {
               version: 1,
               title: p.title,
               data,
-              draft: p.draft,
+              draft: transcriptDraft(p.draft),
               ...(bytes ? { audioBase64: base64(bytes) } : {}),
             }),
           ],
@@ -878,6 +893,7 @@ export function App() {
                 autoComplete="off"
                 rows={5}
                 spellCheck={false}
+                maxLength={100000}
                 value={importText}
                 onChange={(e) =>
                   p.setDraft((d) => ({ ...d, importText: e.target.value }))
@@ -935,7 +951,7 @@ export function App() {
                 aria-label="识别语言"
                 value={p.data.language}
                 onChange={(e) =>
-                  p.setData((d) => ({ ...d, language: e.target.value }))
+                  changeData((d) => ({ ...d, language: e.target.value }))
                 }
               >
                 {languages.map(([id, name]) => (
@@ -1015,9 +1031,10 @@ export function App() {
                 name="notes"
                 autoComplete="off"
                 rows={4}
+                maxLength={20000}
                 value={p.data.notes}
                 onChange={(e) =>
-                  p.setData((d) => ({ ...d, notes: e.target.value }))
+                  changeData((d) => ({ ...d, notes: e.target.value }))
                 }
                 placeholder="记录人名、术语或发音…"
               />

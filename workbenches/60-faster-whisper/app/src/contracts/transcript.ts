@@ -107,7 +107,7 @@ function decode(v: unknown, strict: boolean): Transcript {
       id: raw.id,
       start: boundedText(raw.start, 24),
       end: boundedText(raw.end, 24),
-      text: boundedText(raw.text, 4000),
+      text: boundedText(raw.text, strict ? 4000 : 8000),
       reviewed: raw.reviewed,
     };
     if (strict && seconds(cue.end) <= seconds(cue.start))
@@ -121,12 +121,28 @@ function decode(v: unknown, strict: boolean): Transcript {
     notes: boundedText(v.notes, 20000),
     origin: boundedText(v.origin, 240),
   };
-  if (new TextEncoder().encode(JSON.stringify(data)).length > 750000)
-    throw new Error("字幕内容超过 750 KB，请拆分项目。");
+  if (
+    new TextEncoder().encode(JSON.stringify(data)).length >
+    (strict ? 750000 : 1250000)
+  )
+    throw new Error(
+      strict
+        ? "字幕内容超过 750 KB，工作稿仍会保留，请拆分项目。"
+        : "工作稿超过 1.25 MB，请先导出并拆分内容。",
+    );
   return data;
 }
 export const validateTranscript = (v: unknown) => decode(v, true);
 export const restoreTranscript = (v: unknown) => decode(v, false);
+export function transcriptDraft(v: unknown): Record<string, unknown> {
+  if (!isRecord(v)) return {};
+  return {
+    selected: typeof v.selected === "string" ? boundedText(v.selected, 80) : "",
+    onlyPending: v.onlyPending === true,
+    importText:
+      typeof v.importText === "string" ? boundedText(v.importText, 100000) : "",
+  };
+}
 export const emptyTranscript: Transcript = {
   source: null,
   cues: [],
