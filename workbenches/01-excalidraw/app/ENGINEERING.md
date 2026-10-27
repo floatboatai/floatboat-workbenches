@@ -9,3 +9,7 @@
 - 字体从锁定的 npm 包经同源 API 提供。`src/vendor/` 的 pnpm 补丁让已配置字体源不再附加 CDN 后备地址，以适配宿主 CSP；不修改模板 SDK。
 - 根目录与 app 的 pnpm 锁文件都包含相同补丁，补丁及 MIT 版权说明随源包分发。
 - 模板与运行数据由根目录 prepare 命令下载/创建，不属于发布源码。命令见仓库 README；实际验收见工作台 README。
+
+## 0.2.0 工作草稿
+
+使用公共 autosave contracts/client/cache/requests/server，追加独立迁移，不改原迁移。`documentId` 与 `mutationId` 去重；草稿 revision 与项目 revision 分别验证。UI 用 `documentKey`/`loadEpoch` 表示文档切换，后台保存不换 key。额外输入放 `draft`；宽松但限定类型的恢复器允许业务校验尚未通过的编辑值。Excalidraw adapter 映射原 boards 表，保留既有 API 与 1.5MB 场景边界。

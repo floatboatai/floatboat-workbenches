@@ -33,10 +33,13 @@ export function boardStore(db: DatabaseSync) {
         .all() as unknown as BoardSummary[];
     },
     get,
-    create(title: unknown, scene: unknown = emptyScene): Board {
+    create(
+      title: unknown,
+      scene: unknown = emptyScene,
+      id: string = randomUUID(),
+    ): Board {
       const safeTitle = titleValue(title),
-        safeScene = sceneValue(scene),
-        id = randomUUID();
+        safeScene = sceneValue(scene);
       db.prepare(
         "INSERT INTO boards(id,title,scene,revision,updated_at) VALUES (?,?,?,1,?)",
       ).run(id, safeTitle, safeScene, new Date().toISOString());

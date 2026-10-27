@@ -1,9 +1,12 @@
+import { AutoStatus } from "./AutosaveStatus";
+import type { SavePhase } from "../contracts/autosave";
 import {
   useCallback,
   useEffect,
   useRef,
   useState,
   type ComponentProps,
+  type ReactNode,
 } from "react";
 import {
   Excalidraw,
@@ -16,12 +19,7 @@ import {
   serializeAsJSON,
 } from "@excalidraw/excalidraw";
 import { Save, Download, Sparkles, Trash2 } from "lucide-react";
-import {
-  diagramValue,
-  sceneValue,
-  type Board,
-  type Diagram,
-} from "../contracts/boards";
+import { diagramValue, sceneValue, type Diagram } from "../contracts/boards";
 import { request, download } from "./api";
 import "@excalidraw/excalidraw/index.css";
 
@@ -30,11 +28,18 @@ type EditorAPI = Parameters<
 >[0];
 type OnChange = NonNullable<ComponentProps<typeof Excalidraw>["onChange"]>;
 type Props = {
-  board: Board;
-  onSaved: (board: Board) => void;
+  scene: string;
+  title: string;
+  onTitleChange: (title: string) => void;
+  onSceneChange: (scene: string) => void;
+  onSave: () => Promise<unknown>;
   onDelete: () => void;
-  onDirty: (value: boolean) => void;
+  canDelete: boolean;
   busy: boolean;
+  autoState: { phase: SavePhase; message: string; savedAt: string };
+  prompt: string;
+  onPromptChange: (prompt: string) => void;
+  feedback: ReactNode;
 };
 const editorOptions = {
   canvasActions: { loadScene: false, saveToActiveFile: false },
@@ -95,28 +100,48 @@ function elementsFromDiagram(diagram: Diagram) {
   return convertToExcalidrawElements(elements, { regenerateIds: true });
 }
 
-export function Whiteboard({ board, onSaved, onDelete, onDirty, busy }: Props) {
-  const [api, setApi] = useState<EditorAPI | null>(null);
-  const [title, setTitle] = useState(board.title);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const [assistant, setAssistant] = useState(false);
-  const [dirty, setDirty] = useState(false);
+export function Whiteboard({
+  scene,
+  title,
+  onTitleChange,
+  onSceneChange,
+  onSave,
+  onDelete,
+  canDelete,
+  busy,
+  autoState,
+  prompt,
+  onPromptChange,
+  feedback,
+}: Props) {
+  const [api, setApi] = useState<EditorAPI | null>(null),
+    [message, setMessage] = useState(""),
+    [error, setError] = useState(""),
+    [generating, setGenerating] = useState(false),
+    [assistant, setAssistant] = useState(false);
   const [dark, setDark] = useState(
     () => matchMedia("(prefers-color-scheme: dark)").matches,
   );
-  const revision = useRef(board.revision);
-  const original = useRef("");
+  const previousVersion = useRef("");
+  const canvasElement = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false),
+    ready = useRef(false),
+    initialNonEmpty = useRef(false);
+  const updateScene = useRef(onSceneChange);
+  updateScene.current = onSceneChange;
   const alive = useRef(true);
   const [initialData] = useState(() =>
     loadFromBlob(
-      new Blob([board.scene], { type: "application/json" }),
+      new Blob([scene], { type: "application/json" }),
       null,
       null,
-    ).then((data) => ({ ...data, scrollToContent: true })),
+    ).then((data) => {
+      ready.current = true;
+      initialNonEmpty.current = !!data.elements?.some(
+        (element) => !element.isDeleted,
+      );
+      return { ...data, scrollToContent: true };
+    }),
   );
   useEffect(() => {
     alive.current = true;
@@ -130,14 +155,49 @@ export function Whiteboard({ board, onSaved, onDelete, onDirty, busy }: Props) {
     query.addEventListener("change", change);
     return () => query.removeEventListener("change", change);
   }, []);
-  useEffect(
-    () => onDirty(dirty || title !== board.title || generating),
-    [dirty, title, board.title, generating, onDirty],
-  );
+  useEffect(() => {
+    const element = canvasElement.current;
+    if (!api || !element) return;
+    let frame = 0,
+      narrow: boolean | undefined;
+    const observer = new ResizeObserver(([entry]) => {
+      const next = entry.contentRect.width < 700;
+      const crossed = narrow !== undefined && narrow !== next;
+      narrow = next;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        api.refresh();
+        if (crossed)
+          api.scrollToContent(undefined, {
+            fitToContent: true,
+            animate: false,
+          });
+      });
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [api]);
   const change = useCallback<OnChange>((elements, state, files) => {
-    const version = fingerprint(elements, state);
-    if (!original.current) original.current = version;
-    setDirty(version !== original.current);
+    if (!ready.current || state.isLoading) return;
+    if (
+      !initialized.current &&
+      initialNonEmpty.current &&
+      !elements.some((element) => !element.isDeleted)
+    )
+      return;
+    initialized.current = true;
+    const version =
+      fingerprint(elements, state) +
+      ":" +
+      Object.values(files)
+        .map((file) => file.id + ":" + file.dataURL.length + ":" + file.created)
+        .join("|");
+    if (version === previousVersion.current) return;
+    previousVersion.current = version;
+    updateScene.current(serializeAsJSON(elements, state, files, "local"));
   }, []);
   const snapshot = () => {
     if (!api) throw new Error("画布仍在加载，请稍后重试。");
@@ -154,45 +214,11 @@ export function Whiteboard({ board, onSaved, onDelete, onDirty, busy }: Props) {
   };
   async function save() {
     setError("");
-    setMessage("");
-    setSaving(true);
     try {
-      const scene = sceneValue(snapshot());
-      const savedFingerprint = api
-        ? fingerprint(api.getSceneElements(), api.getAppState())
-        : "";
-      const result = await request(`/api/boards/${board.id}`, {
-        method: "PUT",
-        body: JSON.stringify({ title, scene, revision: revision.current }),
-      });
-      if (!alive.current) return;
-      if (
-        typeof result !== "object" ||
-        result === null ||
-        !("revision" in result) ||
-        typeof result.revision !== "number"
-      )
-        throw new Error("保存响应无效。");
-      const updated = {
-        ...board,
-        title: title.trim(),
-        scene,
-        revision: result.revision,
-      };
-      revision.current = updated.revision;
-      original.current = savedFingerprint;
-      setDirty(
-        api
-          ? fingerprint(api.getSceneElements(), api.getAppState()) !==
-              savedFingerprint
-          : false,
-      );
-      setMessage("已保存");
-      onSaved(updated);
-    } catch (value) {
-      showError(value);
-    } finally {
-      if (alive.current) setSaving(false);
+      updateScene.current(snapshot());
+      await onSave();
+    } catch (error) {
+      showError(error);
     }
   }
   async function exportFile(format: "json" | "png" | "svg") {
@@ -257,7 +283,7 @@ export function Whiteboard({ board, onSaved, onDelete, onDirty, busy }: Props) {
       }));
       api.updateScene({ elements: [...old, ...moved] });
       api.scrollToContent(moved, { fitToContent: true });
-      setMessage("已添加到画布，请检查后保存。");
+      setMessage("已添加到画布，正在自动保存。");
       setAssistant(false);
     } catch (value) {
       showError(value);
@@ -278,60 +304,74 @@ export function Whiteboard({ board, onSaved, onDelete, onDirty, busy }: Props) {
             autoComplete="off"
             value={title}
             maxLength={120}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => onTitleChange(e.target.value)}
           />
-          <span className="save-state" role="status">
-            {saving
-              ? "保存中…"
-              : dirty || title !== board.title
-                ? "尚未保存"
-                : message || "已保存"}
-          </span>
+          <AutoStatus state={autoState} />
         </div>
         <div className="toolbar">
-          <button
-            className="primary"
-            onClick={() => void save()}
-            disabled={!api || saving || busy}
+          <details
+            className="canvas-file-menu"
+            onClick={(event) => {
+              if (
+                event.target instanceof Element &&
+                event.target.closest("button")
+              )
+                event.currentTarget.open = false;
+            }}
           >
-            <Save aria-hidden="true" size={16} />
-            保存
-          </button>
-          <button
-            aria-expanded={assistant}
-            onClick={() => setAssistant((value) => !value)}
-          >
-            <Sparkles aria-hidden="true" size={16} />
-            生成图形
-          </button>
-          <button onClick={() => void exportFile("json")} disabled={!api}>
-            <Download aria-hidden="true" size={16} />
-            源文件
-          </button>
-          <button onClick={() => void exportFile("png")} disabled={!api}>
-            PNG
-          </button>
-          <button onClick={() => void exportFile("svg")} disabled={!api}>
-            SVG
-          </button>
-          <button
-            onClick={() =>
-              api?.scrollToContent(undefined, { fitToContent: true })
-            }
-            disabled={!api}
-          >
-            适应画布
-          </button>
-          <button
-            className="icon-button danger"
-            aria-label="删除当前画布"
-            disabled={busy || saving || generating}
-            onClick={onDelete}
-          >
-            <Trash2 aria-hidden="true" size={16} />
-          </button>
+            <summary>文件与操作</summary>
+            <div className="canvas-file-actions">
+              <button
+                className="primary"
+                onClick={() => void save()}
+                disabled={!api || busy}
+              >
+                <Save aria-hidden="true" size={16} />
+                立即保存
+              </button>
+              <button
+                aria-expanded={assistant}
+                onClick={() => setAssistant((value) => !value)}
+              >
+                <Sparkles aria-hidden="true" size={16} />
+                生成图形
+              </button>
+              <button onClick={() => void exportFile("json")} disabled={!api}>
+                <Download aria-hidden="true" size={16} />
+                源文件
+              </button>
+              <button onClick={() => void exportFile("png")} disabled={!api}>
+                PNG
+              </button>
+              <button onClick={() => void exportFile("svg")} disabled={!api}>
+                SVG
+              </button>
+              <button
+                onClick={() =>
+                  api?.scrollToContent(undefined, { fitToContent: true })
+                }
+                disabled={!api}
+              >
+                适应画布
+              </button>
+              <button
+                className="icon-button danger"
+                aria-label="删除当前画布"
+                disabled={busy || generating || !canDelete}
+                onClick={onDelete}
+              >
+                <Trash2 aria-hidden="true" size={16} />
+              </button>
+            </div>
+          </details>
         </div>
       </header>
+      {feedback}
+      {message ? (
+        <p className="canvas-message" role="status">
+          {message}
+        </p>
+      ) : null}
       {error && (
         <div className="error-banner" role="alert">
           {error}
@@ -356,12 +396,15 @@ export function Whiteboard({ board, onSaved, onDelete, onDirty, busy }: Props) {
             required
             value={prompt}
             maxLength={4000}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => onPromptChange(e.target.value)}
             placeholder="例如：客户提交需求，评估后安排设计，再进入开发和验收。"
             disabled={generating}
           />
           <div>
-            <p>使用 Floatboat 的模型服务。生成内容会添加到现有画布。</p>
+            <button type="button" onClick={() => setAssistant(false)}>
+              关闭
+            </button>
+            <p>生成内容会添加到现有画布。</p>
             <button
               className="primary"
               type="submit"
@@ -372,7 +415,7 @@ export function Whiteboard({ board, onSaved, onDelete, onDirty, busy }: Props) {
           </div>
         </form>
       )}
-      <div className="canvas">
+      <div className="canvas" ref={canvasElement}>
         <Excalidraw
           excalidrawAPI={setApi}
           initialData={initialData}
