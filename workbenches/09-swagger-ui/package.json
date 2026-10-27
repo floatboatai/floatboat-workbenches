@@ -24,7 +24,8 @@
   "dependencies": {
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "swagger-ui-dist": "5.34.0"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

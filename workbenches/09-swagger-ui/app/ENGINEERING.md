@@ -1,12 +1,11 @@
-# Engineering
+# 工程说明
 
-The business app root is this directory. Run the authoring commands from the repository root; see `../AGENTS.md`.
+业务输入由 contracts/model.ts 校验。server/routes.ts 与 store.ts 提供 SQLite 项目和 revision 乐观锁；server/index.ts 注册同源只读示例接口及真实 Host LLM。LLM 候选先校验，用户明确采用后才更改当前规格。
 
-- `src/server/` owns business routes, parameterized SQL, transactions and Host SDK calls. Register public page routes under `/api/` through the provided server.
-- `src/ui/` owns React components and the authenticated page connection. UI requests go through `page.fetch`; importing Node, database or Host implementations into the browser is rejected.
-- `src/contracts/` contains shared serializable data types and response validation. Validate external input as unknown and return structured results.
-- Append numbered SQL migrations. Applied migrations are immutable; preview data is persistent and must not be silently reset to accommodate changes.
-- Keep the fixed strict `tsconfig.json` and declarative manifest build profile. The compiler ignores executable project build config and env files. Source assets belong under `src/`.
-- Keep runtime dependency versions and lockfiles aligned; see `../docs/maintenance.md`. Native extensions do not belong in the application profile.
-- Add tests for business boundaries and persistence behavior, using temporary data rather than the user's preview database. Test files live under `tests/` and are run by `pnpm test` from the repository root.
-- Host calls are optional and require actual authorization. Show unavailable/error states and consult `../docs/platform.md`; preserve execution-unknown errors rather than retrying potentially completed external mutations blindly.
+固定 swagger-ui-dist 5.34.0，由服务端只读路由提供官方 JS/CSS。Swagger 在同源独立 iframe 中运行，上层 React 19 管理项目与编辑器，避免旧 React 组件和 Node buffer 浏览器兼容问题。父子 postMessage 同时校验 origin 与 source；ready 握手发送首次规格，更新调用 specActions.updateSpec；父监听在卸载清理，子 ResizeObserver 和监听在 pagehide 清理。
+
+父页面和 iframe 均维持模板 CSP：script-src self、connect-src self，不加入 unsafe-eval。关闭在线 validator、URL query 配置和持久化凭据。只接受内部 $ref 与相对同源 servers，试调按钮和 requestInterceptor 双重限制同源 GET；没有任意 URL 代理。示例 GET /api/demo/health 不写数据。
+
+JSON 编辑稿独立于已应用规格。未应用修改阻止保存和导出旧规格；离开页面、打开、新建、删除和覆盖候选前保护草稿，取消保留原文。无效输入不覆盖可用文档。
+
+固定依赖同时记录在项目根和 app 的 package/lock 文件。使用官方固定 Vite/Node 模板，SDK、日志、本地数据不提交。未进行 Floatboat 客户端导入验收。
