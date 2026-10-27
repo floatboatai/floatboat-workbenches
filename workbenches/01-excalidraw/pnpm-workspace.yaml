@@ -1,0 +1,2 @@
+patchedDependencies:
+  '@excalidraw/excalidraw@0.18.1': app/src/vendor/@excalidraw__excalidraw@0.18.1.patch

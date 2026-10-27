@@ -1,0 +1,13 @@
+{
+  "name": "floatboat-workbenches",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.22.0",
+  "engines": {
+    "node": ">=22.16.0 <23"
+  },
+  "scripts": {
+    "workbench": "node scripts/workbench.mjs",
+    "list": "node scripts/workbench.mjs list"
+  }
+}

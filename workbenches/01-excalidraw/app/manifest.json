@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.f03f2733-a1cd-46aa-9f38-fa795b0d318c",
+  "registryName": "excalidraw-studio",
+  "name": "白板工作台",
+  "description": "用可编辑白板整理流程、方案与想法，保存项目并导出图像。",
+  "changelog": "Initial application.",
+  "version": "0.1.0",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "dependencies": [],
+  "resources": [],
+  "contributions": []
+}

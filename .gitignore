@@ -1,0 +1,17 @@
+node_modules/
+.cache/
+**/.patch-work/
+**/.generated/
+**/.local/
+**/artifacts/
+**/app/dist/
+**/app/sdk/
+**/app/.workbench-vite/
+**/sdk/
+**/tooling/
+**/compatibility.json
+**/template-docs/
+**/.template-guidance/
+.env*
+*.log
+.DS_Store
