@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.c5d010cf-ad2d-422b-9216-500ea96b3f60",
   "registryName": "pdf-js-studio",
-  "name": "PDF.js 工作台",
-  "description": "PDF 阅读、逐页摘要与资料审阅工作台",
+  "name": "PDF 阅读室",
+  "description": "本地 PDF 阅读、全文检索与逐页笔记",
   "version": "0.3.0",
-  "changelog": "Initial application.",
+  "changelog": "PDF.js 原生渲染、逐页笔记自动保存、原文件与便携项目导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -19,5 +19,28 @@
   "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "pdf-originals",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "pdf-originals",
+      "access": "read-write"
+    },
+    {
+      "id": "pdfjs-assets",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "public/pdfjs"
+    },
+    {
+      "id": "sample-pdf",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "public/sample.pdf"
+    }
+  ]
 }
