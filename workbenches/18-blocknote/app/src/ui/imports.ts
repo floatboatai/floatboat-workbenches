@@ -1,8 +1,9 @@
 import { MAX_SOURCE, safeLink, restoreNotebook, validateNotebook, type Notebook } from '../contracts/notebook.ts';
 import { isRecord } from '../contracts/project.ts';
 export function sourceText(value: unknown): string { return typeof value === 'string' && value.length <= MAX_SOURCE ? value : ''; }
+export const MAX_PROJECT_FILE_BYTES = 4_000_000;
 export function importJSON(source: string): { data: Notebook; title: string; extra: Record<string, unknown> } {
-  if (source.length > MAX_SOURCE) throw new Error('导入文本最多 180,000 字符。');
+  if (new TextEncoder().encode(source).length > MAX_PROJECT_FILE_BYTES) throw new Error('知识页文件不能超过 4 MB。');
   const raw: unknown = JSON.parse(source);
   if (!isRecord(raw)) throw new Error('文件需要一个知识页对象。');
   const object = isRecord(raw.snapshot) ? raw.snapshot : raw;

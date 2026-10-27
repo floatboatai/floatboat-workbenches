@@ -14,3 +14,5 @@
 `pnpm workbench:check`、`pnpm test`、`pnpm dev -- --no-watch`、仓库根 `pnpm workbench package blocknote`。9 个契约/SQLite/自动保存测试；实际 Chrome 证据位于忽略的 `.cache/acceptance.mjs`、`acceptance-results.json`、导出文件及视口截图。README 截图复制到仓库 docs/screenshots。
 
 Floatboat 导入后的桌面验收未执行。预览报告 HOST_CONNECTED 只是连接状态，不是业务 Host 调用；本应用无此类调用。
+
+完整知识页 JSON 文件走独立 4 MB 文件入口，直接校验结构并 replace 为新页，避免将导出文件再次塞入 180,000 字符的文本导入草稿。600 个合法块的格式化 JSON 回归覆盖超过文本框容量的项目往返；文本源仍先预览后应用。

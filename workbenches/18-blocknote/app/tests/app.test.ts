@@ -86,3 +86,11 @@ test('安全但超过应用块数的工作副本仍可恢复，媒体始终被�
   assert.equal(importJSON(JSON.stringify({snapshot:{title:"恢复页",data:draft,extra:{}}})).data.blocks.length,1201);
   assert.throws(() => restoreNotebook({...emptyNotebook, blocks:[{type:'image'}]}));
 });
+
+test('完整 JSON 文件可往返超过文本草稿框容量的合法知识页', () => {
+  const data = validateNotebook({ category: '资料', summary: '', blocks: Array.from({ length: 600 }, (_, i) => ({ id: 'paragraph-' + i, type: 'paragraph', content: 'A documented observation for the knowledge page. '.repeat(2) })) });
+  const source = JSON.stringify({ format: 'blocknote-knowledge-page', version: 1, title: '长知识页', data }, null, 2);
+  assert.ok(source.length > 180000);
+  assert.deepEqual(importJSON(source).data, data);
+  assert.throws(() => importJSON(' '.repeat(4_000_001)), /4 MB/);
+});

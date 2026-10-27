@@ -7,7 +7,7 @@ import { BlockNoteView } from '@blocknote/mantine';
 import { blockText, emptyNotebook, MAX_SOURCE, outline, restoreNotebook, safeLink, sampleNotebook, validateNotebook, type Notebook } from '../contracts/notebook';
 import { useWorkbenchState } from './autosave-client';
 import { download } from './requests';
-import { escapeHTML, importJSON, safeHTML, sourceText } from './imports';
+import { escapeHTML, importJSON, safeHTML, sourceText, MAX_PROJECT_FILE_BYTES } from './imports';
 import { RenderBoundary } from './workspace';
 
 const nativeTask = defaultBlockSpecs.checkListItem;
@@ -88,6 +88,23 @@ function Document({ p }: { p: PageState }) {
       if (await p.replace(next.data, next.title, next.extra)) { setImports(false); p.setNotice('已导入为新知识页，原页面仍在知识夹中。'); }
     } catch (e) { p.report(e); } finally { setProcessing(false); }
   }
+  async function importFile(file: File) {
+    const kind = /\.html?$/i.test(file.name) ? 'html' : /\.(md|markdown)$/i.test(file.name) ? 'md' : 'json';
+    setProcessing(true); p.setError('');
+    try {
+      const limit = kind === 'json' ? MAX_PROJECT_FILE_BYTES : 700000;
+      if (file.size > limit) throw new Error(kind === 'json' ? '知识页文件不能超过 4 MB。' : '文本文件超过 700 KB，请拆分后导入。');
+      const value = await file.text();
+      if (kind === 'json') {
+        // Full projects bypass the raw-text draft field, which is intentionally smaller.
+        const next = importJSON(value);
+        if (await p.replace(next.data, next.title, next.extra)) { setImports(false); p.setNotice('已导入为新知识页，原页面仍在知识夹中。'); }
+      } else {
+        if (value.length > MAX_SOURCE) throw new Error('导入文本最多 180,000 字符。');
+        p.setDraft(extra => ({ ...extra, importSource: value, importFormat: kind }));
+      }
+    } catch (error) { p.report(error); } finally { setProcessing(false); }
+  }
   function exportPage(kind: 'json' | 'md' | 'html') {
     try {
       const valid = validateNotebook({ ...p.data, blocks: editor.document });
@@ -99,7 +116,7 @@ function Document({ p }: { p: PageState }) {
   }
   return <>
     <div className="document-tools"><span className="page-kind"><FileText size={14} aria-hidden="true" />知识页</span><div className="tool-actions"><button ref={importButton} onClick={() => setImports(!imports)} aria-expanded={imports}><ArrowUpFromLine size={15} aria-hidden="true" />导入</button><div className="export-wrap"><button onClick={() => setExportMenu(!exportMenu)} aria-expanded={exportMenu}><ArrowDownToLine size={15} aria-hidden="true" />导出</button>{exportMenu && <div className="export-menu" onKeyDown={e => { if (e.key === 'Escape') setExportMenu(false); }}><button onClick={() => exportPage('json')}>知识页 JSON · 完整保留</button><button onClick={() => exportPage('md')}>Markdown · 通用文本</button><button onClick={() => exportPage('html')}>HTML · 阅读页面</button><button onClick={p.exportDraft}>恢复草稿 · 含未应用输入</button></div>}</div><button className="icon-button" aria-label="删除当前知识页" disabled={!p.current || p.busy} onClick={() => void p.remove()}><Trash2 size={15} /></button></div></div>
-    {imports && <section className="import-panel" aria-labelledby="import-title"><div className="import-heading"><h2 id="import-title">将资料收进知识夹</h2><button className="icon-button" aria-label="关闭导入面板" onClick={() => { setImports(false); importButton.current?.focus(); }}><X size={18} /></button></div><p>每次导入都会新建页面。JSON 保留完整块结构；Markdown 与 HTML 保留可支持的文字、列表和表格。</p><div className="import-controls"><label>内容格式<select aria-label="导入格式" value={format} onChange={e => p.setDraft(extra => ({ ...extra, importFormat: e.target.value }))}><option value="json">知识页 JSON / 恢复草稿</option><option value="md">Markdown</option><option value="html">HTML</option></select></label><label className="file-label">选择文件<input type="file" accept=".json,.md,.markdown,.html,.htm,text/plain" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; try { if (file.size > 700000) throw new Error('文件超过 700 KB，请拆分后导入。'); const value = await file.text(); if (value.length > MAX_SOURCE) throw new Error('导入文本最多 180,000 字符。'); const kind = /\.html?$/i.test(file.name) ? 'html' : /\.(md|markdown)$/i.test(file.name) ? 'md' : 'json'; p.setDraft(extra => ({ ...extra, importSource: value, importFormat: kind })); } catch (error) { p.report(error); } e.target.value = ''; }} /></label></div><textarea aria-label="待导入内容" value={source} maxLength={MAX_SOURCE} spellCheck={false} placeholder="粘贴知识页 JSON、Markdown 或 HTML…" onChange={e => draftSource(e.target.value)} /><div className="import-footer"><span>{source ? '此处是未应用的导入草稿，随当前页自动保存。' : 'HTML 只导入文字结构，外部媒体不会载入。'}</span><button className="primary" disabled={processing || p.busy} onClick={() => void applyImport()}>{processing ? '正在导入…' : '导入为新知识页'}</button></div></section>}
+    {imports && <section className="import-panel" aria-labelledby="import-title"><div className="import-heading"><h2 id="import-title">将资料收进知识夹</h2><button className="icon-button" aria-label="关闭导入面板" onClick={() => { setImports(false); importButton.current?.focus(); }}><X size={18} /></button></div><p>每次导入都会新建页面。选择 JSON 文件会直接新建知识页；Markdown 与 HTML 先载入下方预览，再由你应用。</p><div className="import-controls"><label>内容格式<select aria-label="导入格式" value={format} onChange={e => p.setDraft(extra => ({ ...extra, importFormat: e.target.value }))}><option value="json">知识页 JSON / 恢复草稿</option><option value="md">Markdown</option><option value="html">HTML</option></select></label><label className="file-label">导入文件<input type="file" disabled={processing || p.busy} accept=".json,.md,.markdown,.html,.htm,text/plain" onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; if (file) void importFile(file); }} /></label></div><textarea aria-label="待导入内容" value={source} maxLength={MAX_SOURCE} spellCheck={false} placeholder="粘贴知识页 JSON、Markdown 或 HTML…" onChange={e => draftSource(e.target.value)} /><div className="import-footer"><span>{source ? '此处是未应用的导入草稿，随当前页自动保存。' : 'HTML 只导入文字结构，外部媒体不会载入。'}</span><button className="primary" disabled={processing || p.busy} onClick={() => void applyImport()}>{processing ? '正在导入…' : '导入为新知识页'}</button></div></section>}
     <main className="paper" id="document"><div className="page-intro"><label className="category-label"><span className="sr-only">页面分类</span><input aria-label="页面分类" value={p.data.category} maxLength={40} placeholder="知识笔记" onChange={e => p.setData(data => ({ ...data, category: e.target.value }))} /></label><input className="page-title" id="page-title" aria-label="知识页标题" value={p.title} maxLength={120} onChange={e => p.setTitle(e.target.value)} placeholder="未命名知识页" autoComplete="off" /><textarea className="page-summary" aria-label="页面摘要" value={p.data.summary} maxLength={500} placeholder="为这页知识写一句简介…" rows={2} onChange={e => p.setData(data => ({ ...data, summary: e.target.value }))} /><div className="page-rule"><span>写下思考，连接经验</span><span>/ 插入块 · 选中文字设置格式</span></div></div>
       <BlockNoteView editor={editor} theme={dark ? 'dark' : 'light'} onChange={() => { p.setData(data => ({ ...data, blocks: editor.document })); }} />
       <footer className="page-footer"><span>知识的价值，在下一次被用到时发生。</span><span>正文与嵌套内容 · 自动保存已开启</span></footer>
