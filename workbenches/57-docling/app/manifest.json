@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.eace0c23-7f0d-4c80-888b-6a1f0cccb38e",
+  "registryName": "docling-studio",
+  "name": "Docling 工作台",
+  "description": "文档结构、文本与表格校对台",
+  "version": "0.4.0",
+  "changelog": "AI 工作台：业务项目自动保存、结果复核和上游服务接入。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

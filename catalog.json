@@ -2048,5 +2048,191 @@
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
     }
+  },
+  {
+    "name": "LangExtract",
+    "repo": "google/langextract",
+    "url": "https://github.com/google/langextract",
+    "category": "AI 工作台",
+    "kind": "服务适配",
+    "workbench": "证据字段抽取与人工复核台",
+    "core_features": "字段抽取复核：原文高亮与记录表联动",
+    "integration": "Python 核心＋自建任务服务；Apache-2.0",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "Apache-2.0",
+    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "sources": [
+      "https://github.com/google/langextract"
+    ],
+    "group": "AI 工具",
+    "mode": "独立服务与结果审阅",
+    "checked_at": "2026-10-27",
+    "verification": {
+      "build": "pending",
+      "browser": "pending",
+      "upstream": "pending",
+      "hostImport": "unverified"
+    },
+    "id": 56,
+    "slug": "langextract",
+    "directory": "workbenches/56-langextract",
+    "status": "planned",
+    "version": "0.4.0"
+  },
+  {
+    "name": "Docling",
+    "repo": "docling-project/docling",
+    "url": "https://github.com/docling-project/docling",
+    "category": "AI 工作台",
+    "kind": "服务适配",
+    "workbench": "文档结构、文本与表格校对台",
+    "core_features": "文档解析校对：原页、结构树、表格修订",
+    "integration": "官方 docling-serve；代码 MIT，模型单列",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT",
+    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "sources": [
+      "https://github.com/docling-project/docling"
+    ],
+    "group": "AI 工具",
+    "mode": "独立服务与结果审阅",
+    "checked_at": "2026-10-27",
+    "verification": {
+      "build": "pending",
+      "browser": "pending",
+      "upstream": "pending",
+      "hostImport": "unverified"
+    },
+    "id": 57,
+    "slug": "docling",
+    "directory": "workbenches/57-docling",
+    "status": "planned",
+    "version": "0.4.0"
+  },
+  {
+    "name": "LangGraph.js",
+    "repo": "langchain-ai/langgraphjs",
+    "url": "https://github.com/langchain-ai/langgraphjs",
+    "category": "AI 工作台",
+    "kind": "核心库",
+    "workbench": "人工复核与可恢复的 Agent 流程台",
+    "core_features": "人工复核流程：执行图、待办卡、检查点时间线",
+    "integration": "Node 核心＋自建模板 SQLite checkpointer；MIT",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT",
+    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "sources": [
+      "https://github.com/langchain-ai/langgraphjs"
+    ],
+    "group": "AI 工具",
+    "mode": "引擎封装",
+    "checked_at": "2026-10-27",
+    "verification": {
+      "build": "pending",
+      "browser": "pending",
+      "upstream": "pending",
+      "hostImport": "unverified"
+    },
+    "id": 58,
+    "slug": "langgraph",
+    "directory": "workbenches/58-langgraph",
+    "status": "planned",
+    "version": "0.4.0"
+  },
+  {
+    "name": "Promptfoo",
+    "repo": "promptfoo/promptfoo",
+    "url": "https://github.com/promptfoo/promptfoo",
+    "category": "AI 工作台",
+    "kind": "服务适配",
+    "workbench": "提示词与模型回归评测台",
+    "core_features": "评测台：用例×版本矩阵、失败差异、基线",
+    "integration": "外部 runner/真实结果导入；MIT",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT",
+    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "sources": [
+      "https://github.com/promptfoo/promptfoo"
+    ],
+    "group": "AI 工具",
+    "mode": "独立服务与结果审阅",
+    "checked_at": "2026-10-27",
+    "verification": {
+      "build": "pending",
+      "browser": "pending",
+      "upstream": "pending",
+      "hostImport": "unverified"
+    },
+    "id": 59,
+    "slug": "promptfoo",
+    "directory": "workbenches/59-promptfoo",
+    "status": "planned",
+    "version": "0.4.0"
+  },
+  {
+    "name": "faster-whisper",
+    "repo": "SYSTRAN/faster-whisper",
+    "url": "https://github.com/SYSTRAN/faster-whisper",
+    "category": "AI 工作台",
+    "kind": "服务适配",
+    "workbench": "音频转录与字幕审校台",
+    "core_features": "字幕审校：波形、逐句回听、时间轴、术语表",
+    "integration": "自建 Python 任务服务，CPU 可起步；MIT",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT",
+    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "sources": [
+      "https://github.com/SYSTRAN/faster-whisper"
+    ],
+    "group": "AI 工具",
+    "mode": "独立服务与结果审阅",
+    "checked_at": "2026-10-27",
+    "verification": {
+      "build": "pending",
+      "browser": "pending",
+      "upstream": "pending",
+      "hostImport": "unverified"
+    },
+    "id": 60,
+    "slug": "faster-whisper",
+    "directory": "workbenches/60-faster-whisper",
+    "status": "planned",
+    "version": "0.4.0"
+  },
+  {
+    "name": "Presenton",
+    "repo": "presenton/presenton",
+    "url": "https://github.com/presenton/presenton",
+    "category": "AI 工作台",
+    "kind": "服务适配",
+    "workbench": "资料、大纲与 AI 课件制作台",
+    "core_features": "课件制作：逐页大纲、幻灯片舞台、资料引用",
+    "integration": "外部 Docker/self-host API；Apache-2.0",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "Apache-2.0",
+    "caveat": "实现与真实服务验收进行中；Host 与客户端导入单列验证。",
+    "sources": [
+      "https://github.com/presenton/presenton"
+    ],
+    "group": "AI 工具",
+    "mode": "独立服务与结果审阅",
+    "checked_at": "2026-10-27",
+    "verification": {
+      "build": "pending",
+      "browser": "pending",
+      "upstream": "pending",
+      "hostImport": "unverified"
+    },
+    "id": 61,
+    "slug": "presenton",
+    "directory": "workbenches/61-presenton",
+    "status": "planned",
+    "version": "0.4.0"
   }
 ]
