@@ -1,3 +1,4 @@
+import { localOperation } from "./operation.ts";
 import { boundedText, isRecord } from "./project.ts";
 export type Slide = {
   id: string;
@@ -270,6 +271,8 @@ export function restoreExtra(v: unknown): Record<string, unknown> {
   ])
     if (v[key] !== undefined)
       extra[key] = str(v[key], key === "importText" ? 1800000 : 100);
+  if (v.pendingOperation !== undefined)
+    extra.pendingOperation = localOperation(v.pendingOperation);
   return extra;
 }
 export function importDeck(text: string): {

@@ -38,3 +38,13 @@ The binary file tests verify constrained retrieval/cache/chunk mechanics with ex
 ## Delivery
 
 Source package is produced with `pnpm workbench package presenton`. It excludes preview SQLite, downloaded artifacts, node_modules and credentials. Install through **Floatboat → My → Workbenches → Import workbench**. A successful source package is not proof of an imported Host connection or model run. Business-data migration should use portable project JSON and separate downloaded originals.
+
+## Review fixes — submission guard and raw import restoration
+
+Follow-up check/test/package passed; the test suite now contains **29 passing tests**. Six targeted tests cover restored intent with unavailable history, 404 uncertainty, explicit new-task confirmation, terminal exact-ID reconciliation, stopped tasks, empty-list preservation, and portable/recovery raw-editor fields.
+
+A separate temporary preview and SQLite database exercised the real Node connector against an explicitly labelled local HTTP contract fixture. The browser verified the operation metadata was durably saved before the generation POST. The workbench accepted the request, stored the upstream fixture task, and then the browser response was deliberately dropped. Both list and exact-ID lookups returned injected 503 failures. After reload, the original operation remained visible; clicking generation prompted for explicit confirmation. Dismissing it left **one local POST and one fixture upstream generation call**, with no second operation ID. Restoring only the exact-ID endpoint recovered the original task while the list remained unavailable.
+
+The same targeted browser run exported a project containing unfinished raw JSON, imported it as a new project, reloaded it and verified the exact raw text. A full working-copy recovery-file import also retained that text. There were no uncaught page errors. Fixture tasks are confined to the temporary regression database; they are not model runs and do not alter the ordinary preview's production history. No new visual screenshot or unrelated full browser rerun was required. Private evidence is in `work/ai-batch/presenton/guard-evidence.json`.
+
+The application package metadata is aligned to `0.4.0`, matching the root package and manifest. App identity is unchanged. The final reviewed package was rebuilt after this metadata alignment.

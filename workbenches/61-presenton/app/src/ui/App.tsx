@@ -26,6 +26,13 @@ import {
 import { jobValue, states, type Job } from "../contracts/jobs";
 import { isRecord } from "../contracts/project";
 import {
+  localOperation,
+  unresolvedOperation,
+  mergeJobs,
+  type LocalOperation,
+} from "../contracts/operation";
+import { allowNewSubmission } from "./submission-guard";
+import {
   useProjects,
   ProjectPicker,
   Notice,
@@ -47,6 +54,7 @@ export function App() {
     [allJobs, setAllJobs] = useState(false);
   const document = useRef(p.documentKey);
   document.current = p.documentKey;
+  const submitting = useRef(false);
   const currentIndex = Math.max(
       0,
       p.data.slides.findIndex((s) => s.id === active),
@@ -59,13 +67,68 @@ export function App() {
     typeof p.draft.presentationId === "string"
       ? p.draft.presentationId
       : p.data.result?.presentationId || "";
+  let persistedOperation: LocalOperation | null = null;
+  if (p.draft.pendingOperation !== undefined) {
+    try {
+      persistedOperation = localOperation(p.draft.pendingOperation);
+    } catch {
+      /* Invalid state cannot become an executable request. */
+    }
+  }
+  // Older working copies stored only the ID. Keep those guarded too.
+  if (
+    !persistedOperation &&
+    typeof p.draft.lastOperation === "string" &&
+    /^[A-Za-z0-9_-]{1,100}$/.test(p.draft.lastOperation) &&
+    p.current
+  ) {
+    persistedOperation = {
+      id: p.draft.lastOperation,
+      projectId: p.current.id,
+      title: p.title,
+      kind: "generate",
+      createdAt: p.current.updatedAt,
+    };
+  }
+  const operationId = persistedOperation?.id || "";
   const selectedJobs = jobs.filter(
-    (j) => allJobs || j.projectId === p.current?.id,
+    (j) => allJobs || j.projectId === p.current?.id || j.id === operationId,
   );
+  async function loadJob(id: string) {
+    const job = jobValue(await request(`/api/jobs/${id}`));
+    if (job.id !== id) throw new Error("返回的操作记录 ID 不符。");
+    setJobs((old) => mergeJobs(old, [job]));
+    return job;
+  }
+  useEffect(() => {
+    if (p.loading || !persistedOperation) return;
+    const operation = persistedOperation;
+    let alive = true;
+    // Display a recoverable local record before the lookup. List failures or
+    // an empty list cannot erase this submission intent.
+    setJobs((old) =>
+      old.some((job) => job.id === operation.id)
+        ? old
+        : mergeJobs(old, [unresolvedOperation(operation)]),
+    );
+    void request(`/api/jobs/${operation.id}`)
+      .then((value) => {
+        const job = jobValue(value);
+        if (job.id !== operation.id)
+          throw new Error("返回的操作记录 ID 不符。");
+        if (alive) setJobs((old) => mergeJobs(old, [job]));
+      })
+      .catch(() => {
+        /* The unknown local record remains actionable. */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [p.loading, p.documentKey, operationId]);
   async function loadJobs() {
     const v = await request("/api/jobs");
     if (!Array.isArray(v)) throw new Error("制作记录格式无效。");
-    setJobs(v.map(jobValue));
+    setJobs((old) => mergeJobs(old, v.map(jobValue)));
   }
   useEffect(() => {
     let alive = true;
@@ -170,57 +233,79 @@ export function App() {
     }
   }
   async function start(kind: "generate" | "export" = "generate") {
-    if (
-      kind === "generate" &&
-      jobs.some(
-        (j) =>
-          j.projectId === p.current?.id &&
-          ["pending", "submitting", "unknown"].includes(j.state),
-      ) &&
-      !confirm(
-        "这份文稿已有未确认或进行中的任务。再次制作会创建新任务并可能产生额外费用。仍要继续？",
-      )
-    )
-      return;
-    const snapshot = structuredClone(p.data),
-      title = p.title,
-      epoch = p.documentKey;
-    if (kind === "generate") validateDeck(snapshot);
-    const saved = await p.save();
-    if (!saved) throw new Error("请先完成并保存大纲。");
-    if (document.current !== epoch)
-      throw new Error("文稿已切换，请在当前文稿重新制作。");
-    const id = crypto.randomUUID();
-    // The operation ID is retained in the working copy before the request. Reload can query it.
-    p.setDraft((d) => ({ ...d, lastOperation: id }));
-    if (!(await p.save())) throw new Error("操作准备尚未保存，请稍后重试。");
+    if (submitting.current) return;
+    submitting.current = true;
     try {
-      const value = await request("/api/jobs", {
-        method: "POST",
-        body: JSON.stringify({
-          id,
-          projectId: saved.id,
-          title,
-          kind,
-          deck: snapshot,
-          presentationId,
-          format: snapshot.settings.format,
-        }),
-      });
-      setJobs((old) => [jobValue(value), ...old.filter((j) => j.id !== id)]);
-    } catch (e) {
-      await loadJobs().catch(() => {});
-      throw e;
+      const epoch = p.documentKey;
+      if (
+        !(await allowNewSubmission({
+          operation: persistedOperation,
+          jobs,
+          projectId: p.current?.id || "",
+          query: loadJob,
+          confirm: (message) => window.confirm(message),
+        }))
+      )
+        return;
+      if (document.current !== epoch)
+        throw new Error("文稿已切换，请在当前文稿重新制作。");
+      const snapshot = structuredClone(p.data),
+        title = p.title;
+      if (kind === "generate") validateDeck(snapshot);
+      const saved = await p.save();
+      if (!saved) throw new Error("请先完成并保存大纲。");
+      if (document.current !== epoch)
+        throw new Error("文稿已切换，请在当前文稿重新制作。");
+      const operation: LocalOperation = {
+        id: crypto.randomUUID(),
+        projectId: saved.id,
+        title,
+        kind,
+        createdAt: new Date().toISOString(),
+      };
+      // This durable intent and visible pending record both precede the POST.
+      p.setDraft((d) => ({
+        ...d,
+        lastOperation: operation.id,
+        pendingOperation: operation,
+      }));
+      setJobs((old) =>
+        mergeJobs(old, [unresolvedOperation(operation, "submitting")]),
+      );
+      if (!(await p.save())) throw new Error("操作准备尚未保存，请稍后重试。");
+      if (document.current !== epoch)
+        throw new Error("文稿已切换；尚未提交，可在原文稿查询操作记录。");
+      try {
+        const job = jobValue(
+          await request("/api/jobs", {
+            method: "POST",
+            body: JSON.stringify({
+              id: operation.id,
+              projectId: saved.id,
+              title,
+              kind,
+              deck: snapshot,
+              presentationId,
+              format: snapshot.settings.format,
+            }),
+          }),
+        );
+        if (job.id !== operation.id)
+          throw new Error("返回的操作记录 ID 不符。");
+        setJobs((old) => mergeJobs(old, [job]));
+      } catch (error) {
+        setJobs((old) => mergeJobs(old, [unresolvedOperation(operation)]));
+        // Exact-ID reconciliation works even when the list endpoint is down.
+        await loadJob(operation.id).catch(() => {});
+        throw error;
+      }
+    } finally {
+      submitting.current = false;
     }
   }
   async function importText(text: string) {
     const parsed = importDeck(text);
-    if (
-      await p.replace(parsed.deck, parsed.title, {
-        ...parsed.extra,
-        importText: "",
-      })
-    ) {
+    if (await p.replace(parsed.deck, parsed.title, parsed.extra)) {
       setActive(parsed.deck.slides[0].id);
       setTab("outline");
       p.setNotice("已创建独立文稿，可逐页复核。");
@@ -882,6 +967,16 @@ export function App() {
                     )}
                   </dl>
                   <div className="job-actions">
+                    <button
+                      disabled={!!working}
+                      onClick={() =>
+                        void action("recover", async () => {
+                          await loadJob(j.id);
+                        })
+                      }
+                    >
+                      查询操作记录
+                    </button>
                     <button
                       disabled={!!working}
                       onClick={() =>
