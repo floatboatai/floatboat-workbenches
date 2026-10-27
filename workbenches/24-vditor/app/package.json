@@ -13,7 +13,8 @@
   "dependencies": {
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "vditor": "4.0.1"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

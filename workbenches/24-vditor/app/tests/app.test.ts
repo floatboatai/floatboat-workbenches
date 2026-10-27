@@ -1,12 +1,23 @@
-// ABOUTME: 通过真实跨端契约验证响应边界，测试不访问正式数据库。
-
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { isAppInfo } from '../src/contracts/app.ts';
+import { readFileSync, existsSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
+import { randomUUID } from 'node:crypto';
+import { blankArticle, exampleArticle, encodeProject, decodeProject, validateArticle, safeFilename, PROJECT_FILE_LIMIT, requiresSource, renderingLimited } from '../src/contracts/article.ts';
+import { createAutosaveStore } from '../src/server/autosave.ts';
+import { createStore } from '../src/server/store.ts';
+import { isRecord } from '../src/contracts/project.ts';
+import { ASSETS } from '../src/server/routes.ts';
+function setup() { const db = new DatabaseSync(':memory:'); for (const file of ['0001_initial.sql', '0002_projects.sql', '0003_autosave.sql']) db.exec(readFileSync(new URL('../migrations/' + file, import.meta.url), 'utf8')); return { db, drafts: createAutosaveStore(db, validateArticle), projects: createStore(db, validateArticle) }; }
+const request = (data = exampleArticle, title = '测试文章') => ({ documentId: randomUUID(), mutationId: randomUUID(), draftRevision: 0, projectId: null as string | null, projectRevision: null as number | null, snapshot: { title, data, extra: {} as Record<string, unknown> } });
+test('项目保留原始 Markdown、未闭合语法、元数据与模式', () => { const article = { ...blankArticle, markdown: '# 标题\n\n**未闭合\n\t\n', author: '作者', summary: '摘要', mode: 'sv' as const }; assert.deepEqual(decodeProject(encodeProject('文章', article)), { title: '文章', article }); });
+test('上限项目可导出再导入，转义文字不会超过项目文件限制', () => { const article = { ...exampleArticle, markdown: '\u0001'.repeat(100000), summary: '中'.repeat(1000) }; const text = encodeProject('大文章', article); assert.ok(new TextEncoder().encode(text).length < PROJECT_FILE_LIMIT); assert.deepEqual(decodeProject(text).article, article); });
+test('导入拒绝错误格式、超长文本、错误模式与原型式字段', () => { for (const text of ['{', '{}', '{"format":"vditor-article","version":2}', ' '.repeat(PROJECT_FILE_LIMIT + 1)]) assert.throws(() => decodeProject(text)); for (const data of [{ ...exampleArticle, mode: 'html' }, { ...exampleArticle, markdown: 'x'.repeat(100001) }, { ...exampleArticle, author: null }]) assert.throws(() => validateArticle(data)); const data = validateArticle({ ...exampleArticle, remoteUrl: 'https://example.com' }); assert.equal('remoteUrl' in data, false); });
+test('文件名不含路径或控制符', () => { assert.equal(safeFilename('../报告:版本?'), '.._报告_版本_'); assert.equal(safeFilename(''), '文章'); });
+test('自动保存确认丢失后重试不会创建重复文章', async () => { const { db, drafts, projects } = setup(); try { const input = request(); const first = await drafts.commit(input); const retry = await drafts.commit(input); assert.deepEqual(retry, first); assert.equal(projects.list().length, 1); assert.equal(projects.get(input.documentId).data.markdown, exampleArticle.markdown); await assert.rejects(drafts.commit({ ...input, snapshot: { ...input.snapshot, title: '篡改同一保存标识' } })); } finally { db.close(); } });
+test('无效名称保存为草稿，原始导入输入可恢复；修复后形成文章', async () => { const { db, drafts } = setup(); try { const input = request({ ...blankArticle, markdown: '**未闭合\n\n' }, ''); input.snapshot.extra = { importText: '{"article":', importFormat: 'project' }; const first = await drafts.commit(input); assert.equal(first.phase, 'draft'); assert.deepEqual(drafts.get(input.documentId)?.snapshot, input.snapshot); const next = await drafts.commit({ ...input, mutationId: randomUUID(), draftRevision: 1, snapshot: { ...input.snapshot, title: '已命名' } }); assert.equal(next.phase, 'saved'); assert.equal(next.project?.data.markdown, '**未闭合\n\n'); } finally { db.close(); } });
+test('跨窗口更新产生冲突，服务器文章保持新版本且冲突草稿可取回', async () => { const { db, drafts, projects } = setup(); try { const input = request(); const first = await drafts.commit(input); const id = first.project!.id; projects.update(id, '另一窗口', { ...exampleArticle, markdown: '服务器内容' }, 1); const conflicting = { ...input, mutationId: randomUUID(), draftRevision: 1, projectId: id, projectRevision: 1, snapshot: { ...input.snapshot, data: { ...exampleArticle, markdown: '本机未完成内容' } } }; const receipt = await drafts.commit(conflicting); assert.equal(receipt.phase, 'conflict'); assert.equal(projects.get(id).data.markdown, '服务器内容'); assert.deepEqual(drafts.get(input.documentId)?.snapshot.data, conflicting.snapshot.data); } finally { db.close(); } });
+test('导入使用新文档标识，不覆盖现有文章', async () => { const { db, drafts, projects } = setup(); try { await drafts.commit(request()); const imported = decodeProject(encodeProject('副本', { ...exampleArticle, markdown: '导入内容' })); await drafts.commit(request(imported.article, imported.title)); assert.equal(projects.list().length, 2); } finally { db.close(); } });
+test('仅列出的本地运行资源随项目提供', () => { const manifest: unknown = JSON.parse(readFileSync(new URL('../manifest.json', import.meta.url), 'utf8')); assert.ok(isRecord(manifest) && Array.isArray(manifest.resources)); const resource = manifest.resources.find((item: unknown) => isRecord(item) && item.id === 'vditor-assets'); assert.ok(isRecord(resource) && typeof resource.path === 'string'); assert.equal(ASSETS.length, 7); for (const asset of ASSETS) { const file = new URL('../' + resource.path + '/' + asset.replace(/^dist\//, 'runtime/'), import.meta.url); assert.ok(existsSync(file), asset); assert.ok(readFileSync(file).length > 100); } });
 
-test('应用信息需要明确名称和版本', () => {
-  assert.equal(isAppInfo({ name: 'App', version: '0.1.0', platform: 'not-connected' }), true);
-  assert.equal(isAppInfo({ name: 'App', version: '0.1.0', platform: 'unknown' }), false);
-  assert.equal(isAppInfo({ name: 123, version: '0.1.0' }), false);
-  assert.equal(isAppInfo(null), false);
-});
+test('HTML 和媒体要求源码模式，代码示例和自动链接仍可三模式编辑', () => { assert.equal(requiresSource('<img src="https://x.example/x">'), true); assert.equal(requiresSource('![alt](https://x.example/x)'), true); assert.equal(requiresSource('$$\nx+y\n$$'), true); assert.equal(requiresSource('```html\n<div>code</div>\n```'), false); assert.equal(requiresSource('`<b>` 示例与 <https://example.com>'), false); assert.equal(renderingLimited('x'.repeat(4001)), true); assert.equal(renderingLimited('短文\n'), false); });

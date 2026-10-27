@@ -1,40 +1,59 @@
-// ABOUTME: 展示应用信息和加载状态，不预设业务模型。
-
-import { useEffect, useState } from 'react';
-import { LayoutGrid, RefreshCw, Inbox, CircleAlert } from 'lucide-react';
-import { getPageConnection } from './connection';
-import { isAppInfo, type AppInfo } from '../contracts/app';
-import { text } from './messages';
-
+import { useEffect, useRef, useState } from 'react';
+import { BookOpen, ChevronLeft, Download, FilePlus2, Menu, Moon, PanelLeftClose, PenLine, Sun, Upload, X } from 'lucide-react';
+import { blankArticle, decodeProject, encodeProject, exampleArticle, MARKDOWN_LIMIT, PROJECT_FILE_LIMIT, restoreArticle, renderingLimited, safeFilename, validateArticle, type EditorMode } from '../contracts/article';
+import { ArticleEditor, type EditorBridge } from './ArticleEditor';
+import { download, useProjects } from './workspace';
+import { htmlDocument, safeHtml } from './html';
 export function App() {
-  const [info, setInfo] = useState<AppInfo | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [request, setRequest] = useState(0);
-  useEffect(() => {
-    let disposed = false;
-    setFailed(false);
-    void (async () => {
-      const page = await getPageConnection();
-      const response = await page.fetch('/api/app');
-      const value: unknown = await response.json();
-      if (!response.ok || !isAppInfo(value)) throw new Error('APP_RESPONSE_INVALID');
-      if (!disposed) { setInfo(value); document.title = value.name; }
-    })().catch(() => { if (!disposed) setFailed(true); });
-    return () => { disposed = true; };
-  }, [request]);
-  return (
-    <main className="app-shell">
-      <header className="app-header">
-        <LayoutGrid aria-hidden="true" size={20} />
-        <h1>{info?.name ?? text('loading')}</h1>
-        {info && <span className="app-version">{info.version}</span>}
-      </header>
-      {info && <p className="app-platform" data-test-id="app-platform-status" role="status">{text(info.platform)}</p>}
-      <section className="app-state" aria-live="polite">
-        {failed ? <CircleAlert size={28} aria-hidden="true" /> : <Inbox size={28} aria-hidden="true" />}
-        <p>{text(failed ? 'failure' : info ? 'empty' : 'loading')}</p>
-        {failed && <button type="button" data-test-id="app-retry" onClick={() => setRequest(value => value + 1)}><RefreshCw size={16} aria-hidden="true" />{text('retry')}</button>}
-      </section>
-    </main>
-  );
+  const p = useProjects(exampleArticle, validateArticle, '把日常观察，写成一篇好文章', { storageKey: 'vditor-article-v1', restoreDraftData: restoreArticle });
+  const [sidebar, setSidebar] = useState(() => matchMedia('(min-width: 1000px)').matches), [reading, setReading] = useState(false), [importing, setImporting] = useState(false), [ready, setReady] = useState(false);
+  const [dark, setDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches);
+  const bridge = useRef<EditorBridge | null>(null), dialog = useRef<HTMLDialogElement>(null), fileInput = useRef<HTMLInputElement>(null);
+  const raw = typeof p.draft.importText === 'string' ? p.draft.importText : '';
+  const format = p.draft.importFormat === 'html' || p.draft.importFormat === 'project' ? p.draft.importFormat : 'markdown';
+  const headings = p.data.markdown.split('\n').filter(line => /^#{1,6}\s+/.test(line)).slice(0, 80).map(line => ({ level: line.match(/^#+/)?.[0].length ?? 1, text: line.replace(/^#+\s+/, '').replace(/[*_`]/g, '') }));
+  useEffect(() => { document.documentElement.dataset.theme = dark ? 'dark' : 'light'; document.documentElement.style.colorScheme = dark ? 'dark' : 'light'; }, [dark]);
+  useEffect(() => { setReading(false); }, [p.documentKey]);
+  const notice = (text: string) => { p.setError(''); p.setNotice(text); };
+  function setMode(mode: EditorMode) { if (bridge.current?.mode(mode)) { p.setData(value => ({ ...value, mode })); setReading(false); } }
+  async function fresh() { if (await p.replace(blankArticle, '未命名文章')) { setReading(false); setSidebar(false); } }
+  function exportFile(kind: 'markdown' | 'html' | 'project') {
+    try {
+      const name = safeFilename(p.title);
+      if (kind === 'markdown') download(new Blob([p.data.markdown], { type: 'text/markdown;charset=utf-8' }), name + '.md');
+      if (kind === 'html') { if (!bridge.current) throw new Error('编辑器还在准备，请稍后重试。'); download(new Blob([htmlDocument(p.title, p.data.author, p.data.summary, bridge.current.html(), p.data.typeset)], { type: 'text/html;charset=utf-8' }), name + '.html'); }
+      if (kind === 'project') download(new Blob([encodeProject(p.title, p.data)], { type: 'application/json' }), name + '.vditor.json');
+      notice('已导出' + (kind === 'markdown' ? ' Markdown 正文。' : kind === 'html' ? '可离线阅读的 HTML。' : '完整文章项目。'));
+    } catch (e) { p.report(e); }
+  }
+  async function importText(text: string, type: string, filename = '') {
+    setImporting(true); p.setError('');
+    try {
+      if (type === 'project') { const item = decodeProject(text); if (await p.replace(item.article, item.title)) { dialog.current?.close(); notice('项目已导入为新文章。'); } return; }
+      if (text.length > MARKDOWN_LIMIT) throw new Error('正文不能超过 100,000 个字符。');
+      const markdown = type === 'html' ? bridge.current?.html2md(safeHtml(text)) : text;
+      if (markdown === undefined) throw new Error('编辑器还在准备，请稍后重试。');
+      const title = markdown.match(/^#\s+(.+)$/m)?.[1]?.slice(0, 120) || filename.replace(/\.[^.]+$/, '').slice(0, 120) || '导入文章';
+      const article = validateArticle({ ...blankArticle, markdown, mode: 'sv' });
+      if (await p.replace(article, title)) { dialog.current?.close(); notice(type === 'html' ? 'HTML 正文已转为 Markdown，新建了一篇文章。媒体与脚本不会导入。' : 'Markdown 已导入为新文章。'); }
+    } catch (e) { p.report(e); } finally { setImporting(false); }
+  }
+  async function readFile(file: File) { try { if (file.size > PROJECT_FILE_LIMIT) throw new Error('文件不能超过 900 KB。'); const text = await file.text(); const type = /\.json$/i.test(file.name) ? 'project' : /\.html?$/i.test(file.name) ? 'html' : 'markdown'; await importText(text, type, file.name); } catch (e) { p.report(e); } }
+  function jump(index: number) {
+    const root = reading ? document.querySelector('.reading-body') : document.querySelector(p.data.mode === 'sv' ? '.vditor-preview' : p.data.mode === 'ir' ? '.vditor-ir' : '.vditor-wysiwyg');
+    root?.querySelectorAll('h1,h2,h3,h4,h5,h6')[index]?.scrollIntoView({ block: 'center', behavior: 'auto' });
+  }
+  return <div className={`writing-desk typeset-${p.data.typeset} ${sidebar ? 'sidebar-open' : ''}`}>
+    <a className="skip-link" href="#article">跳到文章正文</a>
+    <header className="topbar"><div className="brand"><PenLine size={21} aria-hidden="true" /><h1>Vditor<span>文章工作台</span></h1></div><div className="file-actions"><button onClick={fresh} disabled={p.busy}><FilePlus2 size={16} aria-hidden="true" />新文章</button><button onClick={() => dialog.current?.showModal()}><Upload size={16} aria-hidden="true" />导入</button><details className="export-menu"><summary><Download size={16} aria-hidden="true" />导出</summary><div><button onClick={() => exportFile('markdown')}>Markdown 正文</button><button onClick={() => exportFile('html')} disabled={!ready || renderingLimited(p.data.markdown)}>HTML 阅读版</button><button onClick={() => exportFile('project')}>完整项目 JSON</button></div></details><button aria-label={dark ? '切换浅色' : '切换深色'} className="icon-button" onClick={() => setDark(!dark)}>{dark ? <Sun size={17} /> : <Moon size={17} />}</button></div></header>
+    <div className="workbar"><button className="outline-toggle" aria-expanded={sidebar} onClick={() => setSidebar(!sidebar)}><Menu size={16} aria-hidden="true" />文章与大纲</button><div className="modes" aria-label="编辑模式">{([['wysiwyg', '所见即所得'], ['ir', '即时渲染'], ['sv', '源码分屏']] as const).map(([mode, label]) => <button key={mode} aria-pressed={!reading && p.data.mode === mode} disabled={!ready} onClick={() => setMode(mode)}>{label}</button>)}<button aria-pressed={reading} onClick={() => setReading(!reading)} disabled={!ready || renderingLimited(p.data.markdown)}><BookOpen size={15} aria-hidden="true" />阅读排版</button></div><span className={`save-state state-${p.autoState.phase}`} role="status">{p.loading ? '正在恢复文章…' : p.autoState.message}</span></div>
+    {(p.error || p.notice) && <div className={`message ${p.error ? 'error' : ''}`} role={p.error ? 'alert' : 'status'}>{p.error || p.notice}<button aria-label="关闭提示" onClick={() => { p.setError(''); p.setNotice(''); }}><X size={14} /></button></div>}
+    {['offline', 'conflict', 'draft'].includes(p.autoState.phase) && <div className="recovery"><button onClick={() => void p.save()}>重试保存</button><button onClick={p.exportDraft}>导出恢复草稿</button>{p.current && <button onClick={() => void p.open(p.current!.id)}>打开服务器版本</button>}</div>}
+    <div className="workspace"><aside className="sidebar"><div className="sidebar-heading"><span>写作目录</span><button className="icon-button" aria-label="收起侧栏" onClick={() => setSidebar(false)}><PanelLeftClose size={16} /></button></div><label className="field-label">当前文章<select aria-label="打开文章" value={p.current?.id ?? ''} onChange={e => e.target.value && void p.open(e.target.value)} disabled={p.busy}><option value="">当前草稿</option>{p.items.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><nav aria-label="文章大纲" className="outline"><p className="eyebrow">文章大纲</p>{headings.length ? headings.map((item, i) => <button key={i} className={`level-${item.level}`} onClick={() => jump(i)}><span>{String(i + 1).padStart(2, '0')}</span>{item.text}</button>) : <p className="muted">用标题为文章划分章节。</p>}</nav><div className="metadata"><p className="eyebrow">写作信息</p><label className="field-label">作者<input name="author" autoComplete="off" maxLength={80} value={p.data.author} onChange={e => p.setData(value => ({ ...value, author: e.target.value }))} placeholder="署名…" /></label><label className="field-label">文章摘要<textarea name="summary" maxLength={1000} rows={4} value={p.data.summary} onChange={e => p.setData(value => ({ ...value, summary: e.target.value }))} placeholder="写下文章的核心想法…" /></label><p className="sidebar-hint">写作时自动保存。导出完整项目可保留正文、署名和排版设置。</p><button className="delete-article" disabled={!p.current || p.busy} onClick={() => void p.remove()}>删除当前文章</button></div></aside>
+    <main id="article" className={`article-area ${reading ? 'is-reading' : ''}`}><div className="document-heading"><div className="document-kicker"><span>ARTICLE / 文章</span><span>{reading ? '阅读排版' : '正在写作'}</span></div><label className="sr-only" htmlFor="article-title">文章名称</label><input id="article-title" name="title" autoComplete="off" maxLength={120} value={p.title} onChange={e => p.setTitle(e.target.value)} placeholder="给文章起一个名字…" /><div className="document-meta"><span>{p.data.author || '未署名'} · {p.data.markdown.replace(/\s/g, '').length.toLocaleString('zh-CN')} 字符</span><label>版式<select aria-label="文章版式" value={p.data.typeset} onChange={e => p.setData(value => ({ ...value, typeset: e.target.value === 'wechat' ? 'wechat' : 'light' }))}><option value="light">书稿</option><option value="wechat">发布稿</option></select></label></div></div>
+    <div hidden={reading}>{!p.loading && <ArticleEditor key={p.documentKey} initial={p.data} dark={dark} mode={p.data.mode} typeset={p.data.typeset} onInput={(markdown, mode) => { p.setData(value => ({ ...value, markdown, mode })); }} onReady={value => { bridge.current = value; setReady(!!value); }} onError={p.setError} />}</div>
+    {reading && !renderingLimited(p.data.markdown) && <section className="reading-surface"><button className="back-to-write" onClick={() => setReading(false)}><ChevronLeft size={15} aria-hidden="true" />返回写作</button>{p.data.summary && <p className="article-summary">{p.data.summary}</p>}<article className="reading-body vditor-reset" dangerouslySetInnerHTML={{ __html: bridge.current?.html() ?? '' }} /></section>}
+    <footer className="article-footer"><span>{reading ? '读一遍，再改一遍。' : '先把想法写下来。'}</span><span>Markdown · {p.data.mode === 'ir' ? '即时渲染' : p.data.mode === 'sv' ? '源码分屏' : '所见即所得'}</span></footer></main></div>
+    <dialog ref={dialog} className="import-dialog"><div className="dialog-heading"><h2>导入一篇文章</h2><button className="icon-button" aria-label="关闭导入" onClick={() => dialog.current?.close()}><X size={20} /></button></div><p className="muted">导入后会新建文章，当前文章会保留。</p><input ref={fileInput} type="file" accept=".md,.markdown,.txt,.html,.htm,.json" hidden onChange={e => { const file = e.target.files?.[0]; if (file) void readFile(file); e.target.value = ''; }} /><button className="file-upload" disabled={importing} onClick={() => fileInput.current?.click()}><Upload size={18} aria-hidden="true" />选择 Markdown、HTML 或项目文件<span>最大 900 KB · 正文最多 100,000 字符</span></button><div className="import-format"><label htmlFor="import-format">或粘贴内容</label><select id="import-format" value={format} onChange={e => p.setDraft(value => ({ ...value, importFormat: e.target.value }))}><option value="markdown">Markdown</option><option value="html">HTML 正文</option><option value="project">项目 JSON</option></select></div><textarea aria-label="待导入内容" rows={8} maxLength={MARKDOWN_LIMIT} spellCheck={false} value={raw} onChange={e => p.setDraft(value => ({ ...value, importText: e.target.value }))} placeholder="在这里粘贴内容…" /><p className="muted">此处未完成的输入也会保存。较大的项目 JSON 请使用文件导入。HTML 只提取文字与常用格式，媒体、样式与脚本不导入。</p>{p.error && <p role="alert" className="import-error">{p.error}</p>}<div className="dialog-actions"><button onClick={() => dialog.current?.close()}>取消</button><button className="primary" disabled={!raw || importing} onClick={() => void importText(raw, format)}>{importing ? '正在导入…' : '导入为新文章'}</button></div></dialog>
+  </div>;
 }

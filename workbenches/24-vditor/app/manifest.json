@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.8e688d6e-3bbe-4011-93ae-cfaea25c2f0c",
   "registryName": "vditor-studio",
-  "name": "Vditor 工作台",
-  "description": "中文 Markdown 写作、技术笔记与内容排版工作台",
+  "name": "Vditor 文章工作台",
+  "description": "用三种 Markdown 模式写作，检查文章排版并导出",
   "version": "0.3.0",
-  "changelog": "Initial application.",
+  "changelog": "原生 Vditor 三模式、中文文章排版、自动草稿恢复、同源资源及 Markdown/HTML/项目导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -19,5 +19,13 @@
   "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "vditor-assets",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "assets/vditor"
+    }
+  ]
 }
