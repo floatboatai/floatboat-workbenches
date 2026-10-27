@@ -203,7 +203,19 @@ export function parseDocument(value: unknown): Document {
   all.forEach(visit);
   return doc;
 }
-export function validateReview(value: unknown): Review {
+export const MODEL_REVIEW_BYTES = 800000;
+export const WORKING_REVIEW_BYTES = 1200000;
+export const WORKING_COPY_BYTES = 1850000;
+export function jsonBytes(value: unknown): number {
+  return new TextEncoder().encode(JSON.stringify(value)).length;
+}
+function decodeReview(value: unknown, maxBytes: number): Review {
+  if (jsonBytes(value) > maxBytes)
+    throw new Error(
+      maxBytes === MODEL_REVIEW_BYTES
+        ? "校订超过正式项目的 800 KB 限额，已保留工作稿；请精简后再保存为项目。"
+        : "工作稿不能超过 1.2 MB，请先导出或精简内容。本次修改未采用。",
+    );
   if (
     !isRecord(value) ||
     value.format !== "docling-review" ||
@@ -252,9 +264,29 @@ export function validateReview(value: unknown): Review {
     order: value.order as string[],
     source: boundedText(value.source, 2000),
   };
-  if (new TextEncoder().encode(JSON.stringify(result)).length > 800000)
-    throw new Error("校订内容过大，请拆分项目。");
+  if (jsonBytes(result) > maxBytes) throw new Error("校订内容超出容量。");
   return result;
+}
+export function validateReview(value: unknown): Review {
+  return decodeReview(value, MODEL_REVIEW_BYTES);
+}
+/** Same structural and per-field constraints as the model, with a bounded recovery allowance. */
+export function restoreReviewDraft(value: unknown): Review {
+  return decodeReview(value, WORKING_REVIEW_BYTES);
+}
+export function assertWorkingCopyCapacity(
+  title: string,
+  data: Review,
+  extra: Record<string, unknown>,
+): void {
+  if (title.length > 120) throw new Error("项目名称不能超过 120 个字符。");
+  if (jsonBytes({ title, data, extra }) > WORKING_COPY_BYTES)
+    throw new Error(
+      "工作副本不能超过 1.85 MB。本次输入未采用；请清空导入草稿或使用文件导入。",
+    );
+}
+export function exportReview(review: Review): string {
+  return JSON.stringify(restoreReviewDraft(review));
 }
 export function fromDocument(
   value: unknown,
@@ -271,7 +303,7 @@ export function fromDocument(
 export function importReview(raw: string): Review {
   const v: unknown = JSON.parse(raw);
   return isRecord(v) && v.format === "docling-review"
-    ? validateReview(v)
+    ? restoreReviewDraft(v)
     : fromDocument(v);
 }
 export function items(

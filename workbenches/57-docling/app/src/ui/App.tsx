@@ -23,6 +23,11 @@ import {
   empty,
   fromDocument,
   validateReview,
+  restoreReviewDraft,
+  assertWorkingCopyCapacity,
+  exportReview,
+  WORKING_COPY_BYTES,
+  type Review,
   importReview,
   items,
   corrected,
@@ -106,8 +111,69 @@ function TablePreview({ node }: { node: Item }) {
 export function App() {
   const p = useProjects(seed, validateReview, "示例 · 现场试验记录", {
     storageKey: "docling-review-v1",
-    restoreDraftData: validateReview,
+    restoreDraftData: restoreReviewDraft,
   });
+  const working = useRef({ title: p.title, data: p.data, extra: p.draft });
+  working.current = { title: p.title, data: p.data, extra: p.draft };
+  function changeData(value: Review) {
+    try {
+      const data = restoreReviewDraft(value);
+      assertWorkingCopyCapacity(
+        working.current.title,
+        data,
+        working.current.extra,
+      );
+      working.current = { ...working.current, data };
+      p.setData(data);
+    } catch (error) {
+      p.report(error);
+    }
+  }
+  function changeDraft(
+    update: (extra: Record<string, unknown>) => Record<string, unknown>,
+  ): boolean {
+    try {
+      const extra = update(working.current.extra);
+      assertWorkingCopyCapacity(
+        working.current.title,
+        working.current.data,
+        extra,
+      );
+      working.current = { ...working.current, extra };
+      p.setDraft(extra);
+      return true;
+    } catch (error) {
+      p.report(error);
+      return false;
+    }
+  }
+  function changeTitle(title: string) {
+    try {
+      assertWorkingCopyCapacity(
+        title,
+        working.current.data,
+        working.current.extra,
+      );
+      working.current = { ...working.current, title };
+      p.setTitle(title);
+    } catch (error) {
+      p.report(error);
+    }
+  }
+  async function replaceReview(
+    value: Review,
+    title: string,
+    extra: Record<string, unknown> = {},
+  ): Promise<boolean> {
+    try {
+      const data = restoreReviewDraft(value);
+      assertWorkingCopyCapacity(title, data, extra);
+      return await p.replace(data, title, extra);
+    } catch (error) {
+      p.report(error);
+      return false;
+    }
+  }
   const [selected, setSelected] = useState("#/tables/0"),
     [query, setQuery] = useState(""),
     [drawer, setDrawer] = useState<"import" | "service" | null>(null),
@@ -199,7 +265,7 @@ export function App() {
   }, [pollingKey]);
   function patch(value: Partial<Correction>) {
     if (!active) return;
-    p.setData({
+    changeData({
       ...p.data,
       corrections: {
         ...p.data.corrections,
@@ -217,50 +283,62 @@ export function App() {
   ) {
     download(new Blob([content], { type }), name);
   }
+  async function importContent(text: string) {
+    const parsed: unknown = JSON.parse(text);
+    const snapshot =
+      isRecord(parsed) && isRecord(parsed.snapshot) ? parsed.snapshot : null;
+    const data = snapshot
+      ? restoreReviewDraft(snapshot.data)
+      : importReview(text);
+    const extra = snapshot && isRecord(snapshot.extra) ? snapshot.extra : {};
+    if (
+      await replaceReview(
+        data,
+        snapshot && typeof snapshot.title === "string"
+          ? snapshot.title
+          : data.original?.name || "导入文档",
+        extra,
+      )
+    ) {
+      setSelected("");
+      setDrawer(null);
+      p.setNotice("已作为新项目导入。");
+    }
+  }
   async function importRaw() {
     try {
-      const parsed: unknown = JSON.parse(raw);
-      const snapshot =
-        isRecord(parsed) && isRecord(parsed.snapshot) ? parsed.snapshot : null;
-      const data = snapshot ? validateReview(snapshot.data) : importReview(raw);
-      const extra = snapshot && isRecord(snapshot.extra) ? snapshot.extra : {};
-      if (
-        await p.replace(
-          data,
-          snapshot && typeof snapshot.title === "string"
-            ? snapshot.title
-            : data.original?.name || "导入文档",
-          extra,
-        )
-      ) {
-        setSelected("");
-        setDrawer(null);
-        p.setNotice("已作为新项目导入。");
-      }
-    } catch (e) {
-      p.report(e);
+      await importContent(raw);
+    } catch (error) {
+      p.report(error);
     }
   }
   async function readImport(file: File | undefined) {
     if (!file) return;
-    if (file.size > 800000) {
-      p.setError("JSON 文件不能超过 800 KB。");
+    if (file.size > WORKING_COPY_BYTES) {
+      p.setError("导入文件不能超过 1.85 MB。");
       return;
     }
-    p.setDraft((d) => ({ ...d, raw: "" }));
+    const key = epoch.current;
     try {
       const text = await file.text();
-      p.setDraft((d) => ({ ...d, raw: text }));
-      setDrawer("import");
-    } catch (e) {
-      p.report(e);
+      if (key !== epoch.current) return;
+      // Valid files are decoded before transition, without duplicating a large project in raw input.
+      try {
+        await importContent(text);
+      } catch (error) {
+        changeDraft((d) => ({ ...d, raw: text }));
+        setDrawer("import");
+        p.report(error);
+      }
+    } catch (error) {
+      p.report(error);
     }
   }
   async function submit() {
     setRunBusy(true);
     p.setError("");
     const id = crypto.randomUUID();
-    p.setDraft((d) => ({ ...d, lastOperation: id }));
+    changeDraft((d) => ({ ...d, lastOperation: id }));
     try {
       const job = jobValue(
         await request("/api/docling/jobs", {
@@ -306,7 +384,7 @@ export function App() {
           " · task " +
           currentJob.taskId,
       );
-      if (await p.replace(data, data.original?.name ?? "转换结果")) {
+      if (await replaceReview(data, data.original?.name ?? "转换结果")) {
         setDrawer(null);
         setSelected("");
         p.setNotice("转换结果已作为新项目打开。");
@@ -341,7 +419,7 @@ export function App() {
           <input
             aria-label="项目名称"
             value={p.title}
-            onChange={(e) => p.setTitle(e.target.value)}
+            onChange={(e) => changeTitle(e.target.value)}
             autoComplete="off"
           />
           <span className={"save-state " + p.autoState.phase} role="status">
@@ -370,7 +448,7 @@ export function App() {
         />
         <button
           onClick={() => {
-            void p.replace({ ...empty }, "未命名文档");
+            void replaceReview({ ...empty }, "未命名文档");
           }}
         >
           <Plus size={15} aria-hidden="true" />
@@ -409,10 +487,7 @@ export function App() {
             </button>
             <button
               onClick={() =>
-                exportFile(
-                  JSON.stringify(p.data, null, 2),
-                  p.title + ".review.json",
-                )
+                exportFile(exportReview(p.data), p.title + ".review.json")
               }
             >
               可移植校对项目
@@ -483,7 +558,7 @@ export function App() {
               spellCheck={false}
               value={raw}
               onChange={(e) =>
-                p.setDraft((d) => ({ ...d, raw: e.target.value }))
+                changeDraft((d) => ({ ...d, raw: e.target.value }))
               }
             />
           </label>
@@ -533,7 +608,7 @@ export function App() {
                         void f
                           .text()
                           .then((text) =>
-                            p.setDraft((d) => ({
+                            changeDraft((d) => ({
                               ...d,
                               html: text,
                               filename: f.name,
@@ -550,7 +625,7 @@ export function App() {
                 <input
                   value={filename}
                   onChange={(e) =>
-                    p.setDraft((d) => ({ ...d, filename: e.target.value }))
+                    changeDraft((d) => ({ ...d, filename: e.target.value }))
                   }
                 />
               </label>
@@ -561,7 +636,7 @@ export function App() {
                   spellCheck={false}
                   value={html}
                   onChange={(e) =>
-                    p.setDraft((d) => ({ ...d, html: e.target.value }))
+                    changeDraft((d) => ({ ...d, html: e.target.value }))
                   }
                 />
               </label>
@@ -667,7 +742,7 @@ export function App() {
                             <input
                               value={taskId}
                               onChange={(e) =>
-                                p.setDraft((d) => ({
+                                changeDraft((d) => ({
                                   ...d,
                                   taskId: e.target.value,
                                 }))
@@ -950,14 +1025,16 @@ export function App() {
                 <div className="actions">
                   <button
                     onClick={() =>
-                      p.setData(moveSibling(p.data, activeRef, -1))
+                      changeData(moveSibling(p.data, activeRef, -1))
                     }
                   >
                     <ArrowUp size={14} aria-hidden="true" />
                     同级上移
                   </button>
                   <button
-                    onClick={() => p.setData(moveSibling(p.data, activeRef, 1))}
+                    onClick={() =>
+                      changeData(moveSibling(p.data, activeRef, 1))
+                    }
                   >
                     <ArrowDown size={14} aria-hidden="true" />
                     同级下移
@@ -1004,7 +1081,7 @@ export function App() {
                   disabled={!correction}
                   onClick={() => {
                     if (confirm("移除此项的校订与复核记录？"))
-                      p.setData({
+                      changeData({
                         ...p.data,
                         corrections: Object.fromEntries(
                           Object.entries(p.data.corrections).filter(

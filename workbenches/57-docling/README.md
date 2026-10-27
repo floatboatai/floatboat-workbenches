@@ -50,12 +50,12 @@ DOCLING_SERVE_URL=http://127.0.0.1:5001 pnpm dev
 
 ## 范围与验证
 
-- 原生 JSON 最大 600 KB，校订项目最大 800 KB，每个数组最多 2000 项、结构深度最多 64 层，表格最多 10000 格。嵌入图片可能超过限额，建议以 placeholder 导出。
+- 原生 JSON 最大 600 KB，正式校订项目最大 800 KB。超过正式限额的结构合法工作稿可自动保存、恢复及以 `.review.json` 往返，工作稿上限 1.2 MB；含未应用输入的完整工作副本上限 1.85 MB，界面拒绝超量输入并保留修改前内容。每个数组最多 2000 项、结构深度最多 64 层，表格最多 10000 格。嵌入图片可能超过限额，建议以 placeholder 导出。
 - HTML 源文件、转换结果保存在声明的 `documents` 数据资源，以安全操作 ID 命名。JSON 项目导出包含原始解析文档、校订和顺序；不包含上游运行状态、HTML 源文件或凭据。
 - 当前不预览 PDF 页面、不上传 PDF/DOCX、不运行 OCR 或视觉模型，不渲染远端图片，也不把普通 LLM 输出称作 Docling 结果。
 - **真实 Docling core 已运行**：原创 HTML → 5 个文本项 + 1 张表；浏览器导出的校订 JSON 被原生 `DoclingDocument` 接收，原生 Markdown 导出包含校订值。
 - **官方 Serve 端到端未验收**：连接器有真实路由和 multipart/轮询/恢复合同测试；未启动完整服务实例。默认未配置状态经过浏览器验证。
-- 20 项自动化测试、13 条 Chrome 交互验收通过；详见 [app/ACCEPTANCE.md](app/ACCEPTANCE.md)。Host 连接实际报告 `HOST_NOT_CONNECTED`；本地校对不依赖 Host 模型能力。
+- 23 项自动化测试、13 条原有 Chrome 交互验收及 5 条容量定向验收通过；详见 [app/ACCEPTANCE.md](app/ACCEPTANCE.md)。Host 连接实际报告 `HOST_NOT_CONNECTED`；本地校对不依赖 Host 模型能力。
 
 如需复现轻量真实 core 检查：
 

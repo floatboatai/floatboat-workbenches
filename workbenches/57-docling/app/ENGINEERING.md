@@ -15,7 +15,7 @@
 
 `Review` 持有 original、按 self_ref 的 corrections、order、来源说明。校订仅覆盖需要更改的 text/label/table_cells，orig、引用、未知字段保留；导出同时更新 Docling table grid。JSON 原始数值经过 JavaScript Number 解析，因此不承诺原 JSON 字节或超安全整数的逐字精度。复杂图像/公式/表单保留 JSON，当前 Markdown 只投影文本和表格。
 
-项目上限 800 KB；raw JSON、HTML、文件名和待关联 task ID 放入额外草稿，服务端工作副本与本机 IndexedDB 一起保留。模型未变但输入草稿存在时界面明确“草稿未应用”。恢复工作副本导入会创建新项目。
+正式项目上限 800 KB；`restoreReviewDraft` 复用同样的结构、引用、原件（600 KB）及字段校验，使用独立 1.2 MB 工作稿限额。`useProjects.restoreDraftData` 和便携 review 导入使用该 decoder，避免服务器已保留的大工作稿在恢复时再次被正式模型限额拒绝。所有 UI 编辑入口核对 1.2 MB 工作稿与 1.85 MB 工作副本总量，给 1.95 MB 自动保存 envelope 留出余量；超过上限的输入不写入状态。合法文件先校验后直接作为新文档导入，不把大项目与同样大的导入源文本同时塞入旧工作副本。raw JSON、HTML、文件名和待关联 task ID 放入额外草稿，服务端工作副本与本机 IndexedDB 一起保留。模型未变但输入草稿存在时界面明确“草稿未应用”。恢复工作副本导入会创建新项目。
 
 源 HTML 写入 `documents/{operationId}.input.html` 后提交，SQLite 保存本地 ID、输入 SHA-256、服务 origin hash、上游 task ID、状态与时间。`submitting` 在进程重启时转为 uncertain；重复 ID 只读已有记录，不触发网络提交。提交未知必须手动关联已知任务。结果原子写入 `documents/{operationId}.result.json`，采用时新建项目，不覆盖运行期间的编辑。上游没有接入取消接口，暂停只关闭本地跟踪。现有任务的服务 origin 不匹配时拒绝查询。结果路径以安全 ID 派生，未暴露原始路径/密钥；API 不提供任意 URL 代理。
 
@@ -23,4 +23,4 @@
 
 ## 验证
 
-`pnpm workbench:check` → `pnpm test` → Chrome 交互验收 → 真实 Python Docling core → `pnpm package`。20 个自动化测试中 8 个服务测试明确命名 contract，不宣称真实服务执行。真实 core 输出和校订 JSON 经原生 DoclingDocument 验证；完整 Serve/PDF/OCR/Host 安装未验收。详细结果见 ACCEPTANCE.md。
+`pnpm workbench:check` → `pnpm test` → Chrome 交互验收 → 真实 Python Docling core → `pnpm package`。23 个自动化测试中 8 个服务测试明确命名 contract，不宣称真实服务执行。真实 core 输出和校订 JSON 经原生 DoclingDocument 验证；完整 Serve/PDF/OCR/Host 安装未验收。详细结果见 ACCEPTANCE.md。
