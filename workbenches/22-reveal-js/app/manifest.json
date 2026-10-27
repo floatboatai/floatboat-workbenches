@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.f13de244-0bb3-4ad4-8387-b4d1b607aa83",
+  "registryName": "reveal-js-studio",
+  "name": "reveal.js 工作台",
+  "description": "产品演示、培训讲义与网页汇报工作台",
+  "version": "0.3.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

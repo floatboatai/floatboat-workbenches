@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.ea4c7329-b201-4fc9-b5bf-bf2dfd1a3d03",
+  "registryName": "milkdown-studio",
+  "name": "Milkdown 工作台",
+  "description": "Markdown 笔记、长文写作与知识卡片工作台",
+  "version": "0.3.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

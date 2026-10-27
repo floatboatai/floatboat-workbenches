@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.aa560584-7514-48cc-ab26-59b010756b40",
+  "registryName": "filerobot-image-editor-studio",
+  "name": "Filerobot Image Editor 工作台",
+  "description": "商品素材处理工作台：改尺寸、标注、滤镜、水印与版本保存",
+  "version": "0.3.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}

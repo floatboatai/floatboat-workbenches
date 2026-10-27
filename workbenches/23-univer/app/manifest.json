@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.5c7b3893-99b2-4e34-9946-117bf72183b6",
+  "registryName": "univer-studio",
+  "name": "Univer 工作台",
+  "description": "数据清洗、预算计划和公式分析工作台",
+  "version": "0.3.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": []
+}
