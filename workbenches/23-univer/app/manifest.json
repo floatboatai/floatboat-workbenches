@@ -5,7 +5,7 @@
   "name": "Univer 工作台",
   "description": "数据清洗、预算计划和公式分析工作台",
   "version": "0.3.0",
-  "changelog": "Initial application.",
+  "changelog": "原生 Univer 多工作表、公式和格式编辑，CSV 与工作簿导入导出，自动保存及单元格草稿恢复。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -19,5 +19,13 @@
   "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "upstream-licenses",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "licenses"
+    }
+  ]
 }
