@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.0ae28e0d-6148-4b55-864f-5b0d5f3e0f56",
   "registryName": "farmos-map-studio",
-  "name": "farmOS-map 工作台",
-  "description": "地块边界 → 圈绘、面积核对、分区记录 → GeoJSON/WKT",
+  "name": "田块记录台",
+  "description": "地块圈绘与坐标编辑、分区面积核对、GeoJSON/项目/面积表导出",
   "version": "0.1.0",
-  "changelog": "Initial application.",
+  "changelog": "首版：离线地块地图、边界编辑、SQLite记录与导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,9 +16,7 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
   "resources": []

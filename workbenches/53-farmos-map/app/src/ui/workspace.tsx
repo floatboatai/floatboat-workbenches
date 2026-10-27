@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
   type ReactNode,
   Component,
@@ -58,10 +57,7 @@ export function useProjects<T>(
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
-    [loading, setLoading] = useState(true),
-    [aiBusy, setAiBusy] = useState(false),
-    [suggestion, setSuggestion] = useState<T | null>(null);
-  const epoch = useRef(0);
+    [loading, setLoading] = useState(true);
   const dirty = current
     ? title !== current.title ||
       JSON.stringify(data) !== JSON.stringify(current.data)
@@ -85,7 +81,6 @@ export function useProjects<T>(
       });
     return () => {
       active = false;
-      epoch.current++;
     };
   }, [refresh]);
   useEffect(() => {
@@ -143,12 +138,15 @@ export function useProjects<T>(
       setBusy(false);
     }
   }
-  async function open(id: string) {
-    if (dirty && !confirm("有未保存的修改，确定放弃并打开其他项目吗？")) return;
+  async function open(id: string, skipConfirm = false) {
+    if (
+      !skipConfirm &&
+      dirty &&
+      !confirm("有未保存的修改，确定放弃并打开其他项目吗？")
+    )
+      return;
     setBusy(true);
     setError("");
-    epoch.current++;
-    setSuggestion(null);
     try {
       const result = decode(await request(`/api/projects/${id}`));
       setCurrent(result);
@@ -161,13 +159,12 @@ export function useProjects<T>(
       setBusy(false);
     }
   }
-  function fresh() {
-    if (dirty && !confirm("有未保存的修改，确定放弃并新建吗？")) return;
-    epoch.current++;
+  function fresh(skipConfirm = false) {
+    if (!skipConfirm && dirty && !confirm("有未保存的修改，确定放弃并新建吗？"))
+      return;
     setCurrent(null);
     setData(structuredClone(seed));
     setTitle(defaultTitle);
-    setSuggestion(null);
     setError("");
     setNotice("");
   }
@@ -181,42 +178,20 @@ export function useProjects<T>(
         method: "DELETE",
         body: JSON.stringify({ revision: current.revision }),
       });
-      epoch.current++;
       setCurrent(null);
       setData(structuredClone(seed));
       setTitle(defaultTitle);
-      setSuggestion(null);
-      await refresh();
+      setItems((previous) => previous.filter((item) => item.id !== current.id));
+      setNotice("项目已删除");
+      try {
+        await refresh();
+      } catch {
+        setNotice("项目已删除，列表刷新暂不可用。");
+      }
     } catch (error) {
       report(error);
     } finally {
       setBusy(false);
-    }
-  }
-  async function generate(prompt: string) {
-    const token = ++epoch.current;
-    setAiBusy(true);
-    setError("");
-    setSuggestion(null);
-    try {
-      const result = validate(
-        await request("/api/generate", {
-          method: "POST",
-          body: JSON.stringify({ prompt }),
-        }),
-      );
-      if (epoch.current === token) setSuggestion(result);
-    } catch (error) {
-      if (epoch.current === token) report(error);
-    } finally {
-      setAiBusy(false);
-    }
-  }
-  function applySuggestion() {
-    if (suggestion) {
-      setData(suggestion);
-      setSuggestion(null);
-      setNotice("已采用生成稿，请检查后保存。");
     }
   }
   return {
@@ -233,15 +208,11 @@ export function useProjects<T>(
     notice,
     loading,
     dirty,
-    aiBusy,
-    suggestion,
     refresh,
     save,
     open,
     fresh,
     remove,
-    generate,
-    applySuggestion,
   };
 }
 export function ProjectPicker({
