@@ -24,7 +24,10 @@
   "dependencies": {
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "vega": "6.4.0",
+    "vega-interpreter": "2.3.2",
+    "vega-lite": "6.5.0"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

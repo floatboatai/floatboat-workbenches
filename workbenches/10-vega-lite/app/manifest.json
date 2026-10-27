@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.36399f8d-8c23-4259-86f1-0e18d8087b51",
   "registryName": "vega-lite-studio",
-  "name": "Vega-Lite 工作台",
+  "name": "图表规格实验台",
   "description": "AI图表制作：输入数据和意图，生成可编辑图表规格",
   "version": "0.1.0",
-  "changelog": "Initial application.",
+  "changelog": "实现独立编辑、项目持久化、渲染导出与人工采用 AI 生成稿。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

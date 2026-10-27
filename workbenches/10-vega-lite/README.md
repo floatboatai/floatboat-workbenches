@@ -1,13 +1,15 @@
-# Vega-Lite 工作台
+# 图表规格实验台
 
-状态：计划中，尚未实现。
+版本0.1.0，本地和真实Host模型生成已验证；客户端导入未验收。
 
-目标：AI图表制作：输入数据和意图，生成可编辑图表规格
+运行：从总仓库执行 `pnpm workbench prepare vega-lite`、`pnpm workbench dev vega-lite`。
 
-上游：https://github.com/vega/vega-lite
+编辑Vega-Lite JSON后点击「应用并绘图」，修改先经过业务校验。可保存实验、重新打开、重命名、删除；导出规格JSON和实际SVG。AI返回候选规格，确认后采用。
 
-适配路线：集成发布包及Vega Embed，Agent生成受校验的JSON规格，保存数据与图表配置
+## 已验证
 
-限制：需自建数据导入和编辑器；避免使用需要原生canvas的服务端图片导出路线
+`pnpm test` 4项通过；真实Chrome运行Vega而非占位图，保存刷新恢复、JSON/SVG导出、错误JSON恢复、真实模型生成和采用通过。1440px/375px、暗色/reduced-motion无溢出，pageerror、console error、失败资源请求均0。
 
-许可：BSD-3-Clause
+使用 `vega.parse(spec, undefined, {ast:true})` 与 `expressionInterpreter`，无需 unsafe-eval；图形、数据表和导出均来自内嵌data.values。仅支持基础单视图，1–10000行、500000字符；外部数据URL、图片、href拒绝。
+
+`pnpm workbench package vega-lite` 生成 artifacts/vega-lite-studio-0.1.0.fbworkbench，使用Floatboat「我的→工作台→导入工作台」。
