@@ -1,0 +1,89 @@
+{
+  "verifiedAt": "2026-10-27",
+  "version": "0.4.0",
+  "build": "passed",
+  "applicationTests": 13,
+  "pythonQueueTests": 4,
+  "browser": {
+    "engine": "Chrome via Playwright",
+    "desktop": [
+      1440,
+      1050
+    ],
+    "mobile": [
+      375,
+      900
+    ],
+    "checks": [
+      "autosave and reload",
+      "invalid timing draft restore",
+      "edit during delayed save",
+      "lost response idempotent retry",
+      "split merge review SRT export",
+      "import creates new project",
+      "durable audio waveform playback reload",
+      "real service job submitted",
+      "mobile no overflow reduced motion keyboard",
+      "UI -> Node -> Python -> actual WhisperModel CPU INT8 -> durable result",
+      "adopt result creates new project and preserves edited source project",
+      "portable project includes audio and imports as independent project",
+      "real browser optimistic conflict preserves other editor",
+      "disconnected service does not disable editing/export (response-injected UI test)"
+    ],
+    "errors": [],
+    "restart": {
+      "restoredAudio": true,
+      "restoredTranscript": true,
+      "restoredNotes": true,
+      "stableEditHandler": true,
+      "playback": true,
+      "pageErrors": []
+    }
+  },
+  "inference": {
+    "engine": "faster-whisper 1.2.1",
+    "device": "cpu",
+    "computeType": "int8",
+    "model": "Systran/faster-whisper-tiny.en",
+    "revision": "0d3d19a32d3338f10357c0889762bd8d64bbdeba",
+    "audioSha256": "39f6eb2d61735cef343ca04448782aa6802f2d3cd0d8227a2938ebf5c3582c19",
+    "durationSeconds": 6.887,
+    "result": [
+      {
+        "start": 0,
+        "end": 1.52,
+        "text": " Welcome to the interview."
+      },
+      {
+        "start": 1.52,
+        "end": 4.48,
+        "text": " Today we will discuss how to make clear subtitles."
+      },
+      {
+        "start": 4.48,
+        "end": 6.88,
+        "text": " Please check every sentence before publishing."
+      }
+    ],
+    "pipeline": "Browser -> Node connector -> external Python service -> WhisperModel.transcribe -> independent editable project"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/faster-whisper.png",
+    "size": [
+      1440,
+      1672
+    ],
+    "sha256": "87d893de1f12dd0bfc9679e53351800fc92bb7e9f5efe0e1cead59f45f6311bf"
+  },
+  "package": {
+    "file": "faster-whisper-studio-0.4.0.fbworkbench",
+    "sha256": "55bf4ee7d2b619cc41df747bcaa2aa4d070d80fc905c68feee3ea062b64e5e0a",
+    "businessDataIncluded": false,
+    "pythonAndModelsIncluded": false,
+    "archiveEntries": 34,
+    "sourceFiles": 33
+  },
+  "hostCapabilities": "not used",
+  "hostImport": "unverified",
+  "multilingualAndGPU": "unverified"
+}

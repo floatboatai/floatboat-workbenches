@@ -1,0 +1,9 @@
+# Upstream and model notices
+
+- **faster-whisper 1.2.1**: MIT, copyright 2023 SYSTRAN. The companion service imports its published package; see [the exact release license](https://github.com/SYSTRAN/faster-whisper/blob/v1.2.1/LICENSE) and [README API](https://github.com/SYSTRAN/faster-whisper/tree/v1.2.1). A copy is stored in `notices/faster-whisper-LICENSE`.
+- **Real inference checkpoint**: [Systran/faster-whisper-tiny.en](https://huggingface.co/Systran/faster-whisper-tiny.en), revision `0d3d19a32d3338f10357c0889762bd8d64bbdeba`. Its model card is marked MIT. It is a conversion of OpenAI's tiny.en; retain the original checkpoint provenance and licenses when redistributing weights. No weights are included in this repository or the workbench source artifact.
+- Other model selections have their own terms. The service's default multilingual `tiny` and any user-selected checkpoint must be checked independently; the tiny.en result does not certify them.
+- Native service dependencies, including CTranslate2, ONNX Runtime, PyAV and its FFmpeg libraries, retain their own licenses. They are installed separately through a pinned requirements file, not bundled into the Node application. The pinned PyAV version is a compatibility decision, not a claim that a complete third-party binary license or security audit has been performed.
+- Application React/Lucide/template notices follow the repository's existing [licensing record](../../docs/licensing.md). No blanket license for all newly authored repository code is selected here.
+
+Demonstration material is ordinary synthetic speech and editor-created subtitles. The recorded model validation uses a short spoken description of subtitle review, without personal data. Runtime recordings, databases and model files stay outside tracked source.

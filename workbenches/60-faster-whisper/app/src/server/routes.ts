@@ -1,102 +1,110 @@
-import { registerAutosaveRoutes } from "./autosave.ts";
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
-import { WorkbenchHostError } from "../../sdk/host.mjs";
-import { isRecord } from "../contracts/project";
-import { createStore, StoreError } from "./store";
-export function registerRoutes<T>(
-  app: WorkbenchServer,
-  validate: (value: unknown) => T,
-  instructions: string,
-) {
-  const store = createStore(app.database, validate);
-  registerAutosaveRoutes(app, validate);
-  const fail = (error: unknown) =>
+import { isRecord } from "../contracts/project.ts";
+import { validateTranscript } from "../contracts/transcript.ts";
+import { jobId, jobInput } from "../contracts/job.ts";
+import { createStore, StoreError } from "./store.ts";
+import { registerAutosaveRoutes } from "./autosave.ts";
+import { createAudioFiles, detectMime } from "./files.ts";
+import { createJobs } from "./jobs.ts";
+export function registerRoutes(app: WorkbenchServer) {
+  const store = createStore(app.database, validateTranscript),
+    files = createAudioFiles((p, w) =>
+      app.resources.path("audio-originals", p, w ? "write" : "read"),
+    ),
+    jobs = createJobs(app.database, files.read);
+  registerAutosaveRoutes(app, validateTranscript, undefined, {
+    verify: (data) => files.verify(data.source),
+  });
+  const fail = (e: unknown) =>
     Response.json(
       {
         error: {
           message:
-            error instanceof WorkbenchHostError
-              ? "模型服务暂不可用，请打开 Floatboat 并检查登录和模型设置。"
-              : error instanceof Error
-                ? error.message
+            e instanceof Error && "code" in e
+              ? "音频原件暂不可用，请重新上传后重试。"
+              : e instanceof Error
+                ? e.message
                 : "操作失败，请重试。",
         },
       },
-      {
-        status:
-          error instanceof StoreError
-            ? error.status
-            : error instanceof WorkbenchHostError
-              ? 503
-              : 400,
-      },
+      { status: e instanceof StoreError ? e.status : 400 },
     );
   app.route("GET", "/api/projects", () => store.list());
   app.route("GET", "/api/projects/:id", ({ params }) => {
     try {
       return store.get(params.id);
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("POST", "/api/projects", ({ body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
-      return Response.json(store.create(body.title, body.data), {
-        status: 201,
-      });
-    } catch (error) {
-      return fail(error);
-    }
-  });
-  app.route("PUT", "/api/projects/:id", ({ params, body }) => {
-    try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
-      return store.update(params.id, body.title, body.data, body.revision);
-    } catch (error) {
-      return fail(error);
+    } catch (e) {
+      return fail(e);
     }
   });
   app.route("DELETE", "/api/projects/:id", ({ params, body }) => {
     try {
-      if (!isRecord(body)) throw new Error("请求格式无效。");
+      if (!isRecord(body)) throw new Error("请求无效。");
       return store.remove(params.id, body.revision);
-    } catch (error) {
-      return fail(error);
+    } catch (e) {
+      return fail(e);
     }
   });
-  app.route("POST", "/api/generate", async ({ body }) => {
+  app.route("PUT", "/api/audio/:id/chunks/:index", async ({ params, body }) => {
     try {
-      if (
-        !isRecord(body) ||
-        typeof body.prompt !== "string" ||
-        !body.prompt.trim() ||
-        body.prompt.length > 12000
-      )
-        throw new Error("请输入 1–12000 个字符的要求。");
-      const result = await app.host.llm.generateText(
-        {
-          prompt: body.prompt,
-          system:
-            instructions +
-            " 只返回一个完整 JSON 对象，不要附加 Markdown 围栏或解释文字。",
-          maxOutputTokens: 6000,
+      if (!isRecord(body)) throw new Error("请求无效。");
+      return await files.chunk(params.id, Number(params.index), body.base64);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("POST", "/api/audio", async ({ body }) => {
+    try {
+      return await files.finish(body);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("GET", "/api/audio/:id", async ({ params }) => {
+    try {
+      const bytes = await files.read(params.id);
+      return new Response(new Uint8Array(bytes), {
+        headers: {
+          "content-type": detectMime(bytes),
+          "cache-control": "private,max-age=31536000,immutable",
+          "x-content-type-options": "nosniff",
         },
-        { timeoutMs: 90000 },
-      );
-      const text = result.text
-        .trim()
-        .replace(/^```(?:json)?\s*/, "")
-        .replace(/\s*```$/, "");
-      let value: unknown;
-      try {
-        value = JSON.parse(text);
-      } catch {
-        throw new Error("模型返回的内容不是完整 JSON，请调整要求重试。");
-      }
-      return validate(value);
-    } catch (error) {
-      return fail(error);
+      });
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("GET", "/api/service", () => jobs.health());
+  app.route("GET", "/api/jobs", () => jobs.list());
+  app.route("GET", "/api/jobs/:id", async ({ params }) => {
+    try {
+      return await jobs.reconcile(params.id);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("POST", "/api/jobs", async ({ body }) => {
+    try {
+      if (!isRecord(body)) throw new Error("请求无效。");
+      const input = jobInput(body.input);
+      await files.verify(input.source);
+      return await jobs.create(jobId(body.id), jobId(body.projectId), input);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("POST", "/api/jobs/:id/retry", async ({ params }) => {
+    try {
+      return await jobs.retry(params.id);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("POST", "/api/jobs/:id/cancel", async ({ params }) => {
+    try {
+      return await jobs.cancel(params.id);
+    } catch (e) {
+      return fail(e);
     }
   });
 }

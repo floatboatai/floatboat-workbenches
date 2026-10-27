@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "appId": "workbench.d9568fee-aafb-425f-9660-19fee57a71c1",
   "registryName": "faster-whisper-studio",
-  "name": "faster-whisper 工作台",
-  "description": "音频转录与字幕审校台",
+  "name": "字幕剪辑室",
+  "description": "音频转写、逐句回听与字幕时间轴审校",
   "version": "0.4.0",
   "changelog": "AI 工作台：业务项目自动保存、结果复核和上游服务接入。",
   "sdkVersion": "1.0.0",
@@ -16,10 +16,17 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "audio-originals",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "audio-originals",
+      "access": "read-write"
+    }
+  ]
 }

@@ -1,0 +1,4 @@
+service/__pycache__/
+service/.venv/
+service/data/
+service/models/
