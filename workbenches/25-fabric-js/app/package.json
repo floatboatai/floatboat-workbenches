@@ -11,6 +11,7 @@
     "node": ">=22.16.0"
   },
   "dependencies": {
+    "fabric": "7.4.0",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -19,5 +20,11 @@
     "@types/node": "22.20.2",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "fabric@7.4.0>canvas": "-",
+      "fabric@7.4.0>jsdom": "-"
+    }
   }
 }

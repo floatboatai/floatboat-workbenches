@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.a38a130c-0d84-4b90-9e05-1edf65020d9d",
   "registryName": "fabric-js-studio",
-  "name": "Fabric.js 工作台",
-  "description": "海报与标注工作台：对象化编辑、批量改文案、模板出图",
+  "name": "Fabric.js 海报排版台",
+  "description": "文字与形状排版、精确变换、图层、模板和 PNG/SVG 出图",
   "version": "0.3.0",
-  "changelog": "Initial application.",
+  "changelog": "原生 Fabric 7.4 画板、属性草稿自动保存、模板与便携项目导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

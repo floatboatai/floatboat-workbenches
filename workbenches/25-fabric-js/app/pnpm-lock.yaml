@@ -4,10 +4,17 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  fabric@7.4.0>canvas: '-'
+  fabric@7.4.0>jsdom: '-'
+
 importers:
 
   .:
     dependencies:
+      fabric:
+        specifier: 7.4.0
+        version: 7.4.0
       lucide-react:
         specifier: 0.562.0
         version: 0.562.0(react@19.2.3)
@@ -44,6 +51,10 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
+  fabric@7.4.0:
+    resolution: {integrity: sha512-NalYDc3eifTl1C33zryQwpH6+XA/2ClxQrH9vkASkZw3tbkRmorpikhYMmxhUTmi7O3e9ODz0vOT8qfaCh9IVA==}
+    engines: {node: '>=20.0.0'}
+
   lucide-react@0.562.0:
     resolution: {integrity: sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw==}
     peerDependencies:
@@ -79,6 +90,8 @@ snapshots:
       csstype: 3.2.3
 
   csstype@3.2.3: {}
+
+  fabric@7.4.0: {}
 
   lucide-react@0.562.0(react@19.2.3):
     dependencies:

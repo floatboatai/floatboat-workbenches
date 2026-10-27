@@ -1,12 +1,17 @@
-# Engineering
+# Fabric poster engineering
 
-The business app root is this directory. Run the authoring commands from the repository root; see `../AGENTS.md`.
+`src/contracts/poster.ts` owns a closed versioned model, limits and three ordinary demonstration templates. It rejects unknown keys, duplicate identities, nonfinite geometry, unsupported types/fonts/colors, excessive text/object counts and excessive rendering budgets. Text, rectangles and ellipses are reconstructed with explicit constructors; untrusted JSON never reaches Fabric's generic `loadFromJSON`, SVG or image loaders. No remote requests or executable markup are accepted through projects.
 
-- `src/server/` owns business routes, parameterized SQL, transactions and Host SDK calls. Register public page routes under `/api/` through the provided server.
-- `src/ui/` owns React components and the authenticated page connection. UI requests go through `page.fetch`; importing Node, database or Host implementations into the browser is rejected.
-- `src/contracts/` contains shared serializable data types and response validation. Validate external input as unknown and return structured results.
-- Append numbered SQL migrations. Applied migrations are immutable; preview data is persistent and must not be silently reset to accommodate changes.
-- Keep the fixed strict `tsconfig.json` and declarative manifest build profile. The compiler ignores executable project build config and env files. Source assets belong under `src/`.
-- Keep runtime dependency versions and lockfiles aligned; see `../docs/maintenance.md`. Native extensions do not belong in the application profile.
-- Add tests for business boundaries and persistence behavior, using temporary data rather than the user's preview database. Test files live under `tests/` and are run by `pnpm test` from the repository root.
-- Host calls are optional and require actual authorization. Show unavailable/error states and consult `../docs/platform.md`; preserve execution-unknown errors rather than retrying potentially completed external mutations blindly.
+`src/ui/engine.ts` owns the native Fabric 7.4.0 canvas, object registration, geometry serialization, event listeners, bounded undo history and PNG/SVG exports. Fabric 7 defaults to centered origins; this application explicitly uses left/top origins. `object:modified` and `text:changed` capture pointer transforms and live IText/Textbox input. The export uses native `toBlob` (avoiding CSP-blocked data-URL fetch), `toSVG`, and explicit pixel dimensions without display zoom or retina scaling. Display sizing uses CSS dimensions; scene coordinates remain native pixels. History reloads preserve the current display scale.
+
+`Artboard.tsx` owns one canvas instance per `documentKey`, disposes it on document transitions, and uses callback refs for fresh autosave handlers. Save acknowledgements never instantiate or reload a canvas. ResizeObserver updates fit-to-window display size. The inspector's unapplied string values, raw import source, and canvas size input live in the shared working-copy `extra`. Native text edits update the model immediately; invalid inspector input stays in extra and does not mutate the artwork. Model and draft are both identified in saved status text.
+
+`App.tsx` coordinates the poster workflow, native controls, layers, project navigation and downloads. `workspace.tsx` contains only picker/notice/error boundary UI. No unused generation route or AI capability remains. `connection.ts` uses the supported page SDK for local API requests and Host theme reception. The host handshake being connected does not imply a business Host call; this application requires none.
+
+Server routes register the generic project store and the supplied autosave implementation. Migrations 0001–0003 are preserved. SQLite optimistic revisions, idempotent mutation IDs, drafts, local IndexedDB and recovery behavior follow `scripts/blueprints/AUTOSAVE.md`. Existing model ceiling is 900 KB at persistence; stricter domain payload maximum is 500 KB. Autosave/request envelope remains 1,950,000 bytes. Imported JSON is bounded to 550 KB. No binary resources are stored, so manifest resources and capabilities remain empty.
+
+Dependencies: exact Fabric 7.4.0, React/React DOM 19.2.3 and Lucide 0.562.0, synchronized across root/app manifests and locks. Fabric's optional `canvas` and `jsdom` dependencies are omitted through scoped pnpm overrides because only its browser entry is used; Node/server rendering is not supported. Other optional platform dependencies are retained. Upstream MIT notice is `src/notices/fabric.LICENSE`.
+
+Verification from this workbench root: `pnpm workbench:check`, `pnpm test`, `pnpm dev -- --no-watch`. The repo-level packaging command is `pnpm workbench package fabric-js`. Acceptance scripts and exported fixtures are kept under ignored `.cache/`. Compile diagnostics about large UI/autosave modules are advisory; no type or build diagnostics are suppressed.
+
+Upstream sources consulted: [Fabric docs](https://fabricjs.com/docs/), [events](https://fabricjs.com/docs/events/), [custom properties](https://fabricjs.com/docs/using-custom-properties/), and installed 7.4.0 source for Textbox events, object origins, collection ordering and Canvas export APIs. UI review follows the repository's React rules and the current [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines/blob/main/command.md).

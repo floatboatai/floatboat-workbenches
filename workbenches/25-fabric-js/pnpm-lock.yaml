@@ -4,10 +4,17 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  fabric@7.4.0>canvas: '-'
+  fabric@7.4.0>jsdom: '-'
+
 importers:
 
   .:
     dependencies:
+      fabric:
+        specifier: 7.4.0
+        version: 7.4.0
       lucide-react:
         specifier: 0.562.0
         version: 0.562.0(react@19.2.3)
@@ -393,6 +400,10 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  fabric@7.4.0:
+    resolution: {integrity: sha512-NalYDc3eifTl1C33zryQwpH6+XA/2ClxQrH9vkASkZw3tbkRmorpikhYMmxhUTmi7O3e9ODz0vOT8qfaCh9IVA==}
+    engines: {node: '>=20.0.0'}
+
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
@@ -746,6 +757,8 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.2
       '@esbuild/win32-ia32': 0.27.2
       '@esbuild/win32-x64': 0.27.2
+
+  fabric@7.4.0: {}
 
   fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
