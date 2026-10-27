@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-27",
+  "scope": "Official pinned template, local Chrome preview; empty WASM module only, no candidate app build",
+  "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "previewedApp": "markmap",
+  "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'",
+  "probe": "await WebAssembly.instantiate(new Uint8Array([0,97,115,109,1,0,0,0]))",
+  "result": "blocked",
+  "reason": "Compiling or instantiating WebAssembly violates script-src self. The policy has no wasm-unsafe-eval or unsafe-eval.",
+  "consequence": "Browser WASM candidates require an approved platform capability or an independently evaluated server-side/external service adapter; they are not validated direct embeddings."
+}

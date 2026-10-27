@@ -26,6 +26,8 @@
 
 已安装仓库级 React Best Practices 与 Web Design Guidelines，入口见 `AGENTS.md`。各工作台分别制定设计方案，参见 `docs/design-principles.md`。
 
+行业补充调研：[28 个小众行业候选](docs/research/niche-industry-candidates.md)，覆盖制造、农业、文博、实验室、演出与音乐，含 9 个优先原型方向和 2 个维护/迁站观察项。它们尚未进入实现清单，源码证据、许可证与接入边界分别记录。
+
 ## 开发
 
 需要 Node 22.16+（22.x）、pnpm 10.22.0 和 Git。
