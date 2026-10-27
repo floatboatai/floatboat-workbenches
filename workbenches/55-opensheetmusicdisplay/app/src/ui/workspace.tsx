@@ -58,9 +58,7 @@ export function useProjects<T>(
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
-    [loading, setLoading] = useState(true),
-    [aiBusy, setAiBusy] = useState(false),
-    [suggestion, setSuggestion] = useState<T | null>(null);
+    [loading, setLoading] = useState(true);
   const epoch = useRef(0);
   const dirty = current
     ? title !== current.title ||
@@ -148,7 +146,6 @@ export function useProjects<T>(
     setBusy(true);
     setError("");
     epoch.current++;
-    setSuggestion(null);
     try {
       const result = decode(await request(`/api/projects/${id}`));
       setCurrent(result);
@@ -162,14 +159,14 @@ export function useProjects<T>(
     }
   }
   function fresh() {
-    if (dirty && !confirm("有未保存的修改，确定放弃并新建吗？")) return;
+    if (dirty && !confirm("有未保存的修改，确定放弃并新建吗？")) return false;
     epoch.current++;
     setCurrent(null);
     setData(structuredClone(seed));
     setTitle(defaultTitle);
-    setSuggestion(null);
     setError("");
     setNotice("");
+    return true;
   }
   async function remove() {
     if (!current || !confirm(`删除「${current.title}」？此操作不能撤销。`))
@@ -185,38 +182,17 @@ export function useProjects<T>(
       setCurrent(null);
       setData(structuredClone(seed));
       setTitle(defaultTitle);
-      setSuggestion(null);
-      await refresh();
+      setItems((previous) => previous.filter((item) => item.id !== current.id));
+      setNotice("已删除项目。");
+      try {
+        await refresh();
+      } catch {
+        setNotice("已删除项目，列表刷新暂不可用。");
+      }
     } catch (error) {
       report(error);
     } finally {
       setBusy(false);
-    }
-  }
-  async function generate(prompt: string) {
-    const token = ++epoch.current;
-    setAiBusy(true);
-    setError("");
-    setSuggestion(null);
-    try {
-      const result = validate(
-        await request("/api/generate", {
-          method: "POST",
-          body: JSON.stringify({ prompt }),
-        }),
-      );
-      if (epoch.current === token) setSuggestion(result);
-    } catch (error) {
-      if (epoch.current === token) report(error);
-    } finally {
-      setAiBusy(false);
-    }
-  }
-  function applySuggestion() {
-    if (suggestion) {
-      setData(suggestion);
-      setSuggestion(null);
-      setNotice("已采用生成稿，请检查后保存。");
     }
   }
   return {
@@ -233,15 +209,11 @@ export function useProjects<T>(
     notice,
     loading,
     dirty,
-    aiBusy,
-    suggestion,
     refresh,
     save,
     open,
     fresh,
     remove,
-    generate,
-    applySuggestion,
   };
 }
 export function ProjectPicker({
