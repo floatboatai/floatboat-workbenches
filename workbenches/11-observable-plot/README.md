@@ -15,3 +15,5 @@
 `pnpm workbench package observable-plot` 生成 artifacts/observable-plot-studio-0.1.0.fbworkbench。通过Floatboat「我的→工作台→导入工作台」安装。
 
 分类横轴遵循数据首次出现的顺序；数值横轴保留数值尺度。CSV 拒绝闭合引号后的非分隔字符。
+
+文件导入先完整校验数据与自动字段映射，再检查当前项目的未保存状态。取消覆盖保留原数据、格式、图形类型和字段映射。

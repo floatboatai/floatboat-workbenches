@@ -18,6 +18,8 @@ export function App() {
     [ai, setAi] = useState(false),
     [tab, setTab] = useState<"source" | "table">("table");
   const file = useRef<HTMLInputElement>(null);
+  const latestProject = useRef(project);
+  latestProject.current = project;
   const parsed = useMemo(() => {
     try {
       return { rows: rowsFrom(project.data), error: "" };
@@ -63,7 +65,21 @@ export function App() {
         ) ??
         keys[1] ??
         keys[0];
-      project.setData({ ...project.data, source, format, x: keys[0], y });
+      const current = latestProject.current;
+      const imported = validate({
+        ...current.data,
+        source,
+        format,
+        x: keys[0],
+        y,
+      });
+      if (
+        current.dirty &&
+        !confirm("有未保存的修改，确定导入并替换当前数据和字段映射吗？")
+      )
+        return;
+      current.setData(imported);
+      current.setError("");
       setTab("table");
     } catch (error) {
       project.report(error);
