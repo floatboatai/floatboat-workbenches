@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.0c6f5e2f-25e7-45bc-a8b1-b590e9d8b84b",
   "registryName": "makerjs-studio",
-  "name": "Maker.js 工作台",
+  "name": "参数制图工房",
   "description": "尺寸与孔位 → 参数化面板/刀模 → SVG、DXF",
   "version": "0.1.0",
-  "changelog": "Initial application.",
+  "changelog": "增加固定模板几何、SVG/DXF导出与项目归档。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,9 +16,7 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
   "resources": []

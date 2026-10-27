@@ -11,6 +11,9 @@ importers:
       lucide-react:
         specifier: 0.562.0
         version: 0.562.0(react@19.2.3)
+      makerjs:
+        specifier: 0.19.2
+        version: 0.19.2
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -27,11 +30,32 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.8)
+      dxf-parser:
+        specifier: 1.1.2
+        version: 1.1.2
 
 packages:
 
+  '@danmarshall/jscad-typings@1.0.0':
+    resolution: {integrity: sha512-MGGIGDItK2UQSsz7yTrXErQXDAFXR3UPxyQ7WZ5RHOwnv60CBXjmkJlXYMYPkSvo+7fUuQL2/ODcvECtc/fi9g==}
+
+  '@types/bezier-js@0.0.6':
+    resolution: {integrity: sha512-kXsAlt8e8N6zt9R6LcMYWB1HkBw3q2g+M9BdI/UE+s4agIONuIscQaRCoInH22+Jas3rw8yLUehL2InaZjyNSA==}
+
+  '@types/fontkit@2.0.9':
+    resolution: {integrity: sha512-qNYerFky3muCmZPq+R+B3cUDRA5OONw/oh6aGGFxx2LOBz6yu8eamKusrhkHnC6rc2fm76+G9z9QoWSB2SaQaw==}
+
   '@types/node@22.20.2':
     resolution: {integrity: sha512-xlvWf4Vs9n1PEVYwP1n4vvG07M6y8WgvJ2t0vbrWTmijsIHp1cS+uJ2kMIRdY3nHZK0nCYKrPeD171+SzF4/zw==}
+
+  '@types/node@7.10.14':
+    resolution: {integrity: sha512-29GS75BE8asnTno3yB6ubOJOO0FboExEqNJy4bpz0GSmW/8wPTNL4h9h63c6s1uTrOopCmJYe/4yJLh5r92ZUA==}
+
+  '@types/opentype.js@0.7.2':
+    resolution: {integrity: sha512-Riz6WyBUBEFs7YqSsJya3SbDHJZ6BmMkY7bzNoue6rtwj+RNilLc+mgOX/eJ0Y0asq16FSU6DatBeOg8ZMy2UQ==}
+
+  '@types/pdfkit@0.7.36':
+    resolution: {integrity: sha512-9eRA6MuW+n78yU3HhoIrDxjyAX2++B5MpLDYqHOnaRTquCw+5sYXT+QN8E1eSaxvNUwlRfU3tOm4UzTeGWmBqg==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -41,13 +65,36 @@ packages:
   '@types/react@19.2.8':
     resolution: {integrity: sha512-3MbSL37jEchWZz2p2mjntRZtPt837ij10ApxKfgmXCTuHWagYg7iA5bqPw6C8BMPfwidlvfPI/fxOc42HLhcyg==}
 
+  bezier-js@2.6.1:
+    resolution: {integrity: sha512-jelZM33eNzcZ9snJ/5HqJLw3IzXvA8RFcBjkdOB8SDYyOvW8Y2tTosojAiBTnD1MhbHoWUYNbxUXxBl61TxbRg==}
+
+  clone@1.0.4:
+    resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
+    engines: {node: '>=0.8'}
+
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  dxf-parser@1.1.2:
+    resolution: {integrity: sha512-GPTumUvRkounlIazLIyJMmTWt+nlg+ksS0Hdm8jWvejmZKBTz6gvHTam76wRm4PQMma5sgKLThblQyeIJcH79Q==}
+
+  graham_scan@1.0.5:
+    resolution: {integrity: sha512-471KIBS1jOrAHpEStAbOjYI5U7MGBSyqy+wIEnvRYaFDNmpUUhbDZWLRsCSh/OnlY0dCg0NaDyN/2XLoypgIfA==}
+
+  kdbush@2.0.1:
+    resolution: {integrity: sha512-9KqSdmWCkBIisFIGclT0FRagKhI7IVbMyUjsxCFG0Ly1Dg6whlxJ7b9lrq8ifk3X/fGeJzok1R75LQfZTfA5zQ==}
+
+  loglevel@1.9.2:
+    resolution: {integrity: sha512-HgMmCqIJSAKqo68l0rS2AanEWfkxaZ5wNiEFb5ggm08lDs9Xl2KxBlX3PTcaD2chBM1gXAYf491/M2Rv8Jwayg==}
+    engines: {node: '>= 0.6.0'}
 
   lucide-react@0.562.0:
     resolution: {integrity: sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  makerjs@0.19.2:
+    resolution: {integrity: sha512-+W30jtxgM5ht8jWyxOpoLpz/6u9DEDjW9XXbvkyAba9xIDXnUB4vaB+JajMm7i6QbD7E41rxSl6VFkOcNMwFBA==}
 
   react-dom@19.2.3:
     resolution: {integrity: sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==}
@@ -66,9 +113,25 @@ packages:
 
 snapshots:
 
+  '@danmarshall/jscad-typings@1.0.0': {}
+
+  '@types/bezier-js@0.0.6': {}
+
+  '@types/fontkit@2.0.9':
+    dependencies:
+      '@types/node': 22.20.2
+
   '@types/node@22.20.2':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/node@7.10.14': {}
+
+  '@types/opentype.js@0.7.2': {}
+
+  '@types/pdfkit@0.7.36':
+    dependencies:
+      '@types/node': 22.20.2
 
   '@types/react-dom@19.2.3(@types/react@19.2.8)':
     dependencies:
@@ -78,11 +141,38 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
+  bezier-js@2.6.1: {}
+
+  clone@1.0.4: {}
+
   csstype@3.2.3: {}
+
+  dxf-parser@1.1.2:
+    dependencies:
+      loglevel: 1.9.2
+
+  graham_scan@1.0.5: {}
+
+  kdbush@2.0.1: {}
+
+  loglevel@1.9.2: {}
 
   lucide-react@0.562.0(react@19.2.3):
     dependencies:
       react: 19.2.3
+
+  makerjs@0.19.2:
+    dependencies:
+      '@danmarshall/jscad-typings': 1.0.0
+      '@types/bezier-js': 0.0.6
+      '@types/fontkit': 2.0.9
+      '@types/node': 7.10.14
+      '@types/opentype.js': 0.7.2
+      '@types/pdfkit': 0.7.36
+      bezier-js: 2.6.1
+      clone: 1.0.4
+      graham_scan: 1.0.5
+      kdbush: 2.0.1
 
   react-dom@19.2.3(react@19.2.3):
     dependencies:
