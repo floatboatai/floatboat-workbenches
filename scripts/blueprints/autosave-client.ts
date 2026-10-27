@@ -295,8 +295,8 @@ export function useWorkbenchState<T>(
     }
     const status = value.acknowledgedState;
     const acknowledgedState: AutoState | undefined =
-      isRecord(status) &&
-      ["idle", "saved", "draft", "conflict", "offline"].includes(String(status.phase)) &&
+      isRecord(status) && typeof status.phase === "string" &&
+      ["idle", "saved", "draft", "conflict", "offline"].includes(status.phase) &&
       typeof status.message === "string" && typeof status.savedAt === "string" &&
       (status.savedAt === "" || Number.isFinite(Date.parse(status.savedAt))) &&
       (status.phase !== "saved" || current !== null)
@@ -504,12 +504,16 @@ export function useWorkbenchState<T>(
       if (entryEpoch !== epoch.current) return null;
     }
     const now = fingerprint(workRef.current);
+    const confirmUnknown = force && acknowledgedState.current.phase === "offline";
     if (
       !pending.current &&
       now === ack.current &&
-      (!force || currentRef.current)
+      (!force || currentRef.current) && !confirmUnknown
     )
       return null;
+    // Legacy caches have no authoritative receipt. Revalidate optimistically
+    // with their original versions; keep failures in the normal retry queue.
+    if (confirmUnknown) edited.current = true;
     const generation = epoch.current;
     if (!pending.current)
       pending.current = {
@@ -537,7 +541,8 @@ export function useWorkbenchState<T>(
         });
         if (
           !isRecord(raw) ||
-          !["saved", "draft", "conflict"].includes(String(raw.phase)) ||
+          typeof raw.phase !== "string" ||
+          !["saved", "draft", "conflict"].includes(raw.phase) ||
           typeof raw.draftRevision !== "number" ||
           typeof raw.message !== "string" ||
           typeof raw.savedAt !== "string"
@@ -743,7 +748,7 @@ export function useWorkbenchState<T>(
         }
         return receipt.project;
       }
-      return autoState.phase === "draft" || acknowledgedState.current.phase === "draft" ||
+      return acknowledgedState.current.phase !== "saved" ||
         cacheRepairPending.current || conflicted.current ||
         pending.current ||
         fingerprint(workRef.current) !== ack.current
