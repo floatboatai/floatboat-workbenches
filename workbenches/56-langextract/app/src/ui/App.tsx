@@ -17,8 +17,10 @@ import {
 import { isRecord } from "../contracts/project";
 import {
   seed,
-  validateProject,
-  parseImport,
+  restoreProjectDraft,
+  parseWorkingImport,
+  serializeWorkingCopy,
+  PORTABLE_FILE_BYTES,
   evidenceSpan,
   rawJsonl,
   reviewCsv,
@@ -31,13 +33,8 @@ import {
   type Job,
   type ReviewStatus,
 } from "../contracts/evidence";
-import {
-  useProjects,
-  ProjectPicker,
-  Notice,
-  download,
-  request,
-} from "./workspace";
+import { ProjectPicker, Notice, download, request } from "./workspace";
+import { useEvidenceProjects } from "./evidence-state";
 const statusName: Record<ReviewStatus, string> = {
   pending: "待复核",
   accepted: "已接受",
@@ -73,9 +70,7 @@ function filename(title: string) {
   return title.replace(/[\\/:*?"<>|]/g, "-").slice(0, 80) || "证据项目";
 }
 export function App() {
-  const p = useProjects(seed, validateProject, "青禾展览 · 采购访谈", {
-    storageKey: "langextract-evidence-v1",
-  });
+  const p = useEvidenceProjects();
   const [tab, setTab] = useState<"review" | "config" | "jobs">(() =>
       location.hash === "#config"
         ? "config"
@@ -198,13 +193,12 @@ export function App() {
       p.setError("请先填写修订值。");
       return;
     }
-    updateReview({ status });
-    p.setError("");
+    if (updateReview({ status })) p.setError("");
   }
   async function importText(raw: string) {
     try {
-      const data = parseImport(raw);
-      if (await p.replace(data, p.title + " · 导入")) {
+      const copy = parseWorkingImport(raw, (p.title + " · 导入").slice(0, 120));
+      if (await p.replace(copy.data, copy.title, copy.extra)) {
         setTab("review");
         p.setNotice("已导入为新项目，原项目保留。");
       }
@@ -215,9 +209,10 @@ export function App() {
   async function readFile(file: File | undefined) {
     if (!file) return;
     try {
-      if (file.size > 800000) throw Error("文件超过800KB，请拆分资料。");
-      const raw = await file.text();
-      p.setDraft((old) => ({ ...old, importText: raw }));
+      if (file.size > PORTABLE_FILE_BYTES)
+        throw Error("文件超过6MB，请拆分资料。");
+      // Large portable files are decoded directly, never duplicated in editor extra.
+      await importText(await file.text());
     } catch (e) {
       p.report(e);
     }
@@ -243,7 +238,7 @@ export function App() {
                 examples: p.data.examples,
               }),
             };
-      p.setDraft((old) => ({ ...old, pendingRun: pending }));
+      if (!p.setDraft((old) => ({ ...old, pendingRun: pending }))) return;
       const saved = await p.save();
       if (!saved) throw Error("请先解决草稿保存或版本冲突，再提交抽取。");
       const result = validateJob(
@@ -304,10 +299,10 @@ export function App() {
   }
   function exportFile(kind: "project" | "csv" | "jsonl") {
     try {
-      const data = validateProject(p.data);
+      const data = restoreProjectDraft(p.data);
       const body =
         kind === "project"
-          ? JSON.stringify(data, null, 2)
+          ? serializeWorkingCopy({ title: p.title, data, extra: p.draft })
           : kind === "csv"
             ? reviewCsv(data)
             : rawJsonl(data);
@@ -425,7 +420,7 @@ export function App() {
             <button onClick={() => exportFile("csv")}>审校表 CSV</button>
             <button onClick={() => exportFile("jsonl")}>原始抽取 JSONL</button>
             <button onClick={() => exportFile("project")}>完整项目 JSON</button>
-            <button onClick={p.exportDraft}>恢复草稿</button>
+            <button onClick={() => exportFile("project")}>恢复草稿</button>
           </div>
         </details>
         <span className={"save-state " + p.autoState.phase} role="status">
@@ -475,7 +470,7 @@ export function App() {
       <Notice error={p.error} notice={p.notice} />
       {p.autoState.phase === "conflict" && (
         <div className="recovery">
-          <button onClick={p.exportDraft}>导出本机草稿</button>
+          <button onClick={() => exportFile("project")}>导出本机草稿</button>
           {p.current && (
             <button onClick={() => void p.open(p.current!.id)}>
               打开服务器版本
@@ -603,10 +598,10 @@ export function App() {
                   </summary>
                   <p>
                     每行一份 LangExtract
-                    文档；完整项目包含人工修订。导入后会创建独立项目。
+                    文档；完整项目包含人工修订和未应用草稿。选择文件会直接导入为新项目。
                   </p>
                   <label className="file-input">
-                    选择文件
+                    从文件直接导入新项目
                     <input
                       type="file"
                       name="evidence-file"
@@ -928,9 +923,10 @@ export function App() {
                         ),
                       ),
                     );
-                    p.setData((old) => ({ ...old, examples: next }));
-                    p.setNotice("示例已应用。");
-                    p.setError("");
+                    if (p.setData((old) => ({ ...old, examples: next }))) {
+                      p.setNotice("示例已应用。");
+                      p.setError("");
+                    }
                   } catch (e) {
                     p.report(e);
                   }

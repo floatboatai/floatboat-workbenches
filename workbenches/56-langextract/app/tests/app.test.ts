@@ -1,11 +1,20 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DatabaseSync } from "node:sqlite";
-import { readFileSync } from "node:fs";
+import { readFileSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   seed,
   validateProject,
+  restoreProjectDraft,
+  restoreWorkingCopy,
+  serializeWorkingCopy,
+  parseWorkingImport,
+  jsonBytes,
+  DRAFT_DATA_BYTES,
+  DRAFT_EXTRA_BYTES,
   parseImport,
   importedDocuments,
   evidenceSpan,
@@ -24,8 +33,8 @@ const input = () =>
     prompt: seed.prompt,
     examples: seed.examples,
   });
-function database() {
-  const db = new DatabaseSync(":memory:");
+function database(path = ":memory:") {
+  const db = new DatabaseSync(path);
   for (const name of [
     "0002_projects.sql",
     "0003_autosave.sql",
@@ -208,8 +217,12 @@ test("Service connector rejects insecure remote URLs and response status mismatc
         LANGEXTRACT_SERVICE_TOKEN: token,
       }),
     );
-  assert.throws(() => serviceResult({ id: "expected", status: "succeeded" }, "expected"));
-  assert.throws(() => serviceResult({ id: "expected", status: "invented" }, "expected"));
+  assert.throws(() =>
+    serviceResult({ id: "expected", status: "succeeded" }, "expected"),
+  );
+  assert.throws(() =>
+    serviceResult({ id: "expected", status: "invented" }, "expected"),
+  );
 });
 test("Autosave stores full review and invalid JSON editor draft; same mutation replay is idempotent", async () => {
   const db = database();
@@ -305,6 +318,182 @@ test("Late polling cannot resurrect cancelled work and mismatched source results
 });
 
 test("Service reply must match the requested job identity", () => {
-  assert.throws(() => serviceResult({ id: "different", status: "running" }, "expected"));
-  assert.equal(serviceResult({ id: "expected", status: "running" }, "expected").status, "running");
+  assert.throws(() =>
+    serviceResult({ id: "different", status: "running" }, "expected"),
+  );
+  assert.equal(
+    serviceResult({ id: "expected", status: "running" }, "expected").status,
+    "running",
+  );
+});
+
+function sizedProject(targetBytes: number) {
+  const project = validateProject(clone());
+  const doc = project.documents[0];
+  doc.extractions = Array.from({ length: 300 }, (_, i) => ({
+    ...structuredClone(doc.extractions[0]),
+    extraction_index: i,
+    attributes: {},
+  }));
+  doc.reviews = doc.extractions.map(() => ({
+    status: "pending",
+    correctedText: "",
+    note: "",
+  }));
+  for (let i = doc.extractions.length - 1; i >= 0; i--) {
+    for (let j = 0; j < 10; j++) {
+      if (jsonBytes(project) >= targetBytes) return project;
+      const attrs = doc.extractions[i].attributes!;
+      attrs["padding" + j] = "";
+      const left = targetBytes - jsonBytes(project);
+      if (left < 0) {
+        delete attrs["padding" + j];
+        return project;
+      }
+      attrs["padding" + j] = "x".repeat(Math.min(left, 2000));
+    }
+  }
+  throw Error("Fixture could not reach requested size");
+}
+
+test("A near-limit model saves larger review work as SQLite draft and restores after database reopen", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "langextract-draft-")),
+    path = join(directory, "data.sqlite");
+  let db = database(path);
+  try {
+    const store = createAutosaveStore(db, validateProject),
+      id = randomUUID();
+    const model = validateProject(sizedProject(799000));
+    const first = await store.commit({
+      documentId: id,
+      mutationId: randomUUID(),
+      draftRevision: 0,
+      projectId: null,
+      projectRevision: null,
+      snapshot: { title: "近限项目", data: model, extra: {} },
+    });
+    assert.equal(first.phase, "saved");
+    const data = structuredClone(model);
+    data.documents[0].reviews[0].note = "中".repeat(1000);
+    const snapshot = restoreWorkingCopy({
+      title: "容量工作稿",
+      data,
+      extra: {
+        examplesEditor: "[{ incomplete 中文",
+        importText: "{ unfinished",
+      },
+    });
+    assert.throws(() => validateProject(snapshot.data), /800KB/);
+    const request = {
+      documentId: id,
+      mutationId: randomUUID(),
+      draftRevision: first.draftRevision,
+      projectId: id,
+      projectRevision: first.project!.revision,
+      snapshot,
+    };
+    assert.ok(jsonBytes(request) < 1950000);
+    const draft = await store.commit(request);
+    assert.equal(draft.phase, "draft");
+    assert.equal(
+      JSON.parse(
+        String(
+          db.prepare("SELECT payload FROM projects WHERE id=?").get(id)!
+            .payload,
+        ),
+      ).documents[0].reviews[0].note,
+      "",
+    );
+    db.close();
+    db = new DatabaseSync(path);
+    const reopened = createAutosaveStore(db, validateProject).get(id)!;
+    const restored = restoreWorkingCopy(reopened.snapshot);
+    assert.equal(reopened.receipt.phase, "draft");
+    assert.equal(restored.data.documents[0].reviews[0].note, "中".repeat(1000));
+    assert.equal(restored.extra.examplesEditor, "[{ incomplete 中文");
+    assert.equal(restored.extra.importText, "{ unfinished");
+  } finally {
+    db.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("Working draft limits preserve structure and account for serialized extra and wire overhead", () => {
+  const data = sizedProject(DRAFT_DATA_BYTES - 2000);
+  assert.equal(jsonBytes(restoreProjectDraft(data)), jsonBytes(data));
+  const extra = { examplesEditor: "中".repeat(195000), importText: "pending" };
+  const copy = restoreWorkingCopy({ title: "草稿", data, extra });
+  assert.ok(jsonBytes(copy.extra) < DRAFT_EXTRA_BYTES);
+  assert.ok(
+    jsonBytes({
+      documentId: randomUUID(),
+      mutationId: randomUUID(),
+      draftRevision: 100,
+      projectId: randomUUID(),
+      projectRevision: 100,
+      snapshot: copy,
+    }) < 1950000,
+  );
+  const tooLarge = structuredClone(data);
+  tooLarge.documents[0].reviews[0].note = "中".repeat(1000);
+  assert.throws(() => restoreProjectDraft(tooLarge), /1.2MB/);
+  assert.throws(
+    () =>
+      restoreWorkingCopy({
+        ...copy,
+        extra: { ...extra, importText: "x".repeat(20000) },
+      }),
+    /600KB/,
+  );
+  assert.throws(
+    () =>
+      restoreWorkingCopy({
+        ...copy,
+        extra: { examplesEditor: { invalid: true } },
+      }),
+    /文本/,
+  );
+  assert.throws(
+    () =>
+      restoreProjectDraft({
+        ...data,
+        documents: [{ ...data.documents[0], reviews: [] }],
+      }),
+    /不匹配/,
+  );
+});
+
+test("Portable working copies roundtrip oversized review drafts and unfinished editors without relaxing core JSONL", () => {
+  const data = sizedProject(900000);
+  const copy = restoreWorkingCopy({
+    title: "可恢复资料",
+    data,
+    extra: { examplesEditor: "[{ not finished", importText: "{draft" },
+  });
+  assert.deepEqual(parseWorkingImport(serializeWorkingCopy(copy)), copy);
+  const oldRecovery = JSON.stringify({
+    documentId: randomUUID(),
+    mutationId: randomUUID(),
+    snapshot: copy,
+    current: null,
+    pending: { ignored: true },
+  });
+  assert.deepEqual(parseWorkingImport(oldRecovery), copy);
+  assert.deepEqual(
+    parseWorkingImport(JSON.stringify(data), "旧项目").data,
+    data,
+  );
+  assert.throws(() => parseImport(JSON.stringify(data)), /长度|800KB/);
+  assert.throws(() => parseWorkingImport(rawJsonl(data)), /长度|800KB/);
+  assert.throws(
+    () =>
+      parseWorkingImport(
+        JSON.stringify({
+          format: "langextract-working-copy",
+          version: 2,
+          snapshot: copy,
+        }),
+      ),
+    /版本/,
+  );
 });

@@ -158,7 +158,7 @@ function review(v: unknown): Review {
     note: text(v.note, 4000),
   };
 }
-export function validateProject(v: unknown): EvidenceProject {
+function decodeProject(v: unknown, limit: number): EvidenceProject {
   if (
     !isRecord(v) ||
     v.schemaVersion !== 1 ||
@@ -198,9 +198,100 @@ export function validateProject(v: unknown): EvidenceProject {
     prompt: text(v.prompt, 12000),
     examples: examples(v.examples),
   };
-  if (new TextEncoder().encode(JSON.stringify(out)).length > 800000)
-    throw Error("项目超过800KB，请拆分资料后导入。");
+  if (jsonBytes(out) > limit)
+    throw Error(
+      limit === MODEL_BYTES
+        ? "项目超过800KB，请拆分资料后提交正式项目。"
+        : "工作稿超过1.2MB恢复上限，请先导出并减少资料或修订。",
+    );
   return out;
+}
+export const MODEL_BYTES = 800_000;
+export const DRAFT_DATA_BYTES = 1_200_000;
+export const DRAFT_EXTRA_BYTES = 600_000;
+export const WORKING_COPY_BYTES = 1_850_000;
+export const PORTABLE_FILE_BYTES = 6_000_000;
+export const jsonBytes = (value: unknown): number =>
+  new TextEncoder().encode(JSON.stringify(value)).length;
+export function validateProject(v: unknown): EvidenceProject {
+  return decodeProject(v, MODEL_BYTES);
+}
+export function restoreProjectDraft(v: unknown): EvidenceProject {
+  return decodeProject(v, DRAFT_DATA_BYTES);
+}
+export interface EvidenceWorkingCopy {
+  title: string;
+  data: EvidenceProject;
+  extra: Record<string, unknown>;
+}
+export function restoreWorkingCopy(v: unknown): EvidenceWorkingCopy {
+  if (!isRecord(v) || !isRecord(v.extra)) throw Error("工作稿结构无效。");
+  const extra: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(v.extra)) {
+    if (key === "examplesEditor" || key === "importText") {
+      if (typeof value !== "string") throw Error("编辑器草稿必须是文本。");
+      extra[key] = value;
+    } else if (key === "pendingRun") {
+      if (
+        !isRecord(value) ||
+        typeof value.id !== "string" ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          value.id,
+        )
+      )
+        throw Error("待提交任务草稿无效。");
+      extra[key] = { id: value.id, input: runInput(value.input) };
+    } else throw Error("工作稿含不支持的附加字段。");
+  }
+  if (jsonBytes(extra) > DRAFT_EXTRA_BYTES)
+    throw Error(
+      "编辑器与待提交任务草稿合计超过600KB。请清理导入文本或缩短示例后再编辑；大文件请从文件直接导入。",
+    );
+  const copy = {
+    title: text(v.title, 120),
+    data: restoreProjectDraft(v.data),
+    extra,
+  };
+  if (jsonBytes(copy) > WORKING_COPY_BYTES)
+    throw Error("工作稿超过可恢复容量，请先导出并减少内容。");
+  return copy;
+}
+export function serializeWorkingCopy(v: unknown): string {
+  return JSON.stringify({
+    format: "langextract-working-copy",
+    version: 1,
+    snapshot: restoreWorkingCopy(v),
+  });
+}
+export function parseWorkingImport(
+  raw: string,
+  fallbackTitle = "导入资料",
+): EvidenceWorkingCopy {
+  if (new TextEncoder().encode(raw).length > PORTABLE_FILE_BYTES)
+    throw Error("导入文件超过6MB，请拆分后再导入。");
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {}
+  if (isRecord(value) && value.format === "langextract-working-copy") {
+    if (value.version !== 1) throw Error("工作稿文件版本不支持。");
+    return restoreWorkingCopy(value.snapshot);
+  }
+  // Old generic recovery files contain receipts/IDs; only their validated snapshot is imported.
+  // Import always creates a new workbench document, never replaying a saved mutation.
+  if (
+    isRecord(value) &&
+    typeof value.documentId === "string" &&
+    isRecord(value.snapshot)
+  )
+    return restoreWorkingCopy(value.snapshot);
+  if (isRecord(value) && value.schemaVersion === 1)
+    return restoreWorkingCopy({ title: fallbackTitle, data: value, extra: {} });
+  return restoreWorkingCopy({
+    title: fallbackTitle,
+    data: parseImport(raw),
+    extra: {},
+  });
 }
 export function importedDocuments(
   values: unknown[],
