@@ -1,12 +1,13 @@
-# Engineering
+# Promptfoo application architecture
 
-The business app root is this directory. Run the authoring commands from the repository root; see `../AGENTS.md`.
+UI uses existing autosave and same-origin SDK connection. Evaluation contracts parse Promptfoo v3 results into a matrix; raw JSON stays unchanged in each report so export retains provenance. Reviews are keyed by report ID plus test/prompt indices. Suite editor drafts are stored separately from applied suite. Non-executable suite whitelist is shared by the app connector and external runner.
 
-- `src/server/` owns business routes, parameterized SQL, transactions and Host SDK calls. Register public page routes under `/api/` through the provided server.
-- `src/ui/` owns React components and the authenticated page connection. UI requests go through `page.fetch`; importing Node, database or Host implementations into the browser is rejected.
-- `src/contracts/` contains shared serializable data types and response validation. Validate external input as unknown and return structured results.
-- Append numbered SQL migrations. Applied migrations are immutable; preview data is persistent and must not be silently reset to accommodate changes.
-- Keep the fixed strict `tsconfig.json` and declarative manifest build profile. The compiler ignores executable project build config and env files. Source assets belong under `src/`.
-- Keep runtime dependency versions and lockfiles aligned; see `../docs/maintenance.md`. Native extensions do not belong in the application profile.
-- Add tests for business boundaries and persistence behavior, using temporary data rather than the user's preview database. Test files live under `tests/` and are run by `pnpm test` from the repository root.
-- Host calls are optional and require actual authorization. Show unavailable/error states and consult `../docs/platform.md`; preserve execution-unknown errors rather than retrying potentially completed external mutations blindly.
+Server routes assemble project store, autosave and durable evaluation_jobs migration. The runner connector accepts only a server-configured HTTP loopback/HTTPS origin, refuses redirects, limits response bytes, validates report shape and matches job IDs. Persist stable job before network submission; uncertain receipt is reconciled with the existing ID. Repeated submit has immutable digest check. Model calls happen only in separately configured service/server.mjs, not in browser or source package.
+
+External runner uses Node22 SQLite and promptfoo 0.125.1 evaluate, persistent job states and bounded queue. Restart converts pending/running to interrupted without replay. Credentials stay in server env. Echo provider is explicitly deterministic/no-model; optional model provider accepts only server-owned endpoint and uses a 90s timeout. No imported arbitrary script, provider, transform, local file or template control statement executes.
+
+Business package size constraints are explicit. Only ordinary generated example output is an asset; private databases/configuration are ignored. Exported project includes reports, accepted suite, editor draft and reviews, excluding job handles that would point to another installation. Source package does not contain runner dependencies; repository service deployment is separate.
+
+Check: pnpm workbench:check. Tests: pnpm test and (cd service && pnpm test). Package: pnpm package. Browser acceptance covers matrix, raw details, real echo evaluation, save/reload/draft recovery, delayed save, response-loss, conflict, project import, export, keyboard and responsive layout. Exact executed results are in ../ACCEPTANCE.md.
+
+Strict project validation is limited to750KB; a separately bounded1.3MB working-copy decoder retains oversized reviews as drafts. Editable operations guard that recovery bound, configuration draft is limited to60000 characters, and portable import accepts up to1.8MB with the working-copy decoder. Literal assertion/variable/label fields reject Nunjucks and upstream reference protocols; prompt placeholders must be explicitly supplied, non-reserved variable names. Pending operation identity disables fresh submissions until reconciliation. Terminal state transitions never regress under late responses.

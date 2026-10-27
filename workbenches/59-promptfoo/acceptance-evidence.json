@@ -1,0 +1,49 @@
+{
+  "verifiedAt": "2026-10-27",
+  "version": "0.4.0",
+  "applicationTests": 11,
+  "runnerTests": 3,
+  "upstream": {
+    "package": "promptfoo@0.125.1",
+    "executed": "evaluate with deterministic echo provider",
+    "modelInference": "unverified"
+  },
+  "browser": {
+    "primaryFlow": "passed",
+    "saveReload": "passed",
+    "invalidConfigurationRestore": "passed",
+    "delayedSave": "passed",
+    "lostResponseIdempotency": "passed",
+    "optimisticConflict": "passed",
+    "projectImportCreatesNew": "passed",
+    "keyboardCsvExport": "passed",
+    "desktop": [
+      1440,
+      1000
+    ],
+    "mobile": [
+      375,
+      812
+    ],
+    "pageErrors": [],
+    "edgeCases": {
+      "unknownSubmitBlocksNewRun": true,
+      "submitted": 1,
+      "baselineRebasedToColumn0": true,
+      "overModelLimitDraftRestored": true,
+      "largePortableBytes": 947342,
+      "configurationDraftCharacters": 60000,
+      "reviewCharacters": 6000,
+      "reimportPreserved": true,
+      "pageErrors": []
+    }
+  },
+  "screenshot": {
+    "path": "docs/screenshots/promptfoo.png",
+    "width": 1440,
+    "height": 1185,
+    "sha256": "5ab982dd8f1ab9830671fbf3ecfbcf76a5b5de9a99608e0c4b20da812134eb65"
+  },
+  "hostImport": "unverified",
+  "externalModel": "unverified"
+}

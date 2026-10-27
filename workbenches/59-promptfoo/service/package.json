@@ -1,0 +1,8 @@
+{
+  "name": "floatboat-promptfoo-runner",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.22.0 <23" },
+  "scripts": { "start": "node --experimental-strip-types server.mjs", "test": "node --experimental-strip-types --test runner.test.mjs" },
+  "dependencies": { "promptfoo": "0.125.1" }
+}

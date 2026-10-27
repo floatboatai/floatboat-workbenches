@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "appId": "workbench.8faf7ebf-85d9-4974-b0bf-b5b4e7b6151c",
   "registryName": "promptfoo-studio",
-  "name": "Promptfoo 工作台",
-  "description": "提示词与模型回归评测台",
+  "name": "Promptfoo 评测台",
+  "description": "测试用例、提示版本、失败差异与发布复核",
   "version": "0.4.0",
   "changelog": "AI 工作台：业务项目自动保存、结果复核和上游服务接入。",
   "sdkVersion": "1.0.0",
@@ -16,10 +16,16 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
-  "resources": []
+  "resources": [
+    {
+      "id": "evaluation-example",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "samples/promptfoo-example.json"
+    }
+  ]
 }
