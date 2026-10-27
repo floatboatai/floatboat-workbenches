@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.ea4c7329-b201-4fc9-b5bf-bf2dfd1a3d03",
   "registryName": "milkdown-studio",
-  "name": "Milkdown 工作台",
+  "name": "Milkdown 写作笔记",
   "description": "Markdown 笔记、长文写作与知识卡片工作台",
   "version": "0.3.0",
-  "changelog": "Initial application.",
+  "changelog": "原生 Crepe Markdown 编辑、笔记目录与标签、章节大纲、源码草稿恢复和笔记本导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
