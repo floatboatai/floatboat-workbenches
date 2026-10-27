@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "appId": "workbench.a2d7154d-0d73-456f-b99b-b546dabff611",
   "registryName": "langextract-studio",
-  "name": "LangExtract 工作台",
-  "description": "证据字段抽取与人工复核台",
+  "name": "LangExtract · 证据书桌",
+  "description": "原文证据、字段抽取与人工复核，支持 LangExtract JSONL 和独立服务。",
   "version": "0.4.0",
   "changelog": "AI 工作台：业务项目自动保存、结果复核和上游服务接入。",
   "sdkVersion": "1.0.0",
@@ -16,9 +16,7 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [
-    "llm"
-  ],
+  "capabilities": [],
   "contributions": [],
   "dependencies": [],
   "resources": []
