@@ -1,17 +1,17 @@
-# 图表规格实验台
+# Vega-Lite 图表实验台
 
-版本0.1.0，本地和真实Host模型生成已验证；客户端导入未验收。
+版本 **0.2.0**。编辑后自动保存，不必反复点击保存按钮。
 
-运行：从总仓库执行 `pnpm workbench prepare vega-lite`、`pnpm workbench dev vega-lite`。
+以图表为主，数据表位于下方、JSON规格位于右侧的科学图表实验台。使用AST及expressionInterpreter，无需unsafe-eval；只用内嵌数据。
 
-编辑Vega-Lite JSON后点击「应用并绘图」，修改先经过业务校验。可保存实验、重新打开、重命名、删除；导出规格JSON和实际SVG。AI返回候选规格，确认后采用。
+未应用或错误JSON保留原文；图表和SVG导出只对应已应用规格。AI候选必须人工采用。
 
-## 已验证
+自动保存区分待同步、保存中、已保存、工作草稿、离线和版本冲突。网络失败会保留本机工作副本并重试；冲突不会覆盖服务器版本，可导出恢复草稿后打开服务器版本。“立即保存”用于手动触发同步。
 
-`pnpm test` 4项通过；真实Chrome运行Vega而非占位图，保存刷新恢复、JSON/SVG导出、错误JSON恢复、真实模型生成和采用通过。1440px/375px、暗色/reduced-motion无溢出，pageerror、console error、失败资源请求均0。
+从总仓库运行 `pnpm workbench prepare vega-lite`、`pnpm workbench dev vega-lite`。本目录执行 `pnpm workbench:check`、`pnpm test` 与 `pnpm run package`。
 
-使用 `vega.parse(spec, undefined, {ast:true})` 与 `expressionInterpreter`，无需 unsafe-eval；图形、数据表和导出均来自内嵌data.values。仅支持基础单视图，1–10000行、500000字符；外部数据URL、图片、href拒绝。
+业务测试 4 项；自动保存另经真实Chrome验收：无需按钮创建、延迟回包不覆盖新输入、草稿刷新恢复、503/重试、响应丢失幂等、冲突保留、375px与暗色。AI草稿恢复测试使用明确注入的候选，未据此宣称新一轮真实模型调用成功。
 
-`pnpm workbench package vega-lite` 生成 artifacts/vega-lite-studio-0.1.0.fbworkbench，使用Floatboat「我的→工作台→导入工作台」。
+源包：`artifacts/vega-lite-studio-0.2.0.fbworkbench`。通过Floatboat「我的→工作台→导入工作台」安装。源包不含项目数据；客户端实际导入尚未验收。
 
-未应用 JSON 草稿也有离开保护；新建、切换、删除或采用候选前取消可保留原文，关闭页面触发浏览器提示。草稿未应用时禁止导出旧规格。
+上游与许可见 [NOTICE.md](NOTICE.md)。
