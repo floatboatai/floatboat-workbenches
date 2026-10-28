@@ -1,21 +1,23 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
-  Box,
-  ArrowUpRight,
-  ArrowDownToLine,
   FolderOpen,
-  Plus,
-  Check,
+  Upload,
+  Box,
   Layers,
   Scan,
-  RotateCcw,
   Play,
   Pause,
-  FileJson,
-  ChevronRight,
+  Palette,
+  Boxes,
+  Package,
+  MessageSquare,
+  X,
+  PanelRightOpen,
 } from "lucide-react";
 import { useWorkbenchState } from "./autosave-client";
-import { ProjectPicker, Notice, RenderBoundary } from "./workspace";
+import { RenderBoundary } from "./workspace";
+import { AssetLibrary } from "./AssetLibrary";
+import { Inspector } from "./Inspector";
 import { request, download } from "./requests";
 import {
   seed,
@@ -45,6 +47,12 @@ export function App() {
       restoreDraftData: restoreAsset,
     }),
     d = p.data;
+  const [library, setLibrary] = useState(false),
+    [inspectorOpen, setInspectorOpen] = useState(true),
+    [inspectorMode, setInspectorMode] = useState<"object" | "notes">("object");
+  const inspectorTrigger = useRef<HTMLElement | null>(null),
+    libraryTrigger = useRef<HTMLButtonElement>(null),
+    inspectorToggle = useRef<HTMLButtonElement>(null);
   const [inspection, setInspection] = useState<Inspection | null>(null),
     [sourceInfo, setSourceInfo] = useState<Inspection | null>(null),
     [pending, setPending] = useState(""),
@@ -71,6 +79,9 @@ export function App() {
   useEffect(() => {
     epoch.current++;
     setPlaying(false);
+    setLibrary(false);
+    setInspectorOpen(Boolean(d.source || d.notes));
+    setInspectorMode(d.source || !d.notes ? "object" : "notes");
     setPending("");
     setMissing("");
     setSourceInfo(null);
@@ -137,15 +148,17 @@ export function App() {
     }));
   }
   async function transition(action: () => Promise<unknown>) {
-    if (transitioning.current) return;
+    if (transitioning.current) return false;
     transitioning.current = true;
     epoch.current++;
     setPlaying(false);
     setPending("切换工程");
     try {
-      await action();
+      const result = await action();
+      return result !== false;
     } catch (e) {
       p.report(e);
+      return false;
     } finally {
       setPending("");
       transitioning.current = false;
@@ -206,7 +219,7 @@ export function App() {
         view: "result",
       }));
       setInspection(out.inspection);
-      p.setNotice("修订已回读校验；几何、图像、骨架与动画保全检查通过。");
+      p.setNotice("修订已更新，可切换对照或导出 GLB。");
     } catch (e) {
       if (token === epoch.current) p.report(e);
     } finally {
@@ -351,311 +364,278 @@ export function App() {
     }
   }
   const changed =
-      Object.keys(d.edits.nodes).length +
-      Object.keys(d.edits.materials).length +
-      (d.edits.rootExtras !== null ? 1 : 0),
-    material = sourceInfo?.materials[d.selected],
-    node = sourceInfo?.nodes[d.selected],
-    m = { ...material, ...d.edits.materials[d.selected] },
-    n = { ...node, ...d.edits.nodes[d.selected] };
+    Object.keys(d.edits.nodes).length +
+    Object.keys(d.edits.materials).length +
+    (d.edits.rootExtras !== null ? 1 : 0);
   const onFile =
     (fn: (f: File) => Promise<void>) => (e: ChangeEvent<HTMLInputElement>) => {
       const f = e.target.files?.[0];
       e.target.value = "";
       if (f) void fn(f);
     };
-  const fields = (
-    label: string,
-    value: string | undefined,
-    onChange: (v: string) => void,
-    limit = 160,
-  ) => (
-    <label className="field">
-      <span>{label}</span>
-      <input
-        value={value ?? ""}
-        maxLength={limit}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete="off"
-        spellCheck={false}
-      />
-    </label>
-  );
+  function showInspector(mode: "object" | "notes", trigger: HTMLElement) {
+    inspectorTrigger.current = trigger;
+    setInspectorMode(mode);
+    setInspectorOpen(true);
+  }
+  function hideInspector() {
+    setInspectorOpen(false);
+    requestAnimationFrame(() => {
+      const target = inspectorTrigger.current;
+      if (target?.getClientRects().length) target.focus();
+      else inspectorToggle.current?.focus();
+    });
+  }
+  useEffect(() => {
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !library && inspectorOpen) {
+        event.preventDefault();
+        hideInspector();
+      }
+    };
+    window.addEventListener("keydown", escape);
+    return () => window.removeEventListener("keydown", escape);
+  }, [library, inspectorOpen]);
+  const actionDisabled = locked || Boolean(pending),
+    notesMode = inspectorMode === "notes";
   return (
     <RenderBoundary>
-      <div className="desk">
-        <header className="topbar">
-          <div className="brand">
-            <Box size={24} />
-            <div>
-              <h1>
-                glTF <span>资产检查台</span>
-              </h1>
-              <p>ASSET INSPECTION · 078</p>
-            </div>
-          </div>
-          <div className="project-tools">
-            <ProjectPicker
-              items={p.items}
-              id={p.current?.id}
-              disabled={locked}
-              onOpen={(id) => void transition(() => p.open(id))}
-            />
-            <button
-              className="icon-btn"
-              aria-label="新建工程"
-              disabled={locked}
-              onClick={() => void transition(() => p.fresh())}
-            >
-              <Plus size={18} />
-            </button>
-            <button
-              disabled={locked || Boolean(pending)}
-              onClick={() => projectFile.current?.click()}
-            >
-              <FolderOpen size={15} />
-              打开工程
-            </button>
-          </div>
-          <div
-            className={"save-status " + p.autoState.phase}
-            role="status"
-            data-testid="save-status"
+      <main className={"model-room " + (!d.source ? "is-empty" : "")}>
+        <h1 className="sr-only">模型检查</h1>
+        <a className="skip-link" href="#model-space">
+          跳到模型视图
+        </a>
+        <div id="model-space" tabIndex={-1} className="canvas-layer">
+          <Viewport
+            key={p.documentKey}
+            document={d}
+            resourceVersion={resourceVersion}
+            playing={playing}
+            disabled={locked || library}
+            fit={fit}
+            onView={(camera, target) =>
+              p.setData((old) => ({ ...old, camera, target }))
+            }
+            onTime={setLiveTime}
+            onReady={(meshes, textures) => setLoaded({ meshes, textures })}
+          />
+        </div>
+        <div className="asset-corner">
+          <button
+            className="library-trigger"
+            ref={libraryTrigger}
+            aria-label="打开资产库"
+            aria-haspopup="dialog"
+            aria-expanded={library}
+            disabled={locked}
+            onClick={() => {
+              setLibrary(true);
+              p.setError("");
+              void p.refresh().catch(p.report);
+            }}
           >
-            <i />
-            {p.autoState.message}
+            <FolderOpen size={18} />
+            <span>资产库</span>
+          </button>
+          <div className="current-file">
+            <label>
+              <span className="sr-only">资产名称</span>
+              <input
+                aria-label="资产名称"
+                name="asset-title"
+                autoComplete="off"
+                value={p.title}
+                maxLength={120}
+                onChange={(e) => p.setTitle(e.target.value)}
+                disabled={locked}
+              />
+            </label>
+            <div
+              className={"save-status " + p.autoState.phase}
+              role="status"
+              data-testid="save-status"
+            >
+              <i />
+              {p.autoState.message}
+            </div>
           </div>
-        </header>
-        <div className="project-line">
-          <div className="project-title">
-            <span className="kicker">INSPECTION FILE</span>
-            <input
-              aria-label="工程名称"
-              value={p.title}
-              maxLength={120}
-              onChange={(e) => p.setTitle(e.target.value)}
+        </div>
+        {d.source ? (
+          <>
+            <fieldset
+              className="view-controls"
               disabled={locked}
-            />
-          </div>
-          <div className="actions">
-            <button
-              disabled={locked || Boolean(pending)}
-              onClick={() => file.current?.click()}
+              aria-label="模型视图"
             >
-              <ArrowUpRight size={16} />
-              导入 GLB
-            </button>
-            <button
-              disabled={locked || Boolean(pending)}
-              onClick={() => void loadModel()}
-            >
-              载入材质样例
-            </button>
-            <button
-              className="primary"
-              disabled={locked || Boolean(pending) || !d.source || !sourceInfo}
-              onClick={() => void generate()}
-            >
-              <Check size={16} />
-              {pending === "生成修订" ? "正在回读校验…" : "生成修订"}
-            </button>
-          </div>
-        </div>
-        <div className="feedback">
-          <Notice error={p.error} notice={p.notice} />
-          {missing && (
-            <p role="alert" className="missing">
-              {missing}{" "}
-              <button
-                onClick={() => attach.current?.click()}
-                disabled={Boolean(pending)}
-              >
-                补齐模型文件
-              </button>
-            </p>
-          )}
-          {p.autoState.phase === "conflict" && (
-            <div className="conflict">
-              <button onClick={() => p.exportDraft()}>导出冲突工作稿</button>
-              <button
-                disabled={!p.current}
-                onClick={() => void transition(() => p.open(p.current!.id))}
-              >
-                打开服务器版本
-              </button>
-            </div>
-          )}
-        </div>
-        <fieldset
-          className="work-area"
-          aria-label="资产编辑区"
-          disabled={locked}
-        >
-          <aside className="inventory">
-            <div className="section-head">
-              <span>资产目录</span>
-              <span className="mono">
-                {sourceInfo
-                  ? String(sourceInfo.nodes.length).padStart(2, "0")
-                  : "00"}
-              </span>
-            </div>
-            <div className="tabs" role="tablist" aria-label="资产类别">
-              {[
-                ["nodes", "节点"],
-                ["materials", "材质"],
-                ["resources", "资源"],
-              ].map(([key, label]) => (
+              <div className="view-switch">
                 <button
-                  key={key}
-                  role="tab"
-                  aria-selected={d.tab === key}
-                  onClick={() =>
-                    update({ tab: key as AssetDocument["tab"], selected: 0 })
-                  }
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div className="item-list">
-              {d.tab === "materials" ? (
-                sourceInfo?.materials.map((row) => (
-                  <button
-                    key={row.index}
-                    className={
-                      "asset-row " +
-                      (d.selected === row.index ? "selected" : "")
-                    }
-                    onClick={() => update({ selected: row.index })}
-                  >
-                    <span
-                      className="swatch"
-                      style={{ background: row.color }}
-                    />
-                    <span>
-                      <b>
-                        {(d.edits.materials[row.index]?.name ?? row.name) ||
-                          `材质 ${row.index + 1}`}
-                      </b>
-                      <small>METALLIC / ROUGHNESS</small>
-                    </span>
-                    {d.edits.materials[row.index] && (
-                      <i className="change-dot" />
-                    )}
-                  </button>
-                ))
-              ) : d.tab === "nodes" ? (
-                sourceInfo?.nodes.map((row) => (
-                  <button
-                    key={row.index}
-                    className={
-                      "asset-row " +
-                      (d.selected === row.index ? "selected" : "")
-                    }
-                    onClick={() => update({ selected: row.index })}
-                  >
-                    <Box size={19} />
-                    <span>
-                      <b>
-                        {(d.edits.nodes[row.index]?.name ?? row.name) ||
-                          `节点 ${row.index + 1}`}
-                      </b>
-                      <small>
-                        {row.mesh || "GROUP"} · {row.children} 子项
-                      </small>
-                    </span>
-                    {d.edits.nodes[row.index] && <i className="change-dot" />}
-                  </button>
-                ))
-              ) : (
-                <div className="resource-list">
-                  {sourceInfo?.images.map((img, i) => (
-                    <div key={i}>
-                      <Layers size={18} />
-                      <b>{img.name}</b>
-                      <small>
-                        {img.mime} · {kb(img.bytes)}
-                      </small>
-                      <code>{img.hash.slice(0, 12)}…</code>
-                    </div>
-                  ))}
-                  {sourceInfo && !sourceInfo.images.length && (
-                    <p>此资产没有内嵌图像。</p>
-                  )}
-                </div>
-              )}
-              {!sourceInfo && (
-                <p className="muted empty-list">
-                  导入资产后，节点与材质将列在这里。
-                </p>
-              )}
-            </div>
-            <div className="inventory-footer">
-              <span className="change-dot" />
-              {changed} 项修订配方
-              <button
-                aria-label="重置全部修订"
-                disabled={!changed || Boolean(pending)}
-                onClick={() => {
-                  if (confirm("清除全部修订配方？原件和检查备注将保留。"))
-                    update({ edits: structuredClone(seed.edits) });
-                }}
-              >
-                <RotateCcw size={14} />
-              </button>
-            </div>
-          </aside>
-          <section className="inspection-stage" aria-label="资产视图">
-            <div className="stage-toolbar">
-              <div className="view-tabs">
-                <button
-                  className={d.view === "source" ? "active" : ""}
+                  aria-pressed={d.view === "source"}
                   onClick={() => update({ view: "source" })}
                 >
                   原件
                 </button>
                 <button
                   disabled={!d.result}
-                  className={d.view === "result" ? "active" : ""}
+                  aria-pressed={d.view === "result"}
                   onClick={() => update({ view: "result" })}
                 >
-                  修订结果{stale ? " · 配方已更新" : ""}
+                  修订{stale ? <i aria-label="待更新" /> : null}
                 </button>
               </div>
               <button
+                className="icon-button"
                 onClick={() => setFit((v) => v + 1)}
-                disabled={!selectedRef}
                 aria-label="适配模型视图"
               >
-                <Scan size={16} />
-                适配
+                <Scan size={19} />
               </button>
-            </div>
-            <Viewport
-              key={p.documentKey}
-              document={d}
-              resourceVersion={resourceVersion}
-              playing={playing}
+              {!inspectorOpen ? (
+                <button
+                  className="icon-button"
+                  aria-label="展开检查器"
+                  ref={inspectorToggle}
+                  onClick={(e) => showInspector("object", e.currentTarget)}
+                >
+                  <PanelRightOpen size={18} />
+                </button>
+              ) : null}
+            </fieldset>
+            <fieldset
+              className="context-rail"
               disabled={locked}
-              fit={fit}
-              onView={(camera, target) =>
-                p.setData((old) => ({ ...old, camera, target }))
+              aria-label="模型上下文工具"
+            >
+              {(
+                [
+                  { key: "materials", label: "材质", Icon: Palette },
+                  { key: "nodes", label: "节点", Icon: Boxes },
+                  { key: "resources", label: "资源", Icon: Package },
+                ] as const
+              ).map(({ key, label, Icon }) => (
+                <button
+                  key={key}
+                  aria-pressed={!notesMode && d.tab === key && inspectorOpen}
+                  aria-label={label + "检查"}
+                  onClick={(e) => {
+                    update({
+                      tab: key,
+                      selected: d.tab === key ? d.selected : 0,
+                    });
+                    showInspector("object", e.currentTarget);
+                  }}
+                >
+                  <Icon size={20} />
+                  <span>{label}</span>
+                </button>
+              ))}
+              <span className="rail-divider" />
+              <button
+                aria-pressed={notesMode && inspectorOpen}
+                aria-label="检查备注"
+                onClick={(e) => showInspector("notes", e.currentTarget)}
+              >
+                <MessageSquare size={20} />
+                <span>备注</span>
+              </button>
+            </fieldset>
+            {d.tab === "nodes" && inspectorOpen && !notesMode ? (
+              <fieldset
+                className="node-palette"
+                disabled={locked}
+                aria-label="节点目录"
+              >
+                <div className="palette-label">
+                  节点 <span>{sourceInfo?.nodes.length ?? 0}</span>
+                  <button
+                    className="icon-button"
+                    aria-label="关闭节点目录"
+                    onClick={hideInspector}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                {sourceInfo?.nodes.map((row) => (
+                  <button
+                    key={row.index}
+                    aria-pressed={d.selected === row.index}
+                    onClick={(e) => {
+                      update({ selected: row.index });
+                      showInspector("object", e.currentTarget);
+                    }}
+                  >
+                    <Box size={16} />
+                    <span>
+                      {(d.edits.nodes[row.index]?.name ?? row.name) ||
+                        `节点 ${row.index + 1}`}
+                      <small>
+                        {row.mesh || "分组"} · {row.children} 子项
+                      </small>
+                    </span>
+                  </button>
+                ))}
+              </fieldset>
+            ) : null}
+            {d.tab === "materials" && sourceInfo ? (
+              <fieldset
+                className={
+                  "material-shelf " + (inspectorOpen ? "with-inspector" : "")
+                }
+                disabled={locked}
+                aria-label="模型材质"
+              >
+                <div className="palette-label">
+                  材质 <span>{sourceInfo.materials.length}</span>
+                </div>
+                <div className="material-strip">
+                  {sourceInfo.materials.map((row) => (
+                    <button
+                      key={row.index}
+                      aria-pressed={d.selected === row.index && !notesMode}
+                      onClick={(e) => {
+                        update({ selected: row.index });
+                        showInspector("object", e.currentTarget);
+                      }}
+                    >
+                      <span
+                        className="swatch"
+                        style={{ background: row.color }}
+                      />
+                      <span>
+                        {(d.edits.materials[row.index]?.name ?? row.name) ||
+                          `材质 ${row.index + 1}`}
+                      </span>
+                      {d.edits.materials[row.index] ? (
+                        <i className="change-dot" />
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+            <div
+              className={
+                "asset-readout " + (inspectorOpen ? "with-inspector" : "")
               }
-              onTime={setLiveTime}
-              onReady={(meshes, textures) => setLoaded({ meshes, textures })}
-            />
-            <div className="stage-caption">
+            >
               <span>
-                <i />
                 {loaded.meshes
-                  ? `${loaded.meshes} 网格 / ${loaded.textures} 图像已载入`
-                  : "LOCAL ASSET VIEW"}
+                  ? `${loaded.meshes} 网格 · ${loaded.textures} 图像`
+                  : "读取模型…"}
               </span>
-              <span className="mono">{selectedRef?.name ?? "—"}</span>
+              <span>
+                {inspection
+                  ? `${inspection.instancedVertices.toLocaleString()} 顶点 · ${kb(inspection.bytes)}`
+                  : ""}
+              </span>
+              <span className="source-name">{selectedRef?.name}</span>
             </div>
-            {Boolean(inspection?.animations.length) && (
-              <div className="animation-strip">
+            {inspection?.animations.length ? (
+              <div
+                className={
+                  "animation-controls " +
+                  (inspectorOpen ? "with-inspector" : "")
+                }
+              >
                 <select
                   aria-label="检查动画"
                   value={d.clip || "0"}
@@ -663,313 +643,204 @@ export function App() {
                     setPlaying(false);
                     update({ clip: e.target.value, time: 0 });
                   }}
+                  disabled={locked}
                 >
-                  {inspection?.animations.map((c, i) => (
+                  {inspection.animations.map((clip, i) => (
                     <option key={i} value={i}>
-                      {c.name}
+                      {clip.name}
                     </option>
                   ))}
                 </select>
                 <button
+                  className="icon-button"
+                  disabled={locked}
+                  aria-label={playing ? "暂停动画" : "播放动画"}
                   onClick={() => {
                     if (playing)
                       update({
                         time:
                           liveTime %
-                          (inspection?.animations[Number(d.clip) || 0]
+                          (inspection.animations[Number(d.clip) || 0]
                             ?.duration || 1),
                       });
                     setPlaying((v) => !v);
                   }}
-                  aria-label={playing ? "暂停动画" : "播放动画"}
                 >
-                  {playing ? <Pause size={14} /> : <Play size={14} />}
+                  {playing ? <Pause size={15} /> : <Play size={15} />}
                 </button>
                 <input
                   aria-label="动画位置"
                   type="range"
                   min="0"
                   max={
-                    inspection?.animations[Number(d.clip) || 0]?.duration || 1
+                    inspection.animations[Number(d.clip) || 0]?.duration || 1
                   }
                   step="0.01"
                   value={
                     playing
                       ? liveTime %
-                        (inspection?.animations[Number(d.clip) || 0]
-                          ?.duration || 1)
+                        (inspection.animations[Number(d.clip) || 0]?.duration ||
+                          1)
                       : d.time
                   }
                   onChange={(e) => {
                     setPlaying(false);
                     update({ time: Number(e.target.value) });
                   }}
+                  disabled={locked}
                 />
-                <small>动画原样保留</small>
               </div>
-            )}
-            <div className="metrics">
-              <div>
-                <small>文件体积</small>
-                <b>{inspection ? kb(inspection.bytes) : "—"}</b>
-              </div>
-              <div>
-                <small>实例顶点</small>
-                <b>{inspection?.instancedVertices.toLocaleString() ?? "—"}</b>
-              </div>
-              <div>
-                <small>材质 / 图像</small>
-                <b>
-                  {inspection
-                    ? `${inspection.materials.length} / ${inspection.images.length}`
-                    : "—"}
-                </b>
-              </div>
-              <div>
-                <small>骨架 / 动画</small>
-                <b>
-                  {inspection
-                    ? `${inspection.skins} / ${inspection.animations.length}`
-                    : "—"}
-                </b>
-              </div>
-            </div>
-          </section>
-          <aside className="properties">
-            <div className="section-head">
-              <span>
-                {d.tab === "materials"
-                  ? "材质修订"
-                  : d.tab === "nodes"
-                    ? "节点修订"
-                    : "资源交付"}
-              </span>
-              <span className="kicker">EDIT RECIPE</span>
-            </div>
-            {d.tab === "materials" && material ? (
-              <>
-                <div className="material-heading">
-                  <span
-                    className="large-swatch"
-                    style={{
-                      background: /^#[\da-f]{6}$/i.test(m.color ?? "")
-                        ? m.color
-                        : material.color,
-                    }}
-                  />
-                  <div>
-                    <small>PBR MATERIAL</small>
-                    <h2>{m.name || "未命名材质"}</h2>
-                  </div>
-                </div>
-                {fields("材质名称", m.name, (v) => materialPatch({ name: v }))}
-                {fields(
-                  "底色 · sRGB HEX",
-                  m.color,
-                  (v) => materialPatch({ color: v }),
-                  32,
-                )}
-                <div className="pair">
-                  {fields(
-                    "金属度 · 0–1",
-                    m.metallic,
-                    (v) => materialPatch({ metallic: v }),
-                    32,
-                  )}
-                  {fields(
-                    "粗糙度 · 0–1",
-                    m.roughness,
-                    (v) => materialPatch({ roughness: v }),
-                    32,
-                  )}
-                </div>
-                {fields(
-                  "不透明度 · 0–1",
-                  m.opacity,
-                  (v) => materialPatch({ opacity: v }),
-                  32,
-                )}
-                <label className="field">
-                  <span>透明模式</span>
-                  <select
-                    value={m.alphaMode}
-                    onChange={(e) =>
-                      materialPatch({
-                        alphaMode: e.target.value as MaterialEdit["alphaMode"],
-                      })
-                    }
-                  >
-                    <option>OPAQUE</option>
-                    <option>MASK</option>
-                    <option>BLEND</option>
-                  </select>
-                </label>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={m.doubleSided ?? false}
-                    onChange={(e) =>
-                      materialPatch({ doubleSided: e.target.checked })
-                    }
-                  />
-                  双面渲染
-                </label>
-                <p className="texture-note">
-                  <Layers size={14} />
-                  {material.texture}
-                </p>
-                <label className="field">
-                  <span>材质附加信息 · JSON</span>
-                  <textarea
-                    value={m.extras ?? "{}"}
-                    maxLength={60000}
-                    rows={4}
-                    spellCheck={false}
-                    onChange={(e) => materialPatch({ extras: e.target.value })}
-                  />
-                </label>
-                {d.view === "result" && inspection?.materials[d.selected] && (
-                  <p className="verified">
-                    结果值：粗糙度 {inspection.materials[d.selected].roughness}{" "}
-                    / 金属度 {inspection.materials[d.selected].metallic}
-                  </p>
-                )}
-              </>
-            ) : d.tab === "nodes" && node ? (
-              <>
-                {fields("节点名称", n.name, (v) => nodePatch({ name: v }))}
-                <dl className="node-detail">
-                  <dt>网格</dt>
-                  <dd>{node.mesh || "无"}</dd>
-                  <dt>平移 XYZ</dt>
-                  <dd>
-                    {node.translation.map((v) => v.toFixed(3)).join(" / ")}
-                  </dd>
-                  <dt>子节点</dt>
-                  <dd>{node.children}</dd>
-                </dl>
-                <label className="field">
-                  <span>节点附加信息 · JSON</span>
-                  <textarea
-                    value={n.extras ?? "{}"}
-                    rows={10}
-                    maxLength={60000}
-                    spellCheck={false}
-                    onChange={(e) => nodePatch({ extras: e.target.value })}
-                  />
-                </label>
-              </>
-            ) : d.tab === "resources" && sourceInfo ? (
-              <>
-                <div className="resource-facts">
-                  <p>原件与结果独立保留，按 SHA-256 校验。</p>
-                  <b>场景 · {sourceInfo.scenes.length}</b>
-                  <span>{sourceInfo.scenes.join(" / ")}</span>
-                  <span>几何访问器 {kb(sourceInfo.geometryBytes)} · 图像 {sourceInfo.pixels.toLocaleString()} 像素</span>
-                  <b>原件</b>
-                  <code>{d.source?.id}</code>
-                  <b>修订结果</b>
-                  <code>{d.result?.id ?? "尚未生成"}</code>
-                </div>
-                <label className="field">
-                  <span>资产附加信息 · JSON</span>
-                  <textarea
-                    value={d.edits.rootExtras ?? sourceInfo.rootExtras}
-                    rows={7}
-                    maxLength={60000}
-                    spellCheck={false}
-                    onChange={(e) =>
-                      p.setData((old) => ({
-                        ...old,
-                        edits: { ...old.edits, rootExtras: e.target.value },
-                      }))
-                    }
-                  />
-                </label>
-              </>
-            ) : (
-              <div className="property-empty">
-                <ChevronRight size={24} />
-                <p>
-                  选择一个节点或材质
-                  <br />
-                  建立交付修订配方。
-                </p>
-              </div>
-            )}
-            <div className="property-foot">
-              输入自动保留。生成修订后，预览与导出使用新的结果文件。
-            </div>
-          </aside>
-        </fieldset>
-        <fieldset className="handoff" aria-label="交付检查" disabled={locked}>
-          <div className="review-notes">
-            <label htmlFor="notes">
-              检查备注 <span>REVIEW NOTES</span>
-            </label>
-            <textarea
-              id="notes"
-              placeholder="记录贴图、命名与交付事项…"
-              value={d.notes}
-              maxLength={40000}
-              onChange={(e) => update({ notes: e.target.value })}
-              rows={3}
-            />
-          </div>
-          <div className="delivery">
+            ) : null}
+          </>
+        ) : (
+          <section className="open-asset">
+            <Box size={30} />
+            <h1>打开模型</h1>
+            <p>检查形状、材质与交付文件。</p>
+            <button
+              className="primary"
+              disabled={actionDisabled}
+              onClick={() => file.current?.click()}
+            >
+              <Upload size={18} />
+              选择 GLB 文件
+            </button>
             <div>
-              <small>交付包</small>
-              <b>
-                {d.result
-                  ? stale
-                    ? "配方已修改，请重新生成"
-                    : "修订结果已通过回读"
-                  : "完成检查后生成修订"}
-              </b>
-            </div>
-            <div className="delivery-buttons">
               <button
-                disabled={!d.result || stale || Boolean(pending)}
-                onClick={() => void exportResult()}
+                className="text-button"
+                disabled={actionDisabled}
+                onClick={() => void loadModel()}
               >
-                <ArrowDownToLine size={16} />
-                导出结果 GLB
+                载入材质样例
               </button>
+              <span>·</span>
               <button
-                disabled={!d.source || Boolean(pending)}
-                onClick={() => void exportProject()}
+                className="text-button"
+                disabled={actionDisabled}
+                onClick={() => projectFile.current?.click()}
               >
-                <FileJson size={16} />
-                完整工程
+                导入工程或恢复稿
               </button>
-              <button onClick={() => p.exportDraft()}>恢复工作稿</button>
             </div>
+            <small>GLB 2.0 · 最大 1.4 MB · 内嵌 PNG / JPEG</small>
+          </section>
+        )}
+        {d.source || notesMode ? (
+          <Inspector
+            open={inspectorOpen}
+            mode={inspectorMode}
+            document={d}
+            source={sourceInfo}
+            result={inspection}
+            locked={locked}
+            pending={pending}
+            stale={stale}
+            changes={changed}
+            onClose={hideInspector}
+            onMaterial={materialPatch}
+            onNode={nodePatch}
+            onNotes={(v) => update({ notes: v })}
+            onRootExtras={(v) => {
+              if (!transitioning.current)
+                p.setData((old) => ({
+                  ...old,
+                  edits: { ...old.edits, rootExtras: v },
+                }));
+            }}
+            onReset={() => {
+              if (confirm("清除全部修订配方？原件和检查备注将保留。"))
+                update({ edits: structuredClone(seed.edits) });
+            }}
+            onGenerate={() => void generate()}
+            onExport={() => void exportResult()}
+            onProject={() => void exportProject()}
+            onRecovery={() => p.exportDraft()}
+          />
+        ) : null}
+        {p.error || p.notice || missing || p.autoState.phase === "conflict" ? (
+          <div
+            className={
+              "room-feedback " +
+              (inspectorOpen && d.source ? "with-inspector" : "")
+            }
+          >
+            <div
+              className={
+                p.error || missing
+                  ? "feedback-message error"
+                  : "feedback-message"
+              }
+              role={p.error || missing ? "alert" : "status"}
+            >
+              <span>
+                {p.error || missing || p.notice || p.autoState.message}
+              </span>
+              {missing ? (
+                <button
+                  disabled={Boolean(pending)}
+                  onClick={() => attach.current?.click()}
+                >
+                  补齐模型文件
+                </button>
+              ) : null}
+              {!missing ? (
+                <button
+                  className="icon-button"
+                  aria-label="关闭提示"
+                  onClick={() => {
+                    p.setError("");
+                    p.setNotice("");
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              ) : null}
+            </div>
+            {p.autoState.phase === "conflict" ? (
+              <div className="conflict-actions">
+                <button onClick={() => p.exportDraft()}>下载冲突工作稿</button>
+                <button
+                  disabled={!p.current || locked}
+                  onClick={() => void transition(() => p.open(p.current!.id))}
+                >
+                  打开服务器版本
+                </button>
+              </div>
+            ) : null}
           </div>
-        </fieldset>
-        <footer>
-          <span>glTF Transform 4.5.1 · 原生资产读写</span>
-          <div>
-            <button
-              disabled={Boolean(pending)}
-              onClick={() => attach.current?.click()}
-            >
-              补齐资源
-            </button>
-            <button
-              onClick={() => void p.save()}
-              disabled={p.loading || p.busy}
-            >
-              重试保存
-            </button>
-            <button
-              disabled={!p.current || Boolean(pending)}
-              onClick={() => void transition(() => p.remove())}
-            >
-              删除工程
-            </button>
-          </div>
-          <span>GLB 2.0 / ≤ 1.4 MB / 无扩展</span>
-        </footer>
+        ) : null}
+        <AssetLibrary
+          open={library}
+          busy={locked}
+          items={p.items}
+          currentId={p.current?.id}
+          currentTitle={p.title}
+          onClose={() => setLibrary(false)}
+          onOpen={(id) => void transition(() => p.open(id))}
+          onNew={() => void transition(() => p.fresh())}
+          onModel={() => {
+            setLibrary(false);
+            file.current?.click();
+          }}
+          onProject={() => {
+            setLibrary(false);
+            projectFile.current?.click();
+          }}
+          onDelete={() => void transition(() => p.remove())}
+          onRecovery={() => p.exportDraft()}
+          onNotes={() => {
+            setLibrary(false);
+            if (libraryTrigger.current)
+              showInspector("notes", libraryTrigger.current);
+          }}
+          onRepair={() => {
+            setLibrary(false);
+            attach.current?.click();
+          }}
+          onRetry={() => void p.save()}
+          saveMessage={p.autoState.message}
+          error={p.error}
+        />
         <input
           hidden
           ref={file}
@@ -994,7 +865,7 @@ export function App() {
           accept=".glb"
           onChange={onFile(reattach)}
         />
-      </div>
+      </main>
     </RenderBoundary>
   );
 }

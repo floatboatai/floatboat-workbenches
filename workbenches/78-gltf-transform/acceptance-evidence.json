@@ -1,54 +1,54 @@
 {
-  "version": "0.8.0",
+  "version": "0.8.1",
   "date": "2026-10-28",
+  "baseCommit": "b2c9079",
   "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
-  "engine": {
-    "package": "@gltf-transform/core",
-    "version": "4.5.1",
-    "gitHead": "895b70777fda68aa321358d17dab2105e8564d08",
-    "pipeline": "NodeIO.readBinary → native property patches → NodeIO.writeBinary → NodeIO.readBinary"
-  },
   "check": "passed",
   "applicationTests": {
     "passed": 11,
-    "failed": 0
+    "failed": 0,
+    "scope": "existing tests; native processing and persistence unchanged"
   },
-  "browser": {
-    "url": "http://127.0.0.1:59704",
+  "businessMatrix": {
+    "passed": 12,
     "checks": [
-      "Chrome loads real four-mesh textured GLB under unchanged CSP",
-      "UI NodeIO revision exports GLB with edited material and preserved multiple meshes/images",
-      "actual full project download imports as a new document with two independent SHA-256 resources",
-      "unfinished material number is saved before blur, refreshed and restored from actual recovery download",
-      "late committed autosave receipt cannot overwrite continued typing",
-      "lost receipt retries an identical idempotent mutation",
-      "native processing freezes recipe version and discards output after further material edits",
-      "late result cannot contaminate newly selected document",
-      "delayed project open disables old-document fields/tabs/notes until replacement completes",
-      "stale writer conflict preserves raw working copy through reload and new tab",
-      "offline new draft survives switch/reopen/reconnect/refresh",
-      "missing resource draft recovers by matching hash and same-ID viewport reload",
-      "real 66-joint animated GLB edits/exports/reloads and browser animation frames differ",
-      "375px layout containment, keyboard viewport controls and reduced motion",
-      "WebGL unavailable fallback keeps inspector and project export usable"
+      "1440px canvas fills model room; no persistent project select/create cluster",
+      "Unfinished material number saves before blur and restores after refresh",
+      "PBR revision exports GLB and complete project with matching resource hashes",
+      "Library and context operations preserve native canvas identity and model resource requests",
+      "Complete and downloaded recovery files import as new documents",
+      "Delayed autosave receipt preserves continued input",
+      "Navigation waits for delayed save and freezes input during delayed open",
+      "Library new/delete actions preserve unrelated assets",
+      "0.8.0 project imports preserve original/result hashes and notes",
+      "Missing resource is repaired using the same content hash",
+      "Offline model-free notes are listed, reopened and synchronized",
+      "375px layout, keyboard camera controls and reduced motion remain usable"
+    ],
+    "observedIssue": "Offline library refresh initially created unhandled promise rejections after the functional checks passed.",
+    "resolution": "The caller now catches refresh rejection and reports it inside the library; current local rows remain usable.",
+    "resolutionVerifiedBy": "targetedRegression"
+  },
+  "targetedRegression": {
+    "url": "http://127.0.0.1:65187",
+    "checks": [
+      "Tab/Shift+Tab wrap within library and Escape restores the opener",
+      "offline refresh error stays inside the library while local notes remain listed, clickable, and recoverable",
+      "reconnect and retry saves the recovered local draft without an unhandled rejection",
+      "node overlay closes directly; 375px fit and inspector collapse leave the full model visible"
     ],
     "errors": [],
-    "expectedNetworkErrors": 7,
-    "export": {
-      "bytes": 610664,
-      "skins": 1,
-      "joints": 66,
-      "animations": 1
-    }
+    "expectedOfflineNetworkErrors": 10,
+    "finalTitle": "陶土与瓷 · 交付检查"
   },
   "package": {
-    "filename": "gltf-transform-0.8.0-delivery.fbworkbench",
-    "sha256": "6da3706103e50fe73320d8f8318326bdbef07b525774b1393ab15c94da3e0d56",
-    "bytes": 75396,
-    "files": 41,
+    "filename": "gltf-transform-0.8.1-final.fbworkbench",
+    "sha256": "6a1b5e406354a6ab83c22d7a2feea43db7696f5ce2719003fa507762c0f84340",
+    "bytes": 81997,
+    "files": 43,
     "crc": "passed",
     "transferHashes": "passed",
-    "sourceByteMatches": 34,
+    "sourceByteMatches": 36,
     "assetByteMatches": 5,
     "resources": [
       {
@@ -72,79 +72,27 @@
   },
   "visual": {
     "desktop": "../../docs/screenshots/gltf-transform.png",
-    "mobileWidth": 375,
-    "reducedMotion": "verified",
-    "webglFallback": "verified"
-  },
-  "hostImport": "unverified",
-  "hostModelCalls": "not-used",
-  "scopes": [
-    "node names and extras",
-    "material name, PBR and extras",
-    "root extras",
-    "scene/node/material/image inspection",
-    "original/result snapshots and SHA-256 resources",
-    "full project and working copy restore"
-  ],
-  "limits": {
-    "glbBytes": 1400000,
-    "effectiveVertices": 50000,
-    "nodes": 256,
-    "meshes": 64,
-    "materials": 128,
-    "images": 32,
-    "imageSide": 2048,
-    "totalImagePixels": 8388608,
-    "formalDataBytes": 850000,
-    "restoreDataBytes": 2000000,
-    "restoreSnapshotBytes": 1950000,
-    "outerRecoveryBytes": 12582912
-  },
-  "unsupported": [
-    "extensions and compression codecs",
-    "external image/buffer URIs",
-    "sparse accessors",
-    "morph targets",
-    "cameras",
-    "non-triangle primitives",
-    "shear and degenerate transforms",
-    "technical metadata without a native preservation mapping"
-  ],
-  "notes": [
-    "Only TRS default-value normalization allows 1e-5 absolute tolerance; accessor arrays and embedded images remain exact.",
-    "Resource reattachment reloads the same content ID.",
-    "Saved working input and recipe identity remain stable after schema normalization."
-  ],
-  "integratedPackage": {
-    "directory": "workbenches/78-gltf-transform",
-    "version": "0.8.0",
-    "appId": "workbench.cdaf06c7-7f94-47f3-8c2b-0b77757a6ba4",
-    "filename": "78-gltf-transform-0.8.0.fbworkbench",
-    "bytes": 75396,
-    "sha256": "6da3706103e50fe73320d8f8318326bdbef07b525774b1393ab15c94da3e0d56",
-    "crc": "passed",
-    "sourceFilesMatched": 34,
-    "assetFilesMatched": 5,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "license": "MIT",
-    "deliveryPath": "workbench-gltf-transform/gltf-transform-studio-0.8.0.fbworkbench",
-    "introductionFile": "workbench-gltf-transform/presentation.json"
-  },
-  "integratedApplicationTests": 11,
-  "exportedSourceLinuxTests": {
-    "passed": 11,
-    "environment": "node:22-bookworm / Node22.23.3",
-    "network": "none",
-    "resourceMapping": "passed",
-    "dependencies": "prepared locked dependencies mounted read-only"
-  },
-  "screenshot": {
-    "path": "../../docs/screenshots/gltf-transform.png",
-    "dimensions": [
+    "desktopViewport": [
       1440,
-      1231
+      980
     ],
-    "sha256": "6dda94b53c15541f5d2642d6d8743dcd2b00844e391fe11341d3217673b3a1e3"
-  }
+    "mobileWidth": 375,
+    "library": "gltf-library.png",
+    "offlineLibrary": "gltf-library-offline.png",
+    "unobstructedCanvas": "gltf-canvas-unobstructed.png",
+    "mobileFit": "gltf-mobile-fit.png"
+  },
+  "unchanged": [
+    "appId",
+    "registryName",
+    "storageKey",
+    "database schema/migrations",
+    "server routes",
+    "contracts and validation",
+    "NodeIO processing",
+    "autosave core",
+    "SDK/tooling/CSP"
+  ],
+  "hostImport": "unverified",
+  "hostModelCalls": "not-used"
 }

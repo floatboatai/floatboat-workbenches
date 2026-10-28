@@ -9,3 +9,9 @@ Resources are stored separately under manifest-declared writable `models/` by SH
 Operations bind to documentKey, operation epoch and recipe snapshot. Delayed processing cannot replace edits made while processing or contaminate another project. Export freezes the selected snapshot; changing input cancels obsolete result export. A resource-version counter reloads even the same content ID after reattachment. Viewport uses data-URI image decoding under existing CSP, on-demand render, explicit animation play, and disposal of WebGL/texture/geometry resources.
 
 Verification uses Node native roundtrips plus real Chrome. HTTP/receipt conditions use explicit awaited Node polling, never async Playwright waitForFunction. Host import is separately unverified.
+
+## 0.8.1 UI structure
+
+`App` keeps the existing document/operation epochs and input snapshots. `AssetLibrary` owns a native modal, bounded search/list, Escape, Tab/Shift+Tab focus cycling and focus restoration; its actions call the existing project APIs without introducing a new persistence layer. `Inspector` owns only presentation of node/material/resource/note fields and adjacent revision/export actions. Opening the library, changing context or hiding the inspector never changes Viewport's documentKey or source hash. Camera fit accounts for viewport aspect ratio; GLB geometry and native processing are untouched.
+
+The full canvas stays mounted behind the contextual UI. On narrow screens the inspector flows below the model; model selection lists can close directly. Library, inspector and draft error states remain visible. A model-free working note is available from the library, preserving offline drafts from 0.8.0. Schema, appId, registryName, storageKey, server routes and migrations are unchanged.

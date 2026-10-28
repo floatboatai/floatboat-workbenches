@@ -1,48 +1,4 @@
 import { Component, type ReactNode } from "react";
-import type { ProjectSummary } from "../contracts/project";
-export function ProjectPicker({
-  items,
-  id,
-  disabled,
-  onOpen,
-}: {
-  items: ProjectSummary[];
-  id?: string;
-  disabled: boolean;
-  onOpen: (id: string) => void;
-}) {
-  return (
-    <label className="project-picker">
-      <span className="sr-only">打开已保存项目</span>
-      <select
-        aria-label="打开已保存项目"
-        value={id ?? ""}
-        disabled={disabled}
-        onChange={(event) => {
-          if (event.target.value) onOpen(event.target.value);
-        }}
-      >
-        <option value="">当前草稿</option>
-        {items.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.title}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-export function Notice({ error, notice }: { error: string; notice: string }) {
-  return error ? (
-    <p className="notice error" role="alert">
-      {error}
-    </p>
-  ) : notice ? (
-    <p className="notice" role="status">
-      {notice}
-    </p>
-  ) : null;
-}
 export class RenderBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }

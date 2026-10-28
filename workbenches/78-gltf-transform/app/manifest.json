@@ -4,8 +4,8 @@
   "registryName": "gltf-transform-studio",
   "name": "glTF 资产检查台",
   "description": "检查模型节点、材质与资源，生成可回读的GLB交付文件",
-  "version": "0.8.0",
-  "changelog": "原生glTF Transform读写、材质修订与完整工程恢复。",
+  "version": "0.8.1",
+  "changelog": "模型主屏、上下文检查器与按需资产库。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

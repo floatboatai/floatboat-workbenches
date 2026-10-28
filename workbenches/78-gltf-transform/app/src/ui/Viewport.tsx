@@ -125,7 +125,9 @@ export function Viewport(props: Props) {
       camera.position
         .copy(c)
         .add(
-          new T.Vector3(1, 0.68, 1.3).normalize().multiplyScalar(size * 1.8),
+          new T.Vector3(1, 0.68, 1.3)
+            .normalize()
+            .multiplyScalar((size * 1.8) / Math.min(camera.aspect, 1)),
         );
       controls.update();
       save();
@@ -290,12 +292,6 @@ export function Viewport(props: Props) {
       ) : loading ? (
         <div className="stage-message" role="status">
           读取模型与内嵌贴图…
-        </div>
-      ) : !source ? (
-        <div className="stage-message empty-stage">
-          <span>◇</span>
-          <h2>每一件资产，都值得交付前检查。</h2>
-          <p>载入 GLB，核对结构、材质与资源。</p>
         </div>
       ) : null}
       <div className="axis" aria-hidden="true">
