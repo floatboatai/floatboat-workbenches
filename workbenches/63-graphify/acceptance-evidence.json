@@ -1,0 +1,35 @@
+{
+  "version": "0.5.0",
+  "verifiedAt": "2026-10-27",
+  "timezone": "America/New_York",
+  "applicationTests": 9,
+  "serviceTests": 4,
+  "browserChecks": 17,
+  "engine": "graphifyy@0.9.97",
+  "actualAstExtraction": true,
+  "nativeExportReloadedByUpstream": {
+    "nodes": 6,
+    "edges": 9
+  },
+  "autosave": true,
+  "invalidJsonDraftRecovery": true,
+  "concurrentConflictProtection": true,
+  "lateResultIsolation": true,
+  "serviceDisconnected": true,
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "screenshot": {
+    "path": "../../docs/screenshots/graphify.png",
+    "dimensions": [
+      1440,
+      1100
+    ],
+    "sha256": "d75280a48fe240d3e3187471d2670897a25630726ca7c16b95bfb1c9b2975ee1"
+  },
+  "package": {
+    "name": "graphify-studio-0.5.0-release.fbworkbench",
+    "sha256": "56f8afb53a47576fd9afcb376f5d49164c56d86f274618d121bb613fa15f7e80",
+    "crc": true,
+    "sourceResourcesMatch": true
+  }
+}

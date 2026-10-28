@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.a3667b34-10cf-487d-8b1f-8790641ff94d",
+  "registryName": "graphify-studio",
+  "name": "知识地图 · Graphify",
+  "description": "源码关系、来源追溯、路径查询与人工审阅",
+  "version": "0.5.0",
+  "changelog": "接入真实Graphify AST提取，原生图谱导入导出、关系地图、路径与完整草稿自动保存。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}
