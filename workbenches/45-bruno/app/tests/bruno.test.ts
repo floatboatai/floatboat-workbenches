@@ -158,6 +158,33 @@ test("SQLite drafts keep invalid sources, duplicate receipts and conflicts", asy
     snapshot: { ...q.snapshot, data: invalid },
   });
   assert.equal(r2.phase, "draft");
+  const largeData = {
+    files: Array.from({ length: 20 }, (_, index) => ({
+      id: `large-${index}`,
+      path: `requests/large-${index}.bru`,
+      source: "汉".repeat(31000),
+    })),
+    results: [],
+    notes: "",
+  };
+  const largeRequest = {
+    ...q,
+    mutationId: randomUUID(),
+    draftRevision: r2.draftRevision,
+    snapshot: { ...q.snapshot, data: largeData },
+  };
+  const requestBytes = Buffer.byteLength(JSON.stringify(largeRequest));
+  assert.ok(requestBytes > 1850000 && requestBytes < 1950000);
+  const largeReceipt = await s.commit(largeRequest);
+  assert.equal(largeReceipt.phase, "draft");
+  assert.match(largeReceipt.message, /780 KB/);
+  const confirmedSnapshot = s.get(q.documentId)!.snapshot;
+  assert.deepEqual(confirmedSnapshot.data, largeData);
+  assert.equal(
+    JSON.stringify(restoreCollection(confirmedSnapshot.data)),
+    JSON.stringify(largeData),
+  );
+  assert.throws(() => validateNativeCollection(largeData), /780 KB/);
   await assert.rejects(s.commit({ ...q, mutationId: randomUUID() }));
   d.close();
 });

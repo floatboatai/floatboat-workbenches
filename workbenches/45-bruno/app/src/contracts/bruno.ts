@@ -91,8 +91,8 @@ export function restoreCollection(value: unknown): Collection {
     )
       throw new Error("响应头无效。");
   }
-  if (new TextEncoder().encode(JSON.stringify(value)).length > 1750000)
-    throw new Error("完整工作稿超过恢复预算 1.75 MB。");
+  if (new TextEncoder().encode(JSON.stringify(value)).length > 2000000)
+    throw new Error("完整工作稿超过恢复预算 2 MB。");
   return value as unknown as Collection;
 }
 export function validateCollection(raw: unknown): Collection {

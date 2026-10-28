@@ -17,3 +17,5 @@ Package `bruno-0.6.0-release.fbworkbench`: CRC passed, 41 files, 39 original sou
 Web Interface Guidelines fetched from Vercel on 2026-10-28: semantic labels/buttons, visible focus, skip link, error/live status, response whitespace containment, reduced motion and narrow screens verified. No blocking owned-UI finding remains.
 
 Boundaries: HTTP subset only; scripts/tests/vars/auth inheritance/collection execution/advanced bodies are retained and blocked, never quietly executed or discarded. Environment secrets not read or bound; manual inputs and response snapshots are included in full engineering exports. Redirects not followed. Four snapshots and 20 source files per working copy. **Host import unverified**; local fixture does not establish production connectivity.
+
+恢复容量回归：工作结构恢复上限调整为 2,000,000 字节，正式模型仍为 780,000 字节，共享完整请求仍为 1,950,000 字节。现有 SQLite 草稿测试覆盖 20 个各含 31,000 汉字的源文件（完整请求约 1.86 MB）：服务器实际确认 draft 后，从 SQLite 读取并 restoreCollection 完整恢复，wire JSON 一致，正式模型仍拒绝该体积；测试总数保持 16。
