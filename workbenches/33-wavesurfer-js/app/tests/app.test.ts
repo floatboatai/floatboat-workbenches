@@ -140,3 +140,63 @@ test("标题边界不产生不可恢复工作稿，CSV公式作文字导出", ()
     ),
   );
 });
+
+test("UTF-8超正式容量的完整工作稿可保存并恢复，不替换有效工程", async () => {
+  const { createAutosaveStore } = await import("../src/server/autosave.ts");
+  const { randomUUID } = await import("node:crypto");
+  const db = new DatabaseSync(":memory:");
+  try {
+    for (const file of ["0002_projects.sql", "0003_autosave.sql"])
+      db.exec(
+        await readFile(
+          new URL("../migrations/" + file, import.meta.url),
+          "utf8",
+        ),
+      );
+    const store = createAutosaveStore(db, validateReview),
+      documentId = randomUUID();
+    const first = await store.commit({
+      documentId,
+      mutationId: randomUUID(),
+      draftRevision: 0,
+      projectId: null,
+      projectRevision: null,
+      snapshot: { title: "录音", data, extra: {} },
+    });
+    const large = {
+      ...data,
+      clips: Array.from({ length: 20 }, (_, i) => ({
+        ...clip,
+        id: "segment-" + i,
+        text: "文".repeat(18000),
+      })),
+    };
+    assert.throws(() => validateReview(large));
+    assert.equal(restoreReview(large).clips[19].text, large.clips[19].text);
+    const receipt = await store.commit({
+      documentId,
+      mutationId: randomUUID(),
+      draftRevision: 1,
+      projectId: first.project.id,
+      projectRevision: 1,
+      snapshot: { title: "录音", data: large, extra: { json: "{unfinished" } },
+    });
+    assert.equal(receipt.phase, "draft");
+    const restored = restoreReview(store.get(documentId).snapshot.data);
+    assert.equal(restored.clips.length, 20);
+    assert.equal(restored.clips[19].text, large.clips[19].text);
+    assert.equal(store.get(documentId).snapshot.extra.json, "{unfinished");
+    assert.equal(
+      JSON.parse(
+        String(
+          db
+            .prepare("SELECT payload FROM projects WHERE id=?")
+            .get(first.project.id).payload,
+        ),
+      ).clips.length,
+      1,
+    );
+  } finally {
+    db.close();
+  }
+});

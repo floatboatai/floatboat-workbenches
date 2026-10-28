@@ -11,6 +11,7 @@ export function Waveform({
   onRange,
   onSelect,
   onTime,
+  onDuration,
   loop,
   api,
   disabled,
@@ -20,6 +21,7 @@ export function Waveform({
   onRange: (id: string, start: string, end: string) => void;
   onSelect: (id: string) => void;
   onTime: (n: number) => void;
+  onDuration: (n: number) => void;
   loop: boolean;
   disabled: boolean;
   api: React.RefObject<WaveSurfer | null>;
@@ -27,10 +29,26 @@ export function Waveform({
   const el = useRef<HTMLDivElement>(null),
     plugin = useRef<Regions | null>(null),
     sync = useRef(false),
-    latest = useRef({ onRange, onSelect, onTime, loop, selected, disabled }),
+    latest = useRef({
+      onRange,
+      onSelect,
+      onTime,
+      onDuration,
+      loop,
+      selected,
+      disabled,
+    }),
     [state, setState] = useState("等待音频"),
     [ready, setReady] = useState(0);
-  latest.current = { onRange, onSelect, onTime, loop, selected, disabled };
+  latest.current = {
+    onRange,
+    onSelect,
+    onTime,
+    onDuration,
+    loop,
+    selected,
+    disabled,
+  };
   useEffect(() => {
     if (!el.current || !data.source) return;
     let alive = true;
@@ -59,6 +77,9 @@ export function Waveform({
     setState("正在读取与解码…");
     ws.on("ready", () => {
       if (alive) {
+        const duration = ws.getDuration();
+        if (Number.isFinite(duration) && duration > 0)
+          latest.current.onDuration(duration);
         setState("波形已就绪");
         setReady((v) => v + 1);
       }

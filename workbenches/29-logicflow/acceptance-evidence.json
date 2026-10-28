@@ -7,7 +7,7 @@
     "core": "2.2.5",
     "extension": "2.3.1"
   },
-  "unitTests": 8,
+  "unitTests": 10,
   "previewUrl": "http://127.0.0.1:49892/",
   "browser": {
     "checks": [
@@ -36,7 +36,8 @@
     "sourceAndResourceFilesCompared": 32,
     "manifest": "verified normalized resource mapping",
     "transferHashes": "all verified",
-    "dataIncluded": false
+    "dataIncluded": false,
+    "status": "superseded-by-final-integrated-package"
   },
   "nativePng": {
     "decoded": true,
@@ -56,5 +57,12 @@
     "Custom node registrations not supported",
     "Host import unverified",
     "Maximum 30 reviewed paths"
-  ]
+  ],
+  "rootBoundaryReview": [
+    "title bound is enforced before typing can create an unrestorable snapshot",
+    "oversized import is rejected while current document and notes remain intact",
+    "unapplicable native JSON stays in saved editor draft across reload without replacing graph",
+    "375px layout, keyboard focus and runtime remain valid after boundary fixes"
+  ],
+  "rootBoundaryReviewNotes": "Boundary review explicitly waits for saved snapshot; original autosave/failure matrix remains the independent app evidence."
 }

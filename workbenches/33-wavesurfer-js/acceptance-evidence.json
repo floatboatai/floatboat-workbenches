@@ -5,7 +5,7 @@
   "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
   "checks": {
     "workbenchCheck": "passed",
-    "tests": 8,
+    "tests": 9,
     "browser": "real Chrome, HTML5 and AudioContext",
     "desktop": "1440x1100",
     "mobile": "375x1000: no horizontal overflow",
@@ -32,7 +32,21 @@
       "native region loop",
       "keyboard focus"
     ],
-    "webGuidelines": "2026-10-28 latest fetched; applied"
+    "webGuidelines": "2026-10-28 latest fetched; applied",
+    "integrationCapacity": [
+      "1.08MB UTF-8 working draft confirmed by actual HTTP/SQLite",
+      "twenty complete excerpts survive reload and selection",
+      "unapplied JSON retained alongside large draft",
+      "formal model is not falsely reported saved",
+      "no runtime errors"
+    ],
+    "integrationDuration": [
+      "long original filename keeps full source identity and bounded generated title",
+      "reference-only recovery duration is verified against actual decoded original",
+      "out-of-range intervals and notes survive as a draft instead of a false valid model",
+      "reload preserves validation and disables impossible playback",
+      "no runtime errors"
+    ]
   },
   "package": {
     "file": "artifacts/wavesurfer-js-studio-0.6.0-final.fbworkbench",
@@ -40,14 +54,15 @@
     "crc": "passed",
     "matchedSourceAndAssets": 36,
     "resourceRelocation": "official pack rewrites asset path; IDs and all other metadata verified",
-    "businessDataIncluded": false
+    "businessDataIncluded": false,
+    "status": "superseded-by-final-integrated-package"
   },
   "preview": "http://127.0.0.1:62242/",
   "hostImport": "unverified",
   "limits": [
     "32 MiB original, 10 minutes native metadata gate before decode",
     "16kHz validation decode maximum 128MiB; browser decoding memory still device dependent",
-    "500 clips and 850KB work data",
+    "500 clips; UTF-8 formal850KB, restore2MB; full autosave request1.95MB",
     "cumulative originals grow with use; no automatic cleanup",
     "no transcription, cutting, denoise or audio re-encoding"
   ]

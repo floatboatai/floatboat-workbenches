@@ -74,7 +74,8 @@ export function restoreReview(raw: unknown): Review {
       reviewed: c.reviewed,
     };
   });
-  if (JSON.stringify(raw).length > 850000) throw Error("工作稿超过 850 KB。");
+  if (new TextEncoder().encode(JSON.stringify(raw)).length > 2000000)
+    throw Error("工作稿超过 2 MB，请先导出并拆分内容。");
   return {
     source: raw.source === null ? null : audioSource(raw.source),
     duration: raw.duration,
@@ -95,6 +96,8 @@ export function validRange(c: Clip, duration: number) {
 }
 export function validateReview(raw: unknown): Review {
   const v = restoreReview(raw);
+  if (new TextEncoder().encode(JSON.stringify(v)).length > 850000)
+    throw Error("正式工程超过850KB，当前内容按草稿保留。");
   if (v.clips.some((c) => !validRange(c, v.duration)))
     throw Error("区间需要有效的起止秒数，且不能超过音频时长。");
   return v;

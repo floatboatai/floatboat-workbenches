@@ -311,6 +311,15 @@ export function App() {
               }));
             }}
             onSelect={setSelected}
+            onDuration={(duration) => {
+              if (transitionRef.current) return;
+              p.setData((d) =>
+                d.source?.id === p.data.source?.id &&
+                Math.abs(d.duration - duration) > 0.05
+                  ? { ...d, duration }
+                  : d,
+              );
+            }}
             onTime={(n) => {
               setTime(n);
               setPlaying(api.current?.isPlaying() ?? false);

@@ -1,15 +1,190 @@
-import {test} from 'node:test';
-import assert from 'node:assert/strict';
-import {DatabaseSync} from 'node:sqlite';
-import {readFileSync} from 'node:fs';
-import {graphValue,seed,review,paths,restoreFlow,validateFlow,importFlow,mergeNative} from '../src/contracts/flow.ts';
-import {createAutosaveStore} from '../src/server/autosave.ts';
-import {randomUUID} from 'node:crypto';
-test('native sample supports approval paths and reports cycle',()=>{const g=graphValue(seed.graph);assert.equal(g.nodes.length,6);assert.ok(review(g).some(x=>x.includes('循环')));assert.ok(paths(g).some(x=>x.includes('完成')));assert.ok(paths(g).some(x=>x.includes('[循环]')));});
-test('dangling and unreachable warnings preserve native objects',()=>{const g=graphValue(seed.graph);g.edges.push({id:'dangling',type:'line',sourceNodeId:'absent',targetNodeId:'start'});g.nodes.push({id:'orphan',type:'rect',x:0,y:0});const serialized=JSON.stringify(g);assert.ok(review(g).some(x=>x.includes('悬空')));assert.ok(review(g).some(x=>x.includes('不可达')));assert.equal(JSON.stringify(g),serialized);});
-test('restoration preserves invalid wire and unfinished data',()=>{const d={graph:'{ invalid',notes:''};assert.equal(restoreFlow(d),d);assert.throws(()=>validateFlow(d));assert.deepEqual(importFlow({snapshot:{title:'恢复',data:d,extra:{raw:'{ half'}}}),{title:'恢复',data:d,extra:{raw:'{ half'}});});
-test('native import keeps unknown fields',()=>{const g=graphValue(seed.graph);g.custom={version:1};const d=importFlow(g);assert.deepEqual(JSON.parse(d.data.graph),g);});
-test('size and unsupported native types rejected explicitly',()=>{assert.throws(()=>restoreFlow({graph:'x'.repeat(550001),notes:''}));const g=graphValue(seed.graph);g.nodes[0].type='unsupported';assert.throws(()=>graphValue(JSON.stringify(g)));});
-test('real sqlite autosave receipts, invalid drafts, retries and conflict',async()=>{const db=new DatabaseSync(':memory:');for(const file of ['0002_projects.sql','0003_autosave.sql'])db.exec(readFileSync(new URL('../migrations/'+file,import.meta.url),'utf8'));const store=createAutosaveStore(db,validateFlow);const request={documentId:randomUUID(),mutationId:randomUUID(),draftRevision:0,projectId:null,projectRevision:null,snapshot:{title:'审批',data:seed,extra:{raw:'{ unfinished'}}};const first=await store.commit(request);assert.equal(first.phase,'saved');assert.deepEqual(await store.commit(request),first);const invalid=await store.commit({...request,mutationId:randomUUID(),draftRevision:1,projectId:first.project!.id,projectRevision:1,snapshot:{...request.snapshot,data:{graph:'{',notes:''}}});assert.equal(invalid.phase,'draft');assert.equal(store.get(request.documentId)!.snapshot.extra.raw,'{ unfinished');await assert.rejects(store.commit({...request,mutationId:randomUUID()}));db.close();});
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { DatabaseSync } from "node:sqlite";
+import { readFileSync } from "node:fs";
+import {
+  graphValue,
+  seed,
+  review,
+  paths,
+  restoreFlow,
+  validateFlow,
+  importFlow,
+  mergeNative,
+} from "../src/contracts/flow.ts";
+import { createAutosaveStore } from "../src/server/autosave.ts";
+import { randomUUID } from "node:crypto";
+test("native sample supports approval paths and reports cycle", () => {
+  const g = graphValue(seed.graph);
+  assert.equal(g.nodes.length, 6);
+  assert.ok(review(g).some((x) => x.includes("循环")));
+  assert.ok(paths(g).some((x) => x.includes("完成")));
+  assert.ok(paths(g).some((x) => x.includes("[循环]")));
+});
+test("dangling and unreachable warnings preserve native objects", () => {
+  const g = graphValue(seed.graph);
+  g.edges.push({
+    id: "dangling",
+    type: "line",
+    sourceNodeId: "absent",
+    targetNodeId: "start",
+  });
+  g.nodes.push({ id: "orphan", type: "rect", x: 0, y: 0 });
+  const serialized = JSON.stringify(g);
+  assert.ok(review(g).some((x) => x.includes("悬空")));
+  assert.ok(review(g).some((x) => x.includes("不可达")));
+  assert.equal(JSON.stringify(g), serialized);
+});
+test("restoration preserves invalid wire and unfinished data", () => {
+  const d = { graph: "{ invalid", notes: "" };
+  assert.equal(restoreFlow(d), d);
+  assert.throws(() => validateFlow(d));
+  assert.deepEqual(
+    importFlow({
+      snapshot: { title: "恢复", data: d, extra: { raw: "{ half" } },
+    }),
+    { title: "恢复", data: d, extra: { raw: "{ half" } },
+  );
+});
+test("native import keeps unknown fields", () => {
+  const g = graphValue(seed.graph);
+  g.custom = { version: 1 };
+  const d = importFlow(g);
+  assert.deepEqual(JSON.parse(d.data.graph), g);
+});
+test("size and unsupported native types rejected explicitly", () => {
+  assert.throws(() => restoreFlow({ graph: "x".repeat(550001), notes: "" }));
+  const g = graphValue(seed.graph);
+  g.nodes[0].type = "unsupported";
+  assert.throws(() => graphValue(JSON.stringify(g)));
+});
+test("real sqlite autosave receipts, invalid drafts, retries and conflict", async () => {
+  const db = new DatabaseSync(":memory:");
+  for (const file of ["0002_projects.sql", "0003_autosave.sql"])
+    db.exec(
+      readFileSync(new URL("../migrations/" + file, import.meta.url), "utf8"),
+    );
+  const store = createAutosaveStore(db, validateFlow);
+  const request = {
+    documentId: randomUUID(),
+    mutationId: randomUUID(),
+    draftRevision: 0,
+    projectId: null,
+    projectRevision: null,
+    snapshot: { title: "审批", data: seed, extra: { raw: "{ unfinished" } },
+  };
+  const first = await store.commit(request);
+  assert.equal(first.phase, "saved");
+  assert.deepEqual(await store.commit(request), first);
+  const invalid = await store.commit({
+    ...request,
+    mutationId: randomUUID(),
+    draftRevision: 1,
+    projectId: first.project!.id,
+    projectRevision: 1,
+    snapshot: { ...request.snapshot, data: { graph: "{", notes: "" } },
+  });
+  assert.equal(invalid.phase, "draft");
+  assert.equal(
+    store.get(request.documentId)!.snapshot.extra.raw,
+    "{ unfinished",
+  );
+  await assert.rejects(store.commit({ ...request, mutationId: randomUUID() }));
+  db.close();
+});
 
-test('native changes retain extension fields and dangling edges',()=>{const g=graphValue(seed.graph);g.nodes[0].external={version:2};g.edges.push({id:'dangling',type:'polyline',sourceNodeId:'missing',targetNodeId:'start'});const n=structuredClone(g);delete n.nodes[0].external;n.edges=n.edges.filter(e=>e.id!=='dangling');n.nodes[0].x=300;const merged=mergeNative(g,n);assert.deepEqual(merged.nodes[0].external,{version:2});assert.equal(merged.nodes[0].x,300);assert.ok(merged.edges.some(e=>e.id==='dangling'));});
+test("native changes retain extension fields and dangling edges", () => {
+  const g = graphValue(seed.graph);
+  g.nodes[0].external = { version: 2 };
+  g.edges.push({
+    id: "dangling",
+    type: "polyline",
+    sourceNodeId: "missing",
+    targetNodeId: "start",
+  });
+  const n = structuredClone(g);
+  delete n.nodes[0].external;
+  n.edges = n.edges.filter((e) => e.id !== "dangling");
+  n.nodes[0].x = 300;
+  const merged = mergeNative(g, n);
+  assert.deepEqual(merged.nodes[0].external, { version: 2 });
+  assert.equal(merged.nodes[0].x, 300);
+  assert.ok(merged.edges.some((e) => e.id === "dangling"));
+});
+
+test("import rejects unrecoverable titles, malformed extras and over-budget native input before replacement", () => {
+  const title = "题".repeat(121);
+  assert.throws(() =>
+    importFlow({ format: "logicflow-workbench", title, data: seed, extra: {} }),
+  );
+  assert.throws(() =>
+    importFlow({ snapshot: { title, data: seed, extra: {} } }),
+  );
+  assert.equal(
+    importFlow({
+      snapshot: { title: "", data: seed, extra: { raw: "{unfinished" } },
+    }).title,
+    "",
+  );
+  assert.throws(() =>
+    importFlow({
+      format: "logicflow-workbench",
+      title: "图纸",
+      data: seed,
+      extra: "lost",
+    }),
+  );
+  assert.throws(() =>
+    importFlow({ ...graphValue(seed.graph), source: "x".repeat(550001) }),
+  );
+});
+test("UTF-8 over-budget model stays a complete SQLite draft without replacing the confirmed graph", async () => {
+  const db = new DatabaseSync(":memory:");
+  for (const file of ["0002_projects.sql", "0003_autosave.sql"])
+    db.exec(
+      readFileSync(new URL("../migrations/" + file, import.meta.url), "utf8"),
+    );
+  try {
+    const store = createAutosaveStore(db, validateFlow),
+      documentId = randomUUID();
+    const first = await store.commit({
+      documentId,
+      mutationId: randomUUID(),
+      draftRevision: 0,
+      projectId: null,
+      projectRevision: null,
+      snapshot: { title: "图纸", data: seed, extra: {} },
+    });
+    const data = {
+      ...seed,
+      graph: JSON.stringify({
+        ...graphValue(seed.graph),
+        source: "文".repeat(300000),
+      }),
+    };
+    assert.equal(restoreFlow(data), data);
+    assert.throws(() => validateFlow(data));
+    const receipt = await store.commit({
+      documentId,
+      mutationId: randomUUID(),
+      draftRevision: 1,
+      projectId: first.project!.id,
+      projectRevision: 1,
+      snapshot: { title: "图纸", data, extra: { raw: "{pending" } },
+    });
+    assert.equal(receipt.phase, "draft");
+    assert.equal(store.get(documentId)!.snapshot.data.graph, data.graph);
+    assert.equal(
+      JSON.parse(
+        String(
+          db
+            .prepare("SELECT payload FROM projects WHERE id=?")
+            .get(first.project!.id)!.payload,
+        ),
+      ).graph,
+      seed.graph,
+    );
+  } finally {
+    db.close();
+  }
+});

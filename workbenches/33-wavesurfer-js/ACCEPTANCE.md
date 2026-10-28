@@ -11,3 +11,5 @@
 默认源码包CRC、源码与资源字节核对通过，manifest仅官方打包资源路径重定位；无业务音频、SQLite或node_modules。预览 http://127.0.0.1:62242/ 。客户端导入 `hostImport=unverified`。
 
 预算：每原件32MiB、10分钟；metadata在分配解码缓冲前检查；16kHz校验解码最多128MiB，实际内存仍受浏览器影响；500选段、850KB工作稿。累计原件随使用增长。没有转录、剪切、降噪或重新编码。
+
+Primary integration review separates the 850KB UTF-8 formal model limit from 2MB working structure restoration. A real HTTP/SQLite 1.08MB working copy with twenty complete excerpts and unapplied JSON survives reload while explicitly marked draft. Decoded original duration is rechecked for reference-only recovery without discarding out-of-range notes. The final integration package supersedes the initial agent package.
