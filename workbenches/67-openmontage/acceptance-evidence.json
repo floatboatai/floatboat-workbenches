@@ -1,0 +1,57 @@
+{
+  "at": "2026-10-28T04:01:34.312Z",
+  "actualOfficialTools": true,
+  "uploadAndPlayback": true,
+  "saveReload": true,
+  "incompleteTimeRecovery": true,
+  "rawJsonRecovery": true,
+  "approval": true,
+  "actualMp4Download": true,
+  "taskReload": true,
+  "portableIncludesTwoOriginals": true,
+  "importCreatesNewWithoutReplay": true,
+  "mobileNoOverflow": true,
+  "pageErrors": [],
+  "delayedEdit": true,
+  "lostReceipt": true,
+  "invalidDurationRestore": true,
+  "optimisticConflict": true,
+  "pendingAndRaceRegression": {
+    "at": "2026-10-28T04:06:30.819Z",
+    "postResponseLostAndListUnavailable": true,
+    "pendingReload": true,
+    "originalOperationAndSnapshotRetried": true,
+    "onlyOneServerJob": true,
+    "navigationAndImportGuard": true,
+    "staleListCannotRevertCompleted": true,
+    "pageErrors": []
+  },
+  "concurrentProduction": {
+    "sameOperationConcurrent": true,
+    "oneCreatedAt": true,
+    "actualOfficialTools": true,
+    "state": "completed",
+    "at": "2026-10-28T04:15:26.491Z"
+  },
+  "version": "0.5.0",
+  "applicationTests": 9,
+  "serviceTests": 4,
+  "upstreamCommit": "e01dbf433f46eeb91d39bf905e194162921019a3",
+  "actualRender": {
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "duration": 4
+  },
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "screenshot": {
+    "path": "../../docs/screenshots/openmontage.png",
+    "sha256": "5a11fac21433b61856c62cdb9707fe5e08be448d4d83669376aa534489050bbe",
+    "dimensions": [
+      1440,
+      1100
+    ]
+  }
+}
