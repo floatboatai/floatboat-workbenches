@@ -1,0 +1,57 @@
+{
+  "verifiedAt": "2026-10-28T03:57:19.892Z",
+  "timezone": "America/New_York",
+  "version": "0.5.0",
+  "build": "passed",
+  "applicationTests": 9,
+  "serviceTests": 4,
+  "browserChecks": [
+    "real PageIndex sample index and PDFium page image",
+    "note and current page survive reload",
+    "real Gemini 3.8 chapter selection, original-page answer and validated quotations",
+    "unapplied invalid JSON draft restored",
+    "portable export includes original PDF, notes, drafts and answer",
+    "portable import creates a separate project without replaying model calls",
+    "375px navigation and review have no horizontal overflow",
+    "keyboard focus and no pageerror",
+    "CSP-compatible original PDF image decodes successfully",
+    "editing while save acknowledgement is delayed preserves latest content",
+    "save committed then response lost retries same mutation without duplicate project",
+    "stale window conflict cannot overwrite confirmed notes",
+    "invalid JSON draft survives portable import",
+    "375px image and review both remain usable",
+    "no browser pageerror"
+  ],
+  "browserImageDecode": "passed after CSP-compatible data image fix",
+  "engine": {
+    "name": "pageindex",
+    "version": "0.2.10",
+    "mode": "flash, summary=False, optimize=False",
+    "nativeIndex": true,
+    "pdfiumRendering": true
+  },
+  "host": {
+    "model": "gemini-3.8-flash",
+    "chapterSelection": "passed",
+    "questionAnswer": "passed",
+    "verbatimPageCitations": "passed",
+    "metadataPersisted": false
+  },
+  "hostImport": "unverified",
+  "screenshot": {
+    "path": "../../docs/screenshots/pageindex.png",
+    "dimensions": [
+      1440,
+      1518
+    ],
+    "sha256": "2dc1c47f5b2419e6b8fefdc236d76efd24f5e5b00a1577b63b7314b63caa7964"
+  },
+  "package": {
+    "filename": "pageindex-studio-0.5.0.fbworkbench",
+    "sha256": "79de8a7cd7c23590d0a8a853f4c1214a3dd1f1a98db236d7d2a68ee7dfa873e3",
+    "bytes": 60291,
+    "crc": "passed",
+    "sourceAndResourceBytes": "matched",
+    "businessData": "excluded"
+  }
+}

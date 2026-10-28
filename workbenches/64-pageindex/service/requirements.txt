@@ -1,0 +1,3 @@
+pageindex==0.2.10
+pypdfium2==5.14.0
+Pillow==13.0.0

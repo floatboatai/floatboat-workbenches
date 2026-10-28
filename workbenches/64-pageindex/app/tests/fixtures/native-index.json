@@ -1,0 +1,45 @@
+{
+  "engine": "pageindex",
+  "version": "0.2.10",
+  "sha256": "315a01210fea5b1e2d7e5f337344789b4eb974f1acb562b738ab238146cfe4d2",
+  "pages": [
+    {
+      "number": 1,
+      "text": "Visitor schedule\r\nThe Harbor Workshop opens at 09:00 and closes at 18:00.\r\nLin is responsible for the daily opening checklist.\r\nGroup visits must be registered one day in advance.\r\nHarbor Workshop / Demonstration handbook / 1"
+    },
+    {
+      "number": 2,
+      "text": "Equipment checklist\r\nInspect all 24 adjustable lamps before each exhibition.\r\nCheck lamp quantities, colour temperature reports and warranty files.\r\nStore the two-year warranty files in the equipment archive.\r\nHarbor Workshop / Demonstration handbook / 2"
+    },
+    {
+      "number": 3,
+      "text": "Closing handover\r\nBefore closing, count all lamps and check the power switches.\r\nAttach the inspection photographs to the handover record.\r\nRecord unresolved issues and notify the next shift supervisor.\r\nHarbor Workshop / Demonstration handbook / 3"
+    }
+  ],
+  "index": {
+    "doc_name": "document.pdf",
+    "doc_title": "Visitor schedule",
+    "structure": [
+      {
+        "title": "Visitor schedule",
+        "node_id": "0000",
+        "start_index": 1,
+        "end_index": 2
+      },
+      {
+        "title": "Equipment checklist",
+        "node_id": "0001",
+        "start_index": 2,
+        "end_index": 3
+      },
+      {
+        "title": "Closing handover",
+        "node_id": "0002",
+        "start_index": 3,
+        "end_index": 3
+      }
+    ],
+    "has_abstract_or_references_section": false,
+    "toc_source": "hybrid"
+  }
+}
