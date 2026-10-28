@@ -138,6 +138,52 @@ test("missing introduction screenshot fails before the packager runs", async () 
   );
   assert.equal(packaged, false);
 });
+test("license and scope notes survive packaging and multipart upload verbatim", async () => {
+  const { root, output, catalog } = await fixture();
+  const description =
+    "GPL-2.0-or-later\n\nIncludes corresponding source and license notices.\nUpload is staging; it does not grant marketplace publication.";
+  catalog[0].presentation.fullDescription = description;
+  await writeFile(join(root, "catalog.json"), JSON.stringify(catalog));
+  await packageBundle(root, "example", output, (path) =>
+    writeFile(path, "package-bytes"),
+  );
+  const bundle = await readUploadBundle(output);
+  assert.equal(bundle.presentation.fullDescription, description);
+  await uploadBundle(bundle, {
+    url: "https://upload.example.invalid/ingest",
+    apiKey: "official-fixture-key",
+    fetchImpl: async (_url, options) => {
+      const presentation = JSON.parse(options.body.get("presentation"));
+      assert.equal(presentation.fullDescription, description);
+      assert.equal(presentation.package.sha256, bundle.presentation.package.sha256);
+      return Response.json({
+        code: 0,
+        data: {
+          contentHash: bundle.presentation.package.sha256,
+          registryName: "example-studio",
+          version: "1.2.3",
+          objectId: "test-object",
+        },
+      });
+    },
+  });
+});
+test("invalid introduction text fails before packaging or writing an output", async () => {
+  for (const value of [42, null, "x".repeat(32001)]) {
+    const { root, output, catalog } = await fixture();
+    catalog[0].presentation.fullDescription = value;
+    await writeFile(join(root, "catalog.json"), JSON.stringify(catalog));
+    let packaged = false;
+    await assert.rejects(
+      packageBundle(root, "example", output, async () => {
+        packaged = true;
+      }),
+      /Invalid full introduction/,
+    );
+    assert.equal(packaged, false);
+    await assert.rejects(readFile(join(output, "presentation.json")), /ENOENT/);
+  }
+});
 test("a bundle preserves every declared introduction image", async () => {
   const { root, output, catalog } = await fixture();
   catalog[0].presentation.screenshots.push({

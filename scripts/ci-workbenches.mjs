@@ -69,6 +69,12 @@ export async function packageBundle(
   const sources = project.presentation?.screenshots;
   if (!Array.isArray(sources) || !sources.length || sources.length > 10)
     throw new Error(`A real introduction screenshot is required: ${slug}`);
+  const fullDescription = project.presentation?.fullDescription;
+  if (
+    fullDescription !== undefined &&
+    (typeof fullDescription !== "string" || fullDescription.length > 32000)
+  )
+    throw new Error("Invalid full introduction description: " + slug);
   const screenshots = [];
   let totalImageBytes = 0;
   for (const [index, source] of sources.entries()) {
@@ -125,6 +131,7 @@ export async function packageBundle(
     version: manifest.version,
     name: manifest.name,
     shortDescription: manifest.description,
+    ...(fullDescription === undefined ? {} : { fullDescription }),
     package: { file, sha256: sha256(bytes) },
     screenshots: screenshots.map(({ file, caption, bytes }) => ({
       file,
