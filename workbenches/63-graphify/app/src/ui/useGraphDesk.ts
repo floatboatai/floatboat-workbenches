@@ -1,3 +1,6 @@
+import { useNavigation } from "./navigation.ts";
+import { restoreDraftData } from "../contracts/graph.ts";
+import { decodeProjectImport } from "../contracts/import-project.ts";
 import { useEffect, useRef, useState } from "react";
 import { useProjects, request, download } from "./workspace.tsx";
 import { isRecord } from "../contracts/project.ts";
@@ -11,9 +14,32 @@ import {
   fromGraph,
 } from "../contracts/graph.ts";
 export function useGraphDesk() {
-  const p = useProjects(seed, projectValue, "目录服务 · 关系审阅", {
+  const base = useProjects(seed, projectValue, "目录服务 · 关系审阅", {
     storageKey: "graphify-map-v1",
+    restoreDraftData,
   });
+  const navigation = useNavigation();
+  const p = {
+    ...base,
+    busy: base.busy || navigation.transitioning,
+    fresh: () => navigation.run(() => base.fresh()),
+    open: (...args: Parameters<typeof base.open>) =>
+      navigation.run(() => base.open(...args)),
+    replace: (...args: Parameters<typeof base.replace>) =>
+      navigation.run(() => base.replace(...args)),
+    setData: (value: Parameters<typeof base.setData>[0]) => {
+      if (!navigation.active.current) base.setData(value);
+    },
+    setDraft: (value: Parameters<typeof base.setDraft>[0]) => {
+      if (!navigation.active.current) base.setDraft(value);
+    },
+    setTitle: (value: Parameters<typeof base.setTitle>[0]) => {
+      if (!navigation.active.current) base.setTitle(value);
+    },
+    save: (...args: Parameters<typeof base.save>) =>
+      navigation.active.current ? Promise.resolve(null) : base.save(...args),
+  };
+
   const [query, setQuery] = useState(""),
     [zoom, setZoom] = useState(0.8),
     [sourceOpen, setSourceOpen] = useState(false),
@@ -79,27 +105,34 @@ export function useGraphDesk() {
     );
   }
   async function importFile(f: File) {
-    try {
-      if (f.size > 1500000) throw new Error("文件超过1.5MB，请拆分后导入。");
-      const raw: unknown = JSON.parse(await f.text());
-      if (isRecord(raw) && isRecord(raw.data)) {
-        const data = projectValue(raw.data);
-        const extra = isRecord(raw.extra) ? raw.extra : {};
-        if (new TextEncoder().encode(JSON.stringify(extra)).length > 900000)
-          throw new Error("工作稿超过容量限制。");
-        await p.replace(
-          data,
-          typeof raw.title === "string" ? raw.title : "导入的知识地图",
-          extra,
-        );
-      } else
-        await p.replace(
+    await navigation.run(async () => {
+      try {
+        if (f.size > 8 * 1024 * 1024) throw new Error("文件超过8MB");
+        const raw: unknown = JSON.parse(await f.text()),
+          imported = decodeProjectImport(raw);
+        if (imported) {
+          const ok = await base.replace(
+            imported.data,
+            imported.title,
+            imported.extra,
+          );
+          if (ok)
+            base.setNotice(
+              imported.recovered
+                ? "工作稿已恢复为新项目；原保存操作仅保留历史信息。"
+                : "已导入为新项目。",
+            );
+          return ok;
+        }
+        return await base.replace(
           fromGraph(graphValue(raw)),
           f.name.replace(/\.json$/i, ""),
         );
-    } catch (e) {
-      p.report(e);
-    }
+      } catch (e) {
+        base.report(e);
+        return false;
+      }
+    });
   }
   async function extract() {
     const key = epoch.current;
@@ -138,6 +171,7 @@ export function useGraphDesk() {
         delete n.graphJson;
         return n;
       });
+      p.setError("");
       p.setNotice("图谱已更新。");
     } catch (e) {
       p.report(e);

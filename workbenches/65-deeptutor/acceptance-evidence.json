@@ -2,9 +2,9 @@
   "version": "0.5.0",
   "verifiedAt": "2026-10-28",
   "timezone": "America/New_York",
-  "applicationTests": 10,
+  "applicationTests": 13,
   "serviceTests": 8,
-  "browserChecks": 19,
+  "browserChecks": 23,
   "upstreamCommit": "a31d82624c27d75f4e771d4fcb78dce16470b383",
   "upstreamModulesUnmodified": true,
   "actualHostGeneration": true,
@@ -43,9 +43,18 @@
     "sha256": "bb937f5a98f7188afa384a77b6114e362b167c28cad7538d8fa85d91e31b587b"
   },
   "package": {
-    "name": "deeptutor-studio-0.5.0.fbworkbench",
-    "sha256": "61ec7c45be2e6ff872b17ff04c982f9284db60b3513af0760f6ed16325b87b92",
+    "name": "deeptutor-studio-0.5.0-recovery.fbworkbench",
+    "sha256": "d5a4cf5ac74b746e89ed473b02a281066f5b5c7762edd267a532b3a574a95e17",
     "crc": true,
     "sourceResourcesMatch": true
+  },
+  "recoveryImportAndNavigation": {
+    "checks": [
+      "navigation locks all fields while old save completes and preserves old input",
+      "real recovery download imports as new project retaining incomplete extra",
+      "old pending operations preserved as history without replay",
+      "imported working draft survives another refresh"
+    ],
+    "errors": []
   }
 }

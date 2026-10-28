@@ -1,10 +1,10 @@
 {
   "version": "0.5.0",
-  "verifiedAt": "2026-10-27",
+  "verifiedAt": "2026-10-28",
   "timezone": "America/New_York",
-  "applicationTests": 9,
+  "applicationTests": 12,
   "serviceTests": 4,
-  "browserChecks": 17,
+  "browserChecks": 22,
   "engine": "graphifyy@0.9.97",
   "actualAstExtraction": true,
   "nativeExportReloadedByUpstream": {
@@ -27,9 +27,19 @@
     "sha256": "d75280a48fe240d3e3187471d2670897a25630726ca7c16b95bfb1c9b2975ee1"
   },
   "package": {
-    "name": "graphify-studio-0.5.0-release.fbworkbench",
-    "sha256": "56f8afb53a47576fd9afcb376f5d49164c56d86f274618d121bb613fa15f7e80",
+    "name": "graphify-studio-0.5.0-recovery.fbworkbench",
+    "sha256": "1ba816dbaf46593d63d9ddced378488c610f61cca261611402e8c79141f5be37",
     "crc": true,
     "sourceResourcesMatch": true
+  },
+  "recoveryImportAndNavigation": {
+    "checks": [
+      "navigation locks all fields while old save completes and preserves old input",
+      "real recovery download imports as new project retaining incomplete extra",
+      "old pending operations preserved as history without replay",
+      "imported working draft survives another refresh",
+      "successful JSON correction clears stale error"
+    ],
+    "errors": []
   }
 }

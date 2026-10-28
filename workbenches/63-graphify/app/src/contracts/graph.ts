@@ -55,12 +55,13 @@ export function graphValue(value: unknown): Graph {
   });
   return { ...value, directed: value.directed, nodes, links };
 }
-export function projectValue(value: unknown): MapProject {
+function decodeProject(value: unknown, working: boolean): MapProject {
   if (
     !isRecord(value) ||
     !isRecord(value.notes) ||
     !isRecord(value.positions) ||
-    new TextEncoder().encode(JSON.stringify(value)).length > 550000
+    new TextEncoder().encode(JSON.stringify(value)).length >
+      (working ? 1500000 : 550000)
   )
     throw new Error("项目格式或大小无效。");
   const graph = graphValue(value.graph),
@@ -163,3 +164,8 @@ export function fromGraph(graph: Graph): MapProject {
     to: "",
   };
 }
+
+export const projectValue = (value: unknown): MapProject =>
+  decodeProject(value, false);
+export const restoreDraftData = (value: unknown): MapProject =>
+  decodeProject(value, true);

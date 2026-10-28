@@ -911,3 +911,26 @@ footer > span:last-child {
     scroll-behavior: auto !important;
   }
 }
+
+.control-guard {
+  display: contents;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.import-history {
+  margin: 12px 24px;
+  font-size: 12px;
+  color: #68716a;
+}
+.import-history summary {
+  cursor: pointer;
+}
+.import-history p {
+  line-height: 1.8;
+}
+.import-history button {
+  font-size: 11px;
+}

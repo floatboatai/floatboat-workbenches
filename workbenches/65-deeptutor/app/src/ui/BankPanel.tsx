@@ -1,3 +1,4 @@
+import { questionsValue } from "../contracts/tutor.ts";
 import type { useTutorDesk } from "./useTutorDesk.ts";
 import { isRecord } from "../contracts/project.ts";
 export function BankPanel({ d }: { d: ReturnType<typeof useTutorDesk> }) {
@@ -5,8 +6,34 @@ export function BankPanel({ d }: { d: ReturnType<typeof useTutorDesk> }) {
   const command = isRecord(p.draft.pendingGeneration)
     ? p.draft.pendingGeneration
     : null;
+  const imported = Array.isArray(p.draft.importHistory)
+    ? p.draft.importHistory
+        .slice()
+        .reverse()
+        .find(
+          (x) =>
+            isRecord(x) &&
+            isRecord(x.generation) &&
+            x.generation.status === "completed",
+        )
+    : null;
+  function inspectImported() {
+    try {
+      if (!isRecord(imported) || !isRecord(imported.generation)) return;
+      if (d.bank && !confirm("替换当前待采用的题库候选？原生成记录仍会保留。"))
+        return;
+      const questions = questionsValue(imported.generation.questions);
+      p.setDraft((x) => ({ ...x, bankCandidate: questions }));
+      d.setBankOpen(true);
+    } catch (e) {
+      p.report(e);
+    }
+  }
   return (
     <>
+      {imported ? (
+        <button onClick={inspectImported}>查看导入记录中的已完成题库</button>
+      ) : null}
       {generationId || generation ? (
         <section className="generation-panel" aria-label="出题任务">
           <div>

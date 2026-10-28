@@ -159,7 +159,7 @@ export function idValue(v: unknown) {
     throw new Error("操作编号无效");
   return id;
 }
-export function projectValue(v: unknown): Course {
+function decodeProject(v: unknown, working: boolean): Course {
   if (
     !isRecord(v) ||
     !isRecord(v.answers) ||
@@ -167,7 +167,8 @@ export function projectValue(v: unknown): Course {
     !isRecord(v.schedules) ||
     !Array.isArray(v.events) ||
     v.events.length > 500 ||
-    new TextEncoder().encode(JSON.stringify(v)).length > 750000
+    new TextEncoder().encode(JSON.stringify(v)).length >
+      (working ? 1600000 : 750000)
   )
     throw new Error("课程格式或容量无效");
   const questions = questionsValue(v.questions),
@@ -298,3 +299,8 @@ export function generationValue(v: unknown): Generation {
     createdAt: boundedText(v.createdAt, 50),
   };
 }
+
+export const projectValue = (value: unknown): Course =>
+  decodeProject(value, false);
+export const restoreDraftData = (value: unknown): Course =>
+  decodeProject(value, true);

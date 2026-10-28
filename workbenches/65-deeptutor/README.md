@@ -44,3 +44,5 @@ pnpm workbench package deeptutor
 导入路径：Floatboat → 我的 → 工作台 → 导入工作台。普通`.fbworkbench`包不含Python服务环境、开发数据库或模型凭据；项目中的服务需单独启动。客户端源包导入尚未实测。验收与真实Host范围见[ACCEPTANCE.md](ACCEPTANCE.md)。
 
 上游：[HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor)，Apache-2.0。保留原始模块和许可；未更改上游判题/调度算法。
+
+恢复：支持“导出工作稿”的完整恢复文件，优先采用最新snapshot并保留未应用extra。导入总是新项目；旧执行关联仅作历史记录，不自动重跑。新建、打开与导入期间锁定编辑，待旧工作稿保存完成后切换。

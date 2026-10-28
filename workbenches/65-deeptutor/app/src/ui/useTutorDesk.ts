@@ -1,3 +1,6 @@
+import { useNavigation } from "./navigation.ts";
+import { restoreDraftData } from "../contracts/tutor.ts";
+import { decodeProjectImport } from "../contracts/import-project.ts";
 import { useEffect, useRef, useState } from "react";
 import { useProjects, request, download } from "./workspace.tsx";
 import { isRecord } from "../contracts/project.ts";
@@ -15,9 +18,32 @@ import {
   type Question,
 } from "../contracts/tutor.ts";
 export function useTutorDesk() {
-  const p = useProjects(seed, projectValue, "Python · 函数与集合", {
+  const base = useProjects(seed, projectValue, "Python · 函数与集合", {
     storageKey: "deeptutor-course-v1",
+    restoreDraftData,
   });
+  const navigation = useNavigation();
+  const p = {
+    ...base,
+    busy: base.busy || navigation.transitioning,
+    fresh: () => navigation.run(() => base.fresh()),
+    open: (...args: Parameters<typeof base.open>) =>
+      navigation.run(() => base.open(...args)),
+    replace: (...args: Parameters<typeof base.replace>) =>
+      navigation.run(() => base.replace(...args)),
+    setData: (value: Parameters<typeof base.setData>[0]) => {
+      if (!navigation.active.current) base.setData(value);
+    },
+    setDraft: (value: Parameters<typeof base.setDraft>[0]) => {
+      if (!navigation.active.current) base.setDraft(value);
+    },
+    setTitle: (value: Parameters<typeof base.setTitle>[0]) => {
+      if (!navigation.active.current) base.setTitle(value);
+    },
+    save: (...args: Parameters<typeof base.save>) =>
+      navigation.active.current ? Promise.resolve(null) : base.save(...args),
+  };
+
   const [generationError, setGenerationError] = useState("");
   const [bankOpen, setBankOpen] = useState(false),
     [lessonEdit, setLessonEdit] = useState(false),
@@ -29,7 +55,9 @@ export function useTutorDesk() {
     }),
     [filter, setFilter] = useState("all"),
     [clock, setClock] = useState(Date.now());
-  useEffect(() => { setGenerationError(""); }, [p.documentKey]);
+  useEffect(() => {
+    setGenerationError("");
+  }, [p.documentKey]);
   const epoch = useRef(p.documentKey);
   epoch.current = p.documentKey;
   const operation = useRef(false),
@@ -298,7 +326,8 @@ export function useTutorDesk() {
           pendingGeneration: payload,
         }));
     } catch (e) {
-      if (epoch.current === key) setGenerationError(e instanceof Error ? e.message : "出题请求未完成");
+      if (epoch.current === key)
+        setGenerationError(e instanceof Error ? e.message : "出题请求未完成");
     } finally {
       operation.current = false;
       setBusy(false);
@@ -344,31 +373,29 @@ export function useTutorDesk() {
     );
   }
   async function importCourse(f: File) {
-    try {
-      if (f.size > 1600000) throw new Error("课程文件超过1.6MB");
-      const raw: unknown = JSON.parse(await f.text());
-      if (!isRecord(raw) || !isRecord(raw.data))
-        throw new Error("请导入完整课程项目；普通题库请使用题库入口。");
-      const data = projectValue(raw.data);
-      const extra = isRecord(raw.extra) ? { ...raw.extra } : {};
-      delete extra.pendingReview;
-      delete extra.pendingGeneration;
-      delete extra.generationId;
-      if (extra.generation) {
-        const g = generationValue(extra.generation);
-        if (g.status === "completed") extra.bankCandidate = g.questions;
-        delete extra.generation;
+    await navigation.run(async () => {
+      try {
+        if (f.size > 8 * 1024 * 1024) throw new Error("课程恢复文件超过8MB");
+        const imported = decodeProjectImport(JSON.parse(await f.text()));
+        if (!imported)
+          throw new Error("请导入完整课程或恢复工作稿；普通题库请用题库入口。");
+        const ok = await base.replace(
+          imported.data,
+          imported.title,
+          imported.extra,
+        );
+        if (ok)
+          base.setNotice(
+            imported.archived
+              ? "课程已导入为新项目；旧生成与复习请求已保留为导入记录，不会执行。"
+              : "课程已导入为新项目，未完成编辑已保留。",
+          );
+        return ok;
+      } catch (e) {
+        base.report(e);
+        return false;
       }
-      if (new TextEncoder().encode(JSON.stringify(extra)).length > 700000)
-        throw new Error("工作草稿超限");
-      await p.replace(
-        data,
-        typeof raw.title === "string" ? raw.title : "导入的课程",
-        extra,
-      );
-    } catch (e) {
-      p.report(e);
-    }
+    });
   }
   async function readBank(f: File) {
     try {

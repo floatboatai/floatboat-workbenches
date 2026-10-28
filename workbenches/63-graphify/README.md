@@ -45,3 +45,5 @@ Python服务测试：使用上面创建的解释器运行`-m unittest discover -
 `.fbworkbench`为独立应用源码包，导入：Floatboat → 我的 → 工作台 → 导入工作台。包不含Python环境、预览数据或用户文件；服务代码在本仓库项目目录中单独部署。客户端导入尚未验证。具体证据见[ACCEPTANCE.md](ACCEPTANCE.md)。
 
 上游：[Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify)。锁定`graphifyy==0.9.97`，Apache-2.0及历史MIT部分的许可/NOTICE通过只读资源随源码包提供。
+
+恢复：支持“导出工作稿”的完整恢复文件，优先采用最新snapshot并保留未应用extra。导入总是新项目；旧执行关联仅作历史记录，不自动重跑。新建、打开与导入期间锁定编辑，待旧工作稿保存完成后切换。
