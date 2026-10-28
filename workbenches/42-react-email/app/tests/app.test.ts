@@ -90,19 +90,22 @@ test("结构校验拒绝重复组件与过量变量", () => {
   assert.throws(() => variablesValue({ "bad-key": "x" }));
 });
 test("官方源码固定commit和每文件hash保持一致", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("../manifest.json", import.meta.url), "utf8"),
+  );
+  const resource = manifest.resources.find(
+    (r) => r.id === "third-party-notices",
+  );
+  assert.equal(resource.kind, "directory");
+  const root = new URL(resource.path + "/", new URL("../", import.meta.url));
   const provenance = JSON.parse(
-    await readFile(
-      new URL("../third-party/react-email-provenance.json", import.meta.url),
-      "utf8",
-    ),
+    await readFile(new URL("react-email-provenance.json", root), "utf8"),
   );
   assert.equal(provenance.commit, "2e3c28c89a4ee18bd302325f51d5cf4f93c7ea06");
   assert.deepEqual(provenance.externalImports, ["react"]);
   assert.equal(Object.keys(provenance.files).length, 19);
   for (const [name, hash] of Object.entries(provenance.files)) {
-    const bytes = await readFile(
-      new URL("../third-party/react-email-source/" + name, import.meta.url),
-    );
+    const bytes = await readFile(new URL("react-email-source/" + name, root));
     assert.equal(createHash("sha256").update(bytes).digest("hex"), hash);
   }
 });
