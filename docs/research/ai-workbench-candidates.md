@@ -4,7 +4,7 @@
 
 **建议先验证 LangExtract、Docling、LangGraph.js、Promptfoo、faster-whisper、Presenton。** 它们分别产出可复核的记录、文档结构、可恢复流程、评测报告、字幕和课件，容易定义真实输入输出。随后根据服务条件增加 LightRAG、Langfuse、Kokoro 和 ComfyUI。
 
-**实现更新（0.4.0）**：LangExtract、Docling、LangGraph.js、Promptfoo、faster-whisper、Presenton 已完成本地功能验收；仓库为 **32 / 61 项**，其余26个AI候选仍为研究状态。模型与上游服务的真实执行范围、尚未验证项见[发布验收](../release-0.4.0.md)。下文保留初筛时的工作流与排序，不能据此扩大已实现范围。
+**实现更新（0.4.0）**：LangExtract、Docling、LangGraph.js、Promptfoo、faster-whisper、Presenton 已完成本地功能验收；仓库为 **32 / 61 项**，其余26个AI候选仍为研究状态。模型与上游服务的真实执行范围、尚未验证项见[发布验收](../release-0.4.0.md)。LangGraph现已更新至[0.4.1](../release-0.4.1.md)，默认Gemini 3.8并通过真实Host调用。下文保留初筛时的工作流与排序，不能据此扩大已实现范围。
 
 ## 下一批怎么排
 

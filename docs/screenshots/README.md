@@ -2,7 +2,7 @@
 
 真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。采集日期：2026-10-27。
 
-既有26项保留历史采集版本；本批新增6项0.4.0界面。AI截图中的示例、真实引擎输出和未连接状态按项目验收记录区分。
+既有26项保留历史采集版本；本批新增6项AI界面，其中LangGraph更新为0.4.1真实模型交付与已保存状态，其余5项为0.4.0。AI截图中的示例、真实引擎输出和未连接状态按项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -34,9 +34,9 @@
 | [opensheetmusicdisplay.png](opensheetmusicdisplay.png) | 0.2.0 | 1440 × 1000 | 81.0 KiB | `05fb14de1ef33ba47f9138729959899a21a01cd053a737a8ad2b64a7a4c9f2d1` |
 | [langextract.png](langextract.png) | 0.4.0 | 1440 × 1243 | 160.8 KiB | `a5d4eef95117713c1fc8ce3f656659b4bf747e180e5fe7348cff8ef0dc19397d` |
 | [docling.png](docling.png) | 0.4.0 | 1440 × 1000 | 128.4 KiB | `9991beb70e9285d26fc7e1108b53ef01c83593a3e474c9bc372a0f37d655ce7c` |
-| [langgraph.png](langgraph.png) | 0.4.0 | 1440 × 1283 | 167.4 KiB | `d8e7b34b30790a500bc4ff0a81996b6862512cd9b01e70ce1774e89db988e074` |
+| [langgraph.png](langgraph.png) | 0.4.1 | 1440 × 1313 | 188.4 KiB | `686185f8275b53d40f075cb7c8f68e91f79a12476f0e2ee4da30cba675e212ea` |
 | [promptfoo.png](promptfoo.png) | 0.4.0 | 1440 × 1185 | 105.7 KiB | `5ab982dd8f1ab9830671fbf3ecfbcf76a5b5de9a99608e0c4b20da812134eb65` |
 | [faster-whisper.png](faster-whisper.png) | 0.4.0 | 1440 × 1392 | 145.7 KiB | `f662dd5659d280b5555fcb9a61abaefca01ac07541fccbcbf23bfa5195628d32` |
 | [presenton.png](presenton.png) | 0.4.0 | 1440 × 1206 | 185.5 KiB | `c26564d38a34c6620396e5d576d5e3ad0c098ab230597e1d7879003a4c1e70c3` |
 
-共32张，合计 4.26 MiB。
+共32张，合计 4.28 MiB。

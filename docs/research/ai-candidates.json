@@ -145,9 +145,9 @@
       "evidence_document": "ai-agent-candidates.md",
       "implementation": {
         "directory": "workbenches/58-langgraph",
-        "version": "0.4.0",
-        "record": "../release-0.4.0.md",
-        "upstream": "真实StateGraph/SQLite与进程重启；Host模型分支未验证"
+        "version": "0.4.1",
+        "record": "../release-0.4.1.md",
+        "upstream": "真实StateGraph/SQLite与进程重启；Gemini 3.8 Flash经Host完成整理、复核、交付和刷新恢复"
       }
     },
     {
