@@ -1,0 +1,63 @@
+{
+  "version": "0.6.0",
+  "status": "local-verified",
+  "date": "2026-10-28",
+  "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "upstream": {
+    "componentTag": "react-email@6.11.4",
+    "componentCommit": "2e3c28c89a4ee18bd302325f51d5cf4f93c7ea06",
+    "officialSources": 19,
+    "reproducedGeneratedModules": 38,
+    "externalComponentImports": [
+      "react"
+    ],
+    "renderer": "@react-email/render@2.1.1",
+    "runtimeNativeDependencies": false
+  },
+  "checks": {
+    "workbenchCheck": "passed",
+    "unitTests": 10,
+    "browser": "Chrome channel chrome",
+    "viewport": "1440x1180 and 375x1000",
+    "reducedMotion": "passed",
+    "normalFlowRuntimeErrors": 0,
+    "horizontalOverflow": false,
+    "domain": [
+      "real official heading/text/button/hr/row/column components",
+      "component add/edit/move",
+      "variable default and sample recipient override",
+      "desktop/mobile/plain-text proof",
+      "HTML/plain-text/project/recovery actual downloads",
+      "downloaded HTML opened independently and styled with official tables",
+      "HTML iframe sandbox empty; no scripts",
+      "refresh retains content"
+    ],
+    "autosave": [
+      "delayed save preserves newer input on refresh",
+      "committed response loss idempotent retry",
+      "invalid URL and unapplied JSON restore and recovery download imports new copy",
+      "two tab optimistic conflict",
+      "late renderer cannot overwrite current proof",
+      "synchronous transition lock awaits prior save",
+      "offline new working copy found and resumed"
+    ],
+    "capacityRegression": "~1.89MB draft accepted by SQLite autosave then fully recovered; 850KB formal limit distinct from 2MB restore limit",
+    "webGuidelines": "latest official rules fetched and source/browser reviewed 2026-10-28"
+  },
+  "package": {
+    "file": "artifacts/react-email-studio-0.6.0.fbworkbench",
+    "sha256": "023ffdeb1d37746b2adc22771541b20e5cf2ff58b98d2bb18f8f7d24a0204902",
+    "crc": "passed",
+    "matchedSourceAndAssets": 94,
+    "manifestResourceRelocation": "official pack rewrites asset path and adds defaults; identity and all other fields verified",
+    "businessDataIncluded": false
+  },
+  "preview": "http://127.0.0.1:56709/",
+  "hostImport": "unverified",
+  "limits": [
+    "browser preview is not all-email-client certification",
+    "no email sending, contact lookup, arbitrary JSX or eval",
+    "80 blocks, 60 default variables, 30 examples",
+    "850KB formal content; 2MB restore structure; 1.95MB total server request capacity; 4MB imported recovery file"
+  ]
+}

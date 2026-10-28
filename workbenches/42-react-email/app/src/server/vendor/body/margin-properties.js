@@ -1,0 +1,26 @@
+export const marginProperties = [
+    'margin',
+    'marginTop',
+    'marginBottom',
+    'marginRight',
+    'marginLeft',
+    'marginInline',
+    'marginBlock',
+    'marginBlockStart',
+    'marginBlockEnd',
+    'marginInlineStart',
+    'marginInlineEnd',
+];
+export const paddingProperties = [
+    'padding',
+    'paddingTop',
+    'paddingBottom',
+    'paddingRight',
+    'paddingLeft',
+    'paddingInline',
+    'paddingBlock',
+    'paddingBlockStart',
+    'paddingBlockEnd',
+    'paddingInlineStart',
+    'paddingInlineEnd',
+];
