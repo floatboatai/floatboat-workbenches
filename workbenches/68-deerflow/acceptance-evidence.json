@@ -1,0 +1,46 @@
+{
+  "version": "0.5.0",
+  "build": "passed",
+  "tests": 12,
+  "browser": "passed",
+  "autosave": "passed",
+  "workingDraftRecovery": "passed",
+  "upstream": {
+    "officialSerializer": "verified with real LangChain Core 1.4.9 message objects",
+    "sourceCommit": "d4ed40075f9101db6424b2331ea410934af146ac",
+    "nativeRoundtrip": "exact original JSON envelope retained",
+    "httpSync": "explicit local contract fixture; real read-only request, durable ledger, lost receipt and report preservation verified",
+    "liveResearch": "not-run",
+    "liveDeerFlowService": "unverified"
+  },
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "package": "passed",
+  "recoveryExportImportReload": {
+    "passed": true,
+    "schema": "snapshot:{title,data,extra}",
+    "unappliedDraftsRetained": true,
+    "pendingOperationsReplayed": false
+  },
+  "navigationDuringDelayedSave": {
+    "passed": true,
+    "allVisibleEditFieldsDisabled": true,
+    "oldAndNewDocumentsPreserved": true,
+    "sharedAutosaveChanged": false
+  },
+  "browserErrors": [],
+  "screenshot": {
+    "path": "../../docs/screenshots/deerflow.png",
+    "dimensions": [
+      1440,
+      1306
+    ],
+    "sha256": "4e64b3013d9fd9e74d04cea066af2ca4487e43fdfcac9a8bc373a3eb279f59af"
+  },
+  "limitations": [
+    "Research review and delivery scope; no agent execution or model inference",
+    "HTTP state adapter tested against explicit contract fixture, not a live DeerFlow deployment",
+    "Artifact paths preserved; original artifact bytes not downloaded",
+    "Floatboat source-package import unverified"
+  ]
+}

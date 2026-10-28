@@ -1,0 +1,7 @@
+# DeerFlow集成
+
+上游源快照d4ed40075f9101db6424b2331ea410934af146ac；harness2.1.0、app2.2.0-dev。核对routers/threads.py的ThreadStateResponse、client.py的get_thread、runtime/serialization.py消息序列化与artifacts路径契约。
+
+规范数据包含原生JSON文本、独立brief/人工Markdown报告、来源复核与版本状态。原生导出保留未知字段，读取过程中不执行tool_calls/计划/文件路径。服务端独立同步账本记录请求ID、线程ID、状态和快照；GET状态请求不产生远端写入，未知回执可查询原同步ID。只读适配器由DEERFLOW_URL和可选DEERFLOW_TOKEN配置，远程HTTPS，禁止重定向、限制响应和超时。没有把Host模型调用当作DeerFlowAgent运行。
+
+verification保存MIT上游序列化器原文，配固定langchain-core1.4.9验证消息与隐藏图片处理；这是格式验证，不是推理。浏览器使用ReactMarkdown禁用HTML，来源链接只接受HTTP(S)，状态字段按真实含义显示。共享SQLite/IndexedDB自动保存和冲突机制不改。

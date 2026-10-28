@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.72ac1e9f-d1e4-4764-b108-cd5d20bc31bc",
+  "registryName": "deerflow-studio",
+  "name": "研究交付 · DeerFlow",
+  "description": "原生研究会话、证据复核与报告交付",
+  "version": "0.5.0",
+  "changelog": "导入DeerFlow原生线程状态，复核证据和阶段产物，自动保存报告与工作草稿；提供只读上游同步。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}

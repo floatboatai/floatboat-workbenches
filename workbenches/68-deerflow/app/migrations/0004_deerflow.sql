@@ -1,0 +1,1 @@
+CREATE TABLE deerflow_syncs(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,thread_id TEXT NOT NULL,status TEXT NOT NULL,native TEXT NOT NULL DEFAULT '',error TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
