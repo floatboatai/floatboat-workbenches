@@ -53,6 +53,8 @@
 
 仓库级 React Best Practices 与 Web Design Guidelines 已安装，入口见 `AGENTS.md`；各产品的设计原则见 [设计说明](docs/design-principles.md)。
 
+X选题补充：[9个项目与转化优先级](docs/research/x-project-shortlist-2026-10-27.md)（2026-10-27，原帖、GitHub关注度与产品范围分开核验）。
+
 行业补充调研：[28 个小众行业候选](docs/research/niche-industry-candidates.md)。Maker.js、SeqViz、farmOS-map、Mirador 与 OpenSheetMusicDisplay 已实现；其余候选仍处于研究或计划阶段。第12–17项的独立服务接入条件见各自目录。
 
 AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbench-candidates.md)。覆盖文档抽取、知识图谱、Agent、评测、字幕、配音、课件和视觉生成，另含 3 个通用组件；已列明接口、独立服务、模型许可和维护边界。其中6项已完成本地功能验收，其余26项仍处于研究阶段；正式模型/外部服务范围以各项目说明为准。
