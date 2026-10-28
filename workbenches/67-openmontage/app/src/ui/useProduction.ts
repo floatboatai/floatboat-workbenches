@@ -13,6 +13,7 @@ type Workspace = ReturnType<typeof useProjects<Montage>>;
 export function useProduction(p: Workspace) {
   const [jobs, setJobs] = useState<RenderJob[]>([]),
     [busy, setBusy] = useState(false),
+    [transitioning, setTransitioning] = useState(false),
     [status, setStatus] = useState({
       available: false,
       message: "正在检查制作服务…",
@@ -177,7 +178,24 @@ export function useProduction(p: Workspace) {
     cancel,
     video,
     canLeave,
-    open: async (id: string) => canLeave() && p.open(id),
-    fresh: async () => canLeave() && p.fresh(),
+    transitioning,
+    open: async (id: string) => {
+      if (!canLeave()) return false;
+      setTransitioning(true);
+      try {
+        return await p.open(id);
+      } finally {
+        setTransitioning(false);
+      }
+    },
+    fresh: async () => {
+      if (!canLeave()) return false;
+      setTransitioning(true);
+      try {
+        return await p.fresh();
+      } finally {
+        setTransitioning(false);
+      }
+    },
   };
 }

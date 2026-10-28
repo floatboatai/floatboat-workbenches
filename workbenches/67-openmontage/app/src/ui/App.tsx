@@ -24,7 +24,7 @@ export function App() {
   const input = useRef<HTMLInputElement>(null),
     epoch = useRef(p.documentKey);
   epoch.current = p.documentKey;
-  const mutable = !p.loading && !p.busy && !io;
+  const mutable = !p.loading && !p.busy && !io && !flow.transitioning;
   const raw =
       typeof p.draft.json === "string"
         ? p.draft.json
@@ -86,6 +86,7 @@ export function App() {
           )
         )
           return;
+        v.draft.importedPendingRender = v.draft.pendingRender;
         delete v.draft.pendingRender;
       }
       await p.replace(v.data, v.title, v.draft);

@@ -29,6 +29,18 @@ export async function unpack(file: File) {
   if (file.size > 85 * 1024 * 1024) throw new Error("工程文件超过85MB");
   const v: unknown = JSON.parse(await file.text());
   if (
+    isRecord(v) &&
+    isRecord(v.snapshot) &&
+    typeof v.snapshot.title === "string"
+  ) {
+    return {
+      title: v.snapshot.title,
+      data: restoreMontage(v.snapshot.data),
+      draft: isRecord(v.snapshot.extra) ? { ...v.snapshot.extra } : {},
+      recovery: true,
+    };
+  }
+  if (
     !isRecord(v) ||
     v.format !== "floatboat-openmontage-v1" ||
     typeof v.title !== "string" ||

@@ -53,5 +53,20 @@
       1440,
       1100
     ]
+  },
+  "recoveryImportRegression": {
+    "at": "2026-10-28T04:36:28.014Z",
+    "cacheSnapshotReimport": true,
+    "newProject": true,
+    "completeEditAndUnappliedDraft": true
+  },
+  "navigationTransitionLocksEditing": true,
+  "package": {
+    "name": "openmontage-studio-0.5.0-final.fbworkbench",
+    "sha256": "d77e2564d7c8b371245f61c873820ddae0096ee88d38bba32ee8c0ba21ce3903",
+    "files": 40,
+    "crcValid": true,
+    "licenseIncluded": true,
+    "businessDataExcluded": true
   }
 }
