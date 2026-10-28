@@ -3271,5 +3271,83 @@
         }
       ]
     }
+  },
+  {
+    "name": "Ray Optics Simulation",
+    "repo": "ricktu288/ray-optics",
+    "category": "光学与教学",
+    "kind": "原生工具/组件",
+    "workbench": "光路实验、参数对照与场景交付",
+    "core_features": "原生Scene/Simulator/Editor、CPU基础元件与场景JSON",
+    "integration": "固定上游原生核心，适配官方模板与完整工作稿持久化",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "Apache-2.0",
+    "caveat": "基础二维几何光学；不承诺专业镜头优化、WebGPU或未验证公式路径。",
+    "url": "https://github.com/ricktu288/ray-optics",
+    "archived": false,
+    "sources": [
+      "https://github.com/ricktu288/ray-optics"
+    ],
+    "group": "新候选",
+    "mode": "原生核心集成",
+    "checked_at": "2026-10-28",
+    "id": 73,
+    "slug": "ray-optics",
+    "directory": "workbenches/73-ray-optics",
+    "status": "planned",
+    "version": "0.7.0"
+  },
+  {
+    "name": "Invoice Builder",
+    "repo": "piratuks/invoice-builder",
+    "category": "单据与运营",
+    "kind": "原生工具/组件",
+    "workbench": "报价、发票制作与PDF校样",
+    "core_features": "原生计算/文档模型、PDF模板与单据快照",
+    "integration": "固定上游原生核心，适配官方模板与完整工作稿持久化",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT",
+    "caveat": "适配数据库与IPC；不自动记账、寄送或宣称税务合规。",
+    "url": "https://github.com/piratuks/invoice-builder",
+    "archived": false,
+    "sources": [
+      "https://github.com/piratuks/invoice-builder"
+    ],
+    "group": "新候选",
+    "mode": "原生核心集成",
+    "checked_at": "2026-10-28",
+    "id": 74,
+    "slug": "invoice-builder",
+    "directory": "workbenches/74-invoice-builder",
+    "status": "planned",
+    "version": "0.7.0"
+  },
+  {
+    "name": "Mesh2Motion",
+    "repo": "Mesh2Motion/mesh2motion-app",
+    "category": "三维与动画",
+    "kind": "原生工具/组件",
+    "workbench": "模型绑定、动作预览与动画交付",
+    "core_features": "原生模型处理、骨架绑定、Three.js场景和GLB导出",
+    "integration": "固定上游原生核心，适配官方模板与完整工作稿持久化",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT (code); CC0 (assets)",
+    "caveat": "普通GLB优先；贴图资源路径需适配，压缩模型/解码器/WASM另验。",
+    "url": "https://github.com/Mesh2Motion/mesh2motion-app",
+    "archived": false,
+    "sources": [
+      "https://github.com/Mesh2Motion/mesh2motion-app"
+    ],
+    "group": "新候选",
+    "mode": "原生核心集成",
+    "checked_at": "2026-10-28",
+    "id": 75,
+    "slug": "mesh2motion",
+    "directory": "workbenches/75-mesh2motion",
+    "status": "planned",
+    "version": "0.7.0"
   }
 ]
