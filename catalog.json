@@ -3421,5 +3421,83 @@
       "acceptance": "workbenches/75-mesh2motion/ACCEPTANCE.md",
       "upstream": "Mesh2Motion commiteef2de98原生权重管线，Three.js0.185.0"
     }
+  },
+  {
+    "name": "Oasis Editor",
+    "repo": "celsowm/oasis-editor",
+    "category": "分页文档",
+    "kind": "原生工具/组件",
+    "workbench": "DOCX分页编辑、校样与文档交付",
+    "core_features": "原生Canvas分页编辑、DOCX读写和PDF导出",
+    "integration": "固定原生核心，适配官方模板和完整工作副本",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT",
+    "caveat": "早期编辑器；先验证真实格式往返与资源完整性，不承诺完整Word兼容。",
+    "url": "https://github.com/celsowm/oasis-editor",
+    "archived": false,
+    "sources": [
+      "https://github.com/celsowm/oasis-editor"
+    ],
+    "group": "原生工具",
+    "mode": "原生核心集成",
+    "checked_at": "2026-10-28",
+    "id": 76,
+    "slug": "oasis-editor",
+    "directory": "workbenches/76-oasis-editor",
+    "status": "planned",
+    "version": "0.8.0"
+  },
+  {
+    "name": "CircuitJS1",
+    "repo": "pfalstad/circuitjs1",
+    "category": "电子工程",
+    "kind": "原生工具/组件",
+    "workbench": "电路实验、示波器和实验记录",
+    "core_features": "原生TypeScript电路编辑、求解、波形与电路快照",
+    "integration": "固定原生核心，适配官方模板和完整工作副本",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "GPL-2.0-or-later",
+    "caveat": "按GPL源代码声明保留许可；不接真实硬件，恢复不自动运行或播放音频。",
+    "url": "https://github.com/pfalstad/circuitjs1",
+    "archived": false,
+    "sources": [
+      "https://github.com/pfalstad/circuitjs1"
+    ],
+    "group": "原生工具",
+    "mode": "原生核心集成",
+    "checked_at": "2026-10-28",
+    "id": 77,
+    "slug": "circuitjs",
+    "directory": "workbenches/77-circuitjs",
+    "status": "planned",
+    "version": "0.8.0"
+  },
+  {
+    "name": "glTF Transform",
+    "repo": "donmccurdy/glTF-Transform",
+    "category": "三维资产",
+    "kind": "原生工具/组件",
+    "workbench": "模型材质检查、修整和GLB交付",
+    "core_features": "原生NodeIO/core读写、节点/材质修改和GLB复验",
+    "integration": "固定原生核心，适配官方模板和完整工作副本",
+    "effort": "中–高",
+    "priority": "A",
+    "license": "MIT",
+    "caveat": "普通自包含模型优先；压缩、特殊扩展和纹理编码逐项验证。",
+    "url": "https://github.com/donmccurdy/glTF-Transform",
+    "archived": false,
+    "sources": [
+      "https://github.com/donmccurdy/glTF-Transform"
+    ],
+    "group": "原生工具",
+    "mode": "原生核心集成",
+    "checked_at": "2026-10-28",
+    "id": 78,
+    "slug": "gltf-transform",
+    "directory": "workbenches/78-gltf-transform",
+    "status": "planned",
+    "version": "0.8.0"
   }
 ]
