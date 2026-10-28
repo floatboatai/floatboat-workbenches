@@ -34,6 +34,13 @@
       "role": "asset",
       "location": "project",
       "path": "licenses"
+    },
+    {
+      "id": "setup-guide",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "SETUP.md"
     }
   ]
 }
