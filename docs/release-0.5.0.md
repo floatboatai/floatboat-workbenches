@@ -47,4 +47,4 @@ README提供44项真实截图；本批12张均由真实Chrome拍摄，普通示�
 
 补充Linux验证：在既有`node:22-bookworm`容器内只读挂载源码、禁用网络，以各项目根目录为工作目录执行12项共132个应用测试，全部通过。该运行使用Node22.23.3，未替代GitHub Ubuntu24.04/Node22.22.2的完整依赖安装与构建。GEOInflow来源清单已移入随包导出的src目录，并复验13项测试。
 
-线上补验：[GitHub Actions](https://github.com/floatboatai/floatboat-workbenches/actions/runs/40637769141) 已在发布提交 `5ec93c34997d192a8ddcfb34931aed5ddd6d77de` 上全部通过；所有44个工作台完成Ubuntu/Node22.22.2检查、测试、打包与介绍图产物交付。后端上传作业按配置跳过，不代表已公开上架。
+线上补验：[GitHub Actions](https://github.com/floatboatai/floatboat-workbenches/actions/runs/40637769141) 已在发布提交 `5ec93c34997d192a8ddcfb34931aed5ddd6d77de` 上全部通过；所有44个工作台完成Ubuntu/Node22.22.2检查、测试、打包与介绍图产物交付。官方账号上传作业也已成功；上传成功不代表已通过审核或公开上架。

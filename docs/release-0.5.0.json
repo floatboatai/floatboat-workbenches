@@ -216,6 +216,7 @@
     "conclusion": "success",
     "finishedAt": "2026-10-28T05:36:45Z",
     "successfulJobs": 46,
-    "skippedJobs": 0
+    "skippedJobs": 0,
+    "officialUpload": "success; publication/review status not inferred"
   }
 }
