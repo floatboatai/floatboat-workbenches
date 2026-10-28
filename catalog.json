@@ -1425,7 +1425,7 @@
     "checked_at": "2026-10-28",
     "verification": {
       "build": "passed",
-      "tests": 10,
+      "tests": 12,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",

@@ -8,7 +8,7 @@
 
 当前批次 **0.6.0** · **50 / 72 个工作台已完成本地功能验收**，其余22个为计划项目。本批新增Konva、LogicFlow、SimpleMindMap、wavesurfer.js、React Email和Bruno，覆盖标注、流程、脑图、录音听审、邮件与接口调试。Floatboat客户端导入尚未实测。
 
-本批6项均完成原生核心操作、自动保存、未完成草稿、恢复稿回导、冲突、导出与真实Chrome验收，并采用各自产品的布局。实际范围及71项应用测试见[0.6.0验收](docs/release-0.6.0.md)。上一批44项的GitHub检查、打包及官方上传已经通过；WASM画布升级仍等待客户端与模板就绪。
+本批6项均完成原生核心操作、自动保存、未完成草稿、恢复稿回导、冲突、导出与真实Chrome验收，并采用各自产品的布局。实际范围及73项应用测试见[0.6.0验收](docs/release-0.6.0.md)。GitHub检查、打包及官方上传进度见[Actions](https://github.com/floatboatai/floatboat-workbenches/actions)；WASM画布升级仍等待客户端与模板就绪。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
