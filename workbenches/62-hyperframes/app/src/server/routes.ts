@@ -3,6 +3,7 @@ import { isRecord } from "../contracts/project.ts";
 import { movieValue, composition } from "../contracts/movie.ts";
 import { createStore, StoreError } from "./store.ts";
 import { registerAutosaveRoutes } from "./autosave.ts";
+import { reconcileRender } from "./render-state.ts";
 export function registerRoutes(app: WorkbenchServer) {
   const store = createStore(app.database, movieValue);
   registerAutosaveRoutes(app, movieValue);
@@ -144,19 +145,16 @@ export function registerRoutes(app: WorkbenchServer) {
         });
         if (!r.ok) throw new Error();
         const j: unknown = await r.json();
-        if (!isRecord(j) || j.id !== body.id || typeof j.state !== "string")
-          throw new Error();
-        app.database
-          .prepare("UPDATE renders SET state=?,error=? WHERE id=?")
-          .run(j.state, "", body.id);
+        reconcileRender(app.database, body.id, j);
       } catch {
         app.database
-          .prepare("UPDATE renders SET state=?,error=? WHERE id=? AND state<>?")
+          .prepare(
+            "UPDATE renders SET state=?,error=? WHERE id=? AND state IN ('submitting','unknown')",
+          )
           .run(
             "unknown",
             "提交结果未确认，请刷新任务核对；不会自动重复渲染。",
             body.id,
-            "completed",
           );
       }
       return get(body.id);
@@ -181,15 +179,7 @@ export function registerRoutes(app: WorkbenchServer) {
       });
       if (!r.ok) throw new Error("尚未确认提交结果，请稍后按同一任务重试。");
       const j: unknown = await r.json();
-      if (!isRecord(j) || j.id !== params.id || typeof j.state !== "string")
-        throw new Error("渲染响应无效。");
-      app.database
-        .prepare("UPDATE renders SET state=?,error=? WHERE id=?")
-        .run(
-          j.state,
-          typeof j.error === "string" ? j.error.slice(0, 1000) : "",
-          params.id,
-        );
+      reconcileRender(app.database, params.id, j);
       return get(params.id);
     } catch (e) {
       return failure(e);
@@ -202,14 +192,7 @@ export function registerRoutes(app: WorkbenchServer) {
         const r = await upstream("/jobs/" + encodeURIComponent(params.id));
         if (r.ok) {
           const j: unknown = await r.json();
-          if (isRecord(j) && j.id === params.id && typeof j.state === "string")
-            app.database
-              .prepare("UPDATE renders SET state=?,error=? WHERE id=?")
-              .run(
-                j.state,
-                typeof j.error === "string" ? j.error.slice(0, 1000) : "",
-                params.id,
-              );
+          reconcileRender(app.database, params.id, j);
         }
       } catch {}
       return get(params.id);
@@ -226,11 +209,7 @@ export function registerRoutes(app: WorkbenchServer) {
       );
       if (!r.ok) throw new Error("未确认取消，请刷新任务。");
       const j: unknown = await r.json();
-      if (!isRecord(j) || typeof j.state !== "string")
-        throw new Error("取消响应无效");
-      app.database
-        .prepare("UPDATE renders SET state=? WHERE id=?")
-        .run(j.state, params.id);
+      reconcileRender(app.database, params.id, j);
       return get(params.id);
     } catch (e) {
       return failure(e);

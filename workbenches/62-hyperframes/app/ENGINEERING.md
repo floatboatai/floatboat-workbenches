@@ -9,3 +9,7 @@
 渲染器仅监听loopback，拒绝浏览器Origin；只有预定义composition和固定CLI参数，不接受命令行、路径或任意脚本输入。远程工作台服务地址需HTTPS，可配置服务token。视频默认不随工作台源包，服务数据存renderer/.local/jobs，可通过HYPERFRAMES_RENDER_DATA显式配置。Node/Chrome/FFmpeg由操作者安装。
 
 应用check/test/package与renderer契约测试分开运行；真实CLI及浏览器证据见项目ACCEPTANCE。固定SDK、CSP和工具链未改动。manifest不声明未使用的Host模型能力。
+
+提交前将operation ID、项目ID与输入快照写入自动保存草稿并等待确认；未确认期间保留pending，重试使用相同编号/快照，导航或导入不会丢掉未确认任务。终态确认后清理pending。导入携带运行信息的工程需明确确认只创建编辑副本，不重放原运行。
+
+render-state模块对响应身份/状态验证并实现单调状态归并，服务端读取当前SQL状态后同步更新，阻止迟到响应复活终态；前端列表请求有序号并按终态归并。独立渲染器storage写入队列串行化每个任务，采用唯一临时文件与原子rename。

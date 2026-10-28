@@ -15,6 +15,7 @@ export function App() {
   const desk = useMovieDesk();
   const {
     p,
+    pending,
     scene,
     timeline,
     duration,
@@ -284,9 +285,14 @@ export function App() {
             onClick={() => void render()}
           >
             <Download size={17} />
-            {busy ? "正在提交…" : "渲染 MP4"}
+            {busy ? "正在提交…" : pending ? "核对同一任务" : "渲染 MP4"}
           </button>
         </div>
+        {pending ? (
+          <p role="status">
+            当前任务编号和输入已保留；核对同一任务不会创建新的视频输出。
+          </p>
+        ) : null}
         {jobs.length === 0 ? (
           <p className="empty">准备好画面后，创建第一份视频输出。</p>
         ) : (
@@ -305,7 +311,7 @@ export function App() {
                   <button onClick={() => void exportVideo(j.id)}>
                     下载 MP4
                   </button>
-                ) : ["running", "queued", "interrupted"].includes(j.state) ? (
+                ) : ["running", "queued"].includes(j.state) ? (
                   <button
                     onClick={async () => {
                       try {

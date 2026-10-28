@@ -9,10 +9,14 @@ import {
   total,
   sceneSvg,
   composition,
-  jobValue,
   type Scene,
-  type RenderJob,
 } from "../contracts/movie";
+import {
+  jobValue,
+  mergeJobs,
+  terminal,
+  type RenderJob,
+} from "../contracts/render-state";
 export function useMovieDesk() {
   const p = useProjects(seed, movieValue, "Field Notes · 秋季发布", {
     storageKey: "hyperframes-movie-v1",
@@ -28,6 +32,8 @@ export function useMovieDesk() {
       message: "正在检查渲染服务…",
     }),
     [jsonOpen, setJsonOpen] = useState(false);
+  const listSequence = useRef(0),
+    renderFlight = useRef(false);
   const file = useRef<HTMLInputElement>(null),
     epoch = useRef(p.documentKey);
   epoch.current = p.documentKey;
@@ -38,6 +44,19 @@ export function useMovieDesk() {
       timeline.find((x) => time >= x.start && time < x.start + x.duration) ??
       timeline.at(-1)!;
   const mutable = !p.loading && !p.busy;
+  const pending = p.draft.pendingRender;
+  const pendingRef = useRef(pending);
+  pendingRef.current = pending;
+  function clearPending(id: string) {
+    if (isRecord(pendingRef.current) && pendingRef.current.id === id) {
+      pendingRef.current = undefined;
+      p.setDraft((d) => {
+        const next = { ...d };
+        delete next.pendingRender;
+        return next;
+      });
+    }
+  }
   const raw =
     typeof p.draft.json === "string"
       ? p.draft.json
@@ -61,6 +80,7 @@ export function useMovieDesk() {
     }
   }
   async function loadJobs() {
+    const sequence = ++listSequence.current;
     const key = epoch.current,
       id = p.current?.id;
     if (!id) return;
@@ -77,9 +97,13 @@ export function useMovieDesk() {
             : j;
         }),
       );
-      if (key === epoch.current) setJobs(list);
+      if (key === epoch.current && sequence === listSequence.current) {
+        setJobs((old) => mergeJobs(old, list));
+        for (const j of list) if (terminal(j.state)) clearPending(j.id);
+      }
     } catch (e) {
-      if (key === epoch.current) p.report(e);
+      if (key === epoch.current && sequence === listSequence.current)
+        p.report(e);
     }
   }
   useEffect(() => {
@@ -150,36 +174,74 @@ export function useMovieDesk() {
     setTime(duration + 0.7);
   }
   async function render() {
+    if (renderFlight.current) return;
+    renderFlight.current = true;
     const key = epoch.current;
     setBusy(true);
     p.setError("");
     try {
-      movieValue(p.data);
-      if (
-        jobs.some((j) =>
-          ["queued", "running", "submitting", "unknown"].includes(j.state),
+      let command: { id: string; projectId: string; movie: typeof seed };
+      if (pendingRef.current !== undefined) {
+        const raw = pendingRef.current;
+        if (
+          !isRecord(raw) ||
+          typeof raw.id !== "string" ||
+          !/^[0-9a-f-]{36}$/.test(raw.id) ||
+          typeof raw.projectId !== "string" ||
+          raw.projectId !== p.current?.id
         )
-      )
-        throw new Error("已有未完成或待核对任务，请先刷新任务或取消。");
-      const snapshot = structuredClone(p.data),
-        saved = await p.save();
-      if (!saved) return;
+          throw new Error("待核对任务信息无效，请导出恢复草稿后核对原项目。");
+        command = {
+          id: raw.id,
+          projectId: raw.projectId,
+          movie: movieValue(raw.movie),
+        };
+      } else {
+        if (jobs.some((j) => !terminal(j.state)))
+          throw new Error("已有未完成任务，请先核对或取消。");
+        const snapshot = movieValue(p.data),
+          saved = await p.save();
+        if (!saved || key !== epoch.current) return;
+        command = {
+          id: crypto.randomUUID(),
+          projectId: saved.id,
+          movie: snapshot,
+        };
+        pendingRef.current = command;
+        p.setDraft((d) => ({ ...d, pendingRender: command }));
+      }
+      if (!(await p.save()) || key !== epoch.current) return;
       const j = jobValue(
         await request("/api/renders", {
           method: "POST",
-          body: JSON.stringify({
-            id: crypto.randomUUID(),
-            projectId: saved.id,
-            movie: snapshot,
-          }),
+          body: JSON.stringify(command),
         }),
       );
-      if (key === epoch.current) setJobs((old) => [j, ...old]);
+      if (key === epoch.current) {
+        listSequence.current++;
+        setJobs((old) => mergeJobs(old, [j]));
+        if (terminal(j.state)) clearPending(j.id);
+      }
     } catch (e) {
       if (key === epoch.current) p.report(e);
     } finally {
+      renderFlight.current = false;
       setBusy(false);
     }
+  }
+  async function fresh() {
+    if (pendingRef.current !== undefined) {
+      p.setError("当前有未完成或待核对的渲染，请先核对同一任务或取消。");
+      return false;
+    }
+    return p.fresh();
+  }
+  async function open(id: string) {
+    if (pendingRef.current !== undefined) {
+      p.setError("当前有未完成或待核对的渲染，请先核对同一任务或取消。");
+      return false;
+    }
+    return p.open(id);
   }
   async function exportVideo(id: string) {
     try {
@@ -194,6 +256,10 @@ export function useMovieDesk() {
   }
   async function importFile(f?: File) {
     if (!f) return;
+    if (pendingRef.current !== undefined) {
+      p.setError("当前渲染仍待核对，导入前请先核对同一任务或取消。");
+      return;
+    }
     try {
       if (f.size > 900000) throw new Error("工程不能超过900 KB");
       const v: unknown = JSON.parse(await f.text());
@@ -203,11 +269,17 @@ export function useMovieDesk() {
         typeof v.title !== "string"
       )
         throw new Error("不是有效的HyperFrames工作台工程。");
-      await p.replace(
-        restoreMovie(v.data),
-        v.title,
-        isRecord(v.draft) ? v.draft : {},
-      );
+      const extra = isRecord(v.draft) ? { ...v.draft } : {};
+      if (extra.pendingRender !== undefined) {
+        if (
+          !confirm(
+            "此工程包含运行记录。导入只创建编辑副本，不重放任务；原任务保留在原项目中。继续导入吗？",
+          )
+        )
+          return;
+        delete extra.pendingRender;
+      }
+      await p.replace(restoreMovie(v.data), v.title, extra);
     } catch (e) {
       p.report(e);
     }
@@ -223,7 +295,8 @@ export function useMovieDesk() {
     cancelled: "已取消",
   };
   return {
-    p,
+    p: { ...p, open, fresh },
+    pending: pending !== undefined,
     scene,
     timeline,
     duration,

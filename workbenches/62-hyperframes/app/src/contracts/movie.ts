@@ -169,21 +169,3 @@ export function composition(movie: Movie) {
       "",
     )}</div><script>document.querySelectorAll('.clip').forEach(el=>{const start=Number(el.dataset.start)*1000;const a=el.querySelector('.motion').animate([{opacity:0,transform:'translateY(28px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,delay:start,fill:'both',easing:'ease-out'});a.pause();a.currentTime=0;});</script></body></html>`;
 }
-export type RenderJob = {
-  id: string;
-  state: string;
-  createdAt: string;
-  error: string;
-  projectId: string;
-};
-export function jobValue(v: unknown): RenderJob {
-  if (!isRecord(v) || typeof v.id !== "string" || typeof v.state !== "string")
-    throw new Error("渲染任务响应无效。");
-  return {
-    id: v.id,
-    state: v.state,
-    createdAt: boundedText(v.createdAt, 80),
-    error: typeof v.error === "string" ? v.error : "",
-    projectId: typeof v.projectId === "string" ? v.projectId : "",
-  };
-}

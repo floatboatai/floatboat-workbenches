@@ -1,3 +1,4 @@
+import { createJobWriter } from "./storage.mjs";
 import { createServer } from "node:http";
 import {
   mkdir,
@@ -23,10 +24,7 @@ const cli = resolve(
 await mkdir(root, { recursive: true });
 const jobs = new Map(),
   children = new Map();
-const save = async (j) => {
-  await writeFile(join(root, j.id + ".json.tmp"), JSON.stringify(j));
-  await rename(join(root, j.id + ".json.tmp"), join(root, j.id + ".json"));
-};
+const save = createJobWriter(root);
 for (const name of await readdir(root)) {
   if (!name.endsWith(".json")) continue;
   try {
@@ -60,8 +58,10 @@ async function render(j) {
   const folder = join(root, j.id);
   await mkdir(folder, { recursive: true });
   await writeFile(join(folder, "index.html"), composition(j.movie));
+  if (j.state !== "queued") return;
   j.state = "running";
   await save(j);
+  if (j.state !== "running") return;
   const p = spawn(
     process.execPath,
     [

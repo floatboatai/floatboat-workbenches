@@ -21,8 +21,8 @@
   "invalidDurationRestore": true,
   "optimisticConflict": true,
   "version": "0.5.0",
-  "applicationTests": 6,
-  "rendererTests": 3,
+  "applicationTests": 9,
+  "rendererTests": 4,
   "engine": "hyperframes@0.8.210",
   "actualRender": {
     "codec": "h264",
@@ -40,5 +40,15 @@
       1440,
       1149
     ]
+  },
+  "pendingAndRaceRegression": {
+    "at": "2026-10-28T03:51:07.689Z",
+    "postResponseLostAndListUnavailable": true,
+    "pendingReload": true,
+    "originalOperationAndSnapshotRetried": true,
+    "onlyOneServerJob": true,
+    "navigationAndImportGuard": true,
+    "staleListCannotRevertCompleted": true,
+    "pageErrors": []
   }
 }
