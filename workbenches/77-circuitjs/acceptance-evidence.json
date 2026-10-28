@@ -1,133 +1,161 @@
 {
   "schemaVersion": 1,
   "workbench": "circuitjs",
-  "version": "0.8.0",
+  "version": "0.8.1",
+  "checkedAt": "2026-10-28",
+  "scope": "Information architecture and UI layout; native solver and persistence unchanged",
+  "layout": {
+    "primary": "native circuit and Scope",
+    "tools": "vertical component rack",
+    "instruments": "bottom timebase/probe/voltage/current console",
+    "lifecycle": "left-top experiment book dialog",
+    "notes": "on-demand experiment book page",
+    "alwaysVisibleProjectCrud": false
+  },
+  "corePreserved": {
+    "nativeBridgeAutosaveImportExportHandlersUnchanged": true,
+    "handlerSha256": "413ed3bc9a5854590c29afaffe53e2ccf63c195d21ab24daf6111074956bfbba",
+    "corePathsUnchanged": [
+      "workbenches/77-circuitjs/app/engine",
+      "workbenches/77-circuitjs/app/engine-src",
+      "workbenches/77-circuitjs/app/src/server",
+      "workbenches/77-circuitjs/app/src/contracts",
+      "workbenches/77-circuitjs/app/src/ui/autosave-client.ts",
+      "workbenches/77-circuitjs/app/src/ui/autosave-cache.ts",
+      "workbenches/77-circuitjs/app/migrations",
+      "workbenches/77-circuitjs/app/LICENSE"
+    ],
+    "storageKey": "circuitjs-v08",
+    "schemaChanged": false
+  },
+  "checks": {
+    "templateCheck": "passed",
+    "existingTests": {
+      "passed": 6,
+      "failed": 0,
+      "newMirrorTests": 0
+    },
+    "chrome": {
+      "checks": [
+        {
+          "name": "Initial surface prioritizes native circuit and bottom instruments; lifecycle stays in closed book"
+        },
+        {
+          "name": "Dialog keyboard trap, Escape, both focus return targets and unchanged native iframe"
+        },
+        {
+          "name": "New DC example from book; solver 2.5 V / 2.5 mA",
+          "data": [
+            {
+              "type": "VoltageElm",
+              "v": 5,
+              "i": 0.0025
+            },
+            {
+              "type": "ResistorElm",
+              "v": 2.5,
+              "i": 0.0025
+            },
+            {
+              "type": "ResistorElm",
+              "v": 2.5,
+              "i": 0.0025
+            },
+            {
+              "type": "WireElm",
+              "v": 0,
+              "i": 0.0025
+            }
+          ]
+        },
+        {
+          "name": "Resized canvas pointer coordinates place a real resistor; undo works"
+        },
+        {
+          "name": "Unblurred native parameter draft restores, rejects invalid apply, then applies 2k"
+        },
+        {
+          "name": "Contextual XML/PNG export; book import creates new native experiment"
+        },
+        {
+          "name": "Real recovery download/import preserves unapplied parameter and creates a new identity"
+        },
+        {
+          "name": "Delayed autosave keeps notes editable; explicit document change disables old-object editing and book navigation"
+        },
+        {
+          "name": "Delayed acknowledgement + book switch retains latest notes; recent reopen and record export work"
+        },
+        {
+          "name": "Source page retains unfinished raw text across book close/open"
+        },
+        {
+          "name": "375px probe controls have >=28px targets; keyboard edits resistor and adds real native Scope"
+        },
+        {
+          "name": "375px, centered native canvas/Scope, reduced motion, keyboard run/pause and book Escape",
+          "data": {
+            "width": 332,
+            "min": 16,
+            "max": 299,
+            "n": 3043
+          }
+        }
+      ],
+      "errors": [],
+      "passed": true
+    },
+    "screenshots": {
+      "naturalExample": "RC square response; 1 kΩ / 1 µF / 100 Hz",
+      "desktop": [
+        1440,
+        1000
+      ],
+      "mobile": [
+        375,
+        900
+      ],
+      "savedSourceMatchesNativeDump": true,
+      "acknowledgedPhase": "saved",
+      "paused": true
+    }
+  },
+  "package": {
+    "generatedResourceLock": "counts and bytes verified",
+    "file": "circuitjs-0.8.1.fbworkbench",
+    "bytes": 2035395,
+    "sha256": "7177ddfb859882e04ca64d845c3c0c47c37d8b9d2a654eac0a708f34cb90d28c",
+    "entries": 741,
+    "transferFiles": 740,
+    "crc": "passed",
+    "transferHashes": "passed",
+    "sourceAndAssetsMatchWorktree": 738,
+    "nativeOriginalFilesVerified": 683,
+    "version": "0.8.1",
+    "identityPreserved": true,
+    "capabilities": [],
+    "license": "GPL-2.0-or-later",
+    "businessDataIncluded": false,
+    "hostImport": "unverified"
+  },
   "upstream": {
     "repository": "https://github.com/pfalstad/circuitjs1",
     "commit": "e952e788a4135a693bfd4cee7883f9b3314e3e76",
+    "license": "GPL-2.0-or-later",
     "originalFilesVerified": 683
   },
-  "license": "GPL-2.0-or-later",
-  "checkedAt": "2026-10-28",
-  "checks": {
-    "templateCheck": "passed",
-    "tests": {
-      "passed": 6,
-      "failed": 0
-    },
-    "sourcePackageTests": {
-      "node22": 6,
-      "linuxNode22": 6
-    },
-    "chromePrimaryFlow": "passed",
-    "unblurredParameterDraft": "passed",
-    "recoveryFileNewDocument": "passed",
-    "nativeXMLRoundTrip": "passed",
-    "nativeDC": {
-      "voltage": 2.5,
-      "current": 0.0025
-    },
-    "nativeRC": {
-      "time": 0.0010000000000000022,
-      "voltage": 3.1559966177751155,
-      "expected": 3.1606027941427928,
-      "tolerance": 0.015
-    },
-    "delayedAndLostAcknowledgement": "passed",
-    "optimisticConflict": "passed",
-    "offlineReload": "passed",
-    "brandNewOfflineSwitchAndReopen": "passed",
-    "nativeCanvasDragCreateAndUndo": "passed",
-    "parameterResetAndDragExportValidity": "passed",
-    "pngAndExperimentExport": "passed",
-    "viewport375": "passed",
-    "keyboardAndReducedMotion": "passed",
-    "resourceRelocationRebuild": "passed"
-  },
-  "package": {
-    "path": "circuitjs-0.8.0-verified.fbworkbench",
-    "bytes": 2030788,
-    "sha256": "77acb5d4dfab8b45ada8e905fa707b880a494b8a72d1c146ff6097b944604eb8",
-    "entries": 741,
-    "transferFiles": 740,
-    "originalFiles": 683,
-    "crc": true,
-    "transferHashes": true,
-    "resources": true,
-    "sourceIncluded": true,
-    "dataIncluded": false,
-    "license": "GPL-2.0-or-later",
-    "tests": {
-      "sourceNode": {
-        "exit": 0,
-        "counts": {
-          "tests": "6",
-          "pass": "6",
-          "fail": "0"
-        }
-      },
-      "rebuildNative": {
-        "exit": 0,
-        "counts": {}
-      },
-      "sourceLinux": {
-        "exit": 0,
-        "counts": {
-          "tests": "6",
-          "pass": "6",
-          "fail": "0"
-        }
-      },
-      "rebuildMatchesAfterPathNormalization": true,
-      "pathNormalization": "Only relocated resource paths and dependency path comments/module identifiers differ"
-    }
-  },
   "hostImport": "unverified",
-  "hostModelCalls": "not applicable; capabilities empty",
-  "storePublication": "not eligible under current MIT-only release policy",
-  "screenshot": {
-    "path": "../../docs/screenshots/circuitjs.png",
-    "dimensions": [
-      1440,
-      1000
-    ],
-    "sha256": "e75af2dea019c83e08c6d4aabf937f932323ea7d39c0285e0a147316987cce26"
-  },
+  "modelCalls": "not applicable; capabilities remain empty",
+  "storePublication": "Not eligible for the current MIT-only release path",
+  "screenshot": "../../docs/screenshots/circuitjs.png",
   "limitations": [
-    "Basic circuit types, at most 256 top-level records; unsupported imports preserve original text and display a diagnostic.",
-    "Advanced scope property forms, floating scopes, custom slider editor and complex model/subcircuit/audio/service entries are disabled.",
-    "Native Scope settings and component state persist; waveform history does not. Restore starts paused.",
-    "Native spatial editing is not a fully screen-reader-driven interface.",
-    "Original imported unknown fields remain in original text; canonical native exports do not claim semantic preservation of unsupported extensions."
+    "Native spatial editing is not a complete screen-reader interface.",
+    "Existing basic circuit scope and disabled advanced Scope/slider/subcircuit/audio/service features remain unchanged.",
+    "Waveform history is not persisted; restoring a circuit starts paused."
   ],
   "privateReproduction": [
-    "work/batch08/circuit-accept.mjs",
-    "work/batch08/circuit-extra.mjs",
-    "work/batch08/circuit-validity.mjs",
-    "work/batch08/circuit-verify-package.py"
-  ],
-  "integratedPackage": {
-    "directory": "workbenches/77-circuitjs",
-    "version": "0.8.0",
-    "appId": "workbench.9a20add2-4f04-44aa-b343-61f5374fc989",
-    "filename": "77-circuitjs-0.8.0.fbworkbench",
-    "bytes": 2030788,
-    "sha256": "77acb5d4dfab8b45ada8e905fa707b880a494b8a72d1c146ff6097b944604eb8",
-    "crc": "passed",
-    "sourceFilesMatched": 32,
-    "assetFilesMatched": 706,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "license": "GPL-2.0-or-later",
-    "deliveryPath": "workbench-circuitjs/circuitjs-studio-0.8.0.fbworkbench",
-    "introductionFile": "workbench-circuitjs/presentation.json"
-  },
-  "integratedApplicationTests": 6,
-  "exportedSourceLinuxTests": {
-    "passed": 6,
-    "environment": "node:22-bookworm / Node22.23.3",
-    "network": "none",
-    "resourceMapping": "passed",
-    "dependencies": "prepared locked dependencies mounted read-only"
-  }
+    "work/layout-081/circuit-browser.mjs",
+    "work/layout-081/circuit-final-screens.mjs",
+    "work/layout-081/circuit-package-check.py"
+  ]
 }
