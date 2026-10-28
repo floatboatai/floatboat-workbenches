@@ -5,7 +5,8 @@
 - `src/contracts/review.ts`：跨端结构、严格运行校验与宽松工作草稿恢复。日期真实有效；运行最多 40 条检查事项，超过限制的编辑仍按草稿完整保存。
 - `src/server/checkpointer.ts`：`BaseCheckpointSaver` 的 Node 内置 SQLite 实现。checkpoint v4 使用上游 typed serializer 保存 BLOB、metadata、parent config 和 pending writes；特殊通道按 `WRITES_IDX_MAP` 更新，按上游 task-path 排序规则重放。固定单图流程，无任意子图/代码编辑入口。
 - `src/server/runs.ts`：真实 `StateGraph` 的 prepare → human_review → deliver。`interrupt` 暂停，`Command({resume})` 恢复；退回则不产生交付物。SQLite 运行记录与检查点分开保存。
-- `src/server/routes.ts`：项目、运行、复核、取消/恢复与模型连接状态；前端只访问同源路由。模型分支在服务端调用 Host `generateObject`。
+- `src/server/routes.ts`：项目、运行、复核、取消/恢复与模型连接状态；前端只访问同源路由。模型分支在服务端调用 Host `generateText`，显式选择 `gemini-3.8-flash`；协议、路由和凭据仍由 Host 管理。
+- `src/server/model-output.ts`：只接受完整 JSON 或单层完整 JSON 代码块，要求正常 STOP、恰好五个交付字段，再执行日期、长度与检查项校验；拒绝解释文字、截断和未知字段。Host 错误只显示稳定错误代码，不暴露供应商原始信息。
 - `src/ui/useReviewDesk.ts`：持久化提交命令、运行轮询、项目/交付导入导出和复核草稿。输入快照与人工修订分离；模型/流程结果不会自动覆盖当前编辑。
 - `src/ui/App.tsx`、`RecordFields.tsx`、`ReviewPanel.tsx`：页面组织、字段和复核/交付呈现。`presentation.ts` 统一运行状态与本地化时间。
 - `autosave-*`、`store.ts` 等沿用仓库共享版本。SQLite 完整草稿加 IndexedDB 恢复；未重写公共保存机制。

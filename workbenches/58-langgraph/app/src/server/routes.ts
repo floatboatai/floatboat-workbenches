@@ -1,15 +1,11 @@
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { WorkbenchHostError } from "../../sdk/host.mjs";
 import { isRecord, titleValue } from "../contracts/project.ts";
-import {
-  projectValue,
-  recordValue,
-  recordSchema,
-  idValue,
-} from "../contracts/review.ts";
+import { projectValue, recordSchema, idValue } from "../contracts/review.ts";
 import { createStore, StoreError } from "./store.ts";
 import { registerAutosaveRoutes } from "./autosave.ts";
 import { createRunService } from "./runs.ts";
+import { parseModelRecord, hostModelErrorMessage } from "./model-output.ts";
 
 export function registerRoutes(app: WorkbenchServer) {
   const store = createStore(app.database, projectValue);
@@ -17,22 +13,20 @@ export function registerRoutes(app: WorkbenchServer) {
     app.database,
     async (source, signal, operationId) => {
       try {
-        const result = await app.host.llm.generateObject(
+        const result = await app.host.llm.generateText(
           {
-            prompt: source,
-            schema: recordSchema,
+            model: "gemini-3.8-flash",
+            prompt: `${source}\n\nReturn only JSON matching this JSON Schema:\n${JSON.stringify(recordSchema)}`,
             system:
-              "从用户资料中整理交付事项。只依据原文，缺少的日期留空；负责人未知时写待确认，不编造事实。checklist 是需人工检查的事项。",
+              "从用户资料中整理交付事项。只依据原文，dueDate必须是YYYY-MM-DD格式的有效日期（例如2026-11-15），缺少的日期留空字符串；负责人未知时写待确认，不编造事实。checklist 是需人工检查的事项。",
             maxOutputTokens: 3000,
           },
           { timeoutMs: 90000, signal, requestId: operationId },
         );
-        return recordValue(result.object);
+        return parseModelRecord(result.text, result.finishReason);
       } catch (error) {
         if (error instanceof WorkbenchHostError)
-          throw new Error(
-            "模型整理未完成，请打开 Floatboat 并检查模型连接。输入和运行记录已保留；也可使用填写资料模式。",
-          );
+          throw new Error(hostModelErrorMessage(error.code));
         throw error;
       }
     },
@@ -112,8 +106,7 @@ export function registerRoutes(app: WorkbenchServer) {
       return {
         available: status.capabilities.some(
           (entry) =>
-            entry.operation === "generateObject" &&
-            entry.status === "available",
+            entry.operation === "generateText" && entry.status === "available",
         ),
         message: "Floatboat 模型服务已连接",
       };

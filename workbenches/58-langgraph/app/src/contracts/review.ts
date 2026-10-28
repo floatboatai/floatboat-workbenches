@@ -200,10 +200,10 @@ export const recordSchema = {
   additionalProperties: false,
   required: ["subject", "owner", "dueDate", "summary", "checklist"],
   properties: {
-    subject: { type: "string" },
-    owner: { type: "string" },
-    dueDate: { type: "string" },
-    summary: { type: "string" },
-    checklist: { type: "array", items: { type: "string" }, maxItems: 40 },
+    subject: { type: "string", minLength: 1, maxLength: 160 },
+    owner: { type: "string", minLength: 1, maxLength: 100 },
+    dueDate: { type: "string", pattern: "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2})?$" },
+    summary: { type: "string", maxLength: 10000 },
+    checklist: { type: "array", items: { type: "string", maxLength: 500 }, maxItems: 40 },
   },
 };
