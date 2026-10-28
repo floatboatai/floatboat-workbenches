@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import LogicFlow from "@logicflow/core";
+import LogicFlow, { ElementState } from "@logicflow/core";
 import { Snapshot } from "@logicflow/extension";
+import { isRecord } from "../contracts/project";
+import {
+  nativeTextDrafts,
+  recordNativeText,
+  acknowledgeNativeText,
+  graphText,
+  type NativeTextDraft,
+} from "../contracts/native-text";
 import "@logicflow/core/lib/style/index.css";
 import { download, Notice, ProjectPicker, useProjects } from "./workspace";
 import {
@@ -25,11 +33,17 @@ export function App() {
     lf = useRef<LogicFlow | null>(null),
     transitionRef = useRef(false),
     latest = useRef(p),
-    rendering = useRef(false);
+    rendering = useRef(false),
+    engineKey = useRef<string | null>(null),
+    synchronizedGraph = useRef<{
+      engine: LogicFlow;
+      key: string;
+      graph: string;
+    } | null>(null);
   latest.current = p;
   const [transitioning, setTransitioning] = useState(false),
     [selected, setSelected] = useState(""),
-    [ready, setReady] = useState(false),
+    [readyKey, setReadyKey] = useState<string | null>(null),
     [inspector, setInspector] = useState(true);
   let graph: Graph = { nodes: [], edges: [] },
     parseError = "";
@@ -43,7 +57,11 @@ export function App() {
     graph.edges.find((e) => e.id === selected);
   const warnings = parseError ? [parseError] : review(graph),
     pathList = parseError ? [] : paths(graph);
+  const ready =
+    readyKey === p.documentKey && engineKey.current === p.documentKey;
   const locked = transitioning || p.loading || p.busy;
+  const nativeLocked = locked || !ready;
+  const textDrafts = nativeTextDrafts(p.draft);
   const raw = typeof p.draft.raw === "string" ? p.draft.raw : p.data.graph;
   const source =
     typeof p.draft.source === "string"
@@ -53,21 +71,42 @@ export function App() {
     typeof p.draft.target === "string"
       ? p.draft.target
       : (graph.nodes[1]?.id ?? "");
+  function suspendEngine() {
+    const engine = lf.current,
+      key = engineKey.current;
+    engineKey.current = null;
+    setReadyKey(null);
+    return () => {
+      if (key && lf.current === engine && latest.current.documentKey === key) {
+        engineKey.current = key;
+        setReadyKey(key);
+      }
+    };
+  }
   async function transition(action: () => Promise<boolean>) {
     if (transitionRef.current) return;
     transitionRef.current = true;
+    const resume = suspendEngine();
+    let moved = false;
     setTransitioning(true);
     try {
-      if (await action()) setSelected("");
+      moved = await action();
+      if (moved) setSelected("");
     } finally {
       transitionRef.current = false;
+      if (!moved) resume();
       setTransitioning(false);
     }
   }
   useEffect(() => {
     if (!host.current || p.loading) return;
+    const container = host.current,
+      documentKey = p.documentKey;
+    let alive = true,
+      initialized = false;
+    const entered = new Map<string, NativeTextDraft>();
     const engine = new LogicFlow({
-      container: host.current,
+      container,
       grid: { size: 20, visible: true },
       background: { backgroundColor: "#faf9f5" },
       keyboard: { enabled: false },
@@ -75,6 +114,14 @@ export function App() {
       stopScrollGraph: true,
     });
     lf.current = engine;
+    engineKey.current = documentKey;
+    const current = () =>
+      alive &&
+      initialized &&
+      latest.current.documentKey === documentKey &&
+      engineKey.current === documentKey &&
+      lf.current === engine &&
+      !transitionRef.current;
     engine.setTheme({
       rect: { radius: 8, stroke: "#263b51", fill: "#fffefb" },
       circle: { stroke: "#263b51", fill: "#e7eee9" },
@@ -83,77 +130,210 @@ export function App() {
       nodeText: { color: "#243648", fontSize: 14 },
       edgeText: { color: "#5d6873", fontSize: 12, textWidth: 100 },
     });
-    const update = () => {
-      if (rendering.current || transitionRef.current) return;
-      const previous = graphValue(latest.current.data.graph);
-      latest.current.setData((v) => ({
-        ...v,
-        graph: JSON.stringify(
-          mergeNative(previous, engine.getGraphRawData() as unknown as Graph),
-          null,
-          2,
-        ),
-      }));
+    const publish = () => {
+      if (!current() || rendering.current) return false;
+      const synchronized = synchronizedGraph.current;
+      if (
+        synchronized?.engine === engine &&
+        synchronized.graph !== latest.current.data.graph
+      )
+        return false;
+      try {
+        const data = engine.getGraphRawData() as unknown as Graph;
+        latest.current.setData((v) => {
+          const next = restoreFlow({
+            ...v,
+            graph: JSON.stringify(
+              mergeNative(graphValue(v.graph), data),
+              null,
+              2,
+            ),
+          });
+          synchronizedGraph.current = {
+            engine,
+            key: documentKey,
+            graph: next.graph,
+          };
+          return next;
+        });
+        return true;
+      } catch (error) {
+        if (current()) latest.current.report(error);
+        return false;
+      }
     };
-    engine.on("history:change", update);
-    engine.on("node:click,edge:click", ({ data }: { data: { id: string } }) =>
-      setSelected(data.id),
-    );
-    const resize = new ResizeObserver(() => engine.resize());
-    resize.observe(host.current);
-    setReady(true);
+    const input = (event: Event) => {
+      if (
+        !current() ||
+        rendering.current ||
+        !(event.target instanceof HTMLElement)
+      )
+        return;
+      const editable = event.target.closest<HTMLElement>(
+        '.lf-text-input[contenteditable="true"]',
+      );
+      const model = engine.graphModel.textEditElement;
+      if (!editable || !container.contains(editable) || !model) return;
+      const edit = { id: model.id, text: editable.innerText };
+      entered.set(edit.id, edit);
+      latest.current.setDraft((extra) => recordNativeText(extra, edit));
+    };
+    const textUpdated = ({ data }: { data?: unknown }) => {
+      if (!current() || !isRecord(data) || typeof data.id !== "string") return;
+      const edit = entered.get(data.id);
+      if (!publish() || !edit) return;
+      const actual = graphText(
+        engine.getGraphRawData() as unknown as Graph,
+        edit.id,
+      );
+      latest.current.setDraft((extra) =>
+        acknowledgeNativeText(extra, edit, actual),
+      );
+      if (
+        actual === edit.text ||
+        actual === edit.text.replace(/(\r\n)+$|(\n)+$/, "")
+      )
+        entered.delete(edit.id);
+    };
+    const select = ({ data }: { data: { id: string } }) => {
+      if (current()) setSelected(data.id);
+    };
+    engine.on("history:change", publish);
+    engine.on("text:update", textUpdated);
+    engine.on("node:click,edge:click", select);
+    container.addEventListener("input", input, true);
+    const resize = new ResizeObserver(() => {
+      if (current()) engine.resize();
+    });
+    resize.observe(container);
+    try {
+      renderGraph(engine, p.data.graph);
+    } catch {
+      /* The original invalid JSON stays in the working copy. */
+    }
+    initialized = true;
+    setReadyKey(documentKey);
     return () => {
+      alive = false;
+      initialized = false;
+      container.removeEventListener("input", input, true);
       resize.disconnect();
+      if (lf.current === engine) {
+        lf.current = null;
+        engineKey.current = null;
+      }
+      if (synchronizedGraph.current?.engine === engine)
+        synchronizedGraph.current = null;
       engine.destroy();
-      lf.current = null;
-      setReady(false);
+      setReadyKey((key) => (key === documentKey ? null : key));
     };
   }, [p.loading, p.documentKey]);
-  useEffect(() => {
-    const engine = lf.current;
-    if (!engine || !ready) return;
-    try {
-      const g = graphValue(p.data.graph);
-      const ids = new Set(g.nodes.map((n) => n.id));
-      const displayed = {
-        ...g,
-        edges: g.edges.filter(
-          (e) => ids.has(e.sourceNodeId) && ids.has(e.targetNodeId),
-        ),
-      };
-      if (
-        JSON.stringify(engine.getGraphRawData()) !== JSON.stringify(displayed)
-      ) {
-        rendering.current = true;
-        engine.render(
-          displayed as unknown as Parameters<LogicFlow["render"]>[0],
-        );
-        rendering.current = false;
-      }
-    } catch {
-      rendering.current = false;
-    }
-  }, [p.data.graph, ready, p.documentKey]);
-  function native(action: (engine: LogicFlow) => void) {
+  function renderGraph(engine: LogicFlow, source: string) {
+    const key = engineKey.current;
     if (
-      transitionRef.current ||
-      latest.current.loading ||
-      latest.current.busy ||
-      !lf.current
+      !key ||
+      (synchronizedGraph.current?.engine === engine &&
+        synchronizedGraph.current.key === key &&
+        synchronizedGraph.current.graph === source)
     )
       return;
-    action(lf.current);
-    p.setData((v) => ({
-      ...v,
-      graph: JSON.stringify(
-        mergeNative(
-          graphValue(v.graph),
-          lf.current!.getGraphRawData() as unknown as Graph,
-        ),
-        null,
-        2,
+    const g = graphValue(source),
+      ids = new Set(g.nodes.map((n) => n.id));
+    const displayed = {
+      ...g,
+      edges: g.edges.filter(
+        (e) => ids.has(e.sourceNodeId) && ids.has(e.targetNodeId),
       ),
-    }));
+    };
+    rendering.current = true;
+    try {
+      engine.render(displayed as unknown as Parameters<LogicFlow["render"]>[0]);
+      synchronizedGraph.current = { engine, key, graph: source };
+    } finally {
+      rendering.current = false;
+    }
+  }
+  useEffect(() => {
+    const engine = currentEngine();
+    if (!engine) return;
+    try {
+      renderGraph(engine, p.data.graph);
+    } catch {
+      /* Keep invalid raw input recoverable without touching the canvas. */
+    }
+  }, [p.data.graph, readyKey, p.documentKey]);
+  function currentEngine(): LogicFlow | null {
+    return !transitionRef.current &&
+      !latest.current.loading &&
+      !latest.current.busy &&
+      latest.current.documentKey === p.documentKey &&
+      readyKey === p.documentKey &&
+      engineKey.current === p.documentKey
+      ? lf.current
+      : null;
+  }
+  function native(action: (engine: LogicFlow) => void): boolean {
+    const engine = currentEngine();
+    if (!engine) return false;
+    try {
+      action(engine);
+      if (currentEngine() !== engine) return false;
+      const data = engine.getGraphRawData() as unknown as Graph;
+      p.setData((v) => {
+        const next = restoreFlow({
+          ...v,
+          graph: JSON.stringify(
+            mergeNative(graphValue(v.graph), data),
+            null,
+            2,
+          ),
+        });
+        synchronizedGraph.current = {
+          engine,
+          key: p.documentKey,
+          graph: next.graph,
+        };
+        return next;
+      });
+      return true;
+    } catch (error) {
+      if (currentEngine() === engine) p.report(error);
+      return false;
+    }
+  }
+  async function applyTextDraft(edit: NativeTextDraft) {
+    const engine = currentEngine(),
+      documentKey = p.documentKey;
+    if (!engine) return;
+    // Exit an active upstream editor first so its queued __prevText cannot
+    // overwrite this explicit application. Never enter/replay it on restore.
+    const active = engine.graphModel.textEditElement;
+    if (active) {
+      engine.graphModel.setElementStateById(active.id, ElementState.DEFAULT);
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
+    }
+    if (
+      latest.current.documentKey !== documentKey ||
+      currentEngine() !== engine
+    )
+      return;
+    if (
+      graphText(engine.getGraphRawData() as unknown as Graph, edit.id) ===
+      undefined
+    ) {
+      p.setError("原对象已不存在，文字草稿仍保留。");
+      return;
+    }
+    if (native((l) => l.updateText(edit.id, edit.text))) {
+      const actual = graphText(
+        engine.getGraphRawData() as unknown as Graph,
+        edit.id,
+      );
+      p.setDraft((extra) => acknowledgeNativeText(extra, edit, actual));
+      p.setNotice("恢复文字已应用到图纸。");
+    }
   }
   function add(type: string, role: string) {
     native((e) => {
@@ -170,16 +350,19 @@ export function App() {
   async function importFile(file: File) {
     if (transitionRef.current) return;
     transitionRef.current = true;
+    const resume = suspendEngine();
+    let moved = false;
     setTransitioning(true);
     try {
       if (file.size > 1800000) throw new Error("导入文件超过 1.8 MB。");
       const imported = importFlow(JSON.parse(await file.text()));
-      await p.replace(imported.data, imported.title, imported.extra);
-      setSelected("");
+      moved = await p.replace(imported.data, imported.title, imported.extra);
+      if (moved) setSelected("");
     } catch (e) {
       p.report(e);
     } finally {
       transitionRef.current = false;
+      if (!moved) resume();
       setTransitioning(false);
     }
   }
@@ -275,14 +458,23 @@ export function App() {
           完整工程
         </button>
         <button
-          disabled={!ready || Boolean(parseError)}
+          disabled={nativeLocked || Boolean(parseError)}
           onClick={() => {
-            void (lf.current?.extension.snapshot as unknown as Snapshot)
+            const engine = currentEngine(),
+              documentKey = p.documentKey;
+            if (!engine) return;
+            void (engine.extension.snapshot as unknown as Snapshot)
               .getSnapshot("流程图纸", {
                 fileType: "png",
                 backgroundColor: "#faf9f5",
               })
-              .catch(p.report);
+              .catch((error) => {
+                if (
+                  latest.current.documentKey === documentKey &&
+                  currentEngine() === engine
+                )
+                  p.report(error);
+              });
           }}
         >
           PNG 图纸
@@ -298,41 +490,83 @@ export function App() {
         ) : null}
       </nav>
       <Notice error={p.error} notice={p.notice} />
+      {textDrafts.length ? (
+        <section className="text-drafts" aria-label="画布文字草稿">
+          <h2>画布文字草稿</h2>
+          <p>
+            未退出编辑的文字也会自动保存。恢复后请确认内容，再明确应用到原对象。
+          </p>
+          {textDrafts.map((edit) => (
+            <div key={edit.id}>
+              <label>
+                对象 {edit.id}
+                <textarea
+                  aria-label={"恢复文字 " + edit.id}
+                  value={edit.text}
+                  disabled={locked}
+                  onChange={(event) =>
+                    p.setDraft((extra) =>
+                      recordNativeText(extra, {
+                        id: edit.id,
+                        text: event.target.value,
+                      }),
+                    )
+                  }
+                />
+              </label>
+              <button
+                disabled={nativeLocked || Boolean(parseError)}
+                onClick={() => void applyTextDraft(edit)}
+              >
+                应用恢复文字
+              </button>
+              {graphText(graph, edit.id) === undefined ? (
+                <span role="status">原对象不存在；草稿仍保留。</span>
+              ) : null}
+            </div>
+          ))}
+        </section>
+      ) : null}
       <div className={"workspace " + (!inspector ? "wide" : "")}>
         <section id="drawing" aria-label="流程图纸">
           <div className="tools">
             <span>添加步骤</span>
             <button
-              disabled={locked || Boolean(parseError)}
+              disabled={nativeLocked || Boolean(parseError)}
               onClick={() => add("rect", "task")}
             >
               ▭ 任务
             </button>
             <button
-              disabled={locked || Boolean(parseError)}
+              disabled={nativeLocked || Boolean(parseError)}
               onClick={() => add("diamond", "decision")}
             >
               ◇ 判断
             </button>
             <button
-              disabled={locked || Boolean(parseError)}
+              disabled={nativeLocked || Boolean(parseError)}
               onClick={() => add("circle", "start")}
             >
               ○ 入口
             </button>
             <button
-              disabled={locked || Boolean(parseError)}
+              disabled={nativeLocked || Boolean(parseError)}
               onClick={() => add("circle", "end")}
             >
               ◎ 终点
             </button>
-            <button onClick={() => lf.current?.fitView(40, 40)}>
+            <button
+              disabled={nativeLocked}
+              onClick={() => currentEngine()?.fitView(40, 40)}
+            >
               适配图纸
             </button>
           </div>
           <div
-            inert={locked || Boolean(parseError)}
-            className={"canvas-wrap " + (locked || parseError ? "locked" : "")}
+            inert={nativeLocked || Boolean(parseError)}
+            className={
+              "canvas-wrap " + (nativeLocked || parseError ? "locked" : "")
+            }
           >
             <div
               ref={host}
@@ -367,7 +601,7 @@ export function App() {
             </div>
             <details open>
               <summary>步骤与连线属性</summary>
-              <fieldset disabled={locked}>
+              <fieldset disabled={nativeLocked}>
                 <label>
                   选择对象
                   <select
@@ -515,7 +749,7 @@ export function App() {
             </details>
             <details>
               <summary>连接两个步骤</summary>
-              <fieldset disabled={locked || Boolean(parseError)}>
+              <fieldset disabled={nativeLocked || Boolean(parseError)}>
                 <label>
                   起点
                   <select

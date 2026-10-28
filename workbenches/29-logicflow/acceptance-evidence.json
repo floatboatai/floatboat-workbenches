@@ -7,8 +7,8 @@
     "core": "2.2.5",
     "extension": "2.3.1"
   },
-  "unitTests": 10,
-  "previewUrl": "http://127.0.0.1:49892/",
+  "unitTests": 12,
+  "previewUrl": "http://127.0.0.1:55313/",
   "browser": {
     "checks": [
       "native LogicFlow SVG canvas mounted",
@@ -95,5 +95,19 @@
       1299
     ],
     "sha256": "ac63caecf9f84a43a07320a18c481ed42cb8b834f3968068dc6b07bdcbe4a5b9"
+  },
+  "nativeTextDraft": {
+    "url": "http://127.0.0.1:55313/",
+    "checks": [
+      "native double-click input autosaves while contenteditable retains focus and model remains unchanged",
+      "reload exposes native text draft without replay or focus restoration",
+      "actual recovery download imports new copy and applies text only on explicit action",
+      "native Alt+Enter clears pending text only after actual native model commit",
+      "import suspends old engine immediately; late input callbacks cannot change old or new drafts; new native action targets new graph",
+      "fast open transitions keep text drafts bound to their owning document"
+    ],
+    "pageErrors": [],
+    "unitTests": 12,
+    "nativeFocusSetup": "Wait two animation frames after native double-click before filling, allowing the upstream first-click RAF node.focus to settle; retain contenteditable focus throughout typing and autosave."
   }
 }

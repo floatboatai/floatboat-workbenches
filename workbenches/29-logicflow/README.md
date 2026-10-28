@@ -1,6 +1,6 @@
 # LogicFlow 流程图纸
 
-原生 LogicFlow 审批 / SOP 编辑、节点连线与条件、结构检查、路径审阅、PNG 图纸和原生 JSON 导出。图纸主屏与审阅栏可收起；完整工作稿自动保存，未应用 JSON 也可刷新恢复。
+原生 LogicFlow 审批 / SOP 编辑、节点连线与条件、结构检查、路径审阅、PNG 图纸和原生 JSON 导出。图纸主屏与审阅栏可收起；完整工作稿自动保存，未应用 JSON 也可刷新恢复。原生双击文字编辑尚未退出时也保存完整工作稿；刷新或回导后通过可见的文字草稿明确应用，不自动重放。
 
 - 引擎：`@logicflow/core@2.2.5`、`@logicflow/extension@2.3.1`。
 - 本地启动：根仓库 `pnpm workbench prepare logicflow`，本目录 `pnpm dev -- --no-watch`。
