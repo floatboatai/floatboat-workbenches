@@ -75,5 +75,36 @@
     "Unknown receipts require manual reconciliation",
     "Host import unverified",
     "Loopback fixture is not production service verification"
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/45-bruno",
+    "version": "0.6.0",
+    "appId": "workbench.e29331f3-1d57-4d5b-95ce-b98e4ed11f18",
+    "filename": "45-bruno-0.6.0.fbworkbench",
+    "bytes": 58951,
+    "sha256": "724cb1df95e0199780d996b9a3faa1cff0d51ca88aa9abc0ce7b6cd7c790f1f6",
+    "crc": "passed",
+    "sourceFilesMatched": 36,
+    "assetFilesMatched": 3,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-bruno/bruno-studio-0.6.0.fbworkbench",
+    "introductionFile": "workbench-bruno/presentation.json"
+  },
+  "integratedApplicationTests": 16,
+  "exportedSourceLinuxTests": {
+    "passed": 16,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/bruno.png",
+    "dimensions": [
+      1500,
+      1100
+    ],
+    "sha256": "7c7e969560e4b77e5fa4e2039e3e6c64f11e962b6eb9e0cf56afc43e8eccf18b"
+  }
 }

@@ -59,5 +59,36 @@
     "no email sending, contact lookup, arbitrary JSX or eval",
     "80 blocks, 60 default variables, 30 examples",
     "850KB formal content; 2MB restore structure; 1.95MB total server request capacity; 4MB imported recovery file"
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/42-react-email",
+    "version": "0.6.0",
+    "appId": "workbench.e0e32e86-eaf6-4362-b71d-58129ea60d74",
+    "filename": "42-react-email-0.6.0.fbworkbench",
+    "bytes": 94211,
+    "sha256": "14872cf8ac75a03dd68246ce1888d4d141968ba1b3a6c63ef21b657c559e3a8c",
+    "crc": "passed",
+    "sourceFilesMatched": 69,
+    "assetFilesMatched": 24,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-react-email/react-email-studio-0.6.0.fbworkbench",
+    "introductionFile": "workbench-react-email/presentation.json"
+  },
+  "integratedApplicationTests": 10,
+  "exportedSourceLinuxTests": {
+    "passed": 10,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/react-email.png",
+    "dimensions": [
+      1440,
+      1364
+    ],
+    "sha256": "e81cf86316d05d9a30743b7d19e420cb575bc883393fd0c7bcf226201b9c94e8"
+  }
 }

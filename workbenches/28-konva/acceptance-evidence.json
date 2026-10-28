@@ -187,5 +187,36 @@
       "url": "http://127.0.0.1:49732/",
       "limitErrorClearedAfterDeleteAndSuccessfulAdd": true
     }
+  },
+  "integratedPackage": {
+    "directory": "workbenches/28-konva",
+    "version": "0.6.0",
+    "appId": "workbench.405cc043-fcc0-47f9-9a88-98489103d95b",
+    "filename": "28-konva-0.6.0.fbworkbench",
+    "bytes": 52978,
+    "sha256": "bbf88f3d12f4fae551abda6e28f62c52968d5d787b614c11c120a50a71fe68a4",
+    "crc": "passed",
+    "sourceFilesMatched": 30,
+    "assetFilesMatched": 3,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-konva/konva-studio-0.6.0.fbworkbench",
+    "introductionFile": "workbench-konva/presentation.json"
+  },
+  "integratedApplicationTests": 16,
+  "exportedSourceLinuxTests": {
+    "passed": 16,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/konva.png",
+    "dimensions": [
+      1440,
+      1014
+    ],
+    "sha256": "a1c5bee232cb3fd9e88087dbeb5592c1e3734256c980ca73026eafc9d16a9a99"
   }
 }

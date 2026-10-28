@@ -1,6 +1,6 @@
 # 自动打包与官方上传
 
-GitHub Actions 的 [Workbench packages](../.github/workflows/workbenches.yml) 在 PR、推送 `main`、推送 `v*` 标签或手动触发时运行。它读取 `catalog.json`，只选择 `local-verified` 工作台；当前为 44 个。
+GitHub Actions 的 [Workbench packages](../.github/workflows/workbenches.yml) 在 PR、推送 `main`、推送 `v*` 标签或手动触发时运行。它读取 `catalog.json`，只选择 `local-verified` 工作台；当前为 50 个。
 
 每个工作台独立执行 `prepare → check → test → package`。`prepare` 获取 `template.lock.json` 固定的官方工具链，依赖安装使用项目锁文件。工作流固定 Node 22.22.2、pnpm 10.22.0 和 Actions 的提交 SHA，最多并行 4 个项目。
 

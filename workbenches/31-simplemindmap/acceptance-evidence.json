@@ -158,5 +158,36 @@
     "300 formal nodes, 30 levels, 4000 characters per node; 850KB formal model.",
     "Rapid transitions may require the shared autosave cache-repair confirmation; browser acceptance explicitly confirmed it.",
     "Not the separate desktop client or commercial plugins."
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/31-simplemindmap",
+    "version": "0.6.0",
+    "appId": "workbench.9e76d95a-721d-4819-947d-3dadae0b9c15",
+    "filename": "31-simplemindmap-0.6.0.fbworkbench",
+    "bytes": 59100,
+    "sha256": "eebb1945a2de447b19972d0f2dbe013ef42cddcfc5f3d8ba9235e58779ba54e1",
+    "crc": "passed",
+    "sourceFilesMatched": 28,
+    "assetFilesMatched": 2,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-simplemindmap/simplemindmap-studio-0.6.0.fbworkbench",
+    "introductionFile": "workbench-simplemindmap/presentation.json"
+  },
+  "integratedApplicationTests": 10,
+  "exportedSourceLinuxTests": {
+    "passed": 10,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/simplemindmap.png",
+    "dimensions": [
+      1440,
+      1035
+    ],
+    "sha256": "0bccc1cf9a597c5bb35656f4b70157c345bf8075bbb7beb210ea8021d167d587"
+  }
 }

@@ -64,5 +64,36 @@
     "unapplicable native JSON stays in saved editor draft across reload without replacing graph",
     "375px layout, keyboard focus and runtime remain valid after boundary fixes"
   ],
-  "rootBoundaryReviewNotes": "Boundary review explicitly waits for saved snapshot; original autosave/failure matrix remains the independent app evidence."
+  "rootBoundaryReviewNotes": "Boundary review explicitly waits for saved snapshot; original autosave/failure matrix remains the independent app evidence.",
+  "integratedPackage": {
+    "directory": "workbenches/29-logicflow",
+    "version": "0.6.0",
+    "appId": "workbench.867a6daa-570d-4dc3-8193-f66cb359ce1f",
+    "filename": "29-logicflow-0.6.0.fbworkbench",
+    "bytes": 50535,
+    "sha256": "65de1e30dfd2bf7b8003a45c058c84b0d3878b4829a86d5fcc12a4c039c4f347",
+    "crc": "passed",
+    "sourceFilesMatched": 31,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-logicflow/logicflow-studio-0.6.0.fbworkbench",
+    "introductionFile": "workbench-logicflow/presentation.json"
+  },
+  "integratedApplicationTests": 10,
+  "exportedSourceLinuxTests": {
+    "passed": 10,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/logicflow.png",
+    "dimensions": [
+      1440,
+      1299
+    ],
+    "sha256": "ac63caecf9f84a43a07320a18c481ed42cb8b834f3968068dc6b07bdcbe4a5b9"
+  }
 }

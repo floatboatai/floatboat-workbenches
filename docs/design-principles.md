@@ -88,3 +88,14 @@ Vercel React Best Practices 用于加载、数据获取和渲染效率；Web Des
 | GEOInflow | 宽幅访问账本、范围筛选与逐页调查 |
 | OpenPencil | 全幅组件画板、图层与属性工具 |
 | FigCraft | 暗色原型校样、画板序列与文案复核 |
+
+## 0.6.0 原生工具
+
+| 产品 | 工作空间 |
+| --- | --- |
+| Konva | 标注画板、对象工具与图层 |
+| LogicFlow | 流程图纸、条件连线与结构检查 |
+| SimpleMindMap | 导图主屏、分支导航与上下文工具 |
+| wavesurfer.js | 波形、时间尺、区间与听审记录 |
+| React Email | 邮件稿件、收件人变量与多尺寸校样 |
+| Bruno | 请求集合、编辑器与响应控制台 |

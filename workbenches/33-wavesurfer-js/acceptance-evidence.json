@@ -65,5 +65,36 @@
     "500 clips; UTF-8 formal850KB, restore2MB; full autosave request1.95MB",
     "cumulative originals grow with use; no automatic cleanup",
     "no transcription, cutting, denoise or audio re-encoding"
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/33-wavesurfer-js",
+    "version": "0.6.0",
+    "appId": "workbench.1f69482c-6c1f-42d0-ad61-147e22c5a625",
+    "filename": "33-wavesurfer-js-0.6.0.fbworkbench",
+    "bytes": 51390,
+    "sha256": "40d0606d00236a7e1bd32c41b7f0b73515b8bfea3584fce3f102eebcc4c07a89",
+    "crc": "passed",
+    "sourceFilesMatched": 33,
+    "assetFilesMatched": 2,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-wavesurfer-js/wavesurfer-js-studio-0.6.0.fbworkbench",
+    "introductionFile": "workbench-wavesurfer-js/presentation.json"
+  },
+  "integratedApplicationTests": 9,
+  "exportedSourceLinuxTests": {
+    "passed": 9,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/wavesurfer-js.png",
+    "dimensions": [
+      1440,
+      1283
+    ],
+    "sha256": "7a45335e7282f92e8268d9d8490b3b1bebc3409b7d628aa325c49ed7aeb87d9e"
+  }
 }

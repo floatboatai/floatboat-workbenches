@@ -2,7 +2,7 @@
 
 真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-28。
 
-既有32项保留历史采集版本；本批新增12项0.5.0界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
+既有44项保留历史采集版本；本批新增6项0.6.0界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -50,5 +50,11 @@
 | [geoinflow.png](geoinflow.png) | 0.5.0 | 1440 × 1941 | 176.0 KiB | `64f321a6fed1bfd363a50f9cfd80eed256bbf6474f2e99e1eba0415c2d5d9ce7` |
 | [openpencil.png](openpencil.png) | 0.5.0 | 1440 × 1000 | 108.4 KiB | `4d4471197e9fee67c626b9a80cfe34f6ae57b3dc824c662c416b7937ed9e51bc` |
 | [figcraft.png](figcraft.png) | 0.5.0 | 1440 × 1140 | 411.2 KiB | `0db8e7c7efa021dd91a04723e88f74f2dee83e9e0b79dcfe1ca6487f397d167f` |
+| [konva.png](konva.png) | 0.6.0 | 1440 × 1014 | 94.3 KiB | `a1c5bee232cb3fd9e88087dbeb5592c1e3734256c980ca73026eafc9d16a9a99` |
+| [logicflow.png](logicflow.png) | 0.6.0 | 1440 × 1299 | 218.5 KiB | `ac63caecf9f84a43a07320a18c481ed42cb8b834f3968068dc6b07bdcbe4a5b9` |
+| [simplemindmap.png](simplemindmap.png) | 0.6.0 | 1440 × 1035 | 89.5 KiB | `0bccc1cf9a597c5bb35656f4b70157c345bf8075bbb7beb210ea8021d167d587` |
+| [wavesurfer-js.png](wavesurfer-js.png) | 0.6.0 | 1440 × 1283 | 109.5 KiB | `7a45335e7282f92e8268d9d8490b3b1bebc3409b7d628aa325c49ed7aeb87d9e` |
+| [react-email.png](react-email.png) | 0.6.0 | 1440 × 1364 | 184.8 KiB | `e81cf86316d05d9a30743b7d19e420cb575bc883393fd0c7bcf226201b9c94e8` |
+| [bruno.png](bruno.png) | 0.6.0 | 1500 × 1100 | 123.6 KiB | `7c7e969560e4b77e5fa4e2039e3e6c64f11e962b6eb9e0cf56afc43e8eccf18b` |
 
-共44张，合计 6.37 MiB。
+共50张，合计 7.17 MiB。

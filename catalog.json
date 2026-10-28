@@ -1355,12 +1355,12 @@
     "category": "白板与图形",
     "kind": "基础引擎",
     "workbench": "轻量设计工作台：图片标注、证书/标签排版、交互图形编辑",
-    "core_features": "2D Canvas 场景图，独立对象事件、拖拽、变换、动画、缓存与导出；有 react-konva 集成。",
-    "integration": "使用浏览器端 Konva/react-konva，工作台存业务图形模型和素材，Agent 操作明确的对象属性。",
+    "core_features": "原生Konva画板、对象变换、图片与PNG/完整工程",
+    "integration": "固定官方原生JS/Node引擎或组件，使用官方模板独立打包",
     "effort": "中",
     "priority": "B",
     "license": "MIT",
-    "caveat": "基础引擎需要自行补齐编辑器 UI；不要混同为商用 Polotno SDK，Node 渲染还需原生后端。",
+    "caveat": "200个正式对象；每图750KB、1600万像素；完整工程16MiB；不包含Polotno、撤销或滤镜；Floatboat客户端导入未验证。",
     "url": "https://github.com/konvajs/konva",
     "archived": false,
     "pushed_at": "2026-10-23T22:37:15Z",
@@ -1370,12 +1370,36 @@
     ],
     "group": "图形媒体",
     "mode": "引擎封装",
-    "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "checked_at": "2026-10-28",
+    "verification": {
+      "build": "passed",
+      "tests": 16,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/konva.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.6.0.md",
+      "acceptance": "workbenches/28-konva/ACCEPTANCE.md",
+      "upstream": "Konva 10.9.0，原生Stage/Transformer与PNG导出"
+    },
     "id": 28,
     "slug": "konva",
     "directory": "workbenches/28-konva",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.6.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/konva.png",
+          "caption": "Konva · 标注画板、对象工具与图层"
+        }
+      ]
+    }
   },
   {
     "name": "LogicFlow",
@@ -1383,12 +1407,12 @@
     "category": "流程与节点编辑",
     "kind": "编辑器组件",
     "workbench": "业务流程设计工作台：审批/SOP 绘制、节点规则和运行可视化",
-    "core_features": "自定义节点/连接器/插件，流程图数据转换，支持对接 BPMN/Turbo 等数据结构；提供浏览器端执行引擎。",
-    "integration": "引入 @logicflow/core 和必要扩展，在 React 容器挂载；将节点数据映射为受控的 Floatboat Workflow 调用。",
+    "core_features": "原生流程图编辑、规则检查、路径审阅与原生数据导出",
+    "integration": "固定官方原生JS/Node引擎或组件，使用官方模板独立打包",
     "effort": "中",
     "priority": "B",
     "license": "Apache-2.0",
-    "caveat": "图模型与 Floatboat 执行模型需显式映射；不要把图形连线视为已有完整业务执行语义。",
+    "caveat": "结构与路径用于审阅，不执行业务；内置节点/边，最多30条路径；Floatboat客户端导入未验证。",
     "url": "https://github.com/didi/LogicFlow",
     "archived": false,
     "pushed_at": "2026-10-24T01:23:33Z",
@@ -1398,12 +1422,36 @@
     ],
     "group": "图形媒体",
     "mode": "组件嵌入",
-    "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "checked_at": "2026-10-28",
+    "verification": {
+      "build": "passed",
+      "tests": 10,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/logicflow.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.6.0.md",
+      "acceptance": "workbenches/29-logicflow/ACCEPTANCE.md",
+      "upstream": "LogicFlow core2.2.5/extension2.3.1，原生图纸与Snapshot PNG"
+    },
     "id": 29,
     "slug": "logicflow",
     "directory": "workbenches/29-logicflow",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.6.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/logicflow.png",
+          "caption": "LogicFlow · 流程图纸、条件连线与结构检查"
+        }
+      ]
+    }
   },
   {
     "name": "miniPaint",
@@ -1439,12 +1487,12 @@
     "category": "思维导图",
     "kind": "编辑器组件",
     "workbench": "可编辑思维导图工作台：项目拆解、知识梳理、结构切换和导入导出",
-    "core_features": "框架无关 JS 思维导图库，节点拖动、主题、逻辑图/组织图/鱼骨图，JSON/Markdown 等导入导出。",
-    "integration": "只接 simple-mind-map JS 库，在 React 容器创建实例；保存节点 JSON，用 Agent 批量改节点。",
+    "core_features": "原生可编辑脑图、结构/主题与导出",
+    "integration": "固定官方原生JS/Node引擎或组件，使用官方模板独立打包",
     "effort": "中",
     "priority": "B",
     "license": "MIT（本仓库库/Web；客户端闭源）",
-    "caveat": "官方已声明开源库/Web 低维护；完整 Web UI 是 Vue2，优先集成 JS 库。",
+    "caveat": "纯文本树；拒绝富文本、图像、链接、插件与上游完整配置，原始输入保留；Floatboat客户端导入未验证。",
     "url": "https://github.com/wanglin2/mind-map",
     "archived": false,
     "pushed_at": "2026-08-02T07:54:19Z",
@@ -1455,12 +1503,36 @@
     ],
     "group": "图形媒体",
     "mode": "组件嵌入",
-    "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "checked_at": "2026-10-28",
+    "verification": {
+      "build": "passed",
+      "tests": 10,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/simplemindmap.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.6.0.md",
+      "acceptance": "workbenches/31-simplemindmap/ACCEPTANCE.md",
+      "upstream": "simple-mind-map0.14.0-fix.3，原生节点命令/结构/主题/SVG"
+    },
     "id": 31,
     "slug": "simplemindmap",
     "directory": "workbenches/31-simplemindmap",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.6.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/simplemindmap.png",
+          "caption": "SimpleMindMap · 导图主屏、分支导航与上下文工具"
+        }
+      ]
+    }
   },
   {
     "name": "Squoosh",
@@ -1497,12 +1569,12 @@
     "category": "图片与媒体",
     "kind": "编辑器组件",
     "workbench": "录音审阅工作台：波形、时间区间标记、转写对照与摘录定位",
-    "core_features": "音频波形播放器，提供 Regions、Timeline 等官方插件与 TypeScript 类型。",
-    "integration": "在 React 页面嵌入波形组件，保存片段起止时间；将已验证的转写能力与音频时间轴、业务笔记关联。",
+    "core_features": "真实音频与波形、区间编辑/循环回听、审阅及工程导出",
+    "integration": "固定官方原生JS/Node引擎或组件，使用官方模板独立打包",
     "effort": "中",
     "priority": "B",
     "license": "BSD-3-Clause",
-    "caveat": "它不提供音频剪切/效果处理；长音频可能需预计算波峰，不能把完整编辑器能力算作现成。",
+    "caveat": "单原件32MiB/10分钟；500选段；无转写、剪切、降噪或音频重编码；Floatboat客户端导入未验证。",
     "url": "https://github.com/katspaugh/wavesurfer.js",
     "archived": false,
     "pushed_at": "2026-10-23T14:18:13Z",
@@ -1512,12 +1584,36 @@
     ],
     "group": "图形媒体",
     "mode": "组件嵌入",
-    "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "checked_at": "2026-10-28",
+    "verification": {
+      "build": "passed",
+      "tests": 9,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/wavesurfer-js.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.6.0.md",
+      "acceptance": "workbenches/33-wavesurfer-js/ACCEPTANCE.md",
+      "upstream": "WaveSurfer7.12.12及Regions/Timeline，真实音频解码与回听"
+    },
     "id": 33,
     "slug": "wavesurfer-js",
     "directory": "workbenches/33-wavesurfer-js",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.6.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/wavesurfer-js.png",
+          "caption": "wavesurfer.js · 波形、时间尺、区间与听审记录"
+        }
+      ]
+    }
   },
   {
     "name": "drawDB",
@@ -1759,12 +1855,12 @@
     "category": "邮件与内容",
     "kind": "基础引擎",
     "workbench": "邮件模板编写、个性化预览与 HTML 导出工作台",
-    "core_features": "React/TypeScript 邮件组件与 HTML/纯文本渲染；仓库另提供基于 Tiptap 的邮件编辑器。",
-    "integration": "优先取 @react-email/render 与剥离后的模板组件；Floatboat 管理模板、变量和预览，邮件投递作为独立可选接入。",
+    "core_features": "官方邮件组件编排与渲染、HTML/纯文本/项目导出",
+    "integration": "固定官方原生JS/Node引擎或组件，使用官方模板独立打包",
     "effort": "高",
     "priority": "C",
     "license": "MIT",
-    "caveat": "当前 react-email 主包 runtime 依赖含 esbuild，editor 又依赖主包，不能原样满足纯 JS 依赖限制；需裁剪或选择验证过的组件版本。",
+    "caveat": "浏览器校样和HTML/纯文本导出；未发送邮件，不保证所有邮件客户端像素一致；Floatboat客户端导入未验证。",
     "archived": false,
     "pushed_at": "2026-10-25T02:39:33Z",
     "sources": [
@@ -1774,12 +1870,36 @@
     ],
     "group": "办公文档",
     "mode": "源码/构建适配",
-    "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "checked_at": "2026-10-28",
+    "verification": {
+      "build": "passed",
+      "tests": 10,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/react-email.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.6.0.md",
+      "acceptance": "workbenches/42-react-email/ACCEPTANCE.md",
+      "upstream": "React Email6.11.4官方现役纯组件固定源码 + 官方render2.1.1"
+    },
     "id": 42,
     "slug": "react-email",
     "directory": "workbenches/42-react-email",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.6.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/react-email.png",
+          "caption": "React Email · 邮件稿件、收件人变量与多尺寸校样"
+        }
+      ]
+    }
   },
   {
     "name": "Slidev",
@@ -1870,12 +1990,12 @@
     "category": "API回归测试",
     "kind": "完整应用",
     "workbench": "接口回归工作台：保存Bru集合、批量执行、展示失败与AI诊断",
-    "core_features": "离线API客户端，以Bru文本保存请求集合；CLI支持自动化运行",
-    "integration": "研究复用开源解析、请求和集合模块，重做工作台UI及文件适配；CLI保留为独立执行环境时明确依赖",
+    "core_features": "原生Bru请求、显式HTTP执行、结果检查与导出",
+    "integration": "固定官方原生JS/Node引擎或组件，使用官方模板独立打包",
     "effort": "高",
     "priority": "C",
     "license": "MIT",
-    "caveat": "完整产品依赖Electron及多包构建，不能直接导入；付费版本能力不等于MIT仓库全部提供",
+    "caveat": "20个源文件、4个响应快照、10秒/64KiB；不执行脚本、测试、环境或鉴权继承，不自动重发未知请求；Floatboat客户端导入未验证。",
     "archived": false,
     "pushed_at": "2026-10-26T16:45:02Z",
     "sources": [
@@ -1883,14 +2003,38 @@
       "https://github.com/usebruno/bruno/blob/main/license.md",
       "https://github.com/usebruno/bruno/blob/main/package.json"
     ],
-    "checked_at": "2026-10-26",
-    "verification": "已核查官方源码/文档，未进行 Floatboat 构建测试",
+    "checked_at": "2026-10-28",
+    "verification": {
+      "build": "passed",
+      "tests": 16,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/bruno.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.6.0.md",
+      "acceptance": "workbenches/45-bruno/ACCEPTANCE.md",
+      "upstream": "@usebruno/lang0.41.0原生Bru解析/生成与真实HTTP"
+    },
     "group": "数据开发",
     "mode": "源码/构建适配",
     "id": 45,
     "slug": "bruno",
     "directory": "workbenches/45-bruno",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.6.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/bruno.png",
+          "caption": "Bruno · 请求集合、编辑器与响应控制台"
+        }
+      ]
+    }
   },
   {
     "name": "CyberChef",
