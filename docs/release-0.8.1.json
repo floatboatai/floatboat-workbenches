@@ -1,0 +1,96 @@
+{
+  "version": "0.8.1",
+  "date": "2026-10-28",
+  "mainSourceCommit": "4db9aa828054815a432496a2c29d7f3dc4cf9ebe",
+  "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "totalImplemented": 56,
+  "catalogTotal": 78,
+  "redesigned": 3,
+  "structuralReview": {
+    "passed": 3,
+    "needs-redesign": 26,
+    "pending": 27
+  },
+  "applicationTests": 26,
+  "toolingTests": 20,
+  "browser": "new file navigation, task flows, focus, mobile and autosave regressions passed",
+  "hostImport": "unverified",
+  "hostLlm": "not-used",
+  "sourcePackageVerification": "CRC, transfer hashes, all application source and declared resource bytes checked; no client import claim",
+  "packages": [
+    {
+      "directory": "workbenches/76-oasis-editor",
+      "version": "0.8.1",
+      "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
+      "filename": "76-oasis-editor-0.8.1.fbworkbench",
+      "bytes": 20236181,
+      "sha256": "18eddfc9977b8d2acd0a1ec0179b4adbde98cdd566656b29df443d59fac116ab",
+      "crc": "passed",
+      "sourceFilesMatched": 43,
+      "assetFilesMatched": 20,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "deliveryPath": "workbench-oasis-editor/oasis-editor-studio-0.8.1.fbworkbench",
+      "introductionFile": "workbench-oasis-editor/presentation.json",
+      "license": "MIT",
+      "transferHashes": "passed"
+    },
+    {
+      "directory": "workbenches/77-circuitjs",
+      "version": "0.8.1",
+      "appId": "workbench.9a20add2-4f04-44aa-b343-61f5374fc989",
+      "filename": "77-circuitjs-0.8.1.fbworkbench",
+      "bytes": 2035395,
+      "sha256": "7177ddfb859882e04ca64d845c3c0c47c37d8b9d2a654eac0a708f34cb90d28c",
+      "crc": "passed",
+      "sourceFilesMatched": 32,
+      "assetFilesMatched": 706,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "deliveryPath": "workbench-circuitjs/circuitjs-studio-0.8.1.fbworkbench",
+      "introductionFile": "workbench-circuitjs/presentation.json",
+      "license": "GPL-2.0-or-later",
+      "transferHashes": "passed"
+    },
+    {
+      "directory": "workbenches/78-gltf-transform",
+      "version": "0.8.1",
+      "appId": "workbench.cdaf06c7-7f94-47f3-8c2b-0b77757a6ba4",
+      "filename": "78-gltf-transform-0.8.1.fbworkbench",
+      "bytes": 81997,
+      "sha256": "6a1b5e406354a6ab83c22d7a2feea43db7696f5ce2719003fa507762c0f84340",
+      "crc": "passed",
+      "sourceFilesMatched": 36,
+      "assetFilesMatched": 5,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "deliveryPath": "workbench-gltf-transform/gltf-transform-studio-0.8.1.fbworkbench",
+      "introductionFile": "workbench-gltf-transform/presentation.json",
+      "license": "MIT",
+      "transferHashes": "passed"
+    }
+  ],
+  "screenshots": [
+    {
+      "slug": "oasis-editor",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 130119,
+      "sha256": "99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6"
+    },
+    {
+      "slug": "circuitjs",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 68140,
+      "sha256": "f67fe6093c863fb35d161d6b53ed80a62ec3f8ae4758e7d0afca7a4ca17c7cf0"
+    },
+    {
+      "slug": "gltf-transform",
+      "width": 1440,
+      "height": 980,
+      "bytes": 204061,
+      "sha256": "636c8589a5b1ca389d66d26f0437d6e3628d62fb07ac6155edfeb2ea67963241"
+    }
+  ]
+}

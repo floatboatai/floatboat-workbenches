@@ -28,7 +28,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -38,7 +38,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 1,
     "slug": "excalidraw",
@@ -83,7 +89,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -93,7 +99,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 2,
     "slug": "markmap",
@@ -138,7 +150,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -147,7 +159,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 3,
     "slug": "pdfme",
@@ -192,7 +210,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -202,7 +220,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 4,
     "slug": "tiptap",
@@ -247,7 +271,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -257,7 +281,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 5,
     "slug": "pptxgenjs",
@@ -302,7 +332,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -312,7 +342,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 6,
     "slug": "react-flow",
@@ -357,7 +393,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -367,7 +403,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 7,
     "slug": "surveyjs-form-library",
@@ -411,7 +453,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -421,7 +463,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 8,
     "slug": "mermaid",
@@ -464,7 +512,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -474,7 +522,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "group": "数据开发",
     "mode": "组件嵌入",
@@ -519,7 +573,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -529,7 +583,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "group": "数据开发",
     "mode": "引擎封装",
@@ -574,7 +634,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -584,7 +644,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "group": "数据开发",
     "mode": "引擎封装",
@@ -806,7 +872,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -814,7 +880,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 18,
     "slug": "blocknote",
@@ -865,7 +937,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -873,7 +945,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 19,
     "slug": "mdxeditor",
@@ -922,7 +1000,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -930,7 +1008,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 20,
     "slug": "milkdown",
@@ -980,7 +1064,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -988,7 +1072,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 21,
     "slug": "pdf-js",
@@ -1037,7 +1127,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -1045,7 +1135,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 22,
     "slug": "reveal-js",
@@ -1094,7 +1190,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -1102,7 +1198,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 23,
     "slug": "univer",
@@ -1152,7 +1254,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -1160,7 +1262,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 24,
     "slug": "vditor",
@@ -1209,7 +1317,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -1217,7 +1325,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 25,
     "slug": "fabric-js",
@@ -1266,7 +1380,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -1274,7 +1388,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 26,
     "slug": "filerobot-image-editor",
@@ -1322,7 +1442,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
@@ -1330,7 +1450,13 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "业务流程分项验收；最终共享保存代码经独立 Chrome/SQLite 回归后同步。",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 27,
     "slug": "grapesjs",
@@ -1377,7 +1503,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/konva.png",
       "hostImport": "unverified",
@@ -1385,7 +1511,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.6.0.md",
       "acceptance": "workbenches/28-konva/ACCEPTANCE.md",
-      "upstream": "Konva 10.9.0，原生Stage/Transformer与PNG导出"
+      "upstream": "Konva 10.9.0，原生Stage/Transformer与PNG导出",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 28,
     "slug": "konva",
@@ -1429,7 +1561,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/logicflow.png",
       "hostImport": "unverified",
@@ -1437,7 +1569,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.6.0.md",
       "acceptance": "workbenches/29-logicflow/ACCEPTANCE.md",
-      "upstream": "LogicFlow core2.2.5/extension2.3.1，原生图纸与Snapshot PNG"
+      "upstream": "LogicFlow core2.2.5/extension2.3.1，原生图纸与Snapshot PNG",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 29,
     "slug": "logicflow",
@@ -1510,7 +1648,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/simplemindmap.png",
       "hostImport": "unverified",
@@ -1518,7 +1656,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.6.0.md",
       "acceptance": "workbenches/31-simplemindmap/ACCEPTANCE.md",
-      "upstream": "simple-mind-map0.14.0-fix.3，原生节点命令/结构/主题/SVG"
+      "upstream": "simple-mind-map0.14.0-fix.3，原生节点命令/结构/主题/SVG",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 31,
     "slug": "simplemindmap",
@@ -1591,7 +1735,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/wavesurfer-js.png",
       "hostImport": "unverified",
@@ -1599,7 +1743,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.6.0.md",
       "acceptance": "workbenches/33-wavesurfer-js/ACCEPTANCE.md",
-      "upstream": "WaveSurfer7.12.12及Regions/Timeline，真实音频解码与回听"
+      "upstream": "WaveSurfer7.12.12及Regions/Timeline，真实音频解码与回听",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 33,
     "slug": "wavesurfer-js",
@@ -1877,7 +2027,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/react-email.png",
       "hostImport": "unverified",
@@ -1885,7 +2035,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.6.0.md",
       "acceptance": "workbenches/42-react-email/ACCEPTANCE.md",
-      "upstream": "React Email6.11.4官方现役纯组件固定源码 + 官方render2.1.1"
+      "upstream": "React Email6.11.4官方现役纯组件固定源码 + 官方render2.1.1",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 42,
     "slug": "react-email",
@@ -1958,7 +2114,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/penpot.png",
       "hostImport": "unverified",
@@ -1967,7 +2123,13 @@
       "acceptance": "workbenches/44-penpot/ACCEPTANCE.md",
       "upstream": "真实@penpot/library 1.2.0生成原生归档；外部Penpot导入未验证",
       "hostLlm": "not-used",
-      "serviceTests": 0
+      "serviceTests": 0,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 44,
     "slug": "penpot",
@@ -2010,7 +2172,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/bruno.png",
       "hostImport": "unverified",
@@ -2018,7 +2180,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.6.0.md",
       "acceptance": "workbenches/45-bruno/ACCEPTANCE.md",
-      "upstream": "@usebruno/lang0.41.0原生Bru解析/生成与真实HTTP"
+      "upstream": "@usebruno/lang0.41.0原生Bru解析/生成与真实HTTP",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "group": "数据开发",
     "mode": "源码/构建适配",
@@ -2210,7 +2378,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -2219,7 +2387,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2259,7 +2433,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -2268,7 +2442,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2308,7 +2488,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -2317,7 +2497,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2357,7 +2543,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -2366,7 +2552,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2406,7 +2598,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "screenshot": "README.md#工作台实景",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
@@ -2415,7 +2607,13 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2451,7 +2649,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/langextract.png",
       "hostImport": "unverified",
@@ -2459,7 +2657,13 @@
       "record": "docs/release-0.4.0.md",
       "acceptance": "workbenches/56-langextract/ACCEPTANCE.md",
       "upstream": "真实LangExtract库＋明确stub提供者；真实模型未验证",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 56,
     "slug": "langextract",
@@ -2500,7 +2704,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/docling.png",
       "hostImport": "unverified",
@@ -2508,7 +2712,13 @@
       "record": "docs/release-0.4.0.md",
       "acceptance": "workbenches/57-docling/app/ACCEPTANCE.md",
       "upstream": "真实Docling core HTML转换与原生JSON回读；官方Serve live未验证",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 57,
     "slug": "docling",
@@ -2549,7 +2759,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/langgraph.png",
       "hostImport": "unverified",
@@ -2559,7 +2769,13 @@
       "upstream": "真实StateGraph/SQLite与进程重启；Gemini 3.8 Flash经Host完成整理、复核、交付和刷新恢复",
       "hostLlm": "passed",
       "hostModel": "gemini-3.8-flash",
-      "hostEvidence": "workbenches/58-langgraph/host-acceptance-0.4.1.json"
+      "hostEvidence": "workbenches/58-langgraph/host-acceptance-0.4.1.json",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 58,
     "slug": "langgraph",
@@ -2600,7 +2816,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/promptfoo.png",
       "hostImport": "unverified",
@@ -2608,7 +2824,13 @@
       "record": "docs/release-0.4.0.md",
       "acceptance": "workbenches/59-promptfoo/ACCEPTANCE.md",
       "upstream": "真实Promptfoo evaluator回显评测；外部模型未验证",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 59,
     "slug": "promptfoo",
@@ -2649,7 +2871,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/faster-whisper.png",
       "hostImport": "unverified",
@@ -2657,7 +2879,13 @@
       "record": "docs/release-0.4.0.md",
       "acceptance": "workbenches/60-faster-whisper/ACCEPTANCE.md",
       "upstream": "真实tiny.en CPU INT8英语转写，主仓库完整链路复验",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "id": 60,
     "slug": "faster-whisper",
@@ -2698,7 +2926,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/presenton.png",
       "hostImport": "unverified",
@@ -2706,7 +2934,13 @@
       "record": "docs/release-0.4.0.md",
       "acceptance": "workbenches/61-presenton/app/ACCEPTANCE.md",
       "upstream": "本地编辑/导出与官方API合同；真实生成和上游文件递送未验证",
-      "hostLlm": "not-used"
+      "hostLlm": "not-used",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     },
     "id": 61,
     "slug": "presenton",
@@ -2752,7 +2986,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/hyperframes.png",
       "hostImport": "unverified",
@@ -2761,7 +2995,13 @@
       "acceptance": "workbenches/62-hyperframes/ACCEPTANCE.md",
       "upstream": "真实hyperframes 0.8.210渲染MP4",
       "hostLlm": "not-used",
-      "serviceTests": 4
+      "serviceTests": 4,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2802,7 +3042,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/graphify.png",
       "hostImport": "unverified",
@@ -2811,7 +3051,13 @@
       "acceptance": "workbenches/63-graphify/ACCEPTANCE.md",
       "upstream": "真实graphifyy 0.9.97 AST提取；语义LLM提取未启用",
       "hostLlm": "not-used",
-      "serviceTests": 4
+      "serviceTests": 4,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2852,7 +3098,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/pageindex.png",
       "hostImport": "unverified",
@@ -2861,7 +3107,13 @@
       "acceptance": "workbenches/64-pageindex/ACCEPTANCE.md",
       "upstream": "真实PageIndex 0.2.10 Flash、PDFium及Gemini 3.8问答",
       "hostLlm": "passed: gemini-3.8-flash",
-      "serviceTests": 4
+      "serviceTests": 4,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2902,7 +3154,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/deeptutor.png",
       "hostImport": "unverified",
@@ -2911,7 +3163,13 @@
       "acceptance": "workbenches/65-deeptutor/ACCEPTANCE.md",
       "upstream": "真实DeepTutor批改/排程及Gemini 3.8出题",
       "hostLlm": "passed: gemini-3.8-flash",
-      "serviceTests": 8
+      "serviceTests": 8,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -2952,7 +3210,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/agent-reach.png",
       "hostImport": "unverified",
@@ -2961,7 +3219,13 @@
       "acceptance": "workbenches/66-agent-reach/ACCEPTANCE.md",
       "upstream": "真实Agent-Reach 1.6.0 GitHub读取/搜索、Jina网页和V2EX热门",
       "hostLlm": "not-used",
-      "serviceTests": 5
+      "serviceTests": 5,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -3002,7 +3266,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/openmontage.png",
       "hostImport": "unverified",
@@ -3011,7 +3275,13 @@
       "acceptance": "workbenches/67-openmontage/ACCEPTANCE.md",
       "upstream": "真实OpenMontage裁切/组接；未启用AI视频生成",
       "hostLlm": "not-used",
-      "serviceTests": 4
+      "serviceTests": 4,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -3052,7 +3322,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/deerflow.png",
       "hostImport": "unverified",
@@ -3061,7 +3331,13 @@
       "acceptance": "workbenches/68-deerflow/ACCEPTANCE.md",
       "upstream": "真实官方序列化器与请求模型；运行HTTP契约通过，真实研究服务未验证",
       "hostLlm": "not-used",
-      "serviceTests": 0
+      "serviceTests": 0,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -3102,7 +3378,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/mirofish.png",
       "hostImport": "unverified",
@@ -3111,7 +3387,13 @@
       "acceptance": "workbenches/69-mirofish/ACCEPTANCE.md",
       "upstream": "原生动作格式与运行HTTP契约通过；真实OASIS/Zep模拟未验证",
       "hostLlm": "not-used",
-      "serviceTests": 0
+      "serviceTests": 0,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -3152,7 +3434,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/geoinflow.png",
       "hostImport": "unverified",
@@ -3161,7 +3443,13 @@
       "acceptance": "workbenches/70-geoinflow/ACCEPTANCE.md",
       "upstream": "真实GEOInflow分类与严格日期核心；未做IP/DNS核验或线上采集",
       "hostLlm": "not-used",
-      "serviceTests": 0
+      "serviceTests": 0,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -3202,7 +3490,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/openpencil.png",
       "hostImport": "unverified",
@@ -3211,7 +3499,13 @@
       "acceptance": "workbenches/71-openpencil/ACCEPTANCE.md",
       "upstream": "真实OpenPencil 0.16.0核心与FIG编码；CanvasKit画布等待WASM支持",
       "hostLlm": "not-used",
-      "serviceTests": 0
+      "serviceTests": 0,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -3252,7 +3546,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "needs-redesign",
       "package": "passed",
       "screenshot": "docs/screenshots/figcraft.png",
       "hostImport": "unverified",
@@ -3261,7 +3555,13 @@
       "acceptance": "workbenches/72-figcraft/ACCEPTANCE.md",
       "upstream": "真实FigCraft CLI 0.11.2 CPU渲染及原生文档",
       "hostLlm": "not-used",
-      "serviceTests": 4
+      "serviceTests": 4,
+      "structuralLayout": {
+        "status": "needs-redesign",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source header cluster; task redesign queued"
+      }
     },
     "presentation": {
       "screenshots": [
@@ -3311,7 +3611,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/ray-optics.png",
       "hostImport": "unverified",
@@ -3319,7 +3619,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.7.0.md",
       "acceptance": "workbenches/73-ray-optics/ACCEPTANCE.md",
-      "upstream": "Ray Optics5.5.0 commitdaf76772原生Scene/Simulator/Editor"
+      "upstream": "Ray Optics5.5.0 commitdaf76772原生Scene/Simulator/Editor",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     }
   },
   {
@@ -3361,7 +3667,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/invoice-builder.png",
       "hostImport": "unverified",
@@ -3369,7 +3675,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.7.0.md",
       "acceptance": "workbenches/74-invoice-builder/ACCEPTANCE.md",
-      "upstream": "Invoice Builder commit2979d917原生财务与PDF组件，React PDF4.9.0"
+      "upstream": "Invoice Builder commit2979d917原生财务与PDF组件，React PDF4.9.0",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     }
   },
   {
@@ -3411,7 +3723,7 @@
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/mesh2motion.png",
       "hostImport": "unverified",
@@ -3419,7 +3731,13 @@
       "verifiedAt": "2026-10-28",
       "record": "docs/release-0.7.0.md",
       "acceptance": "workbenches/75-mesh2motion/ACCEPTANCE.md",
-      "upstream": "Mesh2Motion commiteef2de98原生权重管线，Three.js0.185.0"
+      "upstream": "Mesh2Motion commiteef2de98原生权重管线，Three.js0.185.0",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "source scan only; visual/task review pending"
+      }
     }
   },
   {
@@ -3446,12 +3764,12 @@
     "slug": "oasis-editor",
     "directory": "workbenches/76-oasis-editor",
     "status": "local-verified",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/oasis-editor.png",
-          "caption": "Oasis Editor · 纸张编辑区、分页校样与文档边栏"
+          "caption": "Oasis Editor · 居中纸张、文稿菜单与按需页边工具"
         }
       ]
     },
@@ -3467,9 +3785,15 @@
       "hostImport": "unverified",
       "hostLlm": "not-used",
       "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.8.0.md",
+      "record": "docs/release-0.8.1.md",
       "acceptance": "workbenches/76-oasis-editor/ACCEPTANCE.md",
-      "upstream": "celsowm/oasis-editor 0.0.195 · ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195 · MIT"
+      "upstream": "celsowm/oasis-editor 0.0.195 · ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195 · MIT",
+      "structuralLayout": {
+        "status": "passed",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "real screenshots and task flow"
+      }
     }
   },
   {
@@ -3496,12 +3820,12 @@
     "slug": "circuitjs",
     "directory": "workbenches/77-circuitjs",
     "status": "local-verified",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/circuitjs.png",
-          "caption": "CircuitJS1 · 电路画布、仪表与示波轨"
+          "caption": "CircuitJS1 · 电路与示波器、纵向元件架与底部仪表"
         }
       ],
       "fullDescription": "CircuitJS 电路工作台集成原生 TypeScript 电路求解、编辑与示波器。应用整体按 GPL-2.0-or-later 提供，完整对应源代码、上游版本和重建说明随包交付。首版限定基础 RLC、电压源、开关等经过验收的类型；恢复项目不会自动运行。官方上传仅暂存交付包与介绍，不选择许可证；当前商店发布接口只接受 MIT，本 GPL 应用不能据此宣称已公开上架。"
@@ -3518,9 +3842,15 @@
       "hostImport": "unverified",
       "hostLlm": "not-used",
       "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.8.0.md",
+      "record": "docs/release-0.8.1.md",
       "acceptance": "workbenches/77-circuitjs/ACCEPTANCE.md",
-      "upstream": "pfalstad/circuitjs1 · e952e788a4135a693bfd4cee7883f9b3314e3e76 · GPL-2.0-or-later"
+      "upstream": "pfalstad/circuitjs1 · e952e788a4135a693bfd4cee7883f9b3314e3e76 · GPL-2.0-or-later",
+      "structuralLayout": {
+        "status": "passed",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "real screenshots and task flow"
+      }
     }
   },
   {
@@ -3547,12 +3877,12 @@
     "slug": "gltf-transform",
     "directory": "workbenches/78-gltf-transform",
     "status": "local-verified",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/gltf-transform.png",
-          "caption": "glTF Transform · 浅色模型陈列、结构树与材质检查器"
+          "caption": "glTF Transform · 模型空间、底部材质带与浮动检查器"
         }
       ]
     },
@@ -3568,9 +3898,15 @@
       "hostImport": "unverified",
       "hostLlm": "not-used",
       "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.8.0.md",
+      "record": "docs/release-0.8.1.md",
       "acceptance": "workbenches/78-gltf-transform/ACCEPTANCE.md",
-      "upstream": "@gltf-transform/core 4.5.1 · 895b70777fda68aa321358d17dab2105e8564d08；Three 0.185.0 · MIT"
+      "upstream": "@gltf-transform/core 4.5.1 · 895b70777fda68aa321358d17dab2105e8564d08；Three 0.185.0 · MIT",
+      "structuralLayout": {
+        "status": "passed",
+        "reviewedAt": "2026-10-28",
+        "record": "docs/layout-audit-2026-10-28.md",
+        "basis": "real screenshots and task flow"
+      }
     }
   }
 ]

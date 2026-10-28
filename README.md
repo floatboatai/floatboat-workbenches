@@ -6,9 +6,9 @@
 
 ## 当前进度
 
-当前批次 **0.8.0** · **56 / 78 个工作台已完成本地功能验收**，其余22个为计划项目。本批新增Oasis Editor、CircuitJS和glTF Transform，分别用于分页文档、电路实验与3D模型检查。Floatboat客户端导入尚未实测。
+当前版本 **0.8.1** · **56 / 78 个工作台已完成本地功能验收**。本轮重做Oasis、CircuitJS和glTF的页面结构，工作台数量不变。Floatboat客户端导入尚未实测。
 
-本批3项均保留真实上游核心，完成自动保存、未完成草稿与恢复稿回导、产品独立布局、真实Chrome验收和导出源码复验。实际范围及26项应用测试见[0.8.0验收](docs/release-0.8.0.md)。GitHub检查与上传进度见[Actions](https://github.com/floatboatai/floatboat-workbenches/actions)；WASM画布升级仍等待客户端与模板就绪。
+此前对独立布局的判断不足：源码扫描有28项复用页头项目选择与新建组合。本轮3项以文稿、电路和模型为中心完成结构改版；其余26项待结构整改、27项待进一步视觉与任务审查，详见[结构审计](docs/layout-audit-2026-10-28.md)。[0.8.1改版对照与验收](docs/release-0.8.1.md)包含真实截图、主任务变化和自动保存回归结果。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
@@ -65,9 +65,9 @@
 | [Ray Optics Simulation](workbenches/73-ray-optics/) | 原生光路编辑、CPU模拟、探测器与PNG/场景/工程导出 | 光路主屏、器材架与实验读数 |
 | [Invoice Builder](workbenches/74-invoice-builder/) | 原生计价与PDF模板、报价/发票、图片及工程恢复 | 明细填写、纸张校样与PDF预览 |
 | [Mesh2Motion](workbenches/75-mesh2motion/) | 原生人形绑定、87动作预览、动画GLB与完整工程 | 三维舞台、骨架树、关节参数与动作轨 |
-| [Oasis Editor](workbenches/76-oasis-editor/) | 分页DOCX编辑、原始文档保留、表格/图片校样、中文PDF与DOCX及完整工程导出 | 纸张编辑区、分页校样与文档边栏 |
-| [CircuitJS1](workbenches/77-circuitjs/) | 基础RLC电路编辑、原生求解与示波器、参数草稿、原生电路与读数导出 | 电路画布、仪表与示波轨 |
-| [glTF Transform](workbenches/78-gltf-transform/) | 自包含GLB检查、节点与PBR材质修改、JSON元数据、保留蒙皮/动画/贴图的结果与工程导出 | 浅色模型陈列、结构树与材质检查器 |
+| [Oasis Editor](workbenches/76-oasis-editor/) | 分页DOCX编辑、原始文档保留、表格/图片校样、中文PDF与DOCX及完整工程导出 | 居中纸张、文稿菜单与按需页边工具 |
+| [CircuitJS1](workbenches/77-circuitjs/) | 基础RLC电路编辑、原生求解与示波器、参数草稿、原生电路与读数导出 | 电路与示波器、纵向元件架与底部仪表 |
+| [glTF Transform](workbenches/78-gltf-transform/) | 自包含GLB检查、节点与PBR材质修改、JSON元数据、保留蒙皮/动画/贴图的结果与工程导出 | 模型空间、底部材质带与浮动检查器 |
 
 0.4.0批次统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
 
@@ -118,8 +118,8 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[React Email · 邮件稿件、收件人变量与多尺寸校样](workbenches/42-react-email/)**<br>[<img src="docs/screenshots/react-email.png" alt="React Email 工作台实景" width="440">](workbenches/42-react-email/) | **[Bruno · 请求集合、编辑器与响应控制台](workbenches/45-bruno/)**<br>[<img src="docs/screenshots/bruno.png" alt="Bruno 工作台实景" width="440">](workbenches/45-bruno/) |
 | **[Ray Optics Simulation · 光路主屏、器材架与实验读数](workbenches/73-ray-optics/)**<br>[<img src="docs/screenshots/ray-optics.png" alt="Ray Optics Simulation 工作台实景" width="440">](workbenches/73-ray-optics/) | **[Invoice Builder · 明细填写、纸张校样与PDF预览](workbenches/74-invoice-builder/)**<br>[<img src="docs/screenshots/invoice-builder.png" alt="Invoice Builder 工作台实景" width="440">](workbenches/74-invoice-builder/) |
 | **[Mesh2Motion · 三维舞台、骨架树、关节参数与动作轨](workbenches/75-mesh2motion/)**<br>[<img src="docs/screenshots/mesh2motion.png" alt="Mesh2Motion 工作台实景" width="440">](workbenches/75-mesh2motion/) |  |
-| **[Oasis Editor · 纸张编辑区、分页校样与文档边栏](workbenches/76-oasis-editor/)**<br>[<img src="docs/screenshots/oasis-editor.png" alt="Oasis Editor 工作台实景" width="440">](workbenches/76-oasis-editor/) | **[CircuitJS1 · 电路画布、仪表与示波轨](workbenches/77-circuitjs/)**<br>[<img src="docs/screenshots/circuitjs.png" alt="CircuitJS1 工作台实景" width="440">](workbenches/77-circuitjs/) |
-| **[glTF Transform · 浅色模型陈列、结构树与材质检查器](workbenches/78-gltf-transform/)**<br>[<img src="docs/screenshots/gltf-transform.png" alt="glTF Transform 工作台实景" width="440">](workbenches/78-gltf-transform/) |  |
+| **[Oasis Editor · 居中纸张、文稿菜单与按需页边工具](workbenches/76-oasis-editor/)**<br>[<img src="docs/screenshots/oasis-editor.png" alt="Oasis Editor 工作台实景" width="440">](workbenches/76-oasis-editor/) | **[CircuitJS1 · 电路与示波器、纵向元件架与底部仪表](workbenches/77-circuitjs/)**<br>[<img src="docs/screenshots/circuitjs.png" alt="CircuitJS1 工作台实景" width="440">](workbenches/77-circuitjs/) |
+| **[glTF Transform · 模型空间、底部材质带与浮动检查器](workbenches/78-gltf-transform/)**<br>[<img src="docs/screenshots/gltf-transform.png" alt="glTF Transform 工作台实景" width="440">](workbenches/78-gltf-transform/) |  |
 
 自动保存区分待保存、同步中、已保存、待完善草稿、离线和版本冲突。后台保存时仍可编辑；项目导入创建独立项目，未完成输入可恢复。浏览器本机缓存限定同一来源。
 

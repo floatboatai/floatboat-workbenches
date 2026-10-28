@@ -2,7 +2,7 @@
 
 真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-28。
 
-既有53项保留历史采集版本；本批新增3项0.8.0界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
+其余53项保留历史采集版本；本轮更新3项0.8.1界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -59,8 +59,8 @@
 | [ray-optics.png](ray-optics.png) | 0.7.0 | 1440 × 1144 | 189.2 KiB | `21241c612929679ee5557c5d4d8345a05164733b4cdb45f1bb0e638b529c1d7c` |
 | [invoice-builder.png](invoice-builder.png) | 0.7.0 | 1440 × 1050 | 117.9 KiB | `64edaf214cdfb14730442e43d2c55335da906b1b630dfe45c849f187f9b7bbc2` |
 | [mesh2motion.png](mesh2motion.png) | 0.7.0 | 1440 × 1041 | 188.8 KiB | `5d7d47bcba4b11bc2149d7407a0de3189a703195d1e5007b833085b8cec5b125` |
-| [oasis-editor.png](oasis-editor.png) | 0.8.0 | 1440 × 1000 | 213.0 KiB | `3fa2f77b47687955371ddab4271845b640bf90e51a0a8891b9b5076d86b4d1bd` |
-| [circuitjs.png](circuitjs.png) | 0.8.0 | 1440 × 1000 | 100.9 KiB | `e75af2dea019c83e08c6d4aabf937f932323ea7d39c0285e0a147316987cce26` |
-| [gltf-transform.png](gltf-transform.png) | 0.8.0 | 1440 × 1231 | 204.2 KiB | `6dda94b53c15541f5d2642d6d8743dcd2b00844e391fe11341d3217673b3a1e3` |
+| [oasis-editor.png](oasis-editor.png) | 0.8.1 | 1440 × 1000 | 127.1 KiB | `99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6` |
+| [circuitjs.png](circuitjs.png) | 0.8.1 | 1440 × 1000 | 66.5 KiB | `f67fe6093c863fb35d161d6b53ed80a62ec3f8ae4758e7d0afca7a4ca17c7cf0` |
+| [gltf-transform.png](gltf-transform.png) | 0.8.1 | 1440 × 980 | 199.3 KiB | `636c8589a5b1ca389d66d26f0437d6e3628d62fb07ac6155edfeb2ea67963241` |
 
-共56张，合计 8.16 MiB。
+共56张，合计 8.04 MiB。

@@ -230,5 +230,36 @@
     "Full screen-reader document semantics not separately verified"
   ],
   "preview": "http://127.0.0.1:54511/",
-  "legacyPreviewPreserved": "http://127.0.0.1:55070/"
+  "legacyPreviewPreserved": "http://127.0.0.1:55070/",
+  "integratedPackage": {
+    "directory": "workbenches/76-oasis-editor",
+    "version": "0.8.1",
+    "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
+    "filename": "76-oasis-editor-0.8.1.fbworkbench",
+    "bytes": 20236181,
+    "sha256": "18eddfc9977b8d2acd0a1ec0179b4adbde98cdd566656b29df443d59fac116ab",
+    "crc": "passed",
+    "sourceFilesMatched": 43,
+    "assetFilesMatched": 20,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-oasis-editor/oasis-editor-studio-0.8.1.fbworkbench",
+    "introductionFile": "workbench-oasis-editor/presentation.json",
+    "license": "MIT"
+  },
+  "integratedApplicationTests": 9,
+  "screenshot": {
+    "path": "../../docs/screenshots/oasis-editor.png",
+    "dimensions": [
+      1440,
+      1000
+    ],
+    "sha256": "99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6"
+  },
+  "integratedSourcePackage": {
+    "sourceAndResources": "byte-matched with integrated source",
+    "UIComponents": "present in package",
+    "runtime": "local check and targeted Chrome flows passed",
+    "clientImport": "unverified"
+  }
 }

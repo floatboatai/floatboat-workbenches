@@ -94,5 +94,36 @@
     "SDK/tooling/CSP"
   ],
   "hostImport": "unverified",
-  "hostModelCalls": "not-used"
+  "hostModelCalls": "not-used",
+  "integratedPackage": {
+    "directory": "workbenches/78-gltf-transform",
+    "version": "0.8.1",
+    "appId": "workbench.cdaf06c7-7f94-47f3-8c2b-0b77757a6ba4",
+    "filename": "78-gltf-transform-0.8.1.fbworkbench",
+    "bytes": 81997,
+    "sha256": "6a1b5e406354a6ab83c22d7a2feea43db7696f5ce2719003fa507762c0f84340",
+    "crc": "passed",
+    "sourceFilesMatched": 36,
+    "assetFilesMatched": 5,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-gltf-transform/gltf-transform-studio-0.8.1.fbworkbench",
+    "introductionFile": "workbench-gltf-transform/presentation.json",
+    "license": "MIT"
+  },
+  "integratedApplicationTests": 11,
+  "screenshot": {
+    "path": "../../docs/screenshots/gltf-transform.png",
+    "dimensions": [
+      1440,
+      980
+    ],
+    "sha256": "636c8589a5b1ca389d66d26f0437d6e3628d62fb07ac6155edfeb2ea67963241"
+  },
+  "integratedSourcePackage": {
+    "sourceAndResources": "byte-matched with integrated source",
+    "UIComponents": "present in package",
+    "runtime": "local check and targeted Chrome flows passed",
+    "clientImport": "unverified"
+  }
 }

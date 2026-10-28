@@ -147,7 +147,14 @@
   "hostImport": "unverified",
   "modelCalls": "not applicable; capabilities remain empty",
   "storePublication": "Not eligible for the current MIT-only release path",
-  "screenshot": "../../docs/screenshots/circuitjs.png",
+  "screenshot": {
+    "path": "../../docs/screenshots/circuitjs.png",
+    "dimensions": [
+      1440,
+      1000
+    ],
+    "sha256": "f67fe6093c863fb35d161d6b53ed80a62ec3f8ae4758e7d0afca7a4ca17c7cf0"
+  },
   "limitations": [
     "Native spatial editing is not a complete screen-reader interface.",
     "Existing basic circuit scope and disabled advanced Scope/slider/subcircuit/audio/service features remain unchanged.",
@@ -157,5 +164,28 @@
     "work/layout-081/circuit-browser.mjs",
     "work/layout-081/circuit-final-screens.mjs",
     "work/layout-081/circuit-package-check.py"
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/77-circuitjs",
+    "version": "0.8.1",
+    "appId": "workbench.9a20add2-4f04-44aa-b343-61f5374fc989",
+    "filename": "77-circuitjs-0.8.1.fbworkbench",
+    "bytes": 2035395,
+    "sha256": "7177ddfb859882e04ca64d845c3c0c47c37d8b9d2a654eac0a708f34cb90d28c",
+    "crc": "passed",
+    "sourceFilesMatched": 32,
+    "assetFilesMatched": 706,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-circuitjs/circuitjs-studio-0.8.1.fbworkbench",
+    "introductionFile": "workbench-circuitjs/presentation.json",
+    "license": "GPL-2.0-or-later"
+  },
+  "integratedApplicationTests": 6,
+  "integratedSourcePackage": {
+    "sourceAndResources": "byte-matched with integrated source",
+    "UIComponents": "present in package",
+    "runtime": "local check and targeted Chrome flows passed",
+    "clientImport": "unverified"
+  }
 }

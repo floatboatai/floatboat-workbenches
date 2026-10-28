@@ -16,7 +16,7 @@ Oasis没有命中页头组合规则，但长期固定的文稿柜、纸张和笔
 - CircuitJS：电路画布与示波器主体、元件工具和底部仪表操作、按需实验簿。
 - glTF：模型主体、上下文检查工具、按需资产库与交付操作。
 
-以上三项正在实施。其他项目保留功能验收状态，结构整改独立记录，不能据此宣称全仓视觉问题已解决。
+以上三项已完成0.8.1结构改版与真实Chrome验收。其他项目保留功能验收状态，结构整改独立记录，不能据此宣称全仓视觉问题已解决。
 
 ## 生成与同步边界
 
@@ -83,6 +83,8 @@ Oasis没有命中页头组合规则，但长期固定的文稿柜、纸张和笔
 | 73 | [Ray Optics Simulation](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/73-ray-optics/app/src/ui/App.tsx) | 待逐项审查 | 待视觉与任务审查 |
 | 74 | [Invoice Builder](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/74-invoice-builder/app/src/ui/App.tsx) | 待逐项审查 | 待视觉与任务审查 |
 | 75 | [Mesh2Motion](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/75-mesh2motion/app/src/ui/App.tsx) | 待逐项审查 | 待视觉与任务审查 |
-| 76 | [Oasis Editor](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/76-oasis-editor/app/src/ui/App.tsx) | 待逐项审查 | 本轮整改中 |
-| 77 | [CircuitJS1](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/77-circuitjs/app/src/ui/App.tsx#L41) | 页头组合命中 | 本轮整改中 |
-| 78 | [glTF Transform](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/78-gltf-transform/app/src/ui/App.tsx#L387) | 页头组合命中 | 本轮整改中 |
+| 76 | [Oasis Editor](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/76-oasis-editor/app/src/ui/App.tsx) | 待逐项审查 | 本轮已完成0.8.1结构审查 |
+| 77 | [CircuitJS1](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/77-circuitjs/app/src/ui/App.tsx#L41) | 页头组合命中 | 本轮已完成0.8.1结构审查 |
+| 78 | [glTF Transform](https://github.com/floatboatai/floatboat-workbenches/blob/b2c90796c4bccb61b38d75200a7a00b64f7a12c8/workbenches/78-gltf-transform/app/src/ui/App.tsx#L387) | 页头组合命中 | 本轮已完成0.8.1结构审查 |
+
+本轮结果：3项通过结构审查；26项待结构整改；27项待进一步视觉与任务审查。后两类仍保留原有功能验收结果，不等同于结构通过。
