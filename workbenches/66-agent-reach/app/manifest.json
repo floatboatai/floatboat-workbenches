@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.659dd703-061a-42e9-8c32-5f9ba3847ac5",
+  "registryName": "agent-reach-studio",
+  "name": "调研资料台 · Agent-Reach",
+  "description": "公开来源采集、证据摘录与审阅报告",
+  "version": "0.5.0",
+  "changelog": "接入Agent-Reach公开渠道，原生结果导入导出、去重收藏、来源摘录和完整工作稿自动保存。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}

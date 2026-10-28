@@ -1,0 +1,14 @@
+agent-reach @ git+https://github.com/Panniantong/Agent-Reach.git@14c213405669414492bda0f8d52cc6531d062c45
+brotli==1.2.1
+certifi==2026.10.23
+charset-normalizer==3.5.2
+idna==3.20
+loguru==0.7.3
+mutagen==1.48.1
+pycryptodomex==3.24.1
+pyyaml==6.0.3
+requests==2.34.2
+urllib3==2.8.0
+websockets==17.3
+yt-dlp==2026.8.19
+yt-dlp-ejs==0.8.0

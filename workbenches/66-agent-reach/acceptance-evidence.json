@@ -1,0 +1,104 @@
+{
+  "version": "0.5.0",
+  "verifiedAt": "2026-10-28",
+  "timezone": "America/New_York",
+  "applicationTests": 13,
+  "serviceTests": 5,
+  "browserChecks": 19,
+  "upstreamCommit": "14c213405669414492bda0f8d52cc6531d062c45",
+  "engine": "Agent-Reach@1.6.0",
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "sourceDataCommitted": false,
+  "primary": {
+    "checks": [
+      "real upstream GitHub read and candidate refresh recovery",
+      "evidence capture, review and URL dedup preserve notes",
+      "native result export is exact",
+      "real web read and per-source unfinished clipping recovery",
+      "invented quote rejected then successful correction clears error",
+      "unfinished result JSON restored",
+      "portable project import creates a new collection and keeps extra drafts",
+      "report exports attributed evidence and review state",
+      "375px layout and keyboard export",
+      "desktop screenshot from real sources without page errors"
+    ],
+    "errors": [],
+    "liveChannels": [
+      "github",
+      "web"
+    ]
+  },
+  "persistence": {
+    "checks": [
+      "typing during delayed save retained",
+      "lost save acknowledgement retried without losing input",
+      "cross-window conflict protects committed data with explicit server reload",
+      "late real collection response does not overwrite new research project"
+    ],
+    "errors": []
+  },
+  "recoveryImportAndNavigation": {
+    "checks": [
+      "navigation locks all fields while old save completes and preserves old input",
+      "real recovery download imports as new project retaining incomplete extra",
+      "old pending operations preserved as history without replay",
+      "imported working draft survives another refresh"
+    ],
+    "errors": []
+  },
+  "disconnected": {
+    "actualServiceDisconnected": true,
+    "collectDisabled": true,
+    "notesSaved": true,
+    "errors": []
+  },
+  "actualLiveServices": [
+    {
+      "channel": "github",
+      "action": "read",
+      "backend": "github-public-api",
+      "ok": true,
+      "items": 1,
+      "inputHash": "9061fa18c4ae0b45a4c1f0452040d3d00aee80f97d3c6b307310f4c00c2317bf"
+    },
+    {
+      "channel": "web",
+      "action": "read",
+      "backend": "jina",
+      "ok": true,
+      "items": 1,
+      "inputHash": "dae647750c52739c7962dd98e31a3b3a6cf2573e82fa0944e709695328aafe12"
+    },
+    {
+      "channel": "v2ex",
+      "action": "hot",
+      "backend": "v2ex-api",
+      "ok": true,
+      "items": 5,
+      "inputHash": "aba0cce82eff6f6e7f14db06b67c757ab82f6bf6ed62fbeb1e396681ebdc7697"
+    },
+    {
+      "channel": "github",
+      "action": "search",
+      "ok": true,
+      "items": 5,
+      "inputHash": "9f0fca2f4a0daadff2a5592c6779aeccee6ed1ef46c02c0a34dfbf9e34c0e19a",
+      "error": null
+    }
+  ],
+  "screenshot": {
+    "path": "../../docs/screenshots/agent-reach.png",
+    "dimensions": [
+      1440,
+      1851
+    ],
+    "sha256": "0b68fceee763277ec63918b3c663107bb4593492c310f2d711d32c3f48d98fa4"
+  },
+  "package": {
+    "name": "agent-reach-studio-0.5.0.fbworkbench",
+    "sha256": "587618caa619ffc44a1f8384ffac27796f756b3eca59107df15f52c7a7990134",
+    "crc": true,
+    "sourceResourcesMatch": true
+  }
+}

@@ -1,0 +1,6 @@
+# Agent-Reach适配
+
+service/server.py调用固定上游14c213405669414492bda0f8d52cc6531d062c45的渠道核心和原生envelope。公开GitHub使用原有_read/_search并注入不带授权的HTTP函数；V2EX和Jina调用原有公开后端。没有gh/Config/doctor/install/login/browser调用；不读取用户浏览器或凭据。
+contracts/research.ts验证原生信封、采集记录和资料引用，保留未知元数据/raw。同一capture只保存一次，资料引用capture/index；URL规范化去重保留已有笔记。摘录和来源原文匹配。
+Node同源路由验证输入、服务版本、响应hash/渠道/动作和字节容量。独立服务固定loopback默认8783，最多两个并发请求，平台错误不自动切换账号或无限重试。
+UI把结果放工作稿候选，用户收藏才进入资料目录；完整项目携带原生信封与人工层。异步结果用documentKey隔离，待确认查询显式重试。自动保存复用仓库实现；所有外部正文按纯文本呈现。
