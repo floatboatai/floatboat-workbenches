@@ -1,146 +1,161 @@
 {
   "schemaVersion": 1,
   "project": "oasis-editor",
-  "workbenchVersion": "0.8.0",
+  "workbenchVersion": "0.8.1",
   "date": "2026-10-28",
-  "engine": {
-    "package": "oasis-editor@0.0.195",
-    "npmGitHead": "ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195",
-    "inspectedMainHead": "d69f25e4f751ce6904a45ff56253e6d1bbc83c49",
-    "nativeCanvas": true,
-    "wasmRequests": 0,
-    "templateSdkOrCspModified": false
-  },
   "hostImport": "unverified",
+  "scope": "Document-first structural redesign; file lifecycle in menu, optional notes/page index/document information",
+  "baseline": {
+    "git": "b2c9079",
+    "version": "0.8.0",
+    "nativeVersion": "oasis-editor@0.0.195",
+    "nativeCommit": "ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195",
+    "nativeFontServerDataAndAutosaveTreesUnchanged": true,
+    "previousPackageSha256": "39af33f96027fcdb1e8823927e5ac94df226d1624b53ba199c35ecf8b0d6271f",
+    "complexOfficeAndCapacityProbes": "retained baseline; not rerun for UI-only change"
+  },
   "businessTests": {
     "passed": 9,
     "failed": 0,
-    "linuxExportedSource": {
-      "runtime": "node:22-bookworm",
-      "passed": 9,
-      "verifiedBy": "parent integration"
-    }
+    "runs": 1
   },
   "browser": {
-    "autosave": [
+    "url": "http://127.0.0.1:60834/",
+    "steps": [
       {
-        "name": "real DOCX import",
-        "bytes": 175449,
-        "source": "c94d3f448a78bbf7cc9116898db74f169d7321cd11a674f45b050770fc754fb9",
-        "parts": 6
-      },
-      {
-        "name": "native input saved without blur",
+        "name": "file/notes/pages keep canvas and caret; Escape returns trigger; native no-blur save",
         "pass": true
       },
       {
-        "name": "reload/full DOCX-PDF/original bytes",
+        "name": "file menu new/open and reload",
         "pass": true
       },
       {
-        "name": "downloaded real recovery reimport",
-        "oldId": "f001a141-10d9-4a54-a6d9-672f5e2b5f40",
-        "newId": "06cac31a-bde8-44fb-9eca-cb344bde19df"
-      },
-      {
-        "name": "unfinished title preserved",
+        "name": "delayed save permits continued native typing",
         "pass": true
       },
       {
-        "name": "typing continues during delayed receipt",
+        "name": "DOCX/PDF export, file chooser import, exact original and real recovery copy",
         "pass": true
       },
       {
-        "name": "lost receipt retry",
-        "pass": true
-      }
-    ],
-    "faults": [
-      {
-        "name": "two-window conflict retains local input",
+        "name": "375px full file lifecycle, notes and reduced motion",
         "pass": true,
-        "documentId": "f4475226-91c4-43dd-b8eb-08940b34a512"
-      },
-      {
-        "name": "offline new draft native typing+formatting survives reconnect/reload",
-        "pass": true
-      },
-      {
-        "name": "rapid document switching keeps native instance isolated",
-        "pass": true
+        "dimensions": {
+          "width": 375,
+          "scroll": 375,
+          "canvas": 285.6000061035156,
+          "motion": true
+        }
       }
     ],
-    "capacity": {
-      "snapshotBytes": 1929993,
-      "outerBytes": 4365320,
-      "capacityRoundtrip": true,
-      "mobile": {
-        "width": 375,
-        "scroll": 375,
-        "height": 812,
-        "motion": true
-      },
-      "keyboardFocus": {
-        "tag": "A",
-        "label": null
-      },
-      "errors": []
-    },
-    "finalInputIsolation": {
-      "staleImportBlocked": true,
-      "mobile": {
-        "width": 375,
-        "scroll": 375,
-        "canvas": 285.6000061035156,
-        "motion": true
-      },
-      "wasmRequests": 0,
-      "errors": []
-    },
-    "mobileActions": {
-      "create": true,
-      "switch": true,
-      "nativeTyping": true,
-      "mobile": {
-        "width": 375,
-        "scroll": 375,
-        "canvas": 285.6000061035156,
-        "motion": true
-      },
-      "errors": []
-    },
     "errors": []
   },
-  "independentDocx": {
-    "pages": 3,
-    "formalBytes": 434686,
-    "sourceBytes": 918215,
-    "parts": 19,
-    "customXmlPreserved": true,
+  "keyboard": {
+    "focusSteps": [
+      {
+        "name": "撤销",
+        "left": 10,
+        "right": 35.515625,
+        "viewport": 375,
+        "toolbarScroll": 0
+      },
+      {
+        "name": "重做",
+        "left": 37.515625,
+        "right": 63.03125,
+        "viewport": 375,
+        "toolbarScroll": 0
+      },
+      {
+        "name": "加粗",
+        "left": 81.03125,
+        "right": 119.03125,
+        "viewport": 375,
+        "toolbarScroll": 0
+      },
+      {
+        "name": "斜体",
+        "left": 121.03125,
+        "right": 159.03125,
+        "viewport": 375,
+        "toolbarScroll": 0
+      },
+      {
+        "name": "下划线",
+        "left": 161.03125,
+        "right": 210.03125,
+        "viewport": 375,
+        "toolbarScroll": 0
+      },
+      {
+        "name": "字号",
+        "left": 246.03125,
+        "right": 286.03125,
+        "viewport": 375,
+        "toolbarScroll": 0
+      },
+      {
+        "name": "左对齐",
+        "left": 304.03125,
+        "right": 353.03125,
+        "viewport": 375,
+        "toolbarScroll": 0
+      },
+      {
+        "name": "居中",
+        "left": 317.03125,
+        "right": 355.03125,
+        "viewport": 375,
+        "toolbarScroll": 38
+      },
+      {
+        "name": "项目符号",
+        "left": 295.03125,
+        "right": 355.03125,
+        "viewport": 375,
+        "toolbarScroll": 100
+      },
+      {
+        "name": "表格",
+        "left": 287.03125,
+        "right": 325.03125,
+        "viewport": 375,
+        "toolbarScroll": 186
+      },
+      {
+        "name": "分页",
+        "left": 327.03125,
+        "right": 365.03125,
+        "viewport": 375,
+        "toolbarScroll": 186
+      }
+    ],
+    "modalFocusTrap": true,
+    "escapeReturn": true,
     "errors": []
   },
-  "independentOffice": {
-    "verifiedBy": "parent integration",
-    "nativePdfPages": 3,
-    "libreOfficePdfPages": 3,
-    "tables": 3,
-    "images": 1,
-    "customXmlPreserved": true,
-    "fontsNormalizedAcrossTwoRoundTrips": true,
-    "visualResult": "Chinese/table/image readable, no clipping or overlap",
-    "fontConfiguration": "private FONTCONFIG_FILE with system and bundled fonts; no system mutation"
+  "exports": {
+    "pdfPages": 3,
+    "pdfChineseReadable": true,
+    "docxCRC": "passed",
+    "docxRetainedText": true,
+    "docxTables": true,
+    "media": [
+      "word/media/image1.png"
+    ]
   },
   "package": {
-    "filename": "oasis-editor-0.8.0-final.fbworkbench",
+    "filename": "oasis-editor-0.8.1-final.fbworkbench",
     "formatVersion": 2,
-    "files": 64,
-    "packageId": "29ebbda5ec076abae5d7248a16926e00bdc7728b248d20f61be998066f344e0f",
+    "files": 65,
+    "packageId": "7e122b80c156808d29d5a9ff160260fb6794df3c09b1acf3a12364db2fa50e47",
     "packageIdVerified": true,
-    "packageSha256": "39af33f96027fcdb1e8823927e5ac94df226d1624b53ba199c35ecf8b0d6271f",
-    "packageBytes": 20231599,
+    "packageSha256": "18eddfc9977b8d2acd0a1ec0179b4adbde98cdd566656b29df443d59fac116ab",
+    "packageBytes": 20236181,
     "CRC": "passed",
     "transferHashes": "passed",
-    "sourceFilesMatched": 40,
+    "sourceFilesMatched": 41,
     "resourceBytesMatched": true,
     "dataExcluded": true,
     "nativeHashes": "passed",
@@ -189,75 +204,31 @@
       ]
     }
   },
-  "boundaries": [
-    "Host import unverified",
-    "Complex Word objects and exact Office pagination not guaranteed",
-    "External DOCX layout depends on available fonts",
-    "Regular/bold CJK faces; italic intent preserved in DOCX, native PDF may substitute appearance",
-    "Full screen-reader document semantics not separately verified"
-  ],
-  "samples": [
+  "screenshots": [
     {
-      "filename": "oasis-roundtrip.docx",
-      "bytes": 7484,
-      "sha256": "eaf166aeffb22c04e34fdfe64d58092a1f11de2cbe92f92efc60307401f67bce"
+      "name": "oasis-desktop.png",
+      "sha256": "99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6",
+      "bytes": 130119
     },
     {
-      "filename": "oasis-roundtrip.pdf",
-      "bytes": 961904,
-      "sha256": "c30022a368e518e4e45564e8af171875f1b55910c0212170bfc8919d12eb4017"
+      "name": "oasis-mobile.png",
+      "sha256": "207c71bc15d2d5546a9a872b0f1f2f328af5b4a6b92f050e96a66509526b5ec3",
+      "bytes": 72401
     },
     {
-      "filename": "oasis-external-fixture.docx",
-      "bytes": 39775,
-      "sha256": "b9958b5f0300715737d394c1edf5c1062331aad3ea5eac38c073d664ae665312"
-    },
-    {
-      "filename": "oasis-external-roundtrip.docx",
-      "bytes": 40858,
-      "sha256": "59942dc7c11a8e27f97b480587f5c878b01a6f42c72a1e6b7851b2093a5afb19"
-    },
-    {
-      "filename": "oasis-external-roundtrip.pdf",
-      "bytes": 1757410,
-      "sha256": "4d52b365c9a66d091e2a7dfc646e0be9f6a244c0fbcb82ed420bf01e43855f49"
-    },
-    {
-      "filename": "oasis-external-roundtrip2.docx",
-      "bytes": 40858,
-      "sha256": "f777c0a3f23bd2a9923735fd34e189d04d11031ca340348fc0760ebf7b4e43f0"
+      "name": "oasis-mobile-menu.png",
+      "sha256": "bdad79712e8278e41c3c3d91c40ce9703040a0de84c3e90b9b1006991b2a5dd0",
+      "bytes": 67087
     }
   ],
-  "integratedPackage": {
-    "directory": "workbenches/76-oasis-editor",
-    "version": "0.8.0",
-    "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
-    "filename": "76-oasis-editor-0.8.0.fbworkbench",
-    "bytes": 20231599,
-    "sha256": "39af33f96027fcdb1e8823927e5ac94df226d1624b53ba199c35ecf8b0d6271f",
-    "crc": "passed",
-    "sourceFilesMatched": 42,
-    "assetFilesMatched": 20,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "license": "MIT",
-    "deliveryPath": "workbench-oasis-editor/oasis-editor-studio-0.8.0.fbworkbench",
-    "introductionFile": "workbench-oasis-editor/presentation.json"
-  },
-  "integratedApplicationTests": 9,
-  "exportedSourceLinuxTests": {
-    "passed": 9,
-    "environment": "node:22-bookworm / Node22.23.3",
-    "network": "none",
-    "resourceMapping": "passed",
-    "dependencies": "prepared locked dependencies mounted read-only"
-  },
-  "screenshot": {
-    "path": "../../docs/screenshots/oasis-editor.png",
-    "dimensions": [
-      1440,
-      1000
-    ],
-    "sha256": "3fa2f77b47687955371ddab4271845b640bf90e51a0a8891b9b5076d86b4d1bd"
-  }
+  "warnings": [
+    "Large module maintenance warnings: autosave-client and App"
+  ],
+  "boundaries": [
+    "Host import unverified",
+    "External DOCX layout depends on fonts and consumer",
+    "Full screen-reader document semantics not separately verified"
+  ],
+  "preview": "http://127.0.0.1:54511/",
+  "legacyPreviewPreserved": "http://127.0.0.1:55070/"
 }

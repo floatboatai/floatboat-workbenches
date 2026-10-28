@@ -24,6 +24,13 @@ import {
   tableCount,
 } from "./files";
 import { download } from "./requests";
+import {
+  FileDialog,
+  FormatBar,
+  SideNote,
+  PageIndex,
+  type Panel,
+} from "./DocumentChrome";
 export function App() {
   const p = useWorkbenchState(seed, validateDocument, "春日社区阅读计划", {
     storageKey: "oasis-editor-v1",
@@ -37,7 +44,28 @@ export function App() {
     [switching, setSwitching] = useState(false),
     [operation, setOperation] = useState(""),
     [pages, setPages] = useState(1),
-    [panel, setPanel] = useState(() => window.innerWidth > 760);
+    [panel, setPanel] = useState<Panel>(null);
+  const panelTrigger = useRef<HTMLElement | null>(null);
+  function showPanel(next: Panel, trigger: HTMLElement) {
+    panelTrigger.current = trigger;
+    setPanel((value) => (value === next ? null : next));
+  }
+  function closePanel(restoreFocus = true) {
+    setPanel(null);
+    if (restoreFocus)
+      requestAnimationFrame(() => panelTrigger.current?.focus());
+  }
+  useEffect(() => {
+    if (panel !== "notes" && panel !== "pages") return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closePanel();
+      }
+    };
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+  }, [panel]);
   const fileInput = useRef<HTMLInputElement>(null),
     recoveryInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -124,7 +152,7 @@ export function App() {
         )
       )
         live.current.setNotice(
-          "已保存原件并导入为新文稿。请在右侧查看校样说明。",
+          "已保存原件并导入为新文稿。可在“文稿 → 文档信息与原件”查看校样说明。",
         );
     });
   }
@@ -206,171 +234,94 @@ export function App() {
     () => unpackNative(p.data.document, p.data.archive),
     [key],
   );
+  function jump(page: number) {
+    document
+      .querySelectorAll(".native-host canvas")
+      [page - 1]?.scrollIntoView({ block: "start", behavior: "auto" });
+    closePanel();
+  }
+  function newDocument() {
+    closePanel(false);
+    void transit(() => p.replace({ ...seed, document: blank() }, "未命名文稿"));
+  }
+  function openDocument(id: string) {
+    closePanel(false);
+    void transit(() => p.open(id));
+  }
   return (
     <main className="manuscript-app">
-      <header className="masthead">
-        <a className="brand" href="#paper">
-          O<span>OASIS / 文稿室</span>
-        </a>
-        <div className="title-area">
+      <a
+        className="skip-link"
+        href="#paper"
+        onClick={(event) => {
+          event.preventDefault();
+          editor.current?.focus.focus();
+        }}
+      >
+        跳到正文
+      </a>
+      <header className="document-bar">
+        <div className="file-anchor">
+          <span className="wordmark" aria-hidden="true">
+            oasis
+          </span>
+          <button
+            className="file-trigger"
+            aria-haspopup="dialog"
+            aria-expanded={panel === "file" || panel === "info"}
+            onClick={(event) => showPanel("file", event.currentTarget)}
+          >
+            文稿 <span aria-hidden="true">⌄</span>
+          </button>
+        </div>
+        <div className="document-heading">
+          <h1 className="sr-only">文稿编辑器</h1>
           <label className="sr-only" htmlFor="document-title">
             文稿名称
           </label>
           <input
             id="document-title"
+            name="document-title"
+            autoComplete="off"
             disabled={p.loading || switching}
             value={p.title}
             maxLength={120}
-            onChange={(e) => {
+            onChange={(event) => {
               version.current++;
-              p.setTitle(e.target.value);
+              p.setTitle(event.target.value);
             }}
-            placeholder="未命名文稿"
+            placeholder="未命名文稿…"
           />
           <span className={"save-state " + p.autoState.phase} role="status">
             {operation || p.autoState.message}
           </span>
         </div>
-        <div className="file-actions">
-          <button disabled={locked} onClick={() => fileInput.current?.click()}>
-            导入 DOCX
-          </button>
+        <div className="document-output">
           <button
-            disabled={locked || !ready}
-            onClick={() => void exportFormat("docx")}
+            className="notes-trigger"
+            aria-haspopup="dialog"
+            aria-expanded={panel === "notes"}
+            onClick={(event) => showPanel("notes", event.currentTarget)}
           >
-            导出 DOCX
+            笔记
+            {p.data.notes && <span className="note-dot" aria-hidden="true" />}
           </button>
           <button
-            className="primary"
+            className="pdf-action"
             disabled={locked || !ready}
             onClick={() => void exportFormat("pdf")}
           >
-            PDF 校样 ↗
+            PDF 校样 <span aria-hidden="true">↗</span>
           </button>
         </div>
       </header>
-      <nav className="mobile-documents" aria-label="移动端文稿柜">
-        <select
-          aria-label="移动端打开文稿"
-          value={p.current?.id ?? ""}
-          disabled={locked}
-          onChange={(event) => {
-            if (event.target.value)
-              void transit(() => p.open(event.target.value));
-          }}
-        >
-          <option value="">当前工作稿</option>
-          {p.items.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.title}
-            </option>
-          ))}
-        </select>
-        <button
-          disabled={locked}
-          onClick={() =>
-            void transit(() =>
-              p.replace({ ...seed, document: blank() }, "未命名文稿"),
-            )
-          }
-        >
-          ＋ 新建文稿
-        </button>
-      </nav>
-      <nav className="editing-bar" aria-label="文稿排版">
-        <div className="tools">
-          <button
-            title="撤销"
-            aria-label="撤销"
-            disabled={!ready || locked}
-            onClick={() => command("undo")}
-          >
-            ↶
-          </button>
-          <button
-            title="重做"
-            aria-label="重做"
-            disabled={!ready || locked}
-            onClick={() => command("redo")}
-          >
-            ↷
-          </button>
-          <span className="divider" />
-          <button
-            className="bold"
-            disabled={!ready || locked}
-            onClick={() => command("bold")}
-          >
-            加粗
-          </button>
-          <button disabled={!ready || locked} onClick={() => command("italic")}>
-            斜体
-          </button>
-          <button
-            disabled={!ready || locked}
-            onClick={() => command("underline")}
-          >
-            下划线
-          </button>
-          <label>
-            字号{" "}
-            <select
-              aria-label="字号"
-              defaultValue="12"
-              disabled={!ready || locked}
-              onChange={(e) => command("setFontSize", Number(e.target.value))}
-            >
-              {[10, 12, 14, 16, 20, 24, 32].map((n) => (
-                <option key={n}>{n}</option>
-              ))}
-            </select>
-          </label>
-          <button
-            disabled={!ready || locked}
-            onClick={() => command("alignLeft")}
-          >
-            左对齐
-          </button>
-          <button
-            disabled={!ready || locked}
-            onClick={() => command("alignCenter")}
-          >
-            居中
-          </button>
-          <button
-            disabled={!ready || locked}
-            onClick={() => command("bulletList")}
-          >
-            项目符号
-          </button>
-          <button
-            disabled={!ready || locked}
-            onClick={() => command("insertTable", { rows: 3, columns: 3 })}
-          >
-            插入表格
-          </button>
-          <button
-            disabled={!ready || locked}
-            onClick={() => command("pageBreak")}
-          >
-            分页
-          </button>
-        </div>
-        <button
-          className="panel-toggle"
-          aria-expanded={panel}
-          onClick={() => setPanel(!panel)}
-        >
-          校样笔记 {panel ? "−" : "+"}
-        </button>
-      </nav>
+      <FormatBar disabled={locked || !ready} command={command} />
       {(p.error || p.notice) && (
         <div
           className={"message " + (p.error ? "error" : "")}
           role={p.error ? "alert" : "status"}
         >
-          {p.error || p.notice}
+          <span>{p.error || p.notice}</span>
           <button
             aria-label="关闭提示"
             onClick={() => {
@@ -382,242 +333,150 @@ export function App() {
           </button>
         </div>
       )}
-      <div className={"desk " + (panel ? "" : "notes-hidden")}>
-        <aside className="pages-panel">
-          <div className="sidebar-caption">文稿柜</div>
-          <label className="sr-only" htmlFor="saved-document">
-            打开已保存文稿
-          </label>
+      <section className="writing-surface" id="paper" aria-label="文稿纸张">
+        {!p.loading && (
+          <NativeEditor
+            key={key}
+            document={mountedDocument}
+            zoom={p.data.zoom}
+            onChange={(doc) => changed(key, doc)}
+            onReady={(client) => {
+              if (live.current.documentKey === key) {
+                editor.current = client;
+                setReady(!!client);
+                if (
+                  client &&
+                  window.innerWidth < 760 &&
+                  live.current.data.zoom > 35
+                )
+                  live.current.setData((data) => ({ ...data, zoom: 35 }));
+              }
+            }}
+            onError={p.report}
+            onPages={setPages}
+          />
+        )}
+      </section>
+      <footer className="reading-bar">
+        <button
+          className="pages-trigger"
+          aria-haspopup="dialog"
+          aria-expanded={panel === "pages"}
+          onClick={(event) => showPanel("pages", event.currentTarget)}
+        >
+          {pages} 页 <span aria-hidden="true">⌃</span>
+        </button>
+        <span className="reading-label">
+          {imageCount(p.data.document) > 0
+            ? `${imageCount(p.data.document)} 张图片`
+            : ""}
+        </span>
+        <label>
+          缩放{" "}
           <select
-            id="saved-document"
-            value={p.current?.id ?? ""}
-            disabled={locked}
-            onChange={(e) =>
-              e.target.value && void transit(() => p.open(e.target.value))
-            }
+            aria-label="页面缩放"
+            value={p.data.zoom}
+            onChange={(event) => {
+              version.current++;
+              p.setData((data) => ({
+                ...data,
+                zoom: Number(event.target.value),
+              }));
+            }}
           >
-            <option value="">当前工作稿</option>
-            {p.items.map((i) => (
-              <option key={i.id} value={i.id}>
-                {i.title}
+            {[25, 35, 50, 65, 80, 100, 125, 150].map((value) => (
+              <option key={value} value={value}>
+                {value}%
               </option>
             ))}
           </select>
-          <button
-            className="new-document"
-            disabled={locked}
-            onClick={() =>
-              void transit(() =>
-                p.replace({ ...seed, document: blank() }, "未命名文稿"),
-              )
-            }
-          >
-            ＋ 新建文稿
-          </button>
-          <div className="page-heading">
-            <span>纸张导航</span>
-            <span>{pages} 页</span>
-          </div>
-          <div className="page-thumbnails">
-            {Array.from({ length: Math.min(pages, 50) }, (_, i) => (
-              <button
-                aria-label={"跳到第" + (i + 1) + "页"}
-                key={i}
-                onClick={() =>
-                  document
-                    .querySelectorAll(".native-host canvas")
-                    [i]?.scrollIntoView({ block: "start", behavior: "auto" })
-                }
-              >
-                <div className="mini-paper">
-                  <span>OASIS</span>
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <b>{String(i + 1).padStart(2, "0")}</b>
-                </div>
-                <small>第 {i + 1} 页</small>
-              </button>
-            ))}
-          </div>
-          <div className="sidebar-bottom">
-            文稿随输入自动保存
-            <br />
-            原件与校样分开保留
-          </div>
-        </aside>
-        <section className="paper-column" id="paper">
-          <div className="paper-caption">
-            <span>编辑工作稿</span>
-            <label>
-              缩放{" "}
-              <select
-                aria-label="页面缩放"
-                value={p.data.zoom}
-                onChange={(e) => {
-                  version.current++;
-                  p.setData((d) => ({ ...d, zoom: Number(e.target.value) }));
-                }}
-              >
-                {[25, 35, 50, 65, 80, 100, 125, 150].map((n) => (
-                  <option key={n} value={n}>
-                    {n}%
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {!p.loading && (
-            <NativeEditor
-              key={key}
-              document={mountedDocument}
-              zoom={p.data.zoom}
-              onChange={(doc) => changed(key, doc)}
-              onReady={(c) => {
-                if (live.current.documentKey === key) {
-                  editor.current = c;
-                  setReady(!!c);
-                  if (
-                    c &&
-                    window.innerWidth < 760 &&
-                    live.current.data.zoom > 35
-                  )
-                    live.current.setData((d) => ({ ...d, zoom: 35 }));
-                }
-              }}
-              onError={p.report}
-              onPages={setPages}
-            />
-          )}
-        </section>
-        {panel && (
-          <aside className="proof-panel">
-            <div className="sidebar-caption">校样台</div>
-            <h2>
-              让每一页
-              <br />
-              都读得顺畅。
-            </h2>
-            <label htmlFor="proof-notes">编辑笔记</label>
-            <textarea
-              id="proof-notes"
-              disabled={p.loading || switching}
-              placeholder="记下待核对的人名、日期或段落…"
-              value={p.data.notes}
-              maxLength={20000}
-              onChange={(e) => {
-                version.current++;
-                p.setData((d) => ({ ...d, notes: e.target.value }));
-              }}
-            />
-            <section className="proof-details">
-              <h3>字体与保真</h3>
-              <p>
-                本地纸张与 PDF 使用 Workbench Sans SC。DOCX 保留原字体名称；在
-                Word 中可能重新分页。DOCX 的东亚文字需要本机安装 Workbench Sans
-                SC 或可用中文字体；PDF 已嵌入字库。
-              </p>
-              <p>
-                <a href="/api/fonts/WorkbenchSansSC-Regular.ttf" download>
-                  下载常规字体
-                </a>{" "}
-                ·{" "}
-                <a href="/api/fonts/WorkbenchSansSC-Bold.ttf" download>
-                  下载粗体
-                </a>
-              </p>
-              <p>
-                支持正文、常用格式、表格和嵌入图片。复杂版式请对照原件核对。
-              </p>
-              {p.data.source && (
-                <>
-                  <h3>原始文件</h3>
-                  <p className="source-name">{p.data.source.name}</p>
-                  <button
-                    disabled={locked}
-                    onClick={() =>
-                      void task("取回原件…", async () =>
-                        download(
-                          new Blob([
-                            new Uint8Array(
-                              fromBase64(
-                                await loadOriginal(p.data.source!.hash),
-                              ),
-                            ),
-                          ]),
-                          p.data.source!.name,
-                        ),
-                      )
-                    }
-                  >
-                    下载未修改原件 ↓
-                  </button>
-                  {p.data.source.warnings.map((w, i) => (
-                    <p key={i} className="source-warning">
-                      {w}
-                    </p>
-                  ))}
-                </>
-              )}
-            </section>
-            <section className="recovery-actions">
-              <h3>完整工作稿</h3>
-              <p>包含原生文档、原始 OOXML、图片、笔记和未完成输入。</p>
-              <button onClick={() => void exportRecovery()}>下载恢复稿</button>
-              <button
-                disabled={locked}
-                onClick={() => recoveryInput.current?.click()}
-              >
-                从恢复稿新建
-              </button>
-              <button disabled={locked} onClick={() => void p.save()}>
-                立即重试保存
-              </button>
-              {p.current && (
-                <button
-                  className="delete"
-                  disabled={locked}
-                  onClick={() => void transit(() => p.remove())}
-                >
-                  删除此文稿
-                </button>
-              )}
-            </section>
-          </aside>
-        )}
-      </div>
-      <footer className="desk-footer">
-        <span>OASIS EDITOR · 0.8</span>
-        <span>
-          {ready ? "原生 Canvas 排版" : "准备编辑器"} ·{" "}
-          {imageCount(p.data.document)} 张图片
-        </span>
-        <span>本机工作稿 · 自动保存</span>
+        </label>
       </footer>
-      <input
-        hidden
-        ref={fileInput}
-        type="file"
-        accept=".docx"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          e.target.value = "";
-          if (f) void importFile(f);
+      <SideNote
+        open={panel === "notes"}
+        close={() => closePanel()}
+        notes={p.data.notes}
+        disabled={p.loading || switching}
+        onChange={(notes) => {
+          version.current++;
+          p.setData((data) => ({ ...data, notes }));
         }}
       />
-      <input
-        hidden
-        ref={recoveryInput}
-        type="file"
-        accept=".json"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          e.target.value = "";
-          if (f) void importRecovery(f);
-        }}
+      <PageIndex
+        open={panel === "pages"}
+        pages={pages}
+        close={() => closePanel()}
+        jump={jump}
       />
+      <FileDialog
+        panel={panel}
+        close={() => closePanel()}
+        items={p.items}
+        currentId={p.current?.id}
+        locked={locked}
+        ready={ready}
+        title={p.title}
+        source={p.data.source}
+        onNew={newDocument}
+        onOpen={openDocument}
+        onImport={() => fileInput.current?.click()}
+        onExport={() => {
+          closePanel();
+          void exportFormat("docx");
+        }}
+        onInfo={() => setPanel("info")}
+        onRecoveryDownload={() => void exportRecovery()}
+        onRecoveryImport={() => recoveryInput.current?.click()}
+        onRetry={() => {
+          closePanel();
+          void p.save();
+        }}
+        onRemove={() => {
+          closePanel(false);
+          void transit(() => p.remove());
+        }}
+        onOriginal={() =>
+          void task("取回原件…", async () =>
+            download(
+              new Blob([
+                new Uint8Array(
+                  fromBase64(await loadOriginal(p.data.source!.hash)),
+                ),
+              ]),
+              p.data.source!.name,
+            ),
+          )
+        }
+      >
+        <input
+          hidden
+          ref={fileInput}
+          type="file"
+          accept=".docx"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) {
+              closePanel(false);
+              void importFile(file);
+            }
+          }}
+        />
+        <input
+          hidden
+          ref={recoveryInput}
+          type="file"
+          accept=".json"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) {
+              closePanel(false);
+              void importRecovery(file);
+            }
+          }}
+        />
+      </FileDialog>
     </main>
   );
 }

@@ -4,8 +4,8 @@
   "registryName": "oasis-editor-studio",
   "name": "Oasis Editor 工作台",
   "description": "分页文档编辑、DOCX往返、纸张校样与完整工作稿",
-  "version": "0.8.0",
-  "changelog": "原生Canvas分页编辑、DOCX/PDF往返、中文静态字体、完整OOXML与原件恢复、自动保存。",
+  "version": "0.8.1",
+  "changelog": "纸张优先的专注文稿编辑；文件菜单、按需页索引/笔记/文档信息；完整保存与导出保持。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

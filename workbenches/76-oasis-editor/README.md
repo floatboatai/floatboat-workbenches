@@ -1,8 +1,12 @@
 # Oasis Editor 文稿室
 
-版本 **0.8.0**。在连续纸张中编辑文稿、排版表格、核对图片和笔记，导出真正的 DOCX 与 PDF。原生 Canvas 编辑内核来自 [celsowm/oasis-editor](https://github.com/celsowm/oasis-editor)，使用 npm **0.0.195**，固定源提交 `ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195`。
+版本 **0.8.1**。在连续纸张中编辑文稿、排版表格、核对图片和笔记，导出真正的 DOCX 与 PDF。原生 Canvas 编辑内核来自 [celsowm/oasis-editor](https://github.com/celsowm/oasis-editor)，使用 npm **0.0.195**，固定源提交 `ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195`。
 
 ![Oasis Editor 文稿室](../../docs/screenshots/oasis-editor.png)
+
+首屏专注当前纸张。左上“文稿”集中新建、打开 DOCX、最近文稿、DOCX 导出和恢复操作；右上是 PDF 校样。页码索引、校样笔记及文档信息按需打开，不再常驻两侧栏。移动端使用同一文件菜单，保留完整新建和打开流程。
+
+打开菜单或便笺不会重建编辑器，也不会改变原有光标位置。Escape 关闭面板并返回触发按钮；文件转场短暂锁定输入，普通后台保存继续允许编辑。
 
 实际支持正文输入、中文、加粗/斜体/下划线、字号、对齐、项目符号、表格插入、分页、撤销重做；纸张导航与缩放、校样笔记、DOCX 导入、DOCX/PDF 导出。分页与编辑由原生引擎完成。
 

@@ -1,5 +1,7 @@
 # Engineering
 
+0.8.1 仅调整文档界面组织。`DocumentChrome.tsx` 提供文件对话框、按需笔记与页码索引、文字格式条；`App.tsx` 保留现有文件/导出/转场调用。`FileDialog` 使用原生 dialog 的模态及首尾Tab循环，Escape返回触发器；便笺与索引关闭仅改变hidden状态。原生编辑器固定在writing-surface，同一documentKey期间不因面板状态重建。
+
 `src/ui/NativeEditor.tsx` 按 `documentKey` 挂载原生 Canvas 编辑器，内容变化按序列化 wire 去重回流，保存回执不重新加载文档。`engine.ts` 在初始化前加载两份静态字体；失败时显示错误，不能悄悄回退到缺字字体。文件解析使用临时原生实例，确认成功才创建新稿。异步操作同时核对文稿 key 与输入版本。
 
 `src/contracts/document.ts` 区分 850KB 正式数据与 2MB 可恢复数据；`source-package.ts` 无损压缩原始 OOXML 部件，并对解压尺寸、部件、元数据深度、CRC 做校验。`docx-fonts.ts` 规范 OOXML 的 rFonts，不允许将 CSS fallback 列表写作字体名，保留既有 eastAsia，缺失时映射 Workbench Sans SC。
