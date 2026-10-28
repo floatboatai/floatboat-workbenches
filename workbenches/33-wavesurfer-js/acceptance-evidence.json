@@ -1,0 +1,54 @@
+{
+  "version": "0.6.0",
+  "status": "local-verified",
+  "date": "2026-10-28",
+  "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "checks": {
+    "workbenchCheck": "passed",
+    "tests": 8,
+    "browser": "real Chrome, HTML5 and AudioContext",
+    "desktop": "1440x1100",
+    "mobile": "375x1000: no horizontal overflow",
+    "reducedMotion": "passed",
+    "normalFlowRuntimeErrors": 0,
+    "domain": [
+      "synthetic WAV decode and real WaveSurfer",
+      "playback readyState 4 and advancing time",
+      "speed and zoom",
+      "native region handle drag",
+      "only selected overlapping region loops",
+      "excerpt and review marks",
+      "five real downloads",
+      "embedded original byte identity",
+      "reject forged project duration",
+      "missing original matched reattachment retains notes"
+    ],
+    "autosave": [
+      "typing during delayed save and refresh",
+      "committed response loss retry",
+      "invalid working copy download and import into new draft",
+      "two tab optimistic conflict",
+      "new document waits for prior save with synchronous editor lock",
+      "native region loop",
+      "keyboard focus"
+    ],
+    "webGuidelines": "2026-10-28 latest fetched; applied"
+  },
+  "package": {
+    "file": "artifacts/wavesurfer-js-studio-0.6.0-final.fbworkbench",
+    "sha256": "b68e75c4f314e017feb7e89a18e40f7bed2982d8e9aef6a6a67c50a4e263ef8a",
+    "crc": "passed",
+    "matchedSourceAndAssets": 36,
+    "resourceRelocation": "official pack rewrites asset path; IDs and all other metadata verified",
+    "businessDataIncluded": false
+  },
+  "preview": "http://127.0.0.1:62242/",
+  "hostImport": "unverified",
+  "limits": [
+    "32 MiB original, 10 minutes native metadata gate before decode",
+    "16kHz validation decode maximum 128MiB; browser decoding memory still device dependent",
+    "500 clips and 850KB work data",
+    "cumulative originals grow with use; no automatic cleanup",
+    "no transcription, cutting, denoise or audio re-encoding"
+  ]
+}

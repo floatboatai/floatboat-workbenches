@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.1f69482c-6c1f-42d0-ad61-147e22c5a625",
+  "registryName": "wavesurfer-js-studio",
+  "name": "wavesurfer.js 工作台",
+  "description": "录音听审、时间标注与素材选段；保留原件、摘录和完整工作稿",
+  "version": "0.6.0",
+  "changelog": "波形、区间循环听审、人工摘录、自动保存与工程导出。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "audio-originals",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "audio-originals",
+      "access": "read-write"
+    },
+    {
+      "id": "third-party-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "third-party"
+    }
+  ]
+}

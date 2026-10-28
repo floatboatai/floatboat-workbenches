@@ -1,0 +1,24 @@
+{
+  "name": "local-workbench",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --enable-source-maps dist/server/index.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "dependencies": {
+    "lucide-react": "0.562.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "wavesurfer.js": "7.12.12"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.2",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.3"
+  }
+}
