@@ -1,0 +1,51 @@
+{
+  "version": "0.5.0",
+  "verifiedAt": "2026-10-28",
+  "timezone": "America/New_York",
+  "applicationTests": 10,
+  "serviceTests": 8,
+  "browserChecks": 19,
+  "upstreamCommit": "a31d82624c27d75f4e771d4fcb78dce16470b383",
+  "upstreamModulesUnmodified": true,
+  "actualHostGeneration": true,
+  "requestedModel": "gemini-3.8-flash",
+  "actualModelFlows": 2,
+  "primaryChecks": [
+    "real DeepTutor objective grading",
+    "upstream review schedule persists on refresh",
+    "wrong-answer queue is derived from actual grading",
+    "unfinished subjective answer restores without invented grade",
+    "lost review response replays one fixed operation",
+    "real gemini-3.8-flash generation normalized by upstream and restored before adoption",
+    "explicit generated-bank adoption resets review state with confirmation",
+    "invalid bank editor draft restores",
+    "native question bank exported and reread by DeepTutor parser",
+    "portable course import creates new course and retains draft",
+    "375px layout and keyboard task controls",
+    "real desktop screenshot and no page errors"
+  ],
+  "recoveryChecks": [
+    "typing during delayed save retained",
+    "lost save acknowledgement retried",
+    "cross-window conflict and explicit server reload",
+    "lost generation response restores the same durable operation without replay",
+    "late generation query isolated from a new course",
+    "actual generated question graded and scheduled by upstream"
+  ],
+  "actualServiceDisconnected": true,
+  "hostImport": "unverified",
+  "screenshot": {
+    "path": "../../docs/screenshots/deeptutor.png",
+    "dimensions": [
+      1440,
+      1551
+    ],
+    "sha256": "bb937f5a98f7188afa384a77b6114e362b167c28cad7538d8fa85d91e31b587b"
+  },
+  "package": {
+    "name": "deeptutor-studio-0.5.0.fbworkbench",
+    "sha256": "61ec7c45be2e6ff872b17ff04c982f9284db60b3513af0760f6ed16325b87b92",
+    "crc": true,
+    "sourceResourcesMatch": true
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.640daeae-f7a4-4d3d-a490-9bbb89d4f2ef",
+  "registryName": "deeptutor-studio",
+  "name": "课程练习册 · DeepTutor",
+  "description": "讲义、题库、答题核对与错题复习",
+  "version": "0.5.0",
+  "changelog": "接入DeepTutor题库解析、客观判题与复习调度；Host生成题库、完整草稿自动保存与恢复。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [
+    "llm"
+  ],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}
