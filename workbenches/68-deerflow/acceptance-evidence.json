@@ -42,5 +42,9 @@
     "HTTP state adapter tested against explicit contract fixture, not a live DeerFlow deployment",
     "Artifact paths preserved; original artifact bytes not downloaded",
     "Floatboat source-package import unverified"
-  ]
+  ],
+  "packagedSetupGuide": [
+    "application/workbench-assets/assets/setup-guide/file"
+  ],
+  "packageSha256": "aca05130add845b1980580d74296f055cadea3d0a6a80fd470640c685941e677"
 }

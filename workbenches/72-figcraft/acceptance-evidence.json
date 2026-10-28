@@ -41,5 +41,9 @@
     "allVisibleEditFieldsDisabled": true,
     "oldAndNewDocumentsPreserved": true,
     "sharedAutosaveChanged": false
-  }
+  },
+  "packagedSetupGuide": [
+    "application/workbench-assets/assets/setup-guide/file"
+  ],
+  "packageSha256": "4985d5632bd8bc848ba0bc7b66384be148ee07d4dfd3fc881c4b7ddd1a592add"
 }
