@@ -1,0 +1,5 @@
+# Penpot资产编排
+
+React样本册+共享SQLite/IndexedDB自动保存。domain.ts定义工作数据与严格/草稿解码；penpot.ts调用官方createBuildContext、addLibraryColor、addLibraryTypography、addBoard/addRect/addText、exportAsBytes。纯JS上游库运行于Node服务，不修改CSP，不依赖Penpot服务器。原生zip读取使用fflate并限制条目数量与展开大小，只提取支持的颜色/字体，跳过类型计数明确返回。
+
+浏览器样本是CSS视图，用于展示资产角色，不声称是Penpot引擎渲染；交付包由真实官方库生成。服务端导出执行严格验证。工作草稿允许未完成色值/尺寸而保留字符串，规范模型/导出不接受这些值。用户输入进SQLite和本机缓存，普通源码包不含项目数据。

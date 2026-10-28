@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.07af8f06-daea-4b52-b569-042372604020",
+  "registryName": "penpot-studio",
+  "name": "设计资产 · Penpot",
+  "description": "色彩、字体与组件样本库，生成原生Penpot交付文件",
+  "version": "0.5.0",
+  "changelog": "可编辑设计资产与组件样本，自动保存不完整输入，使用官方Penpot库导出原生文件。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}

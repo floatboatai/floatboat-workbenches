@@ -1,0 +1,25 @@
+{
+  "version": "0.5.0",
+  "build": "passed",
+  "tests": 8,
+  "browser": "passed",
+  "autosave": "passed",
+  "workingDraftRecovery": "passed",
+  "upstream": "Official @penpot/library 1.2.0 creates native Penpot export archive; exact color/typography extraction and component main instances verified",
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "package": "passed",
+  "screenshot": {
+    "path": "../../docs/screenshots/penpot.png",
+    "dimensions": [
+      1440,
+      1000
+    ],
+    "sha256": "6fa3f9dfe034acc01869d8f4cd8b40b057ee3e2f454ae52bba161db7b9c79412"
+  },
+  "limitations": [
+    "Design asset/sample workbench, not full Penpot editor",
+    "Native import extracts supported solid color/typography assets only",
+    "Full Penpot client import/font fidelity and Floatboat import unverified"
+  ]
+}
