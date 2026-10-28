@@ -1,3 +1,4 @@
+import { createRunCommands } from "./run-commands.ts";
 import { createMiroFishClient } from "./mirofish-client.ts";
 import { registerAutosaveRoutes } from "./autosave.ts";
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
@@ -59,6 +60,39 @@ export function registerRoutes(app: WorkbenchServer) {
     }
   });
   const client = createMiroFishClient();
+  const runs = createRunCommands(app.database, client);
+  app.route("POST", "/api/run-commands", async ({ body }) => {
+    try {
+      return await runs.submit(body);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("GET", "/api/run-commands/:id", async ({ params }) => {
+    try {
+      return await runs.refresh(params.id);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("GET", "/api/simulations/:id/status", async ({ params }) => {
+    try {
+      return await runs.status(params.id);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route(
+    "GET",
+    "/api/simulations/:id/runs/:stamp/result",
+    async ({ params }) => {
+      try {
+        return await client.result(params.id, params.stamp);
+      } catch (e) {
+        return fail(e);
+      }
+    },
+  );
   app.route("GET", "/api/service", () => client.health());
   app.route("GET", "/api/simulations", async () => {
     try {

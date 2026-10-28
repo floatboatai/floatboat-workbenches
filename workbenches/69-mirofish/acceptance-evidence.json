@@ -16,10 +16,10 @@
   "lostReceipt": true,
   "optimisticConflict": true,
   "version": "0.5.0",
-  "applicationTests": 10,
+  "applicationTests": 14,
   "upstreamCommit": "7657031ac01184afe2cb220f5ee3545573b5e843",
   "upstreamSerializerVerified": true,
-  "upstreamHttpVerification": "local-contract-fixture-only",
+  "upstreamHttpVerification": "local-contract-fixture-including-start-stop-status-not-live",
   "liveOasisZep": "not-run-no-configured-service",
   "hostLlm": "not-used",
   "hostImport": "unverified",
@@ -33,11 +33,51 @@
     ]
   },
   "package": {
-    "name": "mirofish-studio-0.5.0.fbworkbench",
-    "sha256": "0928ff6e167ca3355ff5425293e159d9efe72ae2a6f50daa8cefdf23181ec12e",
-    "files": 35,
+    "name": "mirofish-studio-0.5.0-run-control.fbworkbench",
+    "sha256": "5d08fe4c7874d196cc84ac906362c13dba228da4bbbd4d9be546eae9ffe4656b",
+    "files": 41,
     "crcValid": true,
     "licenseIncluded": true,
-    "businessDataExcluded": true
+    "businessDataExcluded": true,
+    "runMigrationIncluded": true
+  },
+  "runControl": {
+    "at": "2026-10-28T04:55:53.582Z",
+    "verification": "real-Chrome-with-local-HTTP-contract-fixture-not-live",
+    "explicitStartStop": true,
+    "slowPollDoesNotOverlap": true,
+    "pendingBeforeSend": true,
+    "lostPostReceiptAndBlockedPollRecovery": true,
+    "noAutomaticReplay": true,
+    "pendingNavigationGuard": true,
+    "terminalLateResponseProtected": true,
+    "sameRunResultRead": true,
+    "importDoesNotReplay": true,
+    "mobileNoOverflow": true,
+    "pageErrors": []
+  },
+  "offlineRunControl": {
+    "at": "2026-10-28T04:57:36.381Z",
+    "localReviewFlow": true,
+    "notesSaveReload": true,
+    "roundFilter": true,
+    "nativeJsonDraftRecovery": true,
+    "upstreamSerializerFixtureImport": true,
+    "nativeRoundTrip": true,
+    "portableNewProject": true,
+    "recoveryFileReimport": true,
+    "mobileNoOverflow": true,
+    "serviceDisconnectedTruthful": true,
+    "liveSimulation": false,
+    "pageErrors": []
+  },
+  "conditionalStopBoundary": "upstream stop accepts simulation_id only; cannot atomically exclude another client restarting after preflight",
+  "runControlScreenshot": {
+    "path": "docs/mirofish-run-control.png",
+    "sha256": "e09aeb3bc89814586761cfc908366a7c98f501e092cd919b5552856ba58b0b32",
+    "dimensions": [
+      1440,
+      1393
+    ]
   }
 }

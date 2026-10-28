@@ -1,3 +1,4 @@
+import { SimulationControl } from "./SimulationControl";
 import {
   Waves,
   Upload,
@@ -225,27 +226,7 @@ export function App() {
               }
             />
           </label>
-          <div className="connection">
-            <span>{service.message}</span>
-            <button onClick={() => void check()}>重新检查</button>
-            {service.available ? (
-              <label>
-                读取已有模拟
-                <select
-                  disabled={!mutable}
-                  value=""
-                  onChange={(e) => void fromService(e.target.value)}
-                >
-                  <option value="">选择一份模拟结果</option>
-                  {simulations.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.id} · {s.status}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-          </div>
+          <SimulationControl desk={desk} />
         </aside>
         <main id="timeline">
           <div className="summary">

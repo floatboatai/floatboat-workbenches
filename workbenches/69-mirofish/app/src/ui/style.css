@@ -653,3 +653,68 @@ pre {
     scroll-behavior: auto !important;
   }
 }
+
+.simulation-control {
+  border-top: 1px solid #425668;
+  padding-top: 20px;
+  margin-top: 24px;
+  overflow-wrap: anywhere;
+}
+.simulation-control h2 {
+  font-size: 16px;
+  margin: 0;
+}
+.simulation-control p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #b9cedb;
+}
+.simulation-control button {
+  background: #244455;
+  color: #e5f1f6;
+  border-color: #527184;
+  font-size: 12px;
+  padding: 8px;
+}
+.simulation-control button:disabled {
+  opacity: 0.45;
+}
+.run-heading,
+.run-buttons {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.simulation-control label {
+  margin-top: 12px;
+}
+.simulation-control select,
+.simulation-control input {
+  width: 100%;
+  min-width: 0;
+  background: #233c4f;
+  color: #fff;
+  border: 1px solid #567082;
+  padding: 8px;
+}
+.run-options {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 8px;
+}
+.run-status {
+  display: grid;
+  gap: 5px;
+  padding: 12px 0;
+  font-size: 12px;
+}
+.run-status small {
+  line-height: 1.6;
+  color: #aac5d5;
+}
+.command-message {
+  border-left: 2px solid #8fc5d8;
+  padding-left: 9px;
+}

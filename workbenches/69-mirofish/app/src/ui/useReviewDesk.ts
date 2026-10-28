@@ -1,3 +1,5 @@
+import { importedDraft } from "../contracts/run";
+import { useSimulationControl } from "./useSimulationControl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useProjects, request, download } from "./workspace";
 import { isRecord } from "../contracts/project";
@@ -29,7 +31,15 @@ export function useReviewDesk() {
     bundle = useRef<HTMLInputElement>(null),
     epoch = useRef(p.documentKey);
   epoch.current = p.documentKey;
-  const mutable = !p.loading && !p.busy && !io;
+  const control = useSimulationControl(p, service.available);
+  const mutable = !p.loading && !p.busy && !io && !control.busy;
+  function canLeave() {
+    if (control.unresolved) {
+      p.setError("运行命令仍待核对，请先核对状态；不会重复发送。");
+      return false;
+    }
+    return true;
+  }
   const raw = typeof p.draft.nativeRaw === "string" ? p.draft.nativeRaw : "",
     platform =
       typeof p.draft.logPlatform === "string" ? p.draft.logPlatform : "",
@@ -106,6 +116,7 @@ export function useReviewDesk() {
       }));
   }
   async function readNative(f?: File) {
+    if (!canLeave()) return false;
     if (!f) return;
     const key = epoch.current;
     setIo(true);
@@ -122,6 +133,7 @@ export function useReviewDesk() {
     }
   }
   async function applyNative() {
+    if (!canLeave()) return false;
     setIo(true);
     try {
       const name =
@@ -143,6 +155,7 @@ export function useReviewDesk() {
     }
   }
   async function importBundle(f?: File) {
+    if (!canLeave()) return false;
     if (!f) return;
     setIo(true);
     try {
@@ -162,24 +175,26 @@ export function useReviewDesk() {
         typeof v.title !== "string"
       )
         throw new Error("复核工程格式无效");
-      await p.replace(
-        reviewValue(v.data),
-        v.title,
-        isRecord(v.draft) ? v.draft : {},
-      );
+      await p.replace(reviewValue(v.data), v.title, importedDraft(v.draft));
     } catch (e) {
       p.report(e);
     } finally {
       setIo(false);
     }
   }
-  async function fromService(id: string) {
+  async function fromService(id: string, startedAt?: string) {
+    if (!canLeave()) return false;
     if (!id) return;
     const key = epoch.current;
     setIo(true);
     try {
       const result = reviewValue(
-        await request("/api/simulations/" + encodeURIComponent(id) + "/result"),
+        await request(
+          "/api/simulations/" +
+            encodeURIComponent(id) +
+            (startedAt ? "/runs/" + encodeURIComponent(startedAt) : "") +
+            "/result",
+        ),
       );
       if (key === epoch.current) await p.replace(result, id);
     } catch (e) {
@@ -189,6 +204,7 @@ export function useReviewDesk() {
     }
   }
   async function fresh() {
+    if (!canLeave()) return false;
     setIo(true);
     try {
       return await p.fresh();
@@ -197,6 +213,7 @@ export function useReviewDesk() {
     }
   }
   async function open(id: string) {
+    if (!canLeave()) return false;
     setIo(true);
     try {
       return await p.open(id);
@@ -206,6 +223,7 @@ export function useReviewDesk() {
   }
   return {
     p: { ...p, fresh, open },
+    control,
     mutable,
     raw,
     platform,

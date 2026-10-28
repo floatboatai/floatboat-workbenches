@@ -3,9 +3,9 @@
   "appId": "workbench.bceedbaf-e0c0-4bbc-94c8-c219f83db6d6",
   "registryName": "mirofish-studio",
   "name": "情景复核 · MiroFish",
-  "description": "原生模拟动作、角色假设、轮次时间线与审阅报告",
+  "description": "已准备模拟的运行控制、角色假设、原生动作时间线与复核报告",
   "version": "0.5.0",
-  "changelog": "Initial application.",
+  "changelog": "新增官方模拟启动、停止、状态核对与持久化命令恢复。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
