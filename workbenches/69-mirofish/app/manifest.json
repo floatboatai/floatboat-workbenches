@@ -26,6 +26,13 @@
       "role": "asset",
       "location": "project",
       "path": "notices"
+    },
+    {
+      "id": "setup-guide",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "SETUP.md"
     }
   ]
 }

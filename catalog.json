@@ -44,7 +44,15 @@
     "slug": "excalidraw",
     "directory": "workbenches/01-excalidraw",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/excalidraw.png",
+          "caption": "Excalidraw 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Markmap",
@@ -91,7 +99,15 @@
     "slug": "markmap",
     "directory": "workbenches/02-markmap",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/markmap.png",
+          "caption": "Markmap 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "pdfme",
@@ -137,7 +153,15 @@
     "slug": "pdfme",
     "directory": "workbenches/03-pdfme",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/pdfme.png",
+          "caption": "pdfme 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Tiptap",
@@ -184,7 +208,15 @@
     "slug": "tiptap",
     "directory": "workbenches/04-tiptap",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/tiptap.png",
+          "caption": "Tiptap 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "PptxGenJS",
@@ -231,7 +263,15 @@
     "slug": "pptxgenjs",
     "directory": "workbenches/05-pptxgenjs",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/pptxgenjs.png",
+          "caption": "PptxGenJS 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "React Flow",
@@ -278,7 +318,15 @@
     "slug": "react-flow",
     "directory": "workbenches/06-react-flow",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/react-flow.png",
+          "caption": "React Flow 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "SurveyJS Form Library",
@@ -325,7 +373,15 @@
     "slug": "surveyjs-form-library",
     "directory": "workbenches/07-surveyjs-form-library",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/surveyjs.png",
+          "caption": "SurveyJS Form Library 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Mermaid",
@@ -371,7 +427,15 @@
     "slug": "mermaid",
     "directory": "workbenches/08-mermaid",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/mermaid.png",
+          "caption": "Mermaid 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Swagger UI",
@@ -418,7 +482,15 @@
     "slug": "swagger-ui",
     "directory": "workbenches/09-swagger-ui",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/swagger-ui.png",
+          "caption": "Swagger UI 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Vega-Lite",
@@ -465,7 +537,15 @@
     "slug": "vega-lite",
     "directory": "workbenches/10-vega-lite",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/vega-lite.png",
+          "caption": "Vega-Lite 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Observable Plot",
@@ -512,7 +592,15 @@
     "slug": "observable-plot",
     "directory": "workbenches/11-observable-plot",
     "status": "local-verified",
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/observable-plot.png",
+          "caption": "Observable Plot 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "changedetection.io",
@@ -737,7 +825,15 @@
       "@blocknote/react": "0.56.0",
       "@blocknote/mantine": "0.56.0"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/blocknote.png",
+          "caption": "BlockNote 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "MDXEditor",
@@ -786,7 +882,15 @@
     "upstreamVersions": {
       "@mdxeditor/editor": "4.3.3"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/mdxeditor.png",
+          "caption": "MDXEditor 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Milkdown",
@@ -836,7 +940,15 @@
       "@milkdown/crepe": "7.23.0",
       "@milkdown/kit": "7.23.0"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/milkdown.png",
+          "caption": "Milkdown 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "PDF.js",
@@ -885,7 +997,15 @@
     "upstreamVersions": {
       "pdfjs-dist": "6.4.299"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/pdf-js.png",
+          "caption": "PDF.js 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "reveal.js",
@@ -934,7 +1054,15 @@
     "upstreamVersions": {
       "reveal.js": "6.0.2"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/reveal-js.png",
+          "caption": "reveal.js 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Univer",
@@ -984,7 +1112,15 @@
       "@univerjs/presets": "1.2.0",
       "@univerjs/preset-sheets-core": "1.2.0"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/univer.png",
+          "caption": "Univer 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Vditor",
@@ -1034,7 +1170,15 @@
       "vditor": "4.0.1",
       "bundled-lute": "1.7.6"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/vditor.png",
+          "caption": "Vditor 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Fabric.js",
@@ -1082,7 +1226,15 @@
     "upstreamVersions": {
       "fabric": "7.4.0"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/fabric-js.png",
+          "caption": "Fabric.js 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Filerobot Image Editor",
@@ -1131,7 +1283,15 @@
     "upstreamVersions": {
       "react-filerobot-image-editor": "5.0.0-beta.159"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/filerobot-image-editor.png",
+          "caption": "Filerobot Image Editor 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "GrapesJS",
@@ -1179,7 +1339,15 @@
     "upstreamVersions": {
       "grapesjs": "0.23.8"
     },
-    "version": "0.3.0"
+    "version": "0.3.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/grapesjs.png",
+          "caption": "GrapesJS 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Konva",
@@ -1685,7 +1853,15 @@
     "slug": "penpot",
     "directory": "workbenches/44-penpot",
     "status": "local-verified",
-    "version": "0.5.0"
+    "version": "0.5.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/penpot.png",
+          "caption": "Penpot 工作台实景 · 团队设计协同工作台：设计文件入口、设计系统资料与 AI 设计辅助"
+        }
+      ]
+    }
   },
   {
     "name": "Bruno",
@@ -1900,6 +2076,14 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/makerjs.png",
+          "caption": "Maker.js 工作台实景"
+        }
+      ]
     }
   },
   {
@@ -1941,6 +2125,14 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/seqviz.png",
+          "caption": "SeqViz 工作台实景"
+        }
+      ]
     }
   },
   {
@@ -1982,6 +2174,14 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/farmos-map.png",
+          "caption": "farmOS-map 工作台实景"
+        }
+      ]
     }
   },
   {
@@ -2023,6 +2223,14 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/mirador.png",
+          "caption": "Mirador 工作台实景"
+        }
+      ]
     }
   },
   {
@@ -2064,6 +2272,14 @@
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
       "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。"
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/opensheetmusicdisplay.png",
+          "caption": "OpenSheetMusicDisplay 工作台实景"
+        }
+      ]
     }
   },
   {
@@ -2105,7 +2321,15 @@
     "slug": "langextract",
     "directory": "workbenches/56-langextract",
     "status": "local-verified",
-    "version": "0.4.0"
+    "version": "0.4.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/langextract.png",
+          "caption": "LangExtract 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Docling",
@@ -2146,7 +2370,15 @@
     "slug": "docling",
     "directory": "workbenches/57-docling",
     "status": "local-verified",
-    "version": "0.4.0"
+    "version": "0.4.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/docling.png",
+          "caption": "Docling 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "LangGraph.js",
@@ -2189,7 +2421,15 @@
     "slug": "langgraph",
     "directory": "workbenches/58-langgraph",
     "status": "local-verified",
-    "version": "0.4.1"
+    "version": "0.4.1",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/langgraph.png",
+          "caption": "LangGraph.js 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Promptfoo",
@@ -2230,7 +2470,15 @@
     "slug": "promptfoo",
     "directory": "workbenches/59-promptfoo",
     "status": "local-verified",
-    "version": "0.4.0"
+    "version": "0.4.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/promptfoo.png",
+          "caption": "Promptfoo 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "faster-whisper",
@@ -2271,7 +2519,15 @@
     "slug": "faster-whisper",
     "directory": "workbenches/60-faster-whisper",
     "status": "local-verified",
-    "version": "0.4.0"
+    "version": "0.4.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/faster-whisper.png",
+          "caption": "faster-whisper 工作台实景"
+        }
+      ]
+    }
   },
   {
     "name": "Presenton",
@@ -2312,7 +2568,15 @@
     "slug": "presenton",
     "directory": "workbenches/61-presenton",
     "status": "local-verified",
-    "version": "0.4.0"
+    "version": "0.4.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/presenton.png",
+          "caption": "Presenton 工作台实景"
+        }
+      ]
+    }
   },
   {
     "id": 62,
@@ -2354,6 +2618,14 @@
       "upstream": "真实hyperframes 0.8.210渲染MP4",
       "hostLlm": "not-used",
       "serviceTests": 4
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/hyperframes.png",
+          "caption": "HyperFrames 工作台实景 · 品牌动效与产品演示工坊"
+        }
+      ]
     }
   },
   {
@@ -2396,6 +2668,14 @@
       "upstream": "真实graphifyy 0.9.97 AST提取；语义LLM提取未启用",
       "hostLlm": "not-used",
       "serviceTests": 4
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/graphify.png",
+          "caption": "Graphify 工作台实景 · 代码与资料知识地图"
+        }
+      ]
     }
   },
   {
@@ -2438,6 +2718,14 @@
       "upstream": "真实PageIndex 0.2.10 Flash、PDFium及Gemini 3.8问答",
       "hostLlm": "passed: gemini-3.8-flash",
       "serviceTests": 4
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/pageindex.png",
+          "caption": "PageIndex 工作台实景 · 长报告阅读、章节树与页码证据审校"
+        }
+      ]
     }
   },
   {
@@ -2480,6 +2768,14 @@
       "upstream": "真实DeepTutor批改/排程及Gemini 3.8出题",
       "hostLlm": "passed: gemini-3.8-flash",
       "serviceTests": 8
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/deeptutor.png",
+          "caption": "DeepTutor 工作台实景 · 课程学习、练习与错题复习"
+        }
+      ]
     }
   },
   {
@@ -2522,6 +2818,14 @@
       "upstream": "真实Agent-Reach 1.6.0 GitHub读取/搜索、Jina网页和V2EX热门",
       "hostLlm": "not-used",
       "serviceTests": 5
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/agent-reach.png",
+          "caption": "Agent-Reach 工作台实景 · 跨平台来源采集与调研资料台"
+        }
+      ]
     }
   },
   {
@@ -2564,6 +2868,14 @@
       "upstream": "真实OpenMontage裁切/组接；未启用AI视频生成",
       "hostLlm": "not-used",
       "serviceTests": 4
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/openmontage.png",
+          "caption": "OpenMontage 工作台实景 · 视频脚本、分镜、素材与制作审批"
+        }
+      ]
     }
   },
   {
@@ -2606,6 +2918,14 @@
       "upstream": "真实官方序列化器与请求模型；运行HTTP契约通过，真实研究服务未验证",
       "hostLlm": "not-used",
       "serviceTests": 0
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/deerflow.png",
+          "caption": "DeerFlow 工作台实景 · 研究计划、证据与报告交付"
+        }
+      ]
     }
   },
   {
@@ -2648,6 +2968,14 @@
       "upstream": "原生动作格式与运行HTTP契约通过；真实OASIS/Zep模拟未验证",
       "hostLlm": "not-used",
       "serviceTests": 0
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/mirofish.png",
+          "caption": "MiroFish 工作台实景 · 角色、假设与情景推演实验"
+        }
+      ]
     }
   },
   {
@@ -2690,6 +3018,14 @@
       "upstream": "真实GEOInflow分类与严格日期核心；未做IP/DNS核验或线上采集",
       "hostLlm": "not-used",
       "serviceTests": 0
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/geoinflow.png",
+          "caption": "GEOInflow 工作台实景 · AI爬虫访问与搜索引荐运营分析"
+        }
+      ]
     }
   },
   {
@@ -2732,6 +3068,14 @@
       "upstream": "真实OpenPencil 0.16.0核心与FIG编码；CanvasKit画布等待WASM支持",
       "hostLlm": "not-used",
       "serviceTests": 0
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/openpencil.png",
+          "caption": "OpenPencil 工作台实景 · 可编辑设计画布、图层与组件"
+        }
+      ]
     }
   },
   {
@@ -2774,6 +3118,14 @@
       "upstream": "真实FigCraft CLI 0.11.2 CPU渲染及原生文档",
       "hostLlm": "not-used",
       "serviceTests": 4
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/figcraft.png",
+          "caption": "FigCraft 工作台实景 · 界面设计、原型与设计资产管理"
+        }
+      ]
     }
   }
 ]

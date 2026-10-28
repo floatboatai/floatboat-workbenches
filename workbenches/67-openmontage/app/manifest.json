@@ -34,6 +34,13 @@
       "location": "data",
       "path": "media",
       "access": "read-write"
+    },
+    {
+      "id": "setup-guide",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "SETUP.md"
     }
   ]
 }
