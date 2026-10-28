@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.15953789-9544-4762-bda6-2d9a501293fe",
+  "registryName": "figcraft-studio",
+  "name": "原型校样 · FigCraft",
+  "description": "原生FigCraft画板渲染、文案修订与设计交付",
+  "version": "0.5.0",
+  "changelog": "用FigCraft CLI原生引擎渲染与修订画板，自动保存完整设计和逐页复核草稿。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": "0.5.0",
+  "build": "passed",
+  "tests": 5,
+  "serviceTests": 4,
+  "nativeEngine": "FigCraft CLI 0.11.2, official macOS universal archive SHA256 verified",
+  "browser": "passed",
+  "autosave": "passed",
+  "workingDraftRecovery": "passed",
+  "nativeExports": [
+    "figcraft",
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "package": "passed",
+  "service": "Independent Node adapter, localhost:8796; CLI excluded from source package",
+  "screenshot": {
+    "path": "../../docs/screenshots/figcraft.png",
+    "dimensions": [
+      1440,
+      1140
+    ],
+    "sha256": "0db8e7c7efa021dd91a04723e88f74f2dee83e9e0b79dcfe1ca6487f397d167f"
+  },
+  "limitations": [
+    "Scoped prototype proofing, not full desktop GUI",
+    "Native GUI re-open and Floatboat import not separately verified"
+  ]
+}
