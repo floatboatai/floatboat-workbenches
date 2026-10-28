@@ -95,8 +95,42 @@
   "previewUrl": "http://127.0.0.1:64804/",
   "screenshot": {
     "path": "../../docs/screenshots/mesh2motion.png",
-    "width": 1440,
-    "height": 1041,
+    "dimensions": [
+      1440,
+      1041
+    ],
     "sha256": "5d7d47bcba4b11bc2149d7407a0de3189a703195d1e5007b833085b8cec5b125"
+  },
+  "integratedPackage": {
+    "directory": "workbenches/75-mesh2motion",
+    "version": "0.7.0",
+    "appId": "workbench.9e1bdaba-5f05-4703-b930-a7e4a0dd43a6",
+    "filename": "75-mesh2motion-0.7.0.fbworkbench",
+    "bytes": 2563690,
+    "sha256": "d6386ed3d0cae003e8aa895c01d8b6c49860817550847c49dc1e68340ead3005",
+    "crc": "passed",
+    "sourceFilesMatched": 60,
+    "assetFilesMatched": 31,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-mesh2motion/mesh2motion-studio-0.7.0.fbworkbench",
+    "introductionFile": "workbench-mesh2motion/presentation.json"
+  },
+  "integratedApplicationTests": 12,
+  "exportedSourceLinuxTests": {
+    "passed": 12,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked dependencies mounted read-only"
+  },
+  "rootIntegrationReview": {
+    "status": "passed",
+    "checks": [
+      "Final screenshot reviewed: character, pose, controls and saved receipt",
+      "Independent GLB inspection:7399 normalized vertices, valid joint indices and19 varying tracks",
+      "GLTFLoader reload and same-hash resource repair evidence reviewed",
+      "Unpacked source Linux12/12 passed"
+    ]
   }
 }

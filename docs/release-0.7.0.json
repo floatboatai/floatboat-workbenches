@@ -1,0 +1,71 @@
+{
+  "version": "0.7.0",
+  "date": "2026-10-28",
+  "timezone": "America/New_York",
+  "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "mainSourceCommit": "40850089c542947641748806b0cfb74544af5572",
+  "workbenches": 3,
+  "totalImplemented": 53,
+  "catalogTotal": 75,
+  "applicationTests": 34,
+  "exportedSourceTests": {
+    "passed": 34,
+    "environment": "Node22.23.3 Linux, network none, unpacked source and read-only prepared dependencies",
+    "scope": "exported-source tests; not client import"
+  },
+  "browser": "native product task flows, working-copy recovery and integration review passed",
+  "hostImport": "unverified",
+  "hostLlm": "not-used",
+  "githubActions": "See Actions for current published revision; local acceptance is separate",
+  "packages": [
+    {
+      "directory": "workbenches/73-ray-optics",
+      "version": "0.7.0",
+      "appId": "workbench.ffa1db5f-b06e-4735-a26e-7789f23359d6",
+      "filename": "73-ray-optics-0.7.0.fbworkbench",
+      "bytes": 314655,
+      "sha256": "9306f38b58a15f5b59a7a7e53dcc2fa8601ab7763b9aaff8c8aa5084fbe5d49b",
+      "crc": "passed",
+      "sourceFilesMatched": 35,
+      "assetFilesMatched": 51,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "deliveryPath": "workbench-ray-optics/ray-optics-studio-0.7.0.fbworkbench",
+      "introductionFile": "workbench-ray-optics/presentation.json",
+      "transferHashes": "passed"
+    },
+    {
+      "directory": "workbenches/74-invoice-builder",
+      "version": "0.7.0",
+      "appId": "workbench.42e2677d-43cf-457a-9dd7-b48bb9db858d",
+      "filename": "74-invoice-builder-0.7.0.fbworkbench",
+      "bytes": 12864773,
+      "sha256": "449bbbc9e00c19a4f8736546cab8efbcf4294971beae6234597b064d6df2f5de",
+      "crc": "passed",
+      "sourceFilesMatched": 41,
+      "assetFilesMatched": 71,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "deliveryPath": "workbench-invoice-builder/invoice-builder-studio-0.7.0.fbworkbench",
+      "introductionFile": "workbench-invoice-builder/presentation.json",
+      "transferHashes": "passed"
+    },
+    {
+      "directory": "workbenches/75-mesh2motion",
+      "version": "0.7.0",
+      "appId": "workbench.9e1bdaba-5f05-4703-b930-a7e4a0dd43a6",
+      "filename": "75-mesh2motion-0.7.0.fbworkbench",
+      "bytes": 2563690,
+      "sha256": "d6386ed3d0cae003e8aa895c01d8b6c49860817550847c49dc1e68340ead3005",
+      "crc": "passed",
+      "sourceFilesMatched": 60,
+      "assetFilesMatched": 31,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "deliveryPath": "workbench-mesh2motion/mesh2motion-studio-0.7.0.fbworkbench",
+      "introductionFile": "workbench-mesh2motion/presentation.json",
+      "transferHashes": "passed"
+    }
+  ],
+  "toolingTests": 17
+}

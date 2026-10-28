@@ -3278,12 +3278,12 @@
     "category": "光学与教学",
     "kind": "原生工具/组件",
     "workbench": "光路实验、参数对照与场景交付",
-    "core_features": "原生Scene/Simulator/Editor、CPU基础元件与场景JSON",
+    "core_features": "原生光路编辑、CPU模拟、探测器与PNG/场景/工程导出",
     "integration": "固定上游原生核心，适配官方模板与完整工作稿持久化",
     "effort": "中–高",
     "priority": "A",
     "license": "Apache-2.0",
-    "caveat": "基础二维几何光学；不承诺专业镜头优化、WebGPU或未验证公式路径。",
+    "caveat": "version5、10种用户元件、100对象、10000条处理光线；不支持模块/背景/公式/WebGPU；Floatboat客户端导入未验证。",
     "url": "https://github.com/ricktu288/ray-optics",
     "archived": false,
     "sources": [
@@ -3295,8 +3295,32 @@
     "id": 73,
     "slug": "ray-optics",
     "directory": "workbenches/73-ray-optics",
-    "status": "planned",
-    "version": "0.7.0"
+    "status": "local-verified",
+    "version": "0.7.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/ray-optics.png",
+          "caption": "Ray Optics Simulation · 光路主屏、器材架与实验读数"
+        }
+      ]
+    },
+    "verification": {
+      "build": "passed",
+      "tests": 11,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/ray-optics.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.7.0.md",
+      "acceptance": "workbenches/73-ray-optics/ACCEPTANCE.md",
+      "upstream": "Ray Optics5.5.0 commitdaf76772原生Scene/Simulator/Editor"
+    }
   },
   {
     "name": "Invoice Builder",
@@ -3304,12 +3328,12 @@
     "category": "单据与运营",
     "kind": "原生工具/组件",
     "workbench": "报价、发票制作与PDF校样",
-    "core_features": "原生计算/文档模型、PDF模板与单据快照",
+    "core_features": "原生计价与PDF模板、报价/发票、图片及工程恢复",
     "integration": "固定上游原生核心，适配官方模板与完整工作稿持久化",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "适配数据库与IPC；不自动记账、寄送或宣称税务合规。",
+    "caveat": "80条明细；每图150KiB/400万像素；支持4币种；原生JSON仅导出，工程/恢复稿可回导，不寄送或记账；Floatboat客户端导入未验证。",
     "url": "https://github.com/piratuks/invoice-builder",
     "archived": false,
     "sources": [
@@ -3321,8 +3345,32 @@
     "id": 74,
     "slug": "invoice-builder",
     "directory": "workbenches/74-invoice-builder",
-    "status": "planned",
-    "version": "0.7.0"
+    "status": "local-verified",
+    "version": "0.7.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/invoice-builder.png",
+          "caption": "Invoice Builder · 明细填写、纸张校样与PDF预览"
+        }
+      ]
+    },
+    "verification": {
+      "build": "passed",
+      "tests": 11,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/invoice-builder.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.7.0.md",
+      "acceptance": "workbenches/74-invoice-builder/ACCEPTANCE.md",
+      "upstream": "Invoice Builder commit2979d917原生财务与PDF组件，React PDF4.9.0"
+    }
   },
   {
     "name": "Mesh2Motion",
@@ -3330,12 +3378,12 @@
     "category": "三维与动画",
     "kind": "原生工具/组件",
     "workbench": "模型绑定、动作预览与动画交付",
-    "core_features": "原生模型处理、骨架绑定、Three.js场景和GLB导出",
+    "core_features": "原生人形绑定、87动作预览、动画GLB与完整工程",
     "integration": "固定上游原生核心，适配官方模板与完整工作稿持久化",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT (code); CC0 (assets)",
-    "caveat": "普通GLB优先；贴图资源路径需适配，压缩模型/解码器/WASM另验。",
+    "caveat": "人形66关节；静态自包含GLB≤1MB/16000顶点，结果≤1.4MB，完整工程≤8MB；不支持外部纹理、压缩扩展、Morph、FBX或已绑定源模型；Floatboat客户端导入未验证。",
     "url": "https://github.com/Mesh2Motion/mesh2motion-app",
     "archived": false,
     "sources": [
@@ -3347,7 +3395,31 @@
     "id": 75,
     "slug": "mesh2motion",
     "directory": "workbenches/75-mesh2motion",
-    "status": "planned",
-    "version": "0.7.0"
+    "status": "local-verified",
+    "version": "0.7.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/mesh2motion.png",
+          "caption": "Mesh2Motion · 三维舞台、骨架树、关节参数与动作轨"
+        }
+      ]
+    },
+    "verification": {
+      "build": "passed",
+      "tests": 12,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/mesh2motion.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.7.0.md",
+      "acceptance": "workbenches/75-mesh2motion/ACCEPTANCE.md",
+      "upstream": "Mesh2Motion commiteef2de98原生权重管线，Three.js0.185.0"
+    }
   }
 ]

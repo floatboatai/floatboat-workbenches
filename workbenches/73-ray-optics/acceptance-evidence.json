@@ -60,5 +60,36 @@
     "transferHashes": "passed",
     "exportedSourceTests": 11,
     "dataIncluded": false
+  },
+  "integratedPackage": {
+    "directory": "workbenches/73-ray-optics",
+    "version": "0.7.0",
+    "appId": "workbench.ffa1db5f-b06e-4735-a26e-7789f23359d6",
+    "filename": "73-ray-optics-0.7.0.fbworkbench",
+    "bytes": 314655,
+    "sha256": "9306f38b58a15f5b59a7a7e53dcc2fa8601ab7763b9aaff8c8aa5084fbe5d49b",
+    "crc": "passed",
+    "sourceFilesMatched": 35,
+    "assetFilesMatched": 51,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-ray-optics/ray-optics-studio-0.7.0.fbworkbench",
+    "introductionFile": "workbench-ray-optics/presentation.json"
+  },
+  "integratedApplicationTests": 11,
+  "exportedSourceLinuxTests": {
+    "passed": 11,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked dependencies mounted read-only"
+  },
+  "rootIntegrationReview": {
+    "status": "passed",
+    "checks": [
+      "Final screenshot reviewed: native converging rays and detector output",
+      "Computed-result invalidation and1.92MB recovery evidence reviewed",
+      "Unpacked source Linux11/11 passed"
+    ]
   }
 }

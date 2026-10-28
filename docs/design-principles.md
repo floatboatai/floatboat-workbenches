@@ -99,3 +99,11 @@ Vercel React Best Practices 用于加载、数据获取和渲染效率；Web Des
 | wavesurfer.js | 波形、时间尺、区间与听审记录 |
 | React Email | 邮件稿件、收件人变量与多尺寸校样 |
 | Bruno | 请求集合、编辑器与响应控制台 |
+
+## 0.7.0 光学、单据与角色动画
+
+| 产品 | 工作空间 |
+| --- | --- |
+| Ray Optics Simulation | 光路主屏、器材架与实验读数 |
+| Invoice Builder | 明细填写、纸张校样与PDF预览 |
+| Mesh2Motion | 三维舞台、骨架树、关节参数与动作轨 |

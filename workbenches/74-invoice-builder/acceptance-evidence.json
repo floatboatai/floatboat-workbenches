@@ -77,5 +77,37 @@
     "transferHashes": "all passed",
     "dataIncluded": false,
     "status": "verified"
+  },
+  "integratedPackage": {
+    "directory": "workbenches/74-invoice-builder",
+    "version": "0.7.0",
+    "appId": "workbench.42e2677d-43cf-457a-9dd7-b48bb9db858d",
+    "filename": "74-invoice-builder-0.7.0.fbworkbench",
+    "bytes": 12864773,
+    "sha256": "449bbbc9e00c19a4f8736546cab8efbcf4294971beae6234597b064d6df2f5de",
+    "crc": "passed",
+    "sourceFilesMatched": 41,
+    "assetFilesMatched": 71,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-invoice-builder/invoice-builder-studio-0.7.0.fbworkbench",
+    "introductionFile": "workbench-invoice-builder/presentation.json"
+  },
+  "integratedApplicationTests": 11,
+  "exportedSourceLinuxTests": {
+    "passed": 11,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked dependencies mounted read-only"
+  },
+  "rootIntegrationReview": {
+    "status": "passed",
+    "checks": [
+      "Final editor/paper screenshot reviewed",
+      "All four PDF pages rendered and visually inspected: static Regular/Bold, no clipping",
+      "60-line PDF continuity and final totals checked",
+      "Unpacked source Linux11/11 passed"
+    ]
   }
 }

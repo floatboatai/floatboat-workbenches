@@ -6,9 +6,9 @@
 
 ## 当前进度
 
-当前批次 **0.6.0** · **50 / 72 个工作台已完成本地功能验收**，其余22个为计划项目。本批新增Konva、LogicFlow、SimpleMindMap、wavesurfer.js、React Email和Bruno，覆盖标注、流程、脑图、录音听审、邮件与接口调试。Floatboat客户端导入尚未实测。
+当前批次 **0.7.0** · **53 / 75 个工作台已完成本地功能验收**，其余22个为计划项目。本批新增Ray Optics、Invoice Builder和Mesh2Motion，分别用于光学实验、单据制作与角色动画。Floatboat客户端导入尚未实测。
 
-本批6项均完成原生核心操作、自动保存、未完成草稿、恢复稿回导、冲突、导出与真实Chrome验收，并采用各自产品的布局。实际范围及73项应用测试见[0.6.0验收](docs/release-0.6.0.md)。GitHub检查、打包及官方上传进度见[Actions](https://github.com/floatboatai/floatboat-workbenches/actions)；WASM画布升级仍等待客户端与模板就绪。
+本批3项均保留真实上游核心，完成自动保存、未完成草稿与恢复稿回导、产品独立布局、真实Chrome验收和导出源码复验。实际范围及34项应用测试见[0.7.0验收](docs/release-0.7.0.md)。GitHub检查与上传进度见[Actions](https://github.com/floatboatai/floatboat-workbenches/actions)；WASM画布升级仍等待客户端与模板就绪。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
@@ -62,6 +62,9 @@
 | [wavesurfer.js](workbenches/33-wavesurfer-js/) | 真实音频与波形、区间编辑/循环回听、审阅及工程导出 | 波形、时间尺、区间与听审记录 |
 | [React Email](workbenches/42-react-email/) | 官方邮件组件编排与渲染、HTML/纯文本/项目导出 | 邮件稿件、收件人变量与多尺寸校样 |
 | [Bruno](workbenches/45-bruno/) | 原生Bru请求、显式HTTP执行、结果检查与导出 | 请求集合、编辑器与响应控制台 |
+| [Ray Optics Simulation](workbenches/73-ray-optics/) | 原生光路编辑、CPU模拟、探测器与PNG/场景/工程导出 | 光路主屏、器材架与实验读数 |
+| [Invoice Builder](workbenches/74-invoice-builder/) | 原生计价与PDF模板、报价/发票、图片及工程恢复 | 明细填写、纸张校样与PDF预览 |
+| [Mesh2Motion](workbenches/75-mesh2motion/) | 原生人形绑定、87动作预览、动画GLB与完整工程 | 三维舞台、骨架树、关节参数与动作轨 |
 
 0.4.0批次统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
 
@@ -71,6 +74,8 @@
 
 仓库级 React Best Practices 与 Web Design Guidelines 已安装，入口见 `AGENTS.md`；各产品的设计原则见 [设计说明](docs/design-principles.md)。
 
+新增选题：[Reddit与X的23项调研](docs/research/social-shortlist-2026-10-28.md)；本批已转化其中3项，其余保持研究状态。
+
 X选题补充：[9个项目与转化优先级](docs/research/x-project-shortlist-2026-10-27.md)（2026-10-27，原帖、GitHub关注度与产品范围分开核验）。
 
 行业补充调研：[28 个小众行业候选](docs/research/niche-industry-candidates.md)。Maker.js、SeqViz、farmOS-map、Mirador 与 OpenSheetMusicDisplay 已实现；其余候选仍处于研究或计划阶段。第12–17项的独立服务接入条件见各自目录。
@@ -79,7 +84,7 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 
 ## 工作台实景
 
-以下为 50 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
+以下为 53 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
 
 | | |
 | --- | --- |
@@ -108,6 +113,8 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[Konva · 标注画板、对象工具与图层](workbenches/28-konva/)**<br>[<img src="docs/screenshots/konva.png" alt="Konva 工作台实景" width="440">](workbenches/28-konva/) | **[LogicFlow · 流程图纸、条件连线与结构检查](workbenches/29-logicflow/)**<br>[<img src="docs/screenshots/logicflow.png" alt="LogicFlow 工作台实景" width="440">](workbenches/29-logicflow/) |
 | **[SimpleMindMap · 导图主屏、分支导航与上下文工具](workbenches/31-simplemindmap/)**<br>[<img src="docs/screenshots/simplemindmap.png" alt="SimpleMindMap 工作台实景" width="440">](workbenches/31-simplemindmap/) | **[wavesurfer.js · 波形、时间尺、区间与听审记录](workbenches/33-wavesurfer-js/)**<br>[<img src="docs/screenshots/wavesurfer-js.png" alt="wavesurfer.js 工作台实景" width="440">](workbenches/33-wavesurfer-js/) |
 | **[React Email · 邮件稿件、收件人变量与多尺寸校样](workbenches/42-react-email/)**<br>[<img src="docs/screenshots/react-email.png" alt="React Email 工作台实景" width="440">](workbenches/42-react-email/) | **[Bruno · 请求集合、编辑器与响应控制台](workbenches/45-bruno/)**<br>[<img src="docs/screenshots/bruno.png" alt="Bruno 工作台实景" width="440">](workbenches/45-bruno/) |
+| **[Ray Optics Simulation · 光路主屏、器材架与实验读数](workbenches/73-ray-optics/)**<br>[<img src="docs/screenshots/ray-optics.png" alt="Ray Optics Simulation 工作台实景" width="440">](workbenches/73-ray-optics/) | **[Invoice Builder · 明细填写、纸张校样与PDF预览](workbenches/74-invoice-builder/)**<br>[<img src="docs/screenshots/invoice-builder.png" alt="Invoice Builder 工作台实景" width="440">](workbenches/74-invoice-builder/) |
+| **[Mesh2Motion · 三维舞台、骨架树、关节参数与动作轨](workbenches/75-mesh2motion/)**<br>[<img src="docs/screenshots/mesh2motion.png" alt="Mesh2Motion 工作台实景" width="440">](workbenches/75-mesh2motion/) |  |
 
 自动保存区分待保存、同步中、已保存、待完善草稿、离线和版本冲突。后台保存时仍可编辑；项目导入创建独立项目，未完成输入可恢复。浏览器本机缓存限定同一来源。
 

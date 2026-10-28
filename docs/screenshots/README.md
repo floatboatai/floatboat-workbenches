@@ -2,7 +2,7 @@
 
 真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-28。
 
-既有44项保留历史采集版本；本批新增6项0.6.0界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
+既有50项保留历史采集版本；本批新增3项0.7.0界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -56,5 +56,8 @@
 | [wavesurfer-js.png](wavesurfer-js.png) | 0.6.0 | 1440 × 1283 | 109.5 KiB | `7a45335e7282f92e8268d9d8490b3b1bebc3409b7d628aa325c49ed7aeb87d9e` |
 | [react-email.png](react-email.png) | 0.6.0 | 1440 × 1364 | 184.8 KiB | `e81cf86316d05d9a30743b7d19e420cb575bc883393fd0c7bcf226201b9c94e8` |
 | [bruno.png](bruno.png) | 0.6.0 | 1500 × 1100 | 123.6 KiB | `7c7e969560e4b77e5fa4e2039e3e6c64f11e962b6eb9e0cf56afc43e8eccf18b` |
+| [ray-optics.png](ray-optics.png) | 0.7.0 | 1440 × 1144 | 189.2 KiB | `21241c612929679ee5557c5d4d8345a05164733b4cdb45f1bb0e638b529c1d7c` |
+| [invoice-builder.png](invoice-builder.png) | 0.7.0 | 1440 × 1050 | 117.9 KiB | `64edaf214cdfb14730442e43d2c55335da906b1b630dfe45c849f187f9b7bbc2` |
+| [mesh2motion.png](mesh2motion.png) | 0.7.0 | 1440 × 1041 | 188.8 KiB | `5d7d47bcba4b11bc2149d7407a0de3189a703195d1e5007b833085b8cec5b125` |
 
-共50张，合计 7.17 MiB。
+共53张，合计 7.65 MiB。
