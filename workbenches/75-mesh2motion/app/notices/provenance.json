@@ -1,0 +1,145 @@
+{
+  "upstream": "https://github.com/Mesh2Motion/mesh2motion-app",
+  "commit": "eef2de986dab53283cb636f860d502d64b8073e7",
+  "compiler": "5.9.3",
+  "adaptations": [
+    "TypeScript to ES2022 ESM; normalize relative .js import suffixes. No solver algorithm edits."
+  ],
+  "files": [
+    {
+      "path": "RigConfig.ts",
+      "sourceSha256": "a823124d3a1c01ca7091f04dbab47f2cd77a108a6325093aa803e53cf4431135",
+      "compiledSha256": "fee59991560d067fb4dc44d86db8c2603547d5473d4672d3e0ed28fa5c378413"
+    },
+    {
+      "path": "RigModelVariations.ts",
+      "sourceSha256": "62ded1649c70523b6595898034565568794a728e1131a77be9252ee4bb66c8dc",
+      "compiledSha256": "0da4168a17a28d28509f1ef161188cfc80a1d9957eee0db6a024e794d51d9664"
+    },
+    {
+      "path": "Utilities.ts",
+      "sourceSha256": "2a99869ecd71cdeb6397eee7a0dbe6643788a7ed1e9a15a843058702f7004285",
+      "compiledSha256": "7ebbfdbdd6f5cbccbf34c3ff92860a2079423550e9a84436c4337d14fa378d90"
+    },
+    {
+      "path": "enums/ModelPreviewDisplay.ts",
+      "sourceSha256": "5e80629eab59c463396bb17e68578c9653322fb57bcdb875a88c84b14350239d",
+      "compiledSha256": "cb77625d5d31d2307d7d5ee4f19cd0c852ff03654932f35267728bd2238e9cdb"
+    },
+    {
+      "path": "enums/ProcessStep.ts",
+      "sourceSha256": "ced298a70c9c6434467e70d3bc81d0bdae5a51c2760766e0fa8bfae3f4c8f7e6",
+      "compiledSha256": "76a672b213065b010d9afcfc2076a0fa7a3a8305331a9b16b5422a78ba33ccc6"
+    },
+    {
+      "path": "enums/SkeletonType.ts",
+      "sourceSha256": "55e8ef2c1a55b51f4739194f9f60e4a16cfed1336a0df59ae9d47b99ffc8faae",
+      "compiledSha256": "bd3ae1186532e00ab76963ba71b6c0aec007617867449f3162cb0b6cc526b2d8"
+    },
+    {
+      "path": "enums/TransformControlType.ts",
+      "sourceSha256": "89e33de1a34de7ef97194f756ff32418a124e7a1cc5f1175a7a21577d4c1a714",
+      "compiledSha256": "d221befb1fb45c1d18dd4cf84d5ff4b6197c36ceffcbcd093bf46e00b384c946"
+    },
+    {
+      "path": "enums/TransformSpace.ts",
+      "sourceSha256": "ccabcad6e2177fdf9126b1bfee667b4c0033f7a5e6cd03783744941bf39d89f1",
+      "compiledSha256": "9788a125708c430fd24ccdb66e41e3ce75d6d695051db46e77cbf67b6aaa075a"
+    },
+    {
+      "path": "interfaces/BoneCalculationData.ts",
+      "sourceSha256": "cf01d341ce164273f9792a687e450b62080a70fef22da46ec55c7feb28cac6d5",
+      "compiledSha256": "ac83a6a8fd3d9fed26513f5b0cfdbefb088e4f8c257b892d84bc212de7639eed"
+    },
+    {
+      "path": "interfaces/BoneTesterData.ts",
+      "sourceSha256": "24bd285582cf9c50de95abba6e763707d66482bb1a14102356a7cacbb550fee8",
+      "compiledSha256": "c9364e1e5a84af9ba6a1a3d1cca03ad3abc95dcd87d25733b4c0cde195af165e"
+    },
+    {
+      "path": "interfaces/BoneTransformState.ts",
+      "sourceSha256": "ba55e50eb74714cca0c1f7938dfa4d2b3cd64b817171e454f42e830278923093",
+      "compiledSha256": "775e5f660acf95ef9e8f7cb820a068dbfc6679f260523a577c8558e61a507403"
+    },
+    {
+      "path": "interfaces/IntersectionGeometryData.ts",
+      "sourceSha256": "9c0ab114a04c7b1c5ba48229d9bb7ce922d8a4dd08211d16292f8f2f81146231",
+      "compiledSha256": "2ec1f2928ee06508570ec1141f874525310ad78e57215a4fa14d0da5f162928e"
+    },
+    {
+      "path": "interfaces/IntersectionPointData.ts",
+      "sourceSha256": "f2ee15b0ce8f40fbea4301bc032bf372934c3da96dfd2b980885b67961b353c6",
+      "compiledSha256": "76b80a2fd34e9c2bc763d5987785a5e2ceddf9c6168bfeaa86dfe3ca4210041a"
+    },
+    {
+      "path": "processes/animations-listing/AnimationUtility.ts",
+      "sourceSha256": "a32fd5299ac9ae7d5e86244f5d48a2e27a3edf48bec917c3507600a87af2c6ff",
+      "compiledSha256": "7db4a9afd87246cd1844a6267df1bb81960cadfdb62d881e686e26a130142c77"
+    },
+    {
+      "path": "solvers/ArmWeightCorrector.ts",
+      "sourceSha256": "a1dedb38d7864399ddb9eb04e46569fe3dce4c748ea4d2fc6131c167d1715608",
+      "compiledSha256": "0ba076f4c726886c5f734a625f4449f37582b4dec4a8f69264e1c165fa9a1466"
+    },
+    {
+      "path": "solvers/BoneClassifier.ts",
+      "sourceSha256": "0e8d0c6862fb51b8e9ee5fa4726fd9fa12038cf60ddffea6976ab2ed4114a84c",
+      "compiledSha256": "8a2a9c5a213298c173859cb64115c3a848ab680d2f0cff52ff6351139b303a7a"
+    },
+    {
+      "path": "solvers/ExtremityWeightCorrector.ts",
+      "sourceSha256": "9ba43b51c9b8b670203c73233295e0141c98d1e2a13b9d806c2c2dd5a7fc465d",
+      "compiledSha256": "3e2ff4915f653890906626097d79c875adc90708b12f5767a3b9b07b0366e159"
+    },
+    {
+      "path": "solvers/HeadWeightCorrector.ts",
+      "sourceSha256": "5ff88affe935f02a3ac141ace837be5230701de19ef727cddce71f8ccc4f0987",
+      "compiledSha256": "fdf7e21a6b4902e8a67a1bd6fd2f218291ce1378430c0e6753cd555cb9655471"
+    },
+    {
+      "path": "solvers/SkinningAlgorithm.ts",
+      "sourceSha256": "d6efe0603d5ad48bb3e8991c803e7909e6b72a16981160aeee6cd2dfcdc005a2",
+      "compiledSha256": "37503c955c2c3ec8bb37b6ff3a22fcf6dbbbe6ef84a054f3569593cf9bddac4c"
+    },
+    {
+      "path": "solvers/WeightCalculator.ts",
+      "sourceSha256": "3cc4b666b06829c1b2f86e0f38f896d4767128496a67fe9b4ff0d317a52868d3",
+      "compiledSha256": "cdda01fa003f9ff64addb772c5e3eb37be858e4064e2eb77d9789760a8c3cd0d"
+    },
+    {
+      "path": "solvers/WeightNormalizer.ts",
+      "sourceSha256": "e39dff846a86593727005426b9eb3637e81cf3af2004707d32fbb8484961d6f8",
+      "compiledSha256": "ce7c1f54d36c21f03a2bf53807ee4eb2376add86dfc1be68dec6b8d9951e36b7"
+    },
+    {
+      "path": "solvers/WeightSmoother.ts",
+      "sourceSha256": "0a15e68ae8396f39373a1edd5f6f34ef7e5aac6b31e81050caf765a11c8cf5b8",
+      "compiledSha256": "eadb3176a8be0902a88931e54b77139b7f9eb03cf741aceb9c68b42b5e98ffea"
+    }
+  ],
+  "assets": [
+    {
+      "path": "engine-assets/mannequin.glb",
+      "bytes": 364868,
+      "sha256": "8766a46e82c63c947f7eff70c9d72d6ef0661e2280928048559f8975dcd1086d",
+      "license": "CC0"
+    },
+    {
+      "path": "engine-assets/human-rig.glb",
+      "bytes": 21184,
+      "sha256": "3f7ad51c9471458a920dbe373755c3a7223e3672bb572406fa7d2e65deb8f593",
+      "license": "CC0"
+    },
+    {
+      "path": "engine-assets/human-animations.glb",
+      "bytes": 5656648,
+      "sha256": "406eb0a8dc4ab366e623b79b6e3005a4951392e1bda78ae39c1099d31147733c",
+      "license": "CC0"
+    }
+  ],
+  "libraryMetadata": {
+    "path": "src/contracts/human-library.ts",
+    "source": "human-rig.glb joint names and human-animations.glb clip names",
+    "sha256": "37b9e331f438f3f5bf2f45fb5805fec8db26f11b1319cb5d22cf0d97d474ecac"
+  }
+}

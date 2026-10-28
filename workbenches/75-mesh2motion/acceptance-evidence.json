@@ -1,0 +1,102 @@
+{
+  "version": "0.7.0",
+  "status": "local-verified",
+  "hostImport": "unverified",
+  "hostLlm": "not-used",
+  "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "upstream": {
+    "repository": "Mesh2Motion/mesh2motion-app",
+    "commit": "eef2de986dab53283cb636f860d502d64b8073e7",
+    "compiledModules": 22,
+    "three": "0.185.0",
+    "codeLicense": "MIT",
+    "assetLicense": "CC0"
+  },
+  "applicationTests": 12,
+  "browser": {
+    "url": "http://127.0.0.1:60688",
+    "checks": [
+      "server rejects a static GLB mislabeled as a bound result",
+      "real textured unbound GLB renders under unchanged CSP",
+      "real solver binding and different animation frames; exported GLB has skin, weights, animation and embedded texture",
+      "downloaded complete project retains original and bound bytes and imports as a new document",
+      "unfinished coordinate saves before blur, reloads and survives real recovery download/import",
+      "delayed committed receipt never disables or overwrites newer input",
+      "lost response after server commit retries the same mutation",
+      "stale window conflict preserves local draft across reload and a new tab",
+      "offline working copy survives switching away, reopening and reconnecting",
+      "late binding result cannot mutate a newly created document",
+      "375px containment, keyboard focus and no automatic playback under reduced motion"
+    ],
+    "errors": [],
+    "expectedNetworkErrors": 4,
+    "export": {
+      "bytes": 631680,
+      "skins": 1,
+      "animations": 1
+    }
+  },
+  "exportReload": {
+    "file": "mesh-final-animation.glb",
+    "bytes": 631680,
+    "loader": "Three.js 0.185.0 GLTFLoader",
+    "skinnedMeshes": 1,
+    "bones": 66,
+    "vertices": 7399,
+    "animations": [
+      "Dance_Simple"
+    ],
+    "sampledVertexMovement": [
+      0.07593203530697822,
+      0.037991419933807204,
+      0.32055964175730595,
+      0.3073796520136615,
+      0.21755035678421422
+    ],
+    "texture": "Embedded PNG extracted; actual browser texture decoding verified separately"
+  },
+  "limits": {
+    "sourceBytes": 1000000,
+    "boundBytes": 1400000,
+    "fullProjectBytes": 8000000,
+    "vertices": 16000,
+    "imageSide": 2048,
+    "texturePixels": 8388608,
+    "formalUtf8Bytes": 850000,
+    "workingRequestBytes": 1950000
+  },
+  "package": {
+    "file": "mesh2motion-0.7.0-final.fbworkbench",
+    "bytes": 2563690,
+    "sha256": "d6386ed3d0cae003e8aa895c01d8b6c49860817550847c49dc1e68340ead3005",
+    "crc": "passed",
+    "transferHashes": "passed",
+    "sourceFilesMatched": 60,
+    "assetFilesMatched": 31,
+    "businessData": "excluded",
+    "hostImport": "unverified"
+  },
+  "limitations": [
+    "Human rig only; ordinary self-contained GLB with embedded PNG/JPEG",
+    "No FBX, compressed extensions, Morph or pre-bound source models",
+    "No weight painting, motion capture or semantic bone detection",
+    "Imported Floatboat client not tested"
+  ],
+  "resourceRepair": {
+    "url": "http://127.0.0.1:64804/",
+    "checks": [
+      "missing bound original restores as a draft without pretending usable model",
+      "matching hash reattachment reloads the same resource id in native viewport",
+      "explicit rebinding remains functional after resource repair",
+      "final screenshot, 375px and visible keyboard canvas focus verified"
+    ],
+    "errors": []
+  },
+  "previewUrl": "http://127.0.0.1:64804/",
+  "screenshot": {
+    "path": "../../docs/screenshots/mesh2motion.png",
+    "width": 1440,
+    "height": 1041,
+    "sha256": "5d7d47bcba4b11bc2149d7407a0de3189a703195d1e5007b833085b8cec5b125"
+  }
+}

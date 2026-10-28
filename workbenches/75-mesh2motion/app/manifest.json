@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.9e1bdaba-5f05-4703-b930-a7e4a0dd43a6",
+  "registryName": "mesh2motion-studio",
+  "name": "Mesh2Motion 角色动作工坊",
+  "description": "人形模型骨架绑定、动作预览与动画GLB交付",
+  "version": "0.7.0",
+  "changelog": "原生人形绑定、完整工作稿与模型资源恢复。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "engine-assets",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "engine-assets"
+    },
+    {
+      "id": "notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    },
+    {
+      "id": "originals",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "originals",
+      "access": "read-write"
+    },
+    {
+      "id": "setup-guide",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "SETUP.md"
+    }
+  ]
+}

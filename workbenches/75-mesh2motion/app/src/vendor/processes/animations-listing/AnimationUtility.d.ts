@@ -1,0 +1,1 @@
+import type {AnimationClip} from 'three';export class AnimationUtility {static clean_track_data(clips:AnimationClip[],tracking:string|undefined):void;static apply_skeleton_scale_to_position_keyframes(clips:AnimationClip[],scale:number):void;static deep_clone_animation_clip(clip:AnimationClip):AnimationClip;}
