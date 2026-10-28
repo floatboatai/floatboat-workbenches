@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.867a6daa-570d-4dc3-8193-f66cb359ce1f",
+  "registryName": "logicflow-studio",
+  "name": "LogicFlow 工作台",
+  "description": "审批与 SOP 流程图纸、结构检查和路径审阅",
+  "version": "0.6.0",
+  "changelog": "原生 LogicFlow 编辑、完整工作稿与图纸导出。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}

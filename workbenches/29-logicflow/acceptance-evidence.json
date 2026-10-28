@@ -1,0 +1,60 @@
+{
+  "version": "0.6.0",
+  "status": "local-verified",
+  "hostImport": "unverified",
+  "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "nativeEngine": {
+    "core": "2.2.5",
+    "extension": "2.3.1"
+  },
+  "unitTests": 8,
+  "previewUrl": "http://127.0.0.1:49892/",
+  "browser": {
+    "checks": [
+      "native LogicFlow SVG canvas mounted",
+      "native addNode event autosaved",
+      "refresh restores full document",
+      "native label editing / JSON export",
+      "native Snapshot PNG downloaded",
+      "unapplied invalid JSON survives refresh",
+      "actual recovery download imports as new project",
+      "typing remains enabled during delayed receipt",
+      "committed lost receipt retries stable mutation",
+      "two-window conflict preserves stale writer",
+      "new-document synchronous navigation lock",
+      "375px / keyboard / reduced-motion"
+    ],
+    "errors": [
+      "Failed to load resource: net::ERR_FAILED"
+    ],
+    "unexpected": []
+  },
+  "package": {
+    "file": "logicflow-0.6.0-final.fbworkbench",
+    "sha256": "4462325e6735f2cb29d7a5a8e2033918f0d5d9d15bbd852ec31270aec67eda0c",
+    "crc": "passed",
+    "sourceAndResourceFilesCompared": 32,
+    "manifest": "verified normalized resource mapping",
+    "transferHashes": "all verified",
+    "dataIncluded": false
+  },
+  "nativePng": {
+    "decoded": true,
+    "visuallyVerified": true,
+    "width": 1010,
+    "height": 580,
+    "bytes": 42230
+  },
+  "finalChecks": [
+    "unfinished coordinate refresh",
+    "native drag refresh",
+    "375px containment",
+    "no page errors"
+  ],
+  "limitations": [
+    "No workflow execution",
+    "Custom node registrations not supported",
+    "Host import unverified",
+    "Maximum 30 reviewed paths"
+  ]
+}
