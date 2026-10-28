@@ -27,6 +27,7 @@ export function useMovieDesk() {
     [playing, setPlaying] = useState(false),
     [jobs, setJobs] = useState<RenderJob[]>([]),
     [busy, setBusy] = useState(false),
+    [transitioning, setTransitioning] = useState(false),
     [status, setStatus] = useState({
       available: false,
       message: "正在检查渲染服务…",
@@ -43,7 +44,7 @@ export function useMovieDesk() {
     active =
       timeline.find((x) => time >= x.start && time < x.start + x.duration) ??
       timeline.at(-1)!;
-  const mutable = !p.loading && !p.busy;
+  const mutable = !p.loading && !p.busy && !transitioning;
   const pending = p.draft.pendingRender;
   const pendingRef = useRef(pending);
   pendingRef.current = pending;
@@ -234,14 +235,24 @@ export function useMovieDesk() {
       p.setError("当前有未完成或待核对的渲染，请先核对同一任务或取消。");
       return false;
     }
-    return p.fresh();
+    setTransitioning(true);
+    try {
+      return await p.fresh();
+    } finally {
+      setTransitioning(false);
+    }
   }
   async function open(id: string) {
     if (pendingRef.current !== undefined) {
       p.setError("当前有未完成或待核对的渲染，请先核对同一任务或取消。");
       return false;
     }
-    return p.open(id);
+    setTransitioning(true);
+    try {
+      return await p.open(id);
+    } finally {
+      setTransitioning(false);
+    }
   }
   async function exportVideo(id: string) {
     try {
@@ -260,9 +271,18 @@ export function useMovieDesk() {
       p.setError("当前渲染仍待核对，导入前请先核对同一任务或取消。");
       return;
     }
+    setTransitioning(true);
     try {
-      if (f.size > 900000) throw new Error("工程不能超过900 KB");
-      const v: unknown = JSON.parse(await f.text());
+      if (f.size > 12 * 1024 * 1024)
+        throw new Error("工程或恢复稿不能超过12 MB");
+      let v: unknown = JSON.parse(await f.text());
+      if (isRecord(v) && isRecord(v.snapshot))
+        v = {
+          format: "floatboat-hyperframes-v1",
+          title: v.snapshot.title,
+          data: v.snapshot.data,
+          draft: v.snapshot.extra,
+        };
       if (
         !isRecord(v) ||
         v.format !== "floatboat-hyperframes-v1" ||
@@ -277,11 +297,14 @@ export function useMovieDesk() {
           )
         )
           return;
+        extra.importedPendingRender = extra.pendingRender;
         delete extra.pendingRender;
       }
       await p.replace(restoreMovie(v.data), v.title, extra);
     } catch (e) {
       p.report(e);
+    } finally {
+      setTransitioning(false);
     }
   }
   const labels: Record<string, string> = {

@@ -247,6 +247,7 @@ export function App() {
               <label htmlFor="json-draft">工程 JSON 草稿</label>
               <textarea
                 id="json-draft"
+                disabled={!mutable}
                 spellCheck={false}
                 value={raw}
                 onChange={(e) =>

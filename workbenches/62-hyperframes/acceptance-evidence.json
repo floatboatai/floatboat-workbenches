@@ -50,5 +50,20 @@
     "navigationAndImportGuard": true,
     "staleListCannotRevertCompleted": true,
     "pageErrors": []
+  },
+  "recoveryImportRegression": {
+    "at": "2026-10-28T04:36:28.276Z",
+    "cacheSnapshotReimport": true,
+    "newProject": true,
+    "completeEditAndUnappliedDraft": true
+  },
+  "navigationTransitionLocksEditing": true,
+  "package": {
+    "name": "hyperframes-studio-0.5.0-final.fbworkbench",
+    "sha256": "f8130e29e5e07e67d8dc84c1d06d2f72ee3ffeff8d1179feb8ef11413dda84d5",
+    "files": 36,
+    "crcValid": true,
+    "licenseIncluded": true,
+    "businessDataExcluded": true
   }
 }
