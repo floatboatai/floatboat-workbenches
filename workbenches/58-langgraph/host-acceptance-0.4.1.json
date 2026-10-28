@@ -1,0 +1,36 @@
+{
+  "verifiedAt": "2026-10-28T02:45:49.807Z",
+  "hostConnected": true,
+  "generateTextAvailable": true,
+  "strictOutputValidation": true,
+  "actualHostModelCall": true,
+  "requestedModel": "gemini-3.8-flash",
+  "modelSelection": "Explicit app default via Host; returned model ID is not persisted by this app",
+  "mode": "model",
+  "finalStatus": "completed",
+  "reviewPreserved": true,
+  "deliveryPreserved": true,
+  "checkpointCount": 5,
+  "jsonExport": true,
+  "pageErrors": [],
+  "version": "0.4.1",
+  "timezone": "America/New_York",
+  "environment": "Local preview, real Floatboat Host and Chrome",
+  "sourceSample": "普通示例：冬季展览灯光验收",
+  "applicationTests": 17,
+  "hostImport": "unverified",
+  "modelMetadataPersisted": false,
+  "screenshot": {
+    "path": "../../docs/screenshots/langgraph.png",
+    "dimensions": [
+      1440,
+      1313
+    ],
+    "sha256": "686185f8275b53d40f075cb7c8f68e91f79a12476f0e2ee4da30cba675e212ea"
+  },
+  "earlierFailures": [
+    "LLM_OBJECT_INVALID before JSON fence compatibility",
+    "Invalid date before explicit ISO schema/prompt",
+    "One LLM_REQUEST_FAILED; subsequent distinct run succeeded"
+  ]
+}

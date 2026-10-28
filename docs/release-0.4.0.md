@@ -4,6 +4,8 @@
 
 六个Git worktree分批并行，五个实现子代理与主线程分别负责产品；集成时另做独立只读审查和针对性修复。没有改动固定模板SDK、tooling或CSP。模板仍固定在 `3b55d46f7ae25e939ce3299073c37ed334d69c02`。
 
+后续更新：[LangGraph 0.4.1](release-0.4.1.md) 已完成真实 Host 模型验收，并默认使用 Gemini 3.8 Flash。以下表格与106项测试数字保留0.4.0发布时的记录。
+
 ## 检查结果
 
 主仓库完成 **6项构建、106项应用测试、14项独立服务测试、3项工具测试及6个源码包**。应用测试总数采用最终Presenton修复后的29项；主仓库整批检查后，对其修复重新检查、测试和打包。Docling的应用包版本也已对齐0.4.0并重新检查/打包。
@@ -40,7 +42,7 @@
 
 - **LangExtract**：真实模型提供方尚未配置/验证；可使用本地JSONL资料审校。没有Host→Python provider bridge。
 - **Docling**：本版上传HTML；校订DoclingDocument JSON。没有实现PDF/DOCX上传或预览、OCR和视觉模型；官方Serve live往返未验证。
-- **LangGraph**：填写资料模式实际执行核心库。Host模型分支已实现，当前Host断开，未取得真实成功输出。
+- **LangGraph**：填写资料模式实际执行核心库。0.4.0验收时Host断开，未取得真实成功输出；后续0.4.1已通过，见上方补丁记录。
 - **Promptfoo**：真实运行的是回显提供者及断言，不是模型效果测试。模型模式需要在独立执行器配置提供方。
 - **faster-whisper**：只验证tiny.en英语短录音、CPU INT8路线。其他语言/模型、GPU、长录音质量与容量不作已验证承诺。服务锁定PyAV16.0.1以匹配faster-whisper1.2.1。
 - **Presenton**：当前本地大纲与文稿流程可用。真实生成、上游PPTX/PDF渲染与文件递送需配置独立服务后验证；目前的HTTP fixture不代表真实文件生产链路。

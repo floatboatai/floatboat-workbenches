@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前批次 **0.4.0** · **32 / 61 个工作台已完成本地功能验收**，其余29个为计划项目。新增6个AI工作台为0.4.0，既有26个保留0.3.0版本与验收记录。Floatboat客户端导入尚未实测。
+当前批次 **0.4.0** · **32 / 61 个工作台已完成本地功能验收**，其余29个为计划项目。新增6个AI工作台中，LangGraph已更新至0.4.1，其余5个为0.4.0，既有26个保留0.3.0版本与验收记录。Floatboat客户端导入尚未实测。
 
 本批在6个独立worktree分批并行实现。自动保存、未完成草稿、冲突与容量边界是共同验收项；界面按产品任务分别设计。AI引擎、模型和外部服务的验证范围单列在[0.4.0验收](docs/release-0.4.0.md)，配置方式见[AI服务说明](docs/ai-services.md)。
 
@@ -40,16 +40,20 @@
 | [OpenSheetMusicDisplay](workbenches/55-opensheetmusicdisplay/) | MusicXML/MXL 导入、谱面校审、批注及原件/SVG 导出 | 乐谱纸张与边注 |
 | [LangExtract](workbenches/56-langextract/) | 原文、JSONL证据定位、字段复核、人工修订与CSV/JSONL/项目导出 | 原文纸张与证据账本 |
 | [Docling](workbenches/57-docling/) | DoclingDocument结构树、文本/表格校订、顺序、JSON/Markdown/CSV与HTML连接器 | 结构轨、校样纸张与表格检查器 |
-| [LangGraph.js](workbenches/58-langgraph/) | 真实StateGraph、人工中断/恢复、SQLite检查点、交付与项目导出 | 三站复核流程与运行账本 |
+| [LangGraph.js](workbenches/58-langgraph/) | Gemini 3.8资料整理、真实StateGraph、人工复核、SQLite检查点与交付导出 | 三站复核流程与运行账本 |
 | [Promptfoo](workbenches/59-promptfoo/) | 真实评测结果矩阵、基线、人工复核、限定套件执行器与CSV/JSON导出 | 用例×版本矩阵与结果对照 |
 | [faster-whisper](workbenches/60-faster-whisper/) | 音频保存/回听、真实CPU转写、字幕时间编辑与SRT/VTT/完整项目导出 | 暗色波形、字幕行与任务队列 |
 | [Presenton](workbenches/61-presenton/) | 资料、大纲、页序、备注、审阅、便携稿与异步制作服务连接器 | 逐页缩略轨、演示舞台与资料简报 |
 
-本批统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
+0.4.0批次统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
+
+[LangGraph 0.4.1](docs/release-0.4.1.md) 默认使用 **Gemini 3.8 Flash**，已通过真实 Host 整理、人工复核、自动保存、交付及刷新恢复；17项应用测试通过，并补齐JSON代码块与日期格式兼容。其他独立AI服务的接入条件保持各项目说明。
 
 既有26项的构建、208项应用测试与源码包记录见[0.3.0验收](docs/release-0.3.0.md)，本批未重跑未修改的既有应用。历史批次：[0.2.0](docs/release-0.2.0.md)、[2–11](docs/batch-02-11.md)。
 
 仓库级 React Best Practices 与 Web Design Guidelines 已安装，入口见 `AGENTS.md`；各产品的设计原则见 [设计说明](docs/design-principles.md)。
+
+X选题补充：[9个项目与转化优先级](docs/research/x-project-shortlist-2026-10-27.md)（2026-10-27，原帖、GitHub关注度与产品范围分开核验）。
 
 行业补充调研：[28 个小众行业候选](docs/research/niche-industry-candidates.md)。Maker.js、SeqViz、farmOS-map、Mirador 与 OpenSheetMusicDisplay 已实现；其余候选仍处于研究或计划阶段。第12–17项的独立服务接入条件见各自目录。
 

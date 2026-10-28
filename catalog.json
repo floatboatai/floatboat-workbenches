@@ -2362,12 +2362,12 @@
     "category": "AI 工作台",
     "kind": "核心库",
     "workbench": "人工复核与可恢复的 Agent 流程台",
-    "core_features": "真实StateGraph、人工中断/恢复、SQLite检查点、交付与项目导出",
+    "core_features": "Gemini 3.8资料整理、真实StateGraph、人工复核、SQLite检查点与交付导出",
     "integration": "Node 核心＋自建模板 SQLite checkpointer；MIT",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "固定资料复核流程；Host模型成功调用与客户端导入未验证。",
+    "caveat": "固定资料复核流程；Gemini 3.8 Flash普通示例经Host成功验证，其他模型/批量质量与客户端导入未验证。",
     "sources": [
       "https://github.com/langchain-ai/langgraphjs"
     ],
@@ -2376,7 +2376,7 @@
     "checked_at": "2026-10-27",
     "verification": {
       "build": "passed",
-      "tests": 11,
+      "tests": 17,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
@@ -2385,16 +2385,18 @@
       "screenshot": "docs/screenshots/langgraph.png",
       "hostImport": "unverified",
       "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.4.0.md",
+      "record": "docs/release-0.4.1.md",
       "acceptance": "workbenches/58-langgraph/ACCEPTANCE.md",
-      "upstream": "真实StateGraph/SQLite与进程重启；Host模型分支未验证",
-      "hostLlm": "unverified-host-disconnected"
+      "upstream": "真实StateGraph/SQLite与进程重启；Gemini 3.8 Flash经Host完成整理、复核、交付和刷新恢复",
+      "hostLlm": "passed",
+      "hostModel": "gemini-3.8-flash",
+      "hostEvidence": "workbenches/58-langgraph/host-acceptance-0.4.1.json"
     },
     "id": 58,
     "slug": "langgraph",
     "directory": "workbenches/58-langgraph",
     "status": "local-verified",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "presentation": {
       "screenshots": [
         {

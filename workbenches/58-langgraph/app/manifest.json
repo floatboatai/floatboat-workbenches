@@ -4,8 +4,8 @@
   "registryName": "langgraph-studio",
   "name": "交付复核 · LangGraph",
   "description": "资料整理、人工复核、检查点恢复与交付记录",
-  "version": "0.4.0",
-  "changelog": "真实 LangGraph 流程与 SQLite 检查点，自动保存复核草稿与独立运行记录。",
+  "version": "0.4.1",
+  "changelog": "默认使用Gemini 3.8 Flash；兼容Host模型返回的JSON代码块，严格校验交付字段和完成状态，保留明确的模型错误代码。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

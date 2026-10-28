@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | [LangExtract](../workbenches/56-langextract/README.md) | 文本/字段编辑、JSONL证据复核、修订与导出 | 独立Python LangExtract服务及模型提供方 | 真实库管线＋明确stub模型，非模型推理 |
 | [Docling](../workbenches/57-docling/README.md) | DoclingDocument JSON结构、文本和表格校订 | 官方Docling Serve；本版提交HTML | 真实Docling core的HTML转换与校订JSON回读；Serve live未测 |
-| [LangGraph.js](../workbenches/58-langgraph/README.md) | 填写资料、真实流程执行、人工暂停/恢复、交付记录 | 模型整理分支需要已连接Floatboat Host | 真实StateGraph/SQLite检查点及进程重启；Host成功调用未测 |
+| [LangGraph.js](../workbenches/58-langgraph/README.md) | 填写资料、真实流程执行、人工暂停/恢复、交付记录 | 模型整理分支需要已连接Floatboat Host | 真实StateGraph/SQLite检查点及进程重启；0.4.1已验证Gemini 3.8 Host完整流程 |
 | [Promptfoo](../workbenches/59-promptfoo/README.md) | 结果矩阵、基线比较、人工复核、原始结果/CSV | 独立Node执行器；模型模式另配提供方 | 真实Promptfoo evaluator回显评测，非模型质量评测 |
 | [faster-whisper](../workbenches/60-faster-whisper/README.md) | 音频保存/回听、字幕编辑和导出 | 独立Python推理服务及指定模型 | tiny.en CPU INT8真实转写，短英语录音完整链路 |
 | [Presenton](../workbenches/61-presenton/README.md) | 素材、大纲、逐页审阅和便携文稿 | 已部署Presenton服务、其API key与模型 | 接口合同与本地任务流程；真实生成/PPTX/PDF文件递送未测 |
@@ -27,7 +27,7 @@
 
 每个项目README给出精确依赖和启动方法。Presenton官方示例常用5001端口，同时运行Docling时应将其主机端口映射为5002并对应修改URL。远程地址使用HTTPS，来源/鉴权约束按各连接器校验。不要把模型key写进公开脚本、项目JSON或截图。
 
-LangGraph模型整理走真正的Host SDK，由Floatboat管理模型与凭据。本轮Host未连接；其他Python/HTTP服务不会因为Host有LLM能力就自动兼容它。LangExtract目前没有Host→Python provider bridge。
+LangGraph模型整理走真正的Host SDK，由Floatboat管理模型与凭据。0.4.1默认显式请求 `gemini-3.8-flash`，真实调用、人工复核、交付及刷新恢复已通过，见[0.4.1验收](release-0.4.1.md)。这是LangGraph的应用默认值；其他Python/HTTP服务仍独立配置。LangExtract目前没有Host→Python provider bridge。
 
 ## 保存与任务恢复
 
