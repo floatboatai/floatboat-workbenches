@@ -249,9 +249,9 @@ test("CSV cells cannot become spreadsheet formulas and preserve quoted/newline c
   assert.match(value, /A ""quoted""\nline/);
 });
 test("vendored native source and declared strict-type adaptations match their provenance hashes", () => {
-  const manifest = JSON.parse(readFileSync("UPSTREAM.json", "utf8"));
+  const manifest = JSON.parse(readFileSync(new URL("../src/vendor/geoinflow/UPSTREAM.json", import.meta.url), "utf8"));
   for (const f of manifest.files) {
-    const file = "app/src/vendor/geoinflow/" + f.path;
+    const file = new URL("../src/vendor/geoinflow/" + f.path, import.meta.url);
     const hash = createHash("sha256").update(readFileSync(file)).digest("hex");
     assert.equal(hash, manifest.adaptedFiles[f.path] ?? f.sha256, f.path);
   }
