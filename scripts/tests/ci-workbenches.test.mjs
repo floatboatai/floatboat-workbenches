@@ -185,17 +185,17 @@ test("only HTTPS credential-free endpoints are accepted", () => {
   ])
     assert.throws(() => uploadEndpoint(url), /HTTPS/);
   assert.equal(
-    uploadEndpoint("https://example.com/api/workbenches/upload"),
-    "https://example.com/api/workbenches/upload",
+    uploadEndpoint("https://upload.example.invalid/ingest"),
+    "https://upload.example.invalid/ingest",
   );
 });
 test("multipart upload uses official account credential and refuses redirects", async () => {
   const { bundle } = await bundleFixture();
   await uploadBundle(bundle, {
-    url: "https://example.com/api/workbenches/upload",
+    url: "https://upload.example.invalid/ingest",
     apiKey: "official-fixture-key",
     fetchImpl: async (url, options) => {
-      assert.equal(url, "https://example.com/api/workbenches/upload");
+      assert.equal(url, "https://upload.example.invalid/ingest");
       assert.equal(options.redirect, "error");
       assert.equal(
         options.headers.Authorization,

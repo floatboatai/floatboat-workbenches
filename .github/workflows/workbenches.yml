@@ -95,6 +95,6 @@ jobs:
           path: ${{ runner.temp }}/workbench-artifacts
       - name: Upload with the official account
         env:
-          FLOATBOAT_UPLOAD_URL: ${{ vars.FLOATBOAT_UPLOAD_URL }}
+          FLOATBOAT_UPLOAD_URL: ${{ secrets.FLOATBOAT_UPLOAD_URL }}
           FLOATBOAT_UPLOAD_API_KEY: ${{ secrets.FLOATBOAT_UPLOAD_API_KEY }}
         run: node scripts/upload-workbenches.mjs "$RUNNER_TEMP/workbench-artifacts"

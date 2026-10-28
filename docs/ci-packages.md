@@ -22,17 +22,19 @@ GitHub Actions 的 [Workbench packages](../.github/workflows/workbenches.yml) �
 
 自动上传是独立作业，仅在全部打包成功后运行。PR 不会上传；手动执行也必须选择 `main` 或 `v*` 标签。构建作业接触不到上传密钥。
 
-后端先部署 `POST /api/workbenches/upload`，配置 S3 和私有介绍图存储，并设置 `FLOATBOAT_OFFICIAL_USER_IDS` 为官方账号的用户 ID，多账号用英文逗号分隔。空白名单不允许任何账号上传。API Key 使用该账号在平台「设置 → API Keys」创建的账号密钥，不使用 NewAPI 模型密钥。
+后端先部署官方上传接口，配置 S3 和私有介绍图存储，并设置 `FLOATBOAT_OFFICIAL_USER_IDS` 为官方账号的用户 ID，多账号用英文逗号分隔。空白名单不允许任何账号上传。API Key 使用该账号在平台「设置 → API Keys」创建的账号密钥，不使用 NewAPI 模型密钥。
 
 在 GitHub 仓库 Settings → Secrets and variables → Actions 配置：
 
 | 类型 | 名称 | 值 |
 | --- | --- | --- |
 | Variable | `FLOATBOAT_UPLOAD_ENABLED` | `true` |
-| Variable | `FLOATBOAT_UPLOAD_URL` | 已部署接口的完整 HTTPS 地址，例如 `https://example.com/api/workbenches/upload` |
+| Secret | `FLOATBOAT_UPLOAD_URL` | 从安全配置注入已部署接口的完整 HTTPS 地址 |
 | Secret | `FLOATBOAT_UPLOAD_API_KEY` | 白名单官方账号的有效平台 API Key |
 
-未开启时仍正常生成 GitHub Artifacts。开启后缺少地址、密钥、后端白名单或存储配置会使上传作业失败，已生成的 GitHub 产物仍可下载。上传脚本不跟随重定向、不输出凭证或后端原始错误正文。临时网络故障、HTTP 408/429/5xx 最多尝试 3 次；401/403 等授权错误立即失败。
+实际接口域名和路径与密钥一样保存在 Secrets 中，不写入工作流、仓库文档、产物或日志，也不使用普通 Actions Variable。若此前配置过同名 Variable，迁移到 Secret 后删除该 Variable。
+
+未开启时仍正常生成 GitHub Artifacts。开启后缺少地址、密钥、后端白名单或存储配置会使上传作业失败，已生成的 GitHub 产物仍可下载。上传脚本不跟随重定向、不输出接口地址、凭证或后端原始错误正文。临时网络故障、HTTP 408/429/5xx 最多尝试 3 次；401/403 等授权错误立即失败。
 
 接口将 `.fbworkbench` 和介绍图保存为官方账号的上传资料，并返回文件身份与媒体引用。它不自动审核或公开上架；平台已有的作者介绍和截图展示仍使用正常的发布审核流程。当前仓库应用未统一选择发布许可证，上传成功不代表通过商店的许可证和发布要求。
 
