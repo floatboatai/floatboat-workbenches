@@ -1,0 +1,10 @@
+import { createWorkbenchServer } from "../../sdk/runtime.mjs";
+import { registerAppRoute } from "./app-route";
+import { registerRoutes } from "./routes";
+import { designValue } from "../contracts/design";
+import { registerDesignRoutes } from "./design-routes";
+const app = await createWorkbenchServer(import.meta.url);
+registerAppRoute(app);
+registerRoutes(app, designValue);
+registerDesignRoutes(app);
+await app.listen();

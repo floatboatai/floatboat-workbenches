@@ -1,0 +1,24 @@
+{
+  "version": "0.5.0",
+  "build": "passed",
+  "tests": 8,
+  "browser": "passed",
+  "autosave": "passed",
+  "workingDraftRecovery": "passed",
+  "nativeEngine": "OpenPencil 0.16.0 SceneGraph, native FIG codec and SVG export",
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "package": "passed",
+  "screenshot": {
+    "path": "../../docs/screenshots/openpencil.png",
+    "dimensions": [
+      1440,
+      1000
+    ],
+    "sha256": "4d4471197e9fee67c626b9a80cfe34f6ae57b3dc824c662c416b7937ed9e51bc"
+  },
+  "limitations": [
+    "Scoped component drafting, not complete upstream GUI",
+    "Advanced FIG/CanvasKit parity and external Figma import unverified"
+  ]
+}

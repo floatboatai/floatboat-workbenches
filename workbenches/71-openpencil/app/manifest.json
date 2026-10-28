@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.dd0a8c7e-4f52-4434-b48c-92561cc2070b",
+  "registryName": "openpencil-studio",
+  "name": "组件制图 · OpenPencil",
+  "description": "原生FIG图层编辑、画板预览与设计交付",
+  "version": "0.5.0",
+  "changelog": "使用OpenPencil原生文档核心编辑FIG图层，自动保存完整文档与属性草稿，导出FIG与SVG。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}
