@@ -71,12 +71,15 @@
     "version": "0.5.0",
     "appId": "workbench.dce85ea4-7041-4aa6-99fc-993ff4d08ceb",
     "filename": "62-hyperframes-0.5.0.fbworkbench",
-    "bytes": 52744,
-    "sha256": "ff050a26c0e1f1aa8f7d09e55d37da6ba18b19e38b525a8b8ff94bb7d22aad47",
+    "bytes": 55895,
+    "sha256": "84ef2f7ceecfb19091a9a01f6aa3a6fe4f3795d534e99f9d91ebb20e7505521d",
     "crc": "passed",
-    "sourceFilesMatched": 32,
-    "assetFilesMatched": 1,
+    "sourceFilesMatched": 33,
+    "assetFilesMatched": 2,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-hyperframes/hyperframes-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-hyperframes/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

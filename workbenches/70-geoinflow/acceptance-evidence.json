@@ -48,12 +48,15 @@
     "version": "0.5.0",
     "appId": "workbench.adb4b4ec-7b70-4b75-86e1-55b9532c0255",
     "filename": "70-geoinflow-0.5.0.fbworkbench",
-    "bytes": 89701,
-    "sha256": "7fa5cf7c4bb7fa20b562450015664bad8a2ae95ab11ba8f92e474ff7fe434e73",
+    "bytes": 92067,
+    "sha256": "aef62b02c70b76f275db64cbf820bb1862d2cef2272cb95a6569325c75c18d91",
     "crc": "passed",
-    "sourceFilesMatched": 39,
+    "sourceFilesMatched": 41,
     "assetFilesMatched": 2,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-geoinflow/geoinflow-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-geoinflow/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

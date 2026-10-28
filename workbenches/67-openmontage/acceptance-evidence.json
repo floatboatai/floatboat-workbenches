@@ -74,12 +74,15 @@
     "version": "0.5.0",
     "appId": "workbench.289e934c-fb6d-4354-a757-3f8d81327fd8",
     "filename": "67-openmontage-0.5.0.fbworkbench",
-    "bytes": 63456,
-    "sha256": "9d6aac0cd51e39c3c6cfd8ad9f83134bee74037445ebaa9fbf5d7f4b4d99fac0",
+    "bytes": 66696,
+    "sha256": "135cda916b875437deb1ac7ec9d53b1e34b8defba6b68db4c9bd70a711aa599b",
     "crc": "passed",
-    "sourceFilesMatched": 36,
-    "assetFilesMatched": 1,
+    "sourceFilesMatched": 37,
+    "assetFilesMatched": 2,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-openmontage/openmontage-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-openmontage/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

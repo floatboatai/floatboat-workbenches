@@ -70,12 +70,15 @@
     "version": "0.5.0",
     "appId": "workbench.72ac1e9f-d1e4-4764-b108-cd5d20bc31bc",
     "filename": "68-deerflow-0.5.0.fbworkbench",
-    "bytes": 80367,
-    "sha256": "88e963291a338035c798b5372919552d9941d4dc0abfb0c33dfd7086367850e7",
+    "bytes": 81460,
+    "sha256": "19312f69a418493fc5304e130e53535dd0e2a9e7ff3d2f2bba354cc96f029315",
     "crc": "passed",
-    "sourceFilesMatched": 41,
+    "sourceFilesMatched": 42,
     "assetFilesMatched": 3,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-deerflow/deerflow-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-deerflow/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

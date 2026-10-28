@@ -85,12 +85,15 @@
     "version": "0.5.0",
     "appId": "workbench.bceedbaf-e0c0-4bbc-94c8-c219f83db6d6",
     "filename": "69-mirofish-0.5.0.fbworkbench",
-    "bytes": 71200,
-    "sha256": "2e998ad3175eaa67d399895e0a1c9cec1eff37d68e6841b29ba729aed4125ccc",
+    "bytes": 75446,
+    "sha256": "4a0362e52cc4dc378c9c455367a294bf3eb7d476fd8ea3e0f0e757f545d37430",
     "crc": "passed",
-    "sourceFilesMatched": 37,
-    "assetFilesMatched": 1,
+    "sourceFilesMatched": 38,
+    "assetFilesMatched": 2,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-mirofish/mirofish-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-mirofish/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

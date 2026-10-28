@@ -47,12 +47,15 @@
     "version": "0.5.0",
     "appId": "workbench.a3667b34-10cf-487d-8b1f-8790641ff94d",
     "filename": "63-graphify-0.5.0.fbworkbench",
-    "bytes": 56137,
-    "sha256": "664bce8a776c1cbfb1c92af2e44e6dd75e5edf8a23e5e89bc5e2269444f45053",
+    "bytes": 59513,
+    "sha256": "2ea86ec05e6cfc334a47aa092282226f2f55766bd2b7d66fb00ae4e718a00a6c",
     "crc": "passed",
-    "sourceFilesMatched": 34,
-    "assetFilesMatched": 3,
+    "sourceFilesMatched": 35,
+    "assetFilesMatched": 4,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-graphify/graphify-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-graphify/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

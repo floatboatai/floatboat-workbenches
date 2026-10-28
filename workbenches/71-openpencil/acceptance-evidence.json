@@ -39,12 +39,15 @@
     "version": "0.5.0",
     "appId": "workbench.dd0a8c7e-4f52-4434-b48c-92561cc2070b",
     "filename": "71-openpencil-0.5.0.fbworkbench",
-    "bytes": 90251,
-    "sha256": "454e86dd44547e6454f786ae4bdf7974e95fdac90903bcb498949051a5f01237",
+    "bytes": 91344,
+    "sha256": "ff19df726f6be9c155942976bedb24a65ba101b1ca95354163dffaddc053409e",
     "crc": "passed",
-    "sourceFilesMatched": 33,
+    "sourceFilesMatched": 34,
     "assetFilesMatched": 1,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-openpencil/openpencil-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-openpencil/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

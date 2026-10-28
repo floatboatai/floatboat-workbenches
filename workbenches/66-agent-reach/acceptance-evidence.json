@@ -106,12 +106,15 @@
     "version": "0.5.0",
     "appId": "workbench.659dd703-061a-42e9-8c32-5f9ba3847ac5",
     "filename": "66-agent-reach-0.5.0.fbworkbench",
-    "bytes": 55968,
-    "sha256": "634d3d97f419156039d187b23b4adc4fdce23d6a0087c9c0f39e6af54d9470c2",
+    "bytes": 59883,
+    "sha256": "29cce51010ef01790fcd96b30372f1c9beee7247db5416680aa3681bb09bcdaf",
     "crc": "passed",
-    "sourceFilesMatched": 34,
-    "assetFilesMatched": 1,
+    "sourceFilesMatched": 35,
+    "assetFilesMatched": 2,
     "businessData": "excluded",
-    "hostImport": "unverified"
+    "hostImport": "unverified",
+    "deliveryPath": "workbench-agent-reach/agent-reach-studio-0.5.0.fbworkbench",
+    "introductionFile": "workbench-agent-reach/presentation.json",
+    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
   }
 }

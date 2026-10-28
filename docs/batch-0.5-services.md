@@ -22,3 +22,5 @@
 DeerFlow和MiroFish直接连接官方独立部署，本批不另外提供完整上游部署。MiroFish须先在上游准备图谱、角色与模拟；DeerFlow须配置可用模型，默认名为gemini-3.8-flash。两项真实模型运行尚未验证。
 
 OpenPencil CanvasKit与FigCraft浏览器WASM路线不在当前验收中。用户确认客户端和模板可测试后，再按同一持久化与导出标准升级。
+
+每个`workbench-<slug>`交付目录还包含真实介绍图与`presentation.json`，包身份和图片摘要遵循新CI协议。原创封装许可为MIT，上游声明独立保留。包内配置指南说明外部服务入口，support目录提供服务源码与锁文件。
