@@ -1,8 +1,8 @@
 # 工作台实景截图
 
-真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。采集日期：2026-10-27。
+真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-28。
 
-既有26项保留历史采集版本；本批新增6项AI界面，其中LangGraph更新为0.4.1真实模型交付与已保存状态，其余5项为0.4.0。AI截图中的示例、真实引擎输出和未连接状态按项目验收记录区分。
+既有32项保留历史采集版本；本批新增12项0.5.0界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -38,5 +38,17 @@
 | [promptfoo.png](promptfoo.png) | 0.4.0 | 1440 × 1185 | 105.7 KiB | `5ab982dd8f1ab9830671fbf3ecfbcf76a5b5de9a99608e0c4b20da812134eb65` |
 | [faster-whisper.png](faster-whisper.png) | 0.4.0 | 1440 × 1392 | 145.7 KiB | `f662dd5659d280b5555fcb9a61abaefca01ac07541fccbcbf23bfa5195628d32` |
 | [presenton.png](presenton.png) | 0.4.0 | 1440 × 1206 | 185.5 KiB | `c26564d38a34c6620396e5d576d5e3ad0c098ab230597e1d7879003a4c1e70c3` |
+| [penpot.png](penpot.png) | 0.5.0 | 1440 × 1000 | 72.0 KiB | `6fa3f9dfe034acc01869d8f4cd8b40b057ee3e2f454ae52bba161db7b9c79412` |
+| [hyperframes.png](hyperframes.png) | 0.5.0 | 1440 × 1149 | 128.0 KiB | `c24389c51798d7e300f9bf2d37625f31c691628ddadf15705c2e7912f62258a4` |
+| [graphify.png](graphify.png) | 0.5.0 | 1440 × 1100 | 115.8 KiB | `d75280a48fe240d3e3187471d2670897a25630726ca7c16b95bfb1c9b2975ee1` |
+| [pageindex.png](pageindex.png) | 0.5.0 | 1440 × 1518 | 163.1 KiB | `2dc1c47f5b2419e6b8fefdc236d76efd24f5e5b00a1577b63b7314b63caa7964` |
+| [deeptutor.png](deeptutor.png) | 0.5.0 | 1440 × 1551 | 207.0 KiB | `bb937f5a98f7188afa384a77b6114e362b167c28cad7538d8fa85d91e31b587b` |
+| [agent-reach.png](agent-reach.png) | 0.5.0 | 1440 × 1851 | 248.6 KiB | `0b68fceee763277ec63918b3c663107bb4593492c310f2d711d32c3f48d98fa4` |
+| [openmontage.png](openmontage.png) | 0.5.0 | 1440 × 1100 | 122.7 KiB | `5a11fac21433b61856c62cdb9707fe5e08be448d4d83669376aa534489050bbe` |
+| [deerflow.png](deerflow.png) | 0.5.0 | 1440 × 1337 | 155.1 KiB | `afe240962bb7b23a5cf75ce632210058acb93c9d4b001036cfdee1b568955e69` |
+| [mirofish.png](mirofish.png) | 0.5.0 | 1440 × 1393 | 225.9 KiB | `e09aeb3bc89814586761cfc908366a7c98f501e092cd919b5552856ba58b0b32` |
+| [geoinflow.png](geoinflow.png) | 0.5.0 | 1440 × 1941 | 176.0 KiB | `64f321a6fed1bfd363a50f9cfd80eed256bbf6474f2e99e1eba0415c2d5d9ce7` |
+| [openpencil.png](openpencil.png) | 0.5.0 | 1440 × 1000 | 108.4 KiB | `4d4471197e9fee67c626b9a80cfe34f6ae57b3dc824c662c416b7937ed9e51bc` |
+| [figcraft.png](figcraft.png) | 0.5.0 | 1440 × 1140 | 411.2 KiB | `0db8e7c7efa021dd91a04723e88f74f2dee83e9e0b79dcfe1ca6487f397d167f` |
 
-共32张，合计 4.28 MiB。
+共44张，合计 6.37 MiB。

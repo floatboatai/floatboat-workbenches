@@ -64,5 +64,18 @@
   },
   "packageSha256": "a0f535f0d1cd5b50ccd5c58399087d25533bc28b565542d676b917f8992bf8f7",
   "launchNavigationDuringDelayedSave": "passed; old/new briefs preserved, brief/model inputs disabled",
-  "noServicePrerequisites": "passed; run creation disabled and setup prerequisites visible"
+  "noServicePrerequisites": "passed; run creation disabled and setup prerequisites visible",
+  "integratedPackage": {
+    "directory": "workbenches/68-deerflow",
+    "version": "0.5.0",
+    "appId": "workbench.72ac1e9f-d1e4-4764-b108-cd5d20bc31bc",
+    "filename": "68-deerflow-0.5.0.fbworkbench",
+    "bytes": 80367,
+    "sha256": "88e963291a338035c798b5372919552d9941d4dc0abfb0c33dfd7086367850e7",
+    "crc": "passed",
+    "sourceFilesMatched": 41,
+    "assetFilesMatched": 3,
+    "businessData": "excluded",
+    "hostImport": "unverified"
+  }
 }

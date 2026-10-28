@@ -58,5 +58,18 @@
     "missing-original recovery UI accepts matching PDF and preserves note and raw JSON through reload",
     "project transition disables edits while awaiting old document save",
     "no automatic model calls or runtime errors"
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/64-pageindex",
+    "version": "0.5.0",
+    "appId": "workbench.a24c7c1e-6443-45ab-9036-36ee9faf22ed",
+    "filename": "64-pageindex-0.5.0.fbworkbench",
+    "bytes": 61115,
+    "sha256": "4e6cfd3df62968a33dc3754225ab0bf5ba749c25672a719cafaa228aa635d7a5",
+    "crc": "passed",
+    "sourceFilesMatched": 34,
+    "assetFilesMatched": 2,
+    "businessData": "excluded",
+    "hostImport": "unverified"
+  }
 }

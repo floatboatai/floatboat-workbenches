@@ -42,5 +42,18 @@
     "Sample logs are synthetic ordinary demonstration data",
     "No live tracking or model-answer attribution",
     "Native vendor catalogs and unchanged shared autosave exceed module-size advisory"
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/70-geoinflow",
+    "version": "0.5.0",
+    "appId": "workbench.adb4b4ec-7b70-4b75-86e1-55b9532c0255",
+    "filename": "70-geoinflow-0.5.0.fbworkbench",
+    "bytes": 89701,
+    "sha256": "7fa5cf7c4bb7fa20b562450015664bad8a2ae95ab11ba8f92e474ff7fe434e73",
+    "crc": "passed",
+    "sourceFilesMatched": 39,
+    "assetFilesMatched": 2,
+    "businessData": "excluded",
+    "hostImport": "unverified"
+  }
 }

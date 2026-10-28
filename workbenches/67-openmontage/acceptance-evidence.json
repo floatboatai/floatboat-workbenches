@@ -48,11 +48,11 @@
   "hostImport": "unverified",
   "screenshot": {
     "path": "../../docs/screenshots/openmontage.png",
-    "sha256": "5a11fac21433b61856c62cdb9707fe5e08be448d4d83669376aa534489050bbe",
     "dimensions": [
       1440,
       1100
-    ]
+    ],
+    "sha256": "5a11fac21433b61856c62cdb9707fe5e08be448d4d83669376aa534489050bbe"
   },
   "recoveryImportRegression": {
     "at": "2026-10-28T04:36:28.014Z",
@@ -68,5 +68,18 @@
     "crcValid": true,
     "licenseIncluded": true,
     "businessDataExcluded": true
+  },
+  "integratedPackage": {
+    "directory": "workbenches/67-openmontage",
+    "version": "0.5.0",
+    "appId": "workbench.289e934c-fb6d-4354-a757-3f8d81327fd8",
+    "filename": "67-openmontage-0.5.0.fbworkbench",
+    "bytes": 63456,
+    "sha256": "9d6aac0cd51e39c3c6cfd8ad9f83134bee74037445ebaa9fbf5d7f4b4d99fac0",
+    "crc": "passed",
+    "sourceFilesMatched": 36,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified"
   }
 }

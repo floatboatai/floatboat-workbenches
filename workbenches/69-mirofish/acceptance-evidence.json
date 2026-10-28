@@ -26,11 +26,11 @@
   "navigationTransitionLocksEditing": true,
   "screenshot": {
     "path": "../../docs/screenshots/mirofish.png",
-    "sha256": "109864265eae1ba449bb9b54ba9131c926fb5830e20d563818acbd4bc3b69a83",
     "dimensions": [
       1440,
-      1218
-    ]
+      1393
+    ],
+    "sha256": "e09aeb3bc89814586761cfc908366a7c98f501e092cd919b5552856ba58b0b32"
   },
   "package": {
     "name": "mirofish-studio-0.5.0-run-control.fbworkbench",
@@ -79,5 +79,18 @@
       1440,
       1393
     ]
+  },
+  "integratedPackage": {
+    "directory": "workbenches/69-mirofish",
+    "version": "0.5.0",
+    "appId": "workbench.bceedbaf-e0c0-4bbc-94c8-c219f83db6d6",
+    "filename": "69-mirofish-0.5.0.fbworkbench",
+    "bytes": 71200,
+    "sha256": "2e998ad3175eaa67d399895e0a1c9cec1eff37d68e6841b29ba729aed4125ccc",
+    "crc": "passed",
+    "sourceFilesMatched": 37,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified"
   }
 }

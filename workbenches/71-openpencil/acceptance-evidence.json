@@ -33,5 +33,18 @@
     "allVisibleEditFieldsDisabled": true,
     "oldAndNewDocumentsPreserved": true,
     "sharedAutosaveChanged": false
+  },
+  "integratedPackage": {
+    "directory": "workbenches/71-openpencil",
+    "version": "0.5.0",
+    "appId": "workbench.dd0a8c7e-4f52-4434-b48c-92561cc2070b",
+    "filename": "71-openpencil-0.5.0.fbworkbench",
+    "bytes": 90251,
+    "sha256": "454e86dd44547e6454f786ae4bdf7974e95fdac90903bcb498949051a5f01237",
+    "crc": "passed",
+    "sourceFilesMatched": 33,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified"
   }
 }

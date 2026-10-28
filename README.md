@@ -6,9 +6,9 @@
 
 ## 当前进度
 
-当前批次 **0.4.0** · **32 / 61 个工作台已完成本地功能验收**，其余29个为计划项目。新增6个AI工作台中，LangGraph已更新至0.4.1，其余5个为0.4.0，既有26个保留0.3.0版本与验收记录。Floatboat客户端导入尚未实测。
+当前批次 **0.5.0** · **44 / 72 个工作台已完成本地功能验收**，其余28个为计划项目。本批转换9个X选题及OpenPencil、FigCraft、Penpot，共12项。Floatboat客户端导入尚未实测。
 
-本批在6个独立worktree分批并行实现。自动保存、未完成草稿、冲突与容量边界是共同验收项；界面按产品任务分别设计。AI引擎、模型和外部服务的验证范围单列在[0.4.0验收](docs/release-0.4.0.md)，配置方式见[AI服务说明](docs/ai-services.md)。
+在4个独立worktree并行实现，最多主代理加3个子代理同时工作。每项均验证自动保存、未完成草稿、恢复稿回导、冲突和产品专属布局；真实引擎与服务契约的区别见[0.5.0验收](docs/release-0.5.0.md)，启动条件见[本批服务说明](docs/batch-0.5-services.md)。OpenPencil的CanvasKit画布升级等待客户端和模板WASM支持；现有原生FIG/SceneGraph流程可用。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
@@ -44,6 +44,18 @@
 | [Promptfoo](workbenches/59-promptfoo/) | 真实评测结果矩阵、基线、人工复核、限定套件执行器与CSV/JSON导出 | 用例×版本矩阵与结果对照 |
 | [faster-whisper](workbenches/60-faster-whisper/) | 音频保存/回听、真实CPU转写、字幕时间编辑与SRT/VTT/完整项目导出 | 暗色波形、字幕行与任务队列 |
 | [Presenton](workbenches/61-presenton/) | 资料、大纲、页序、备注、审阅、便携稿与异步制作服务连接器 | 逐页缩略轨、演示舞台与资料简报 |
+| [Penpot](workbenches/44-penpot/) | 颜色、字体、组件样本与交付说明，原生Penpot归档及CSS导出 | 设计资产样本册与色彩、字体分页 |
+| [HyperFrames](workbenches/62-hyperframes/) | 镜头文字与构图、时间线、HyperFrames HTML和真实MP4渲染 | 暗色动效舞台、镜头轨与输出队列 |
+| [Graphify](workbenches/63-graphify/) | 真实AST抽取、原生图谱、关系路径、布局与审阅笔记 | 知识地图、符号目录与关系检查器 |
+| [PageIndex](workbenches/64-pageindex/) | PDF章节与原页、便笺、Gemini 3.8问答和逐字页码引用 | 章节目录、纸张原页与审阅便笺 |
+| [DeepTutor](workbenches/65-deeptutor/) | 讲义、真实Host出题、上游批改与复习排程、课程导出 | 对页练习本、答题区与复习清单 |
+| [Agent-Reach](workbenches/66-agent-reach/) | GitHub、网页、V2EX来源采集、去重收藏、摘录与审阅导出 | 来源采集台、阅读正文与摘录夹 |
+| [OpenMontage](workbenches/67-openmontage/) | 上传原片、入出点、镜头复核、上游组接和MP4交付 | 分镜制作单、原片预览与成片架 |
+| [DeerFlow](workbenches/68-deerflow/) | 研究提交、原生线程运行查询、来源复核和报告交付 | 研究进度、交付纸张与来源证据页 |
+| [MiroFish](workbenches/69-mirofish/) | 已准备模拟的启动/停止、状态核对、原生动作与人工复核 | 角色目录、轮次时间线与动作复核 |
+| [GEOInflow](workbenches/70-geoinflow/) | 日志与内容清单、原生UA/引荐分类、覆盖分析和审阅导出 | 宽幅访问账本、范围筛选与逐页调查 |
+| [OpenPencil](workbenches/71-openpencil/) | 图层与属性、原生SceneGraph、FIG/SVG及完整项目导出 | 全幅组件画板、图层与属性工具 |
+| [FigCraft](workbenches/72-figcraft/) | 原生设计画板、文案校订、交付状态和PNG/SVG/PDF导出 | 暗色原型校样、画板序列与文案复核 |
 
 0.4.0批次统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
 
@@ -61,7 +73,7 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 
 ## 工作台实景
 
-以下为 32 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
+以下为 44 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
 
 | | |
 | --- | --- |
@@ -81,6 +93,12 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[LangExtract · 原文纸张与证据账本](workbenches/56-langextract/)**<br>[<img src="docs/screenshots/langextract.png" alt="LangExtract 工作台实景" width="440">](workbenches/56-langextract/) | **[Docling · 结构轨、校样纸张与表格检查器](workbenches/57-docling/)**<br>[<img src="docs/screenshots/docling.png" alt="Docling 工作台实景" width="440">](workbenches/57-docling/) |
 | **[LangGraph.js · 三站复核流程与运行账本](workbenches/58-langgraph/)**<br>[<img src="docs/screenshots/langgraph.png" alt="LangGraph.js 工作台实景" width="440">](workbenches/58-langgraph/) | **[Promptfoo · 用例×版本矩阵与结果对照](workbenches/59-promptfoo/)**<br>[<img src="docs/screenshots/promptfoo.png" alt="Promptfoo 工作台实景" width="440">](workbenches/59-promptfoo/) |
 | **[faster-whisper · 暗色波形、字幕行与任务队列](workbenches/60-faster-whisper/)**<br>[<img src="docs/screenshots/faster-whisper.png" alt="faster-whisper 工作台实景" width="440">](workbenches/60-faster-whisper/) | **[Presenton · 逐页缩略轨、演示舞台与资料简报](workbenches/61-presenton/)**<br>[<img src="docs/screenshots/presenton.png" alt="Presenton 工作台实景" width="440">](workbenches/61-presenton/) |
+| **[Penpot · 设计资产样本册与色彩、字体分页](workbenches/44-penpot/)**<br>[<img src="docs/screenshots/penpot.png" alt="Penpot 工作台实景" width="440">](workbenches/44-penpot/) | **[HyperFrames · 暗色动效舞台、镜头轨与输出队列](workbenches/62-hyperframes/)**<br>[<img src="docs/screenshots/hyperframes.png" alt="HyperFrames 工作台实景" width="440">](workbenches/62-hyperframes/) |
+| **[Graphify · 知识地图、符号目录与关系检查器](workbenches/63-graphify/)**<br>[<img src="docs/screenshots/graphify.png" alt="Graphify 工作台实景" width="440">](workbenches/63-graphify/) | **[PageIndex · 章节目录、纸张原页与审阅便笺](workbenches/64-pageindex/)**<br>[<img src="docs/screenshots/pageindex.png" alt="PageIndex 工作台实景" width="440">](workbenches/64-pageindex/) |
+| **[DeepTutor · 对页练习本、答题区与复习清单](workbenches/65-deeptutor/)**<br>[<img src="docs/screenshots/deeptutor.png" alt="DeepTutor 工作台实景" width="440">](workbenches/65-deeptutor/) | **[Agent-Reach · 来源采集台、阅读正文与摘录夹](workbenches/66-agent-reach/)**<br>[<img src="docs/screenshots/agent-reach.png" alt="Agent-Reach 工作台实景" width="440">](workbenches/66-agent-reach/) |
+| **[OpenMontage · 分镜制作单、原片预览与成片架](workbenches/67-openmontage/)**<br>[<img src="docs/screenshots/openmontage.png" alt="OpenMontage 工作台实景" width="440">](workbenches/67-openmontage/) | **[DeerFlow · 研究进度、交付纸张与来源证据页](workbenches/68-deerflow/)**<br>[<img src="docs/screenshots/deerflow.png" alt="DeerFlow 工作台实景" width="440">](workbenches/68-deerflow/) |
+| **[MiroFish · 角色目录、轮次时间线与动作复核](workbenches/69-mirofish/)**<br>[<img src="docs/screenshots/mirofish.png" alt="MiroFish 工作台实景" width="440">](workbenches/69-mirofish/) | **[GEOInflow · 宽幅访问账本、范围筛选与逐页调查](workbenches/70-geoinflow/)**<br>[<img src="docs/screenshots/geoinflow.png" alt="GEOInflow 工作台实景" width="440">](workbenches/70-geoinflow/) |
+| **[OpenPencil · 全幅组件画板、图层与属性工具](workbenches/71-openpencil/)**<br>[<img src="docs/screenshots/openpencil.png" alt="OpenPencil 工作台实景" width="440">](workbenches/71-openpencil/) | **[FigCraft · 暗色原型校样、画板序列与文案复核](workbenches/72-figcraft/)**<br>[<img src="docs/screenshots/figcraft.png" alt="FigCraft 工作台实景" width="440">](workbenches/72-figcraft/) |
 
 自动保存区分待保存、同步中、已保存、待完善草稿、离线和版本冲突。后台保存时仍可编辑；项目导入创建独立项目，未完成输入可恢复。浏览器本机缓存限定同一来源。
 

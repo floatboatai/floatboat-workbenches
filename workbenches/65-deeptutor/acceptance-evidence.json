@@ -56,5 +56,18 @@
       "imported working draft survives another refresh"
     ],
     "errors": []
+  },
+  "integratedPackage": {
+    "directory": "workbenches/65-deeptutor",
+    "version": "0.5.0",
+    "appId": "workbench.640daeae-f7a4-4d3d-a490-9bbb89d4f2ef",
+    "filename": "65-deeptutor-0.5.0.fbworkbench",
+    "bytes": 63799,
+    "sha256": "08f1619d16f25ecde7bf1fd0e7cd67fc40807db257f63265b7dcbe9356076853",
+    "crc": "passed",
+    "sourceFilesMatched": 38,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified"
   }
 }

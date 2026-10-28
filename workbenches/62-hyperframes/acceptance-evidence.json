@@ -35,11 +35,11 @@
   "hostImport": "unverified",
   "screenshot": {
     "path": "../../docs/screenshots/hyperframes.png",
-    "sha256": "c24389c51798d7e300f9bf2d37625f31c691628ddadf15705c2e7912f62258a4",
     "dimensions": [
       1440,
       1149
-    ]
+    ],
+    "sha256": "c24389c51798d7e300f9bf2d37625f31c691628ddadf15705c2e7912f62258a4"
   },
   "pendingAndRaceRegression": {
     "at": "2026-10-28T03:51:07.689Z",
@@ -65,5 +65,18 @@
     "crcValid": true,
     "licenseIncluded": true,
     "businessDataExcluded": true
+  },
+  "integratedPackage": {
+    "directory": "workbenches/62-hyperframes",
+    "version": "0.5.0",
+    "appId": "workbench.dce85ea4-7041-4aa6-99fc-993ff4d08ceb",
+    "filename": "62-hyperframes-0.5.0.fbworkbench",
+    "bytes": 52744,
+    "sha256": "ff050a26c0e1f1aa8f7d09e55d37da6ba18b19e38b525a8b8ff94bb7d22aad47",
+    "crc": "passed",
+    "sourceFilesMatched": 32,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified"
   }
 }

@@ -34,5 +34,18 @@
     "allVisibleEditFieldsDisabled": true,
     "oldAndNewDocumentsPreserved": true,
     "sharedAutosaveChanged": false
+  },
+  "integratedPackage": {
+    "directory": "workbenches/44-penpot",
+    "version": "0.5.0",
+    "appId": "workbench.07af8f06-daea-4b52-b569-042372604020",
+    "filename": "44-penpot-0.5.0.fbworkbench",
+    "bytes": 52126,
+    "sha256": "ae0bced2f585a1252a34e68113b1ffe02cab776e0d480d315cdfeeb874618718",
+    "crc": "passed",
+    "sourceFilesMatched": 32,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified"
   }
 }

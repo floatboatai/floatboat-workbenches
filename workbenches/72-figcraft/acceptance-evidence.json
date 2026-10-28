@@ -45,5 +45,18 @@
   "packagedSetupGuide": [
     "application/workbench-assets/assets/setup-guide/file"
   ],
-  "packageSha256": "4985d5632bd8bc848ba0bc7b66384be148ee07d4dfd3fc881c4b7ddd1a592add"
+  "packageSha256": "4985d5632bd8bc848ba0bc7b66384be148ee07d4dfd3fc881c4b7ddd1a592add",
+  "integratedPackage": {
+    "directory": "workbenches/72-figcraft",
+    "version": "0.5.0",
+    "appId": "workbench.15953789-9544-4762-bda6-2d9a501293fe",
+    "filename": "72-figcraft-0.5.0.fbworkbench",
+    "bytes": 89719,
+    "sha256": "1002d7c5db21debb6aa2609d742817b389e4e46987efb4b044d36e7a5b84c712",
+    "crc": "passed",
+    "sourceFilesMatched": 32,
+    "assetFilesMatched": 4,
+    "businessData": "excluded",
+    "hostImport": "unverified"
+  }
 }

@@ -100,5 +100,18 @@
     "sha256": "587618caa619ffc44a1f8384ffac27796f756b3eca59107df15f52c7a7990134",
     "crc": true,
     "sourceResourcesMatch": true
+  },
+  "integratedPackage": {
+    "directory": "workbenches/66-agent-reach",
+    "version": "0.5.0",
+    "appId": "workbench.659dd703-061a-42e9-8c32-5f9ba3847ac5",
+    "filename": "66-agent-reach-0.5.0.fbworkbench",
+    "bytes": 55968,
+    "sha256": "634d3d97f419156039d187b23b4adc4fdce23d6a0087c9c0f39e6af54d9470c2",
+    "crc": "passed",
+    "sourceFilesMatched": 34,
+    "assetFilesMatched": 1,
+    "businessData": "excluded",
+    "hostImport": "unverified"
   }
 }
