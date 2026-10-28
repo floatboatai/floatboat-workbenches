@@ -1,0 +1,162 @@
+{
+  "url": "http://127.0.0.1:62195/",
+  "evidence": [
+    {
+      "name": "native SVG nodes and automatic save",
+      "passed": true
+    },
+    {
+      "name": "native child sibling and editable text",
+      "passed": true
+    },
+    {
+      "name": "native deletion and undo",
+      "passed": true
+    },
+    {
+      "name": "branch navigation and native collapse",
+      "passed": true
+    },
+    {
+      "name": "native structure and custom themes",
+      "passed": true
+    },
+    {
+      "name": "native SVG export parsed and decoded",
+      "passed": true,
+      "decoded": {
+        "width": 1143,
+        "height": 476,
+        "textNodes": 18,
+        "painted": 22543
+      }
+    },
+    {
+      "name": "native JSON round trip creates new copy",
+      "passed": true
+    },
+    {
+      "name": "unfinished native contenteditable restores without blur",
+      "passed": true
+    },
+    {
+      "name": "unfinished context text and invalid JSON survive refresh",
+      "passed": true
+    },
+    {
+      "name": "actual cacheValue snapshot recovery import",
+      "passed": true
+    },
+    {
+      "name": "unsupported rich text rejected with exact original JSON retained",
+      "passed": true
+    },
+    {
+      "name": "delayed save leaves edits enabled and newest input intact",
+      "passed": true
+    },
+    {
+      "name": "server commit with lost response uses idempotent retry",
+      "passed": true
+    },
+    {
+      "name": "synchronous transition lock before delayed leave",
+      "passed": true
+    },
+    {
+      "name": "two window optimistic conflict and conflict reload",
+      "passed": true
+    },
+    {
+      "name": "375px keyboard reduced motion",
+      "passed": true,
+      "overflow": {
+        "width": 375,
+        "scroll": 375
+      }
+    },
+    {
+      "name": "no unexpected console or page errors",
+      "passed": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: net::ERR_FAILED"
+  ],
+  "status": "local-verified",
+  "version": "0.6.0",
+  "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "preview": "http://127.0.0.1:65216/",
+  "engine": {
+    "name": "simple-mind-map",
+    "version": "0.14.0-fix.3",
+    "license": "MIT",
+    "entry": "core index.js"
+  },
+  "tests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "check": "passed",
+  "extra": {
+    "literalText": "<img src=x onerror=\"window.__injected=1\">",
+    "svgUnsafeElements": 0,
+    "offlineNewCopy": true,
+    "pageErrors": []
+  },
+  "finalGeometry": {
+    "url": "http://127.0.0.1:65216/",
+    "drawerGeometryCenterError": 0,
+    "branchAfterDrawer": true,
+    "narrowOverflow": false,
+    "errors": []
+  },
+  "package": {
+    "path": "artifacts/simplemindmap-studio-0.6.0.fbworkbench",
+    "sha256": "5b1b042735ef3a1aa548b9f3c6a66076e85261f702bf6255a91271b125e41afc",
+    "crc": "passed",
+    "sourceCorrespondence": [
+      "application/DESIGN.md",
+      "application/ENGINEERING.md",
+      "application/LICENSE",
+      "application/REQUIREMENTS.md",
+      "application/index.html",
+      "application/migrations/0001_initial.sql",
+      "application/migrations/0002_projects.sql",
+      "application/migrations/0003_autosave.sql",
+      "application/package.json",
+      "application/pnpm-lock.yaml",
+      "application/src/contracts/autosave.ts",
+      "application/src/contracts/mindmap.ts",
+      "application/src/contracts/project.ts",
+      "application/src/server/autosave.ts",
+      "application/src/server/index.ts",
+      "application/src/server/store.ts",
+      "application/src/ui/App.tsx",
+      "application/src/ui/MindCanvas.tsx",
+      "application/src/ui/autosave-cache.ts",
+      "application/src/ui/autosave-client.ts",
+      "application/src/ui/connection.ts",
+      "application/src/ui/main.tsx",
+      "application/src/ui/native.d.ts",
+      "application/src/ui/requests.ts",
+      "application/src/ui/style.css",
+      "application/src/ui/workspace.tsx",
+      "application/tests/mindmap.test.ts",
+      "application/tsconfig.json",
+      "application/workbench-assets/assets/third-party-notices/NOTICE.md",
+      "application/workbench-assets/assets/third-party-notices/SIMPLE-MIND-MAP-LICENSE.txt"
+    ],
+    "normalizedMetadata": [
+      "application/manifest.json"
+    ],
+    "businessDataIncluded": false
+  },
+  "hostImport": "unverified",
+  "limitations": [
+    "Pure text nodes only; unsupported rich text, images, links, custom styles/plugins and upstream full config are rejected while original JSON is retained.",
+    "300 formal nodes, 30 levels, 4000 characters per node; 850KB formal model.",
+    "Rapid transitions may require the shared autosave cache-repair confirmation; browser acceptance explicitly confirmed it.",
+    "Not the separate desktop client or commercial plugins."
+  ]
+}

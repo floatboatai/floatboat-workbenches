@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.9e76d95a-721d-4819-947d-3dadae0b9c15",
+  "registryName": "simplemindmap-studio",
+  "name": "SimpleMindMap 思绪地图",
+  "description": "原生节点编排、分支导航与结构主题，自动保存导图和未完成输入",
+  "version": "0.6.0",
+  "changelog": "原生 SimpleMindMap 节点编辑、结构主题和 SVG/JSON，完整工作稿自动恢复。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "third-party-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "licenses"
+    }
+  ]
+}
