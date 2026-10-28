@@ -1,0 +1,360 @@
+/*
+ * Copyright 2024 The Ray Optics Simulation authors and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import BaseSceneObj from '../BaseSceneObj.js';
+import LineObjMixin from '../LineObjMixin.js';
+import i18next from 'i18next';
+import geometry from '../../geometry.js';
+import { parseFormula } from '../../formula/formula-parser.js';
+
+const DETECTOR_TYPE = {
+  name: 'Detector',
+  paramNames: [],
+  dag: parseFormula(
+    `
+      P = P_0s + P_0p;
+      k_1 = 0;
+      v_1 = sigma * P;
+      k_2 = 1;
+      v_2 = -d_0y * P;
+      k_3 = 2;
+      v_3 = -d_0x * P;
+    `,
+    ['d_0x', 'd_0y', 'P_0s', 'P_0p', 'sigma']
+  ),
+  writeCount: 3
+};
+
+const IRRADIANCE_MAP_DETECTOR_TYPE = {
+  name: 'Detector with irradiance map',
+  paramNames: ['L', 'h'],
+  dag: parseFormula(
+    `
+      P = P_0s + P_0p;
+      k_1 = 0;
+      v_1 = sigma * P;
+      k_2 = 1;
+      v_2 = -d_0y * P;
+      k_3 = 2;
+      v_3 = -d_0x * P;
+      k_4 = 3 + floor(u * L / h);
+      v_4 = sigma * P;
+    `,
+    ['d_0x', 'd_0y', 'P_0s', 'P_0p', 'sigma', 'u', 'L', 'h']
+  ),
+  writeCount: 4
+};
+
+/**
+ * The detector tool
+ * 
+ * Tools -> Other -> Detector
+ * @class
+ * @extends BaseSceneObj
+ * @memberof sceneObjs
+ * @property {Point} p1 - The first endpoint of the line segment.
+ * @property {Point} p2 - The second endpoint of the line segment.
+ * @property {boolean} twoSided - Whether to detect rays crossing in both directions.
+ * @property {boolean} irradMap - Whether to display the irradiance map.
+ * @property {number} binSize - The size of the bin for the irradiance map.
+ * @property {number} power - The measured power through the detector.
+ * @property {number} normal - The measured normal force through the detector.
+ * @property {number} shear - The measured shear force through the detector.
+ * @property {Array<number>} binData - The measured data for the irradiance map.
+ */
+class Detector extends LineObjMixin(BaseSceneObj) {
+  static type = 'Detector';
+  static isOptical = true;
+  static serializableDefaults = {
+    p1: null,
+    p2: null,
+    twoSided: true,
+    irradMap: false,
+    binSize: 1
+  };
+
+  constructor(scene, properties) {
+    super(scene, properties);
+
+    // Initialize the quantities to be measured
+    this.power = 0;
+    this.normal = 0;
+    this.shear = 0;
+    this.binData = null;
+    this.results = { values: null };
+  }
+
+  static getDescription(objData, scene, detailed = false) {
+    return i18next.t('main:tools.Detector.title');
+  }
+
+  static getPropertySchema(objData, scene) {
+    return [
+      ...super.getPropertySchema(objData, scene),
+      { key: 'twoSided', type: 'boolean', label: i18next.t('simulator:sceneObjs.Detector.twoSided') },
+      { key: 'irradMap', type: 'boolean', label: i18next.t('simulator:sceneObjs.Detector.irradMap') },
+      { key: 'binSize', type: 'number', label: i18next.t('simulator:sceneObjs.Detector.binSize') },
+    ];
+  }
+
+  populateObjBar(objBar) {
+    if (this.scene.colorMode !== 'default') {
+      var sInfo = i18next.t('simulator:sceneObjs.Detector.info.sNewColorModes');
+    } else {
+      var sInfo = i18next.t('simulator:sceneObjs.Detector.info.s');
+    }
+    objBar.setTitle(i18next.t('main:tools.Detector.title'));
+    objBar.createInfoBox('<ul><li>' + i18next.t('simulator:sceneObjs.Detector.info.P') + '</li><li>' + i18next.t('simulator:sceneObjs.Detector.info.Fperp') + '</li><li>' + i18next.t('simulator:sceneObjs.Detector.info.Fpar') + '</li><li>' + i18next.t('simulator:sceneObjs.Detector.info.irradiance') + '</li><li>' + i18next.t('simulator:sceneObjs.Detector.info.length') + '</li><li>' + i18next.t('simulator:sceneObjs.Detector.info.B') + '</li><li>' + sInfo + '</li><li>' + i18next.t('simulator:sceneObjs.Detector.info.truncation') + '</li></ul>');
+
+    objBar.createBoolean(i18next.t('simulator:sceneObjs.Detector.twoSided'), this.twoSided, function (obj, value) {
+      obj.twoSided = value;
+    });
+
+    objBar.createBoolean(i18next.t('simulator:sceneObjs.Detector.irradMap'), this.irradMap, function (obj, value) {
+      obj.irradMap = value;
+    }, null, true);
+
+    if (this.irradMap) {
+      objBar.createNumber(i18next.t('simulator:sceneObjs.Detector.binSize'), 0.01 * this.scene.lengthScale, 10 * this.scene.lengthScale, 0.01 * this.scene.lengthScale, this.binSize, function (obj, value) {
+        obj.binSize = value;
+      }, i18next.t('simulator:sceneObjs.common.lengthUnitInfo'));
+
+      const self = this;
+
+      objBar.createButton(i18next.t('simulator:sceneObjs.Detector.exportData'), function (obj) {
+        // Export the irradiance map to a CSV file
+        var binSize = obj.binSize;
+        var binNum = Math.ceil(Math.sqrt((obj.p2.x - obj.p1.x) * (obj.p2.x - obj.p1.x) + (obj.p2.y - obj.p1.y) * (obj.p2.y - obj.p1.y)) / binSize);
+        var binData = obj.binData;
+        var csv = "data:text/csv;charset=utf-8,";
+
+        // Write the header
+        csv += "Position,Irradiance\n";
+
+        // Write the data
+        for (var i = 0; i < binNum; i++) {
+          csv += i * binSize + "," + (binData[i] / binSize) + "\n";
+        }
+        var encodedUri = encodeURI(csv);
+
+        // Download the file
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", (self.scene.name || "irradiance_map") + ".csv");
+        document.body.appendChild(link);
+        link.click();
+      });
+    }
+  }
+
+  draw(canvasRenderer, isAboveLight, isHovered) {
+    this.updateMeasurementsFromPrimitiveResults();
+
+    const ctx = canvasRenderer.ctx;
+    const ls = canvasRenderer.lengthScale;
+
+    if (!isAboveLight) {
+      ctx.globalCompositeOperation = 'lighter';
+
+      ctx.strokeStyle = isHovered ? this.scene.highlightColorCss : canvasRenderer.rgbaToCssColor(this.scene.theme.detector.color);
+      ctx.lineWidth = this.scene.theme.detector.width * ls;
+      ctx.setLineDash(this.scene.theme.detector.dash.map(d => d * ls));
+      ctx.beginPath();
+      ctx.moveTo(this.p1.x, this.p1.y);
+      ctx.lineTo(this.p2.x, this.p2.y);
+      ctx.stroke();
+
+      if (!this.twoSided) {
+        const dx = this.p2.x - this.p1.x;
+        const dy = this.p2.y - this.p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+
+        if (len > 0) {
+          const perpX = -dy / len;
+          const perpY = dx / len;
+          const shiftDistance = this.scene.theme.detector.width * ls;
+          const dotLength = Math.max(this.scene.theme.detector.width * ls, 1);
+          const dotGap = Math.max(this.scene.theme.detector.width * 2 * ls, 2);
+
+          ctx.setLineDash([dotLength, dotGap]);
+          ctx.beginPath();
+          ctx.moveTo(this.p1.x - perpX * shiftDistance, this.p1.y - perpY * shiftDistance);
+          ctx.lineTo(this.p2.x - perpX * shiftDistance, this.p2.y - perpY * shiftDistance);
+          ctx.stroke();
+        }
+      }
+
+      ctx.setLineDash([]);
+
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      if (!this.scene.simulator?.isLightLayerSynced) {
+        // If the light layer is not synced (when the user disable auto refresh and modify some optical elements), gray out the readings to indicate that they are not up to date.
+        ctx.globalAlpha = 0.5;
+      }
+      ctx.globalCompositeOperation = 'lighter';
+      var len = Math.sqrt((this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y));
+
+      var accuracy = Math.max(-Math.floor(Math.log10(this.scene.simulator.totalTruncation)), 0);
+      if (this.scene.simulator.totalTruncation > 0 && accuracy <= 2) {
+        var str1 = "P=" + this.power.toFixed(accuracy) + "±" + this.scene.simulator.totalTruncation.toFixed(accuracy);
+        var str2 = "F⊥=" + this.normal.toFixed(accuracy) + "±" + this.scene.simulator.totalTruncation.toFixed(accuracy);
+        var str3 = "F∥=" + this.shear.toFixed(accuracy) + "±" + this.scene.simulator.totalTruncation.toFixed(accuracy);
+      } else {
+        var str1 = "P=" + this.power.toFixed(2);
+        var str2 = "F⊥=" + this.normal.toFixed(2);
+        var str3 = "F∥=" + this.shear.toFixed(2);
+      }
+
+      ctx.font = (this.scene.theme.detectorText.size * ls) + 'px ' + this.scene.theme.detectorText.font;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = isHovered ? this.scene.highlightColorCss : canvasRenderer.rgbaToCssColor(this.scene.theme.detectorText.color);
+      ctx.fillText(str1, this.p2.x, this.p2.y);
+      ctx.fillText(str2, this.p2.x, this.p2.y + 20 * ls);
+      ctx.fillText(str3, this.p2.x, this.p2.y + 40 * ls);
+      ctx.globalCompositeOperation = 'source-over';
+
+      if (this.irradMap && this.binData) {
+        // Define the unit vector of the x-axis of the plot (parallel to obj) and the y-axis of the plot (perpendicular to obj)
+        var len = Math.sqrt((this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y));
+        var ux = (this.p2.x - this.p1.x) / len;
+        var uy = (this.p2.y - this.p1.y) / len;
+        var vx = uy;
+        var vy = -ux;
+
+        // Draw the irradiance map
+        ctx.lineWidth = this.scene.theme.irradMapBorder.width * ls;
+        ctx.strokeStyle = isHovered ? this.scene.highlightColorCss : canvasRenderer.rgbaToCssColor(this.scene.theme.irradMapBorder.color);
+        ctx.fillStyle = canvasRenderer.rgbaToCssColor(this.scene.theme.irradMap.color);
+        ctx.beginPath();
+        ctx.moveTo(this.p1.x, this.p1.y);
+        for (var i = 0; i < this.binData.length; i++) {
+          ctx.lineTo(this.p1.x + ux * i * this.binSize + vx * this.binData[i] / this.binSize * 20 * ls * ls, this.p1.y + uy * i * this.binSize + vy * this.binData[i] / this.binSize * 20 * ls * ls);
+          ctx.lineTo(this.p1.x + ux * (i + 1) * this.binSize + vx * this.binData[i] / this.binSize * 20 * ls * ls, this.p1.y + uy * (i + 1) * this.binSize + vy * this.binData[i] / this.binSize * 20 * ls * ls);
+        }
+        ctx.lineTo(this.p2.x, this.p2.y);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  scale(scale, center) {
+    super.scale(scale, center);
+    return false; // It is unclear what properties should be scaled.
+  }
+
+  getPrimitives() {
+    if (!this.p1 || !this.p2 || (this.p1.x === this.p2.x && this.p1.y === this.p2.y)) {
+      return [];
+    }
+
+    const length = geometry.segmentLength(this);
+    const binCount = this.irradMap ? Math.ceil(length / this.binSize) : 0;
+    return [{
+      kind: 'detector',
+      curve: {
+        kind: 'lineSegment',
+        params: {
+          start: { x: this.p1.x, y: this.p1.y },
+          end: { x: this.p2.x, y: this.p2.y }
+        }
+      },
+      twoSided: this.twoSided,
+      detectorType: this.irradMap
+        ? IRRADIANCE_MAP_DETECTOR_TYPE
+        : DETECTOR_TYPE,
+      params: this.irradMap
+        ? { L: length, h: this.binSize }
+        : {},
+      resultSize: 3 + binCount,
+      result: this.results
+    }];
+  }
+
+  onSimulationStart() {
+    this.results.values = null;
+    this.power = 0;
+    this.normal = 0;
+    this.shear = 0;
+
+    if (this.irradMap) {
+      var binSize = this.binSize;
+      var binNum = Math.ceil(Math.sqrt((this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y)) / binSize);
+      var binData = [];
+      for (var i = 0; i < binNum; i++) {
+        binData[i] = 0;
+      }
+      this.binData = binData;
+    }
+  }
+
+  checkRayIntersects(ray) {
+    if (!this.twoSided && this.getIncidentType(ray) != 1) {
+      return null;
+    }
+
+    return this.checkRayIntersectsShape(ray);
+  }
+
+  onRayIncident(ray, rayIndex, incidentPoint) {
+    var rcrosss = (ray.p2.x - ray.p1.x) * (this.p2.y - this.p1.y) - (ray.p2.y - ray.p1.y) * (this.p2.x - this.p1.x);
+    var sint = rcrosss / Math.sqrt((ray.p2.x - ray.p1.x) * (ray.p2.x - ray.p1.x) + (ray.p2.y - ray.p1.y) * (ray.p2.y - ray.p1.y)) / Math.sqrt((this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y));
+    var cost = ((ray.p2.x - ray.p1.x) * (this.p2.x - this.p1.x) + (ray.p2.y - ray.p1.y) * (this.p2.y - this.p1.y)) / Math.sqrt((ray.p2.x - ray.p1.x) * (ray.p2.x - ray.p1.x) + (ray.p2.y - ray.p1.y) * (ray.p2.y - ray.p1.y)) / Math.sqrt((this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y));
+    ray.p2 = geometry.point(incidentPoint.x + ray.p2.x - ray.p1.x, incidentPoint.y + ray.p2.y - ray.p1.y);
+    ray.p1 = geometry.point(incidentPoint.x, incidentPoint.y);
+
+    this.power += Math.sign(rcrosss) * (ray.brightness_s + ray.brightness_p);
+    this.normal += Math.sign(rcrosss) * sint * (ray.brightness_s + ray.brightness_p);
+    this.shear -= Math.sign(rcrosss) * cost * (ray.brightness_s + ray.brightness_p);
+
+    if (this.irradMap && this.binData) {
+      var binSize = this.binSize;
+      var binNum = Math.ceil(Math.sqrt((this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y)) / binSize);
+      var binIndex = Math.floor(Math.sqrt((incidentPoint.x - this.p1.x) * (incidentPoint.x - this.p1.x) + (incidentPoint.y - this.p1.y) * (incidentPoint.y - this.p1.y)) / binSize);
+      this.binData[binIndex] += Math.sign(rcrosss) * (ray.brightness_s + ray.brightness_p);
+    }
+  }
+
+  getIncidentType(ray) {
+    var rcrosss = (ray.p2.x - ray.p1.x) * (this.p2.y - this.p1.y) - (ray.p2.y - ray.p1.y) * (this.p2.x - this.p1.x);
+    if (rcrosss > 0) {
+      return 1;
+    }
+    if (rcrosss < 0) {
+      return -1;
+    }
+    return NaN;
+  }
+
+  updateMeasurementsFromPrimitiveResults() {
+    const values = this.results.values;
+    if (!values) {
+      return;
+    }
+
+    this.power = values[0] ?? 0;
+    this.normal = values[1] ?? 0;
+    this.shear = values[2] ?? 0;
+    this.binData = this.irradMap
+      ? Array.from(values).slice(3)
+      : null;
+  }
+};
+
+export default Detector;

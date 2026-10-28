@@ -1,0 +1,240 @@
+{
+  "repository": "https://github.com/ricktu288/ray-optics",
+  "commit": "daf76772c73a85e1a2568c4e2e71613bba1fab77",
+  "version": "5.5.0",
+  "license": "Apache-2.0",
+  "files": [
+    {
+      "path": "src/core/CanvasRenderer.js",
+      "sha256": "2a04af35915d20c86457b732e14e45ca7fc6d8abdd1605045facb7ceb131a720",
+      "vendored": "notices/ray-optics/source/CanvasRenderer.js",
+      "vendoredSha256": "d76ba875dc04ec589e2a5140a1cc9ab33faf18c5471588681e25a9eebe276243",
+      "change": "ESM compatibility adapter: [(\"import * as C2S from 'canvas2svg';\", \"import C2S from 'canvas2svg';\")]"
+    },
+    {
+      "path": "src/core/Editor.js",
+      "sha256": "562b11c4e6c2894a57aa683f160bb3de8598497af8e328df19fae700a977c513",
+      "vendored": "notices/ray-optics/source/Editor.js",
+      "vendoredSha256": "57f1a42cc79e82ac463c8172794080324499496e10ee5ed325156fbf6b9bbe54",
+      "change": "ESM compatibility adapter: [(\"import * as C2S from 'canvas2svg';\", \"import C2S from 'canvas2svg';\")]; pointer canvas coordinates use getBoundingClientRect + scroll once per event"
+    },
+    {
+      "path": "src/core/FloatColorRenderer.js",
+      "sha256": "4ddec75b607db5bf54cc11b158bada8d754e2b4a5070ab971d5ac1d751d9c4ca",
+      "vendored": "notices/ray-optics/source/FloatColorRenderer.js",
+      "vendoredSha256": "4ddec75b607db5bf54cc11b158bada8d754e2b4a5070ab971d5ac1d751d9c4ca",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/Mouse.js",
+      "sha256": "9b6582c1e9ef40622f835d53f3db37321e8264270edcdd429b97dac0670ebe90",
+      "vendored": "notices/ray-optics/source/Mouse.js",
+      "vendoredSha256": "42665448402ac02ed0727662d58ba6e95dc4a8cf138d497704a15be24a803d5d",
+      "change": "ESM compatibility adapter: [(\"import Bezier from 'bezier-js';\", \"import { Bezier } from 'bezier-js';\")]"
+    },
+    {
+      "path": "src/core/Scene.js",
+      "sha256": "e079abcacbd900a1af690c7b7e0472fc34b271b6e5d7e0854973b02260453afc",
+      "vendored": "notices/ray-optics/source/Scene.js",
+      "vendoredSha256": "570f3b6988a00bd61bdf86a9c55e936b38ca850216aafef2b0837009eb3f90e1",
+      "change": "ESM compatibility adapter: [(\"obj.constructor === sceneObjs['ModuleObj']\", \"obj.constructor.type === 'ModuleObj'\")]"
+    },
+    {
+      "path": "src/core/Simulator.js",
+      "sha256": "7c546348972052af60e84c343cd722cf3915d66de99e09644fb1a8a67068ca08",
+      "vendored": "notices/ray-optics/source/Simulator.js",
+      "vendoredSha256": "4ba84d005f9c705baae05986ec06b188e8fa090e8ebe0670c228ecfed1ca27a9",
+      "change": "ESM compatibility adapter: [(\"import * as C2S from 'canvas2svg';\", \"import C2S from 'canvas2svg';\")]"
+    },
+    {
+      "path": "src/core/formula/dag-builder.js",
+      "sha256": "a4af6bbd8c853a1d8ea052f6ab57fbf9ddee1b3f99bf19de6d1eb66cad0300ac",
+      "vendored": "notices/ray-optics/source/formula/dag-builder.js",
+      "vendoredSha256": "a4af6bbd8c853a1d8ea052f6ab57fbf9ddee1b3f99bf19de6d1eb66cad0300ac",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/formula/dag-util.js",
+      "sha256": "707d2c91dc7b2d5618ce71a8d47856053092bc52532fb1e727908a65d81a574f",
+      "vendored": "notices/ray-optics/source/formula/dag-util.js",
+      "vendoredSha256": "707d2c91dc7b2d5618ce71a8d47856053092bc52532fb1e727908a65d81a574f",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/formula/formula-parser.js",
+      "sha256": "a72dc414fe2fd2bbbb23e33dd26469ec67f1a0c4b3b02a305b148194ff766e9f",
+      "vendored": "notices/ray-optics/source/formula/formula-parser.js",
+      "vendoredSha256": "a72dc414fe2fd2bbbb23e33dd26469ec67f1a0c4b3b02a305b148194ff766e9f",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/formula/formula-syntax.js",
+      "sha256": "0c02360c071d27de053aad164000044143a5f1121bb4f0d1d48e29861e3b7848",
+      "vendored": "notices/ray-optics/source/formula/formula-syntax.js",
+      "vendoredSha256": "0c02360c071d27de053aad164000044143a5f1121bb4f0d1d48e29861e3b7848",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/geometry.js",
+      "sha256": "5a6a91360f84af5c5acc96c20c485c5c1fdb831e4205bea313097718a34c3ee4",
+      "vendored": "notices/ray-optics/source/geometry.js",
+      "vendoredSha256": "5a6a91360f84af5c5acc96c20c485c5c1fdb831e4205bea313097718a34c3ee4",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs.js",
+      "sha256": "e60579abf10dbb95dd3607fc098810b5d082d975966fc00e5ee61c5461dad799",
+      "vendored": "notices/ray-optics/source/sceneObjs.js",
+      "vendoredSha256": "0541b493688c120558c42ced3293a2d9af45c46029ceef7391eb4661b21e3865",
+      "change": "restrict registry to twelve supported built-ins"
+    },
+    {
+      "path": "src/core/sceneObjs/BaseFilter.js",
+      "sha256": "4e27b2dc766dd7ddb64e528f298bf9bbe33360461e2fefa9749171cb18efed1d",
+      "vendored": "notices/ray-optics/source/sceneObjs/BaseFilter.js",
+      "vendoredSha256": "4e27b2dc766dd7ddb64e528f298bf9bbe33360461e2fefa9749171cb18efed1d",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/BaseGlass.js",
+      "sha256": "a5323ff6653a5cfe816e1670c8291013e35d963ed2183ef19459b90c3dc2fd17",
+      "vendored": "notices/ray-optics/source/sceneObjs/BaseGlass.js",
+      "vendoredSha256": "a5323ff6653a5cfe816e1670c8291013e35d963ed2183ef19459b90c3dc2fd17",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/BaseSceneObj.js",
+      "sha256": "b8b16111056ff423186c3d536462da0b7e454d7e1ff85032ec874804cfa9071a",
+      "vendored": "notices/ray-optics/source/sceneObjs/BaseSceneObj.js",
+      "vendoredSha256": "b8b16111056ff423186c3d536462da0b7e454d7e1ff85032ec874804cfa9071a",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/CircleObjMixin.js",
+      "sha256": "ee0e51623c1cef89140ffaf8c9101468df65f32734a14078ca9d5f35f418cc20",
+      "vendored": "notices/ray-optics/source/sceneObjs/CircleObjMixin.js",
+      "vendoredSha256": "ee0e51623c1cef89140ffaf8c9101468df65f32734a14078ca9d5f35f418cc20",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/LineObjMixin.js",
+      "sha256": "26d2593630197259f2fef738e9f37453d39c3868772d6ba90c3cadcee7bb85aa",
+      "vendored": "notices/ray-optics/source/sceneObjs/LineObjMixin.js",
+      "vendoredSha256": "26d2593630197259f2fef738e9f37453d39c3868772d6ba90c3cadcee7bb85aa",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/blocker/Blocker.js",
+      "sha256": "f55680e76d2796be346aafd4fbaa2c53719d17556de5bd14da5c7e639e8dc12b",
+      "vendored": "notices/ray-optics/source/sceneObjs/blocker/Blocker.js",
+      "vendoredSha256": "f55680e76d2796be346aafd4fbaa2c53719d17556de5bd14da5c7e639e8dc12b",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/glass/CircleGlass.js",
+      "sha256": "2c2f31c516e98eb2fdaec4487940e55e8c7fdbfdc4df979fc8a5abad272d1c15",
+      "vendored": "notices/ray-optics/source/sceneObjs/glass/CircleGlass.js",
+      "vendoredSha256": "2c2f31c516e98eb2fdaec4487940e55e8c7fdbfdc4df979fc8a5abad272d1c15",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/glass/IdealLens.js",
+      "sha256": "4a62ce60879516e0495868b4b4147b628cfb7d9dcdc13a8fbc1381870afc39f3",
+      "vendored": "notices/ray-optics/source/sceneObjs/glass/IdealLens.js",
+      "vendoredSha256": "4a62ce60879516e0495868b4b4147b628cfb7d9dcdc13a8fbc1381870afc39f3",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/glass/PlaneGlass.js",
+      "sha256": "2be7ca1df091394f9945719484ec759b53ad40985a124cec3051fc6cebdd1eda",
+      "vendored": "notices/ray-optics/source/sceneObjs/glass/PlaneGlass.js",
+      "vendoredSha256": "2be7ca1df091394f9945719484ec759b53ad40985a124cec3051fc6cebdd1eda",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/lightSource/Beam.js",
+      "sha256": "7d3f85519f553ce2e6e817b79dc92f5c518ea8a2b5a17293005289e1600549e4",
+      "vendored": "notices/ray-optics/source/sceneObjs/lightSource/Beam.js",
+      "vendoredSha256": "7d3f85519f553ce2e6e817b79dc92f5c518ea8a2b5a17293005289e1600549e4",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/lightSource/SingleRay.js",
+      "sha256": "c98db83dc49cc1a6d3811053e3d0327bd7fe5e54381873c6ee022f243404ca5b",
+      "vendored": "notices/ray-optics/source/sceneObjs/lightSource/SingleRay.js",
+      "vendoredSha256": "c98db83dc49cc1a6d3811053e3d0327bd7fe5e54381873c6ee022f243404ca5b",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/mirror/Mirror.js",
+      "sha256": "b8fea87e6bc6ccd34ab8d184d1f105cff6e0443c4310f0106b035db0e30c1e0e",
+      "vendored": "notices/ray-optics/source/sceneObjs/mirror/Mirror.js",
+      "vendoredSha256": "b8fea87e6bc6ccd34ab8d184d1f105cff6e0443c4310f0106b035db0e30c1e0e",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/other/Detector.js",
+      "sha256": "22fa6ceec75358002c5a7c2730e4e8e8c15d6bbc1227a96f9626ae00cc25cadb",
+      "vendored": "notices/ray-optics/source/sceneObjs/other/Detector.js",
+      "vendoredSha256": "22fa6ceec75358002c5a7c2730e4e8e8c15d6bbc1227a96f9626ae00cc25cadb",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/other/Ruler.js",
+      "sha256": "23924242a8988a658425c935fe10ffba11e4042949c05e4144e8732316ae29df",
+      "vendored": "notices/ray-optics/source/sceneObjs/other/Ruler.js",
+      "vendoredSha256": "23924242a8988a658425c935fe10ffba11e4042949c05e4144e8732316ae29df",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/other/TextLabel.js",
+      "sha256": "57e4bc0520fdf394d24f53f205d36c79b724ec398645d03f49c916de114536d3",
+      "vendored": "notices/ray-optics/source/sceneObjs/other/TextLabel.js",
+      "vendoredSha256": "57e4bc0520fdf394d24f53f205d36c79b724ec398645d03f49c916de114536d3",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/special/CropBox.js",
+      "sha256": "eacee6c310ba2cdc7d1733430266a7978b30492bbcca91cc565421c9619137b6",
+      "vendored": "notices/ray-optics/source/sceneObjs/special/CropBox.js",
+      "vendoredSha256": "eacee6c310ba2cdc7d1733430266a7978b30492bbcca91cc565421c9619137b6",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/sceneObjs/special/Handle.js",
+      "sha256": "5b76bf123e5a6e5837f907dfb350d19cc694048591a38e3af51ab9af0755cccb",
+      "vendored": "notices/ray-optics/source/sceneObjs/special/Handle.js",
+      "vendoredSha256": "5b76bf123e5a6e5837f907dfb350d19cc694048591a38e3af51ab9af0755cccb",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/simulationEngines/rayPower.js",
+      "sha256": "25da43f610e61a6625310ecfbcaeb2cd91287d137b387a54ea2ca3da10591b6a",
+      "vendored": "notices/ray-optics/source/simulationEngines/rayPower.js",
+      "vendoredSha256": "25da43f610e61a6625310ecfbcaeb2cd91287d137b387a54ea2ca3da10591b6a",
+      "change": "unchanged"
+    },
+    {
+      "path": "src/core/versionUpdate.js",
+      "sha256": "6b4337a0945820356fa80d1febc3d2ba75fade387df05293c4e6a8bbe751bc68",
+      "vendored": "notices/ray-optics/source/versionUpdate.js",
+      "vendoredSha256": "6b4337a0945820356fa80d1febc3d2ba75fade387df05293c4e6a8bbe751bc68",
+      "change": "unchanged"
+    }
+  ],
+  "adapter": "index.js exposes upstream Scene, Simulator, Editor and restricted built-ins; browser bundle generated with pinned template esbuild0.27.2",
+  "bundle": {
+    "path": "src/ui/vendor/ray-optics.js",
+    "sha256": "e55c59bc6f3831d0a755ceef0ecd962a3ea6d7489c48a7f8927a52a7f409694a",
+    "builder": "esbuild0.27.2 --bundle --platform=browser --format=esm",
+    "entry": "notices/ray-optics/source/index.js"
+  },
+  "dependencyLicenseNotes": {
+    "bezier-js": "6.1.4 README/source declare MIT but package/tag omit full license file; official current LICENSE.md blob 73f6bcd359e1acbf895c5c3d1c109d2822394f43",
+    "seedrandom": "3.0.5 full MIT copied from source header"
+  },
+  "adapterEntry": {
+    "path": "ray-optics/source/index.js",
+    "sha256": "3329c18af5d7d1f8e57b49bda6d926cc7643118a519ef122b3245b1f6ed07d37"
+  }
+}

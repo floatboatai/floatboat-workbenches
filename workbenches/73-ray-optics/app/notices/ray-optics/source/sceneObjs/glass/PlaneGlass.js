@@ -1,0 +1,204 @@
+/*
+ * Copyright 2024 The Ray Optics Simulation authors and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import BaseGlass from '../BaseGlass.js';
+import LineObjMixin from '../LineObjMixin.js';
+import i18next from 'i18next';
+import geometry from '../../geometry.js';
+import BaseFilter from '../BaseFilter.js';
+
+const HALF_PLANE_RADIUS_IN_LENGTH_SCALES = 1e6;
+
+/**
+ * Glass of the shape of a half-plane.
+ * 
+ * Tools -> Glass -> Half-plane
+ * @class
+ * @extends BaseGlass
+ * @memberof sceneObjs
+ * @property {Point} p1 - A point on the boundary of the half-plane.
+ * @property {Point} p2 - Another point on the boundary of the half-plane.
+ * @property {number} refIndex - The refractive index of the glass, or the Cauchy coefficient A of the glass if "Simulate Colors" is on.
+ * @property {number} cauchyB - The Cauchy coefficient B of the glass if "Simulate Colors" is on, in micrometer squared.
+ */
+class PlaneGlass extends LineObjMixin(BaseGlass) {
+  static type = 'PlaneGlass';
+  static isOptical = true;
+  static mergesWithGlass = true;
+  static serializableDefaults = {
+    p1: null,
+    p2: null,
+    refIndex: 1.5,
+    cauchyB: 0.004,
+    partialReflect: true
+  };
+
+  static getDescription(objData, scene, detailed = false) {
+    return i18next.t('main:meta.parentheses', { main: i18next.t('main:tools.categories.glass'), sub: i18next.t('main:tools.PlaneGlass.title') });
+  }
+
+  static getPropertySchema(objData, scene) {
+    return [
+      ...super.getPropertySchema(objData, scene),
+    ];
+  }
+
+  populateObjBar(objBar) {
+    objBar.setTitle(i18next.t('main:meta.parentheses', { main: i18next.t('main:tools.categories.glass'), sub: i18next.t('main:tools.PlaneGlass.title') }));
+    super.populateObjBar(objBar);
+  }
+
+  draw(canvasRenderer, isAboveLight, isHovered) {
+    const ctx = canvasRenderer.ctx;
+    const ls = canvasRenderer.lengthScale;
+
+    if (this.p1.x == this.p2.x && this.p1.y == this.p2.y) {
+      ctx.fillStyle = 'rgb(128,128,128)';
+      ctx.fillRect(this.p1.x - 1.5 * ls, this.p1.y - 1.5 * ls, 3 * ls, 3 * ls);
+      return;
+    }
+
+    var len = Math.sqrt((this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y));
+    var par_x = (this.p2.x - this.p1.x) / len;
+    var par_y = (this.p2.y - this.p1.y) / len;
+    var per_x = par_y;
+    var per_y = -par_x;
+
+    var sufficientlyLargeDistance = (Math.abs(this.p1.x + this.scene.origin.x) + Math.abs(this.p1.y + this.scene.origin.y) + ctx.canvas.height + ctx.canvas.width) / Math.min(1, this.scene.scale);
+
+    ctx.beginPath();
+    ctx.moveTo(this.p1.x - par_x * sufficientlyLargeDistance, this.p1.y - par_y * sufficientlyLargeDistance);
+    ctx.lineTo(this.p1.x + par_x * sufficientlyLargeDistance, this.p1.y + par_y * sufficientlyLargeDistance);
+    ctx.lineTo(this.p1.x + (par_x - per_x) * sufficientlyLargeDistance, this.p1.y + (par_y - per_y) * sufficientlyLargeDistance);
+    ctx.lineTo(this.p1.x - (par_x + per_x) * sufficientlyLargeDistance, this.p1.y - (par_y + per_y) * sufficientlyLargeDistance);
+
+    this.fillGlass(canvasRenderer, isAboveLight, isHovered);
+
+    if (isHovered) {
+      ctx.fillStyle = 'magenta';
+      ctx.fillRect(this.p1.x - 1.5 * ls, this.p1.y - 1.5 * ls, 3 * ls, 3 * ls);
+      ctx.fillRect(this.p2.x - 1.5 * ls, this.p2.y - 1.5 * ls, 3 * ls, 3 * ls);
+    }
+  }
+
+  getPrimitives() {
+    if (!this.p1 || !this.p2) return [];
+    const dx = this.p2.x - this.p1.x;
+    const dy = this.p2.y - this.p1.y;
+    const length = Math.hypot(dx, dy);
+    if (!(length > 0) || !Number.isFinite(length)) return [];
+
+    const radius =
+      HALF_PLANE_RADIUS_IN_LENGTH_SCALES * this.scene.lengthScale;
+    const tx = dx / length;
+    const ty = dy / length;
+    const center = {
+      x: (this.p1.x + this.p2.x) * 0.5,
+      y: (this.p1.y + this.p2.y) * 0.5
+    };
+    const start = { x: center.x - tx * radius, y: center.y - ty * radius };
+    const end = { x: center.x + tx * radius, y: center.y + ty * radius };
+    const diameter = {
+      kind: 'lineSegment',
+      params: { start, end }
+    };
+    // The directed boundary's glass side is its left side. Close that side
+    // with a large semicircle and absorb rays at the artificial far boundary.
+    const farArc = {
+      kind: 'circularArc',
+      params: { start: end, end: start, bulge: 1 }
+    };
+    return [
+      this.createGlassPrimitive([diameter, farArc]),
+      {
+        kind: 'surface',
+        curve: farArc,
+        twoSided: true,
+        surfaceType: BaseFilter.ABSORBER_SURFACE_TYPE,
+        params: {}
+      }
+    ];
+  }
+
+  checkMouseOver(mouse) {
+    let dragContext = {};
+    if (mouse.isOnPoint(this.p1) && geometry.distanceSquared(mouse.pos, this.p1) <= geometry.distanceSquared(mouse.pos, this.p2)) {
+      dragContext.part = 1;
+      dragContext.targetPoint = geometry.point(this.p1.x, this.p1.y);
+      return dragContext;
+    }
+    if (mouse.isOnPoint(this.p2)) {
+      dragContext.part = 2;
+      dragContext.targetPoint = geometry.point(this.p2.x, this.p2.y);
+      return dragContext;
+    }
+    if (mouse.isOnLine(this)) {
+      const mousePos = mouse.getPosSnappedToGrid();
+      dragContext.part = 0;
+      dragContext.mousePos0 = mousePos; // Mouse position when the user starts dragging
+      dragContext.mousePos1 = mousePos; // Mouse position at the last moment during dragging
+      dragContext.snapContext = {};
+      return dragContext;
+    }
+  }
+
+
+  checkRayIntersects(ray) {
+    var rp_temp = geometry.linesIntersection(ray, this);
+
+    if (geometry.intersectionIsOnRay(rp_temp, ray)) {
+      return rp_temp;
+    }
+  }
+
+  onRayIncident(ray, rayIndex, incidentPoint, surfaceMergingObjs) {
+
+    var rdots = (ray.p2.x - ray.p1.x) * (this.p2.x - this.p1.x) + (ray.p2.y - ray.p1.y) * (this.p2.y - this.p1.y);
+    var ssq = (this.p2.x - this.p1.x) * (this.p2.x - this.p1.x) + (this.p2.y - this.p1.y) * (this.p2.y - this.p1.y);
+    var normal = { x: rdots * (this.p2.x - this.p1.x) - ssq * (ray.p2.x - ray.p1.x), y: rdots * (this.p2.y - this.p1.y) - ssq * (ray.p2.y - ray.p1.y) };
+
+    var incidentType = this.getIncidentType(ray);
+    if (incidentType == 1) {
+      // From inside to outside
+      var n1 = this.getRefIndexAt(incidentPoint, ray);
+    } else if (incidentType == -1) {
+      // From outside to inside
+      var n1 = 1 / this.getRefIndexAt(incidentPoint, ray);
+    } else {
+      // Situation that may cause bugs (e.g. incident on an edge point)
+      // To prevent shooting the ray to a wrong direction, absorb the ray
+      return {
+        isAbsorbed: true,
+        isUndefinedBehavior: true
+      };
+    }
+
+    return this.refract(ray, rayIndex, incidentPoint, normal, n1, surfaceMergingObjs, ray.bodyMergingObj);
+  }
+
+  getIncidentType(ray) {
+    var rcrosss = (ray.p2.x - ray.p1.x) * (this.p2.y - this.p1.y) - (ray.p2.y - ray.p1.y) * (this.p2.x - this.p1.x);
+    if (rcrosss > 0) {
+      return 1; // From inside to outside
+    }
+    if (rcrosss < 0) {
+      return -1; // From outside to inside
+    }
+    return NaN;
+  }
+};
+
+export default PlaneGlass;

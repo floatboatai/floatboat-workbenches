@@ -1,0 +1,64 @@
+{
+  "version": "0.7.0",
+  "status": "local-verified",
+  "hostImport": "unverified",
+  "hostLlm": "not-used",
+  "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "nativeEngine": {
+    "repository": "ricktu288/ray-optics",
+    "version": "5.5.0",
+    "commit": "daf76772c73a85e1a2568c4e2e71613bba1fab77",
+    "path": "31 original core source files + narrow compatibility adapters; true Scene/Simulator/Editor"
+  },
+  "unitTests": 11,
+  "previewUrl": "http://127.0.0.1:53321/",
+  "browser": {
+    "checks": [
+      "native Scene/Simulator/Editor run under actual template CSP with nonzero detector result",
+      "unfinished parameter persists without blur and reload keeps model unchanged",
+      "explicit parameter application changes native geometry; PNG and native JSON exports are real and decodable",
+      "native canvas dragging and keyboard nudging autosave geometry across reload",
+      "actual downloaded recovery imports a new project with unapplied JSON intact",
+      "typing stays enabled during delayed receipt; newer work wins",
+      "lost committed receipt retries the identical mutation without duplicate project",
+      "375px keyboard/reduced-motion task controls stay reachable without overflow",
+      "held native CPU slice is cancelled on edit; late continuation cannot publish old readings or enable PNG",
+      "viewport resize invalidates computed result and export stamp",
+      "import suspends canvas synchronously and old movement callbacks cannot write into the new document",
+      "rejected save preserves edits and succeeds on explicit retry",
+      "two-window optimistic conflict retains stale writer and never overwrites confirmed project",
+      "brand-new offline draft survives leaving, reopening and later synchronization",
+      "actual pending recovery file above 1.95MB reimports the full confirmed 1.92MB draft as a new copy"
+    ],
+    "errors": [],
+    "largeRecoveryBytes": 3848198,
+    "scheduling": "Test clock forces real CPU processRays yielding; continuation is held then invoked after edit to verify result invalidation."
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/ray-optics.png",
+    "dimensions": [
+      1440,
+      1144
+    ],
+    "sha256": "21241c612929679ee5557c5d4d8345a05164733b4cdb45f1bb0e638b529c1d7c"
+  },
+  "limitations": [
+    "version5 and ten user object types only",
+    "no modules/background images/formula objects/WebGPU",
+    "no automatic simulation after restore",
+    "100 objects and 10000 processed ray segments; limit stop is incomplete",
+    "geometrical 2D teaching/review only",
+    "Floatboat client import unverified"
+  ],
+  "package": {
+    "file": "ray-optics-0.7.0.fbworkbench",
+    "bytes": 314655,
+    "sha256": "9306f38b58a15f5b59a7a7e53dcc2fa8601ab7763b9aaff8c8aa5084fbe5d49b",
+    "crc": "passed",
+    "sourceFilesMatched": 35,
+    "assetFilesMatched": 51,
+    "transferHashes": "passed",
+    "exportedSourceTests": 11,
+    "dataIncluded": false
+  }
+}
