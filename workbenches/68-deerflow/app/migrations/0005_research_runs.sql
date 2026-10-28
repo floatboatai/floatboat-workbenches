@@ -1,0 +1,2 @@
+CREATE TABLE deerflow_research_runs(id TEXT PRIMARY KEY,project_id TEXT NOT NULL,thread_id TEXT NOT NULL,prompt TEXT NOT NULL,model TEXT NOT NULL,origin TEXT NOT NULL,phase TEXT NOT NULL,run_id TEXT NOT NULL DEFAULT '',run_status TEXT NOT NULL DEFAULT '',error TEXT NOT NULL DEFAULT '',native TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
+CREATE INDEX deerflow_research_project ON deerflow_research_runs(project_id,created_at DESC);

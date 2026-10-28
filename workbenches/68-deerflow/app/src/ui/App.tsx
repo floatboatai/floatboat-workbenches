@@ -62,12 +62,14 @@ const statuses: Record<string, string> = {
   failed: "读取失败",
   interrupted: "读取中断",
 };
+import { ResearchRunner } from "./ResearchRunner";
+import { DEFAULT_MODEL } from "../contracts/run";
 export function App() {
   const p = useProjects(seed, researchValue, "城市步行导览 / 研究交付", {
     storageKey: "deerflow-review-v1",
     restoreDraftData: restoreResearch,
   });
-  const [tab, setTab] = useState("report"),
+  const [tab, setTab] = useState("research"),
     [editing, setEditing] = useState(true),
     [busy, setBusy] = useState(false),
     [syncs, setSyncs] = useState<Sync[]>([]),
@@ -217,6 +219,30 @@ export function App() {
       setBusy(false);
     }
   }
+  function applyNative(text: string, threadId: string) {
+    nativeValue(text);
+    p.setError("");
+    const d = dataRef.current;
+    const incoming = extractSources(text).map((s) => ({
+      ...s,
+      note: d.sources.find((x) => x.url === s.url)?.note ?? "",
+    }));
+    const manual = d.sources.filter(
+      (s) => s.origin === "手动添加" && !incoming.some((x) => x.url === s.url),
+    );
+    if (incoming.length + manual.length > 100)
+      throw new Error(
+        "合并后来源超过100项，请先导出并整理来源；原快照和报告均已保留。",
+      );
+    change((current) => ({
+      ...current,
+      native: text,
+      sources: [...incoming, ...manual],
+      threadId: threadId,
+      stage: "reviewing",
+    }));
+    p.setNotice("已载入新会话快照；人工报告未覆盖，来源需重新核验。");
+  }
   async function applySnapshot(id: string) {
     const key = epoch.current;
     setBusy(true);
@@ -227,27 +253,7 @@ export function App() {
         throw new Error("快照尚未完成。");
       nativeValue(snapshot.native);
       if (key !== epoch.current) return;
-      const d = dataRef.current;
-      const incoming = extractSources(snapshot.native).map((s) => ({
-        ...s,
-        note: d.sources.find((x) => x.url === s.url)?.note ?? "",
-      }));
-      const manual = d.sources.filter(
-        (s) =>
-          s.origin === "手动添加" && !incoming.some((x) => x.url === s.url),
-      );
-      if (incoming.length + manual.length > 100)
-        throw new Error(
-          "合并后来源超过100项，请先导出并整理来源；原快照和报告均已保留。",
-        );
-      change((current) => ({
-        ...current,
-        native: snapshot.native,
-        sources: [...incoming, ...manual],
-        threadId: snapshot.threadId,
-        stage: "reviewing",
-      }));
-      p.setNotice("已载入新会话快照；人工报告未覆盖，来源需重新核验。");
+      applyNative(snapshot.native, snapshot.threadId);
     } catch (e) {
       p.report(e);
     } finally {
@@ -461,7 +467,10 @@ export function App() {
           onOpen={(id) => void transition(() => p.open(id))}
         />
         <div className="header-actions">
-          <button disabled={!mutable || busy} onClick={() => void transition(() => p.fresh())}>
+          <button
+            disabled={!mutable || busy}
+            onClick={() => void transition(() => p.fresh())}
+          >
             <Plus size={14} />
             新建
           </button>
@@ -556,6 +565,7 @@ export function App() {
       </section>
       <nav className="view-tabs" aria-label="研究视图">
         {[
+          ["research", "发起研究"],
           ["report", "交付稿"],
           ["evidence", "来源证据"],
           ["archive", "会话与产物"],
@@ -578,6 +588,34 @@ export function App() {
         </button>
       </nav>
       <main id="report">
+        {tab === "research" && (
+          <ResearchRunner
+            projectId={p.current?.id ?? null}
+            documentKey={p.documentKey}
+            brief={p.data.brief}
+            model={
+              typeof p.draft.researchModel === "string"
+                ? p.draft.researchModel
+                : DEFAULT_MODEL
+            }
+            mutable={mutable && !busy}
+            configured={configured}
+            onBrief={(brief) => change((d) => ({ ...d, brief }))}
+            onModel={(researchModel) =>
+              p.setDraft((d) => ({ ...d, researchModel }))
+            }
+            save={() => p.save()}
+            onBusy={setBusy}
+            onError={p.report}
+            onCommand={(lastResearchId) =>
+              p.setDraft((d) => ({ ...d, lastResearchId }))
+            }
+            onApply={(text, threadId) => {
+              applyNative(text, threadId);
+              setTab("report");
+            }}
+          />
+        )}
         {tab === "report" && (
           <div className="report-layout">
             <section className="report-paper">
@@ -772,7 +810,10 @@ export function App() {
               }
             />
           </label>
-          <button disabled={!mutable || busy} onClick={() => void transition(() => applyJson())}>
+          <button
+            disabled={!mutable || busy}
+            onClick={() => void transition(() => applyJson())}
+          >
             作为新项目导入
           </button>
         </section>
@@ -783,10 +824,15 @@ export function App() {
         </span>
         {["offline", "draft", "conflict"].includes(p.autoState.phase) && (
           <>
-            <button disabled={!mutable} onClick={() => void p.save()}>重试保存</button>
+            <button disabled={!mutable} onClick={() => void p.save()}>
+              重试保存
+            </button>
             <button onClick={p.exportDraft}>导出恢复稿</button>
             {p.current && (
-              <button disabled={!mutable} onClick={() => void transition(() => p.open(p.current!.id))}>
+              <button
+                disabled={!mutable}
+                onClick={() => void transition(() => p.open(p.current!.id))}
+              >
                 打开服务器版本
               </button>
             )}

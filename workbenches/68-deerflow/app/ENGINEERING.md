@@ -5,3 +5,7 @@
 规范数据包含原生JSON文本、独立brief/人工Markdown报告、来源复核与版本状态。原生导出保留未知字段，读取过程中不执行tool_calls/计划/文件路径。服务端独立同步账本记录请求ID、线程ID、状态和快照；GET状态请求不产生远端写入，未知回执可查询原同步ID。只读适配器由DEERFLOW_URL和可选DEERFLOW_TOKEN配置，远程HTTPS，禁止重定向、限制响应和超时。没有把Host模型调用当作DeerFlowAgent运行。
 
 verification保存MIT上游序列化器原文，配固定langchain-core1.4.9验证消息与隐藏图片处理；这是格式验证，不是推理。浏览器使用ReactMarkdown禁用HTML，来源链接只接受HTTP(S)，状态字段按真实含义显示。共享SQLite/IndexedDB自动保存和冲突机制不改。
+
+研究运行使用独立模块research-runs/research-gateway与0005/0006迁移。SQLite存命令、固定thread_id、brief/model/origin、阶段、run_id/status、错误和结果。先写creating_thread再POST线程，验证metadata归属；先写submitting再POST run，传Idempotency-Key。启动时creating/submitting变unknown，不重发。GET runs匹配floatboat_operation_id恢复；已知run_id只GET对应run；成功读state作为独立快照。未知、pending/running阻止当前项目新命令，避免重复研究；人工报告独立。远端服务origin改变时不向新地址恢复旧任务。
+
+官方证据：thread_runs.py:985后台run立即返回；:1215列表、:1267详情；threads.py:959客户端指定线程ID且幂等；run_models.py的context与on_disconnect；services.py:2192读取model_name并验证模型白名单。verify_run_contract.py加载固定上游RunCreateRequest实际Pydantic模型，未运行Agent。HTTP契约样例与live部署验证分开记录。

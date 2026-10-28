@@ -45,8 +45,8 @@ export function safeUrl(v: string) {
   }
 }
 export function threadValue(v: unknown) {
-  const s = boundedText(v, 100);
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$/.test(s) || s.includes(".."))
+  const s = boundedText(v, 64);
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(s))
     throw new Error("请输入有效的DeerFlow会话编号。");
   return s;
 }

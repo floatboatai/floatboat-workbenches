@@ -1,7 +1,7 @@
 {
   "version": "0.5.0",
   "build": "passed",
-  "tests": 12,
+  "tests": 19,
   "browser": "passed",
   "autosave": "passed",
   "workingDraftRecovery": "passed",
@@ -11,7 +11,9 @@
     "nativeRoundtrip": "exact original JSON envelope retained",
     "httpSync": "explicit local contract fixture; real read-only request, durable ledger, lost receipt and report preservation verified",
     "liveResearch": "not-run",
-    "liveDeerFlowService": "unverified"
+    "liveDeerFlowService": "unverified",
+    "officialRunRequest": "Pinned official Pydantic RunCreateRequest validates actual background launch payload; no Agent execution",
+    "httpRun": "Explicit HTTP contract fixture: thread creation, background run, metadata matching, fixed Idempotency-Key, GET-only recovery and native state retrieval"
   },
   "hostLlm": "not-used",
   "hostImport": "unverified",
@@ -33,18 +35,34 @@
     "path": "../../docs/screenshots/deerflow.png",
     "dimensions": [
       1440,
-      1306
+      1337
     ],
-    "sha256": "4e64b3013d9fd9e74d04cea066af2ca4487e43fdfcac9a8bc373a3eb279f59af"
+    "sha256": "afe240962bb7b23a5cf75ce632210058acb93c9d4b001036cfdee1b568955e69"
   },
   "limitations": [
-    "Research review and delivery scope; no agent execution or model inference",
-    "HTTP state adapter tested against explicit contract fixture, not a live DeerFlow deployment",
-    "Artifact paths preserved; original artifact bytes not downloaded",
+    "Requires an existing configured DeerFlow Gateway, models, tools and authorization; live execution remains unverified",
+    "Cancel, human confirmation and interrupted-run continuation are handled in upstream DeerFlow",
+    "Original artifact bytes are not downloaded",
     "Floatboat source-package import unverified"
   ],
   "packagedSetupGuide": [
     "application/workbench-assets/assets/setup-guide/file"
   ],
-  "packageSha256": "aca05130add845b1980580d74296f055cadea3d0a6a80fd470640c685941e677"
+  "researchLifecycle": {
+    "explicitSubmission": true,
+    "defaultModel": "gemini-3.8-flash via official context.model_name",
+    "durableBeforeRemoteWrite": true,
+    "independentThreadPerCommand": true,
+    "activeProjectConstraint": true,
+    "unknownReceiptAutomaticallyResent": false,
+    "browserAndUpstreamLostReceipt": "passed; one thread POST and one run POST",
+    "unmatchedUnknown": "remains unknown; submission disabled; refresh does not POST upstream",
+    "importExecutesHistoricalCommands": false,
+    "reportPreservedOnResultLoad": true,
+    "modelAllowlistRejection": "passed",
+    "liveRun": "unverified"
+  },
+  "packageSha256": "a0f535f0d1cd5b50ccd5c58399087d25533bc28b565542d676b917f8992bf8f7",
+  "launchNavigationDuringDelayedSave": "passed; old/new briefs preserved, brief/model inputs disabled",
+  "noServicePrerequisites": "passed; run creation disabled and setup prerequisites visible"
 }
