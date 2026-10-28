@@ -107,6 +107,8 @@ pnpm test:tooling
 
 每个应用独立维护 manifest、依赖锁、SQLite 迁移、测试及验收记录。启动预览后使用终端打印的完整地址。生成的 `.fbworkbench` 位于该项目的 `artifacts/`，可通过 Floatboat 的「我的 → 工作台 → 导入工作台」导入。
 
+GitHub CI 会自动检查、测试并打包全部已验收工作台，产物同时包含真实介绍截图和 `presentation.json`。在 Actions 中下载对应 `workbench-<slug>`；配置官方账号后可自动上传后端。触发方式、配置及介绍图协议见[自动打包与官方上传](docs/ci-packages.md)。
+
 继续实现计划项目时运行 `node scripts/init-workbench.mjs <slug>`；缺少模板缓存会自动获取锁定版本，已存在的应用及身份不会被覆盖。然后按 `AGENTS.md` 补齐设计、业务代码和验收。批量命令与日志位置见 [开发说明](docs/batch-commands.md)。
 
 ## 许可
