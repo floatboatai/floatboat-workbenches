@@ -1,0 +1,27 @@
+{
+  "name": "local-workbench",
+  "private": true,
+  "version": "0.8.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --enable-source-maps dist/server/index.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "build:engine": "node src/rebuild-engine.mjs"
+  },
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "dependencies": {
+    "lucide-react": "0.562.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "lz-string": "1.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.2",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.3",
+    "esbuild": "0.27.2"
+  },
+  "license": "GPL-2.0-or-later"
+}

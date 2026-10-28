@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.9a20add2-4f04-44aa-b343-61f5374fc989",
+  "registryName": "circuitjs-studio",
+  "name": "CircuitJS1 工作台",
+  "description": "电路实验、示波器和实验记录",
+  "version": "0.8.0",
+  "changelog": "原生电路仿真、示波器、自动保存与实验记录。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "engine",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "engine"
+    },
+    {
+      "id": "notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    },
+    {
+      "id": "engine-source",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "engine-src"
+    },
+    {
+      "id": "license",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "LICENSE"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "workbench": "circuitjs",
+  "version": "0.8.0",
+  "upstream": {
+    "repository": "https://github.com/pfalstad/circuitjs1",
+    "commit": "e952e788a4135a693bfd4cee7883f9b3314e3e76",
+    "originalFilesVerified": 683
+  },
+  "license": "GPL-2.0-or-later",
+  "checkedAt": "2026-10-28",
+  "checks": {
+    "templateCheck": "passed",
+    "tests": {
+      "passed": 6,
+      "failed": 0
+    },
+    "sourcePackageTests": {
+      "node22": 6,
+      "linuxNode22": 6
+    },
+    "chromePrimaryFlow": "passed",
+    "unblurredParameterDraft": "passed",
+    "recoveryFileNewDocument": "passed",
+    "nativeXMLRoundTrip": "passed",
+    "nativeDC": {
+      "voltage": 2.5,
+      "current": 0.0025
+    },
+    "nativeRC": {
+      "time": 0.0010000000000000022,
+      "voltage": 3.1559966177751155,
+      "expected": 3.1606027941427928,
+      "tolerance": 0.015
+    },
+    "delayedAndLostAcknowledgement": "passed",
+    "optimisticConflict": "passed",
+    "offlineReload": "passed",
+    "brandNewOfflineSwitchAndReopen": "passed",
+    "nativeCanvasDragCreateAndUndo": "passed",
+    "parameterResetAndDragExportValidity": "passed",
+    "pngAndExperimentExport": "passed",
+    "viewport375": "passed",
+    "keyboardAndReducedMotion": "passed",
+    "resourceRelocationRebuild": "passed"
+  },
+  "package": {
+    "path": "circuitjs-0.8.0-verified.fbworkbench",
+    "bytes": 2030788,
+    "sha256": "77acb5d4dfab8b45ada8e905fa707b880a494b8a72d1c146ff6097b944604eb8",
+    "entries": 741,
+    "transferFiles": 740,
+    "originalFiles": 683,
+    "crc": true,
+    "transferHashes": true,
+    "resources": true,
+    "sourceIncluded": true,
+    "dataIncluded": false,
+    "license": "GPL-2.0-or-later",
+    "tests": {
+      "sourceNode": {
+        "exit": 0,
+        "counts": {
+          "tests": "6",
+          "pass": "6",
+          "fail": "0"
+        }
+      },
+      "rebuildNative": {
+        "exit": 0,
+        "counts": {}
+      },
+      "sourceLinux": {
+        "exit": 0,
+        "counts": {
+          "tests": "6",
+          "pass": "6",
+          "fail": "0"
+        }
+      },
+      "rebuildMatchesAfterPathNormalization": true,
+      "pathNormalization": "Only relocated resource paths and dependency path comments/module identifiers differ"
+    }
+  },
+  "hostImport": "unverified",
+  "hostModelCalls": "not applicable; capabilities empty",
+  "storePublication": "not eligible under current MIT-only release policy",
+  "screenshot": "../../docs/screenshots/circuitjs.png",
+  "limitations": [
+    "Basic circuit types, at most 256 top-level records; unsupported imports preserve original text and display a diagnostic.",
+    "Advanced scope property forms, floating scopes, custom slider editor and complex model/subcircuit/audio/service entries are disabled.",
+    "Native Scope settings and component state persist; waveform history does not. Restore starts paused.",
+    "Native spatial editing is not a fully screen-reader-driven interface.",
+    "Original imported unknown fields remain in original text; canonical native exports do not claim semantic preservation of unsupported extensions."
+  ],
+  "privateReproduction": [
+    "work/batch08/circuit-accept.mjs",
+    "work/batch08/circuit-extra.mjs",
+    "work/batch08/circuit-validity.mjs",
+    "work/batch08/circuit-verify-package.py"
+  ]
+}
