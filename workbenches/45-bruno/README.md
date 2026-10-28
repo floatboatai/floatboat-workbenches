@@ -1,13 +1,13 @@
-# Bruno 工作台
+# Bruno 接口调试台
 
-状态：计划中，尚未实现。
+原生 `.bru` 请求/集合编辑、明确点击 HTTP 执行、响应状态/头/正文/时间检查与完整工程导出。集合侧栏可收起，请求和响应对照；完整工作稿自动保存，包含未应用参数、无效源码和响应快照。
 
-目标：接口回归工作台：保存Bru集合、批量执行、展示失败与AI诊断
+使用官方 `@usebruno/lang@0.41.0` 解析/序列化。导入 `.bru`/`bruno.json` 文件或文件夹；原生集合 ZIP 解压后可重新导入。导出当前文件保留字节，完整工程和实际恢复稿均导入新副本。
 
-上游：https://github.com/usebruno/bruno
+`pnpm workbench prepare bruno` 后，在此目录运行 `pnpm dev -- --no-watch`。验证：`pnpm workbench:check`、`pnpm test`。打包：`pnpm run package`；Floatboat → My → Workbenches → Import workbench。默认包不含业务数据，客户端导入尚未验证。
 
-适配路线：研究复用开源解析、请求和集合模块，重做工作台UI及文件适配；CLI保留为独立执行环境时明确依赖
+执行边界：10 秒、64 KiB 响应正文、不自动跟随重定向或重发。脚本、tests、变量、认证/集合继承等仅保留原文并阻止运行；无环境秘密读取。手动输入和响应属于工程导出范围。完整说明见 [SETUP](app/SETUP.md)、[验收](ACCEPTANCE.md)。
 
-限制：完整产品依赖Electron及多包构建，不能直接导入；付费版本能力不等于MIT仓库全部提供
+[Bruno upstream](https://github.com/usebruno/bruno) · 原创集成采用范围限定 MIT，依赖保留各自许可。
 
-许可：MIT
+![接口调试台](../../docs/screenshots/bruno.png)

@@ -1,0 +1,79 @@
+{
+  "version": "0.6.0",
+  "status": "local-verified",
+  "hostImport": "unverified",
+  "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "nativeEngine": {
+    "@usebruno/lang": "0.41.0",
+    "nativeConverters": [
+      "bruToJsonV2",
+      "jsonToBruV2",
+      "collectionBruToJson"
+    ],
+    "fflate": "0.8.2"
+  },
+  "unitTests": 16,
+  "previewUrl": "http://127.0.0.1:59349/",
+  "browser": {
+    "checks": [
+      "official native parse/compose edits method URL headers query and body without network",
+      "real loopback POST / status body timing and header snapshot",
+      "refresh and receipt reconciliation never resend HTTP",
+      "native Bru and collection ZIP preserve exact source bytes",
+      "invalid native editor persists through refresh",
+      "actual snapshot recovery imports a new copy without replay",
+      "lost HTTP response reconciles persisted record without repeating POST",
+      "real HTTP cancellation remains unknown and is never retried",
+      "cancel during persistence prevents later HTTP dispatch",
+      "typing survives delayed autosave",
+      "committed autosave lost receipt idempotent retry",
+      "two-window optimistic conflict",
+      "new document synchronous lock",
+      "unsupported scripts are preserved byte-for-byte and block execution",
+      "375px keyboard reduced-motion and no overflow"
+    ],
+    "fixture": {
+      "binding": "127.0.0.1",
+      "port": 59784,
+      "requests": 3,
+      "externalCredentials": false
+    },
+    "errors": [
+      "Failed to load resource: net::ERR_FAILED",
+      "Failed to load resource: net::ERR_FAILED"
+    ],
+    "unexpected": []
+  },
+  "additionalBrowserChecks": [
+    "native ZIP extraction/folder import preserves paths and bytes",
+    "file rename refresh",
+    "unfinished URL refresh",
+    "sidebar collapse",
+    "375px no overflow",
+    "offline IndexedDB restore and confirmed retry"
+  ],
+  "package": {
+    "file": "bruno-0.6.0-release.fbworkbench",
+    "sha256": "952b84d2e0dd227ae4a7d5bccd136bb9e999d4488f84bd92a61b1776d8251e52",
+    "crc": "passed",
+    "files": 41,
+    "sourceAndResourceFilesCompared": 39,
+    "manifest": "verified normalized resource mapping",
+    "transferHashes": "all verified",
+    "dataIncluded": false
+  },
+  "limits": {
+    "timeoutMs": 10000,
+    "responseBytes": 65536,
+    "snapshotCount": 4,
+    "fileCount": 20
+  },
+  "limitations": [
+    "No script/test/assertion execution",
+    "No variables/auth inheritance or environment secrets",
+    "No automatic redirects/retries",
+    "Unknown receipts require manual reconciliation",
+    "Host import unverified",
+    "Loopback fixture is not production service verification"
+  ]
+}

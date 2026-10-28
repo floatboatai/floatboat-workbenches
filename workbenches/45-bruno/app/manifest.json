@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.e29331f3-1d57-4d5b-95ce-b98e4ed11f18",
+  "registryName": "bruno-studio",
+  "name": "Bruno 工作台",
+  "description": "原生 Bru 集合编辑、显式 HTTP 调试与响应快照",
+  "version": "0.6.0",
+  "changelog": "官方 Bru 解析与导出、请求编辑、持久化执行记录与完整工作稿。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    },
+    {
+      "id": "setup",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "SETUP.md"
+    }
+  ]
+}
