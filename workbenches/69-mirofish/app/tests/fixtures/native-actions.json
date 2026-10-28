@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "data": {
+    "simulation_id": "sim_contract_example",
+    "all_actions": [
+      {
+        "round_num": 3,
+        "timestamp": "2026-10-27T11:00:00",
+        "platform": "reddit",
+        "agent_id": 7,
+        "agent_name": "社区志愿者",
+        "action_type": "CREATE_POST",
+        "action_args": {
+          "content": "先在小范围试办，再收集居民意见。",
+          "metadata": {
+            "source": "ordinary test fixture"
+          }
+        },
+        "result": null,
+        "success": true
+      }
+    ]
+  }
+}

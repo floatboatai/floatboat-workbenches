@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.bceedbaf-e0c0-4bbc-94c8-c219f83db6d6",
+  "registryName": "mirofish-studio",
+  "name": "情景复核 · MiroFish",
+  "description": "原生模拟动作、角色假设、轮次时间线与审阅报告",
+  "version": "0.5.0",
+  "changelog": "Initial application.",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}

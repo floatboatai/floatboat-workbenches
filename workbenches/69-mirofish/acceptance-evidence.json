@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-28T04:36:30.398Z",
+  "localReviewFlow": true,
+  "notesSaveReload": true,
+  "roundFilter": true,
+  "nativeJsonDraftRecovery": true,
+  "upstreamSerializerFixtureImport": true,
+  "nativeRoundTrip": true,
+  "portableNewProject": true,
+  "recoveryFileReimport": true,
+  "mobileNoOverflow": true,
+  "serviceDisconnectedTruthful": true,
+  "liveSimulation": false,
+  "pageErrors": [],
+  "delayedEdit": true,
+  "lostReceipt": true,
+  "optimisticConflict": true,
+  "version": "0.5.0",
+  "applicationTests": 10,
+  "upstreamCommit": "7657031ac01184afe2cb220f5ee3545573b5e843",
+  "upstreamSerializerVerified": true,
+  "upstreamHttpVerification": "local-contract-fixture-only",
+  "liveOasisZep": "not-run-no-configured-service",
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "navigationTransitionLocksEditing": true,
+  "screenshot": {
+    "path": "../../docs/screenshots/mirofish.png",
+    "sha256": "109864265eae1ba449bb9b54ba9131c926fb5830e20d563818acbd4bc3b69a83",
+    "dimensions": [
+      1440,
+      1218
+    ]
+  },
+  "package": {
+    "name": "mirofish-studio-0.5.0.fbworkbench",
+    "sha256": "0928ff6e167ca3355ff5425293e159d9efe72ae2a6f50daa8cefdf23181ec12e",
+    "files": 35,
+    "crcValid": true,
+    "licenseIncluded": true,
+    "businessDataExcluded": true
+  }
+}
