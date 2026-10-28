@@ -203,11 +203,19 @@
     }
   ],
   "toolingTests": 17,
-  "ciIntroductionBundles": "12 passed locally; live GitHub Actions not yet verified",
+  "ciIntroductionBundles": "passed locally and on GitHub Actions for the published 0.5.0 commit",
   "linuxApplicationTests": {
     "passed": 132,
     "environment": "node:22-bookworm / Node 22.23.3",
     "network": "none",
     "scope": "application tests only; precise GitHub runtime build unverified"
+  },
+  "githubActions": {
+    "url": "https://github.com/floatboatai/floatboat-workbenches/actions/runs/40637769141",
+    "head": "5ec93c34997d192a8ddcfb34931aed5ddd6d77de",
+    "conclusion": "success",
+    "finishedAt": "2026-10-28T05:36:45Z",
+    "successfulJobs": 46,
+    "skippedJobs": 0
   }
 }
