@@ -1,0 +1,278 @@
+{
+  "repository": "https://github.com/piratuks/invoice-builder",
+  "commit": "2979d91742008be0d2376e919be9e404657a900b",
+  "upstreamVersion": "3.2.1",
+  "license": "MIT",
+  "generation": "esbuild 0.27.2 ESM tree-shaken browser-neutral output",
+  "changes": [
+    "Only PDFDocument font imports and automatic registration removed. Workbench registers bundled Noto Sans SC via resources. All math and PDF layout/sections retained."
+  ],
+  "sources": [
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/BusinessInfo.tsx",
+      "sha256": "b68aa45153571e1a9f3079a8921cada1385f4028efb68d0c32ecf007194f764b"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/ClientInfo.tsx",
+      "sha256": "721cb064a3cf273fef2065c562d4ef49a95773d03b2ee0ff42346fac9f354942"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/FinancialInfo.tsx",
+      "sha256": "f2b83e8ac71c5f37bd49f7377505bb939be13f28949c4984b495c6cb1dd570ff"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/HeaderInfo.tsx",
+      "sha256": "8c861ccddb37ef014677cfe902be74b902b3af6e5844c709dc8ea71b6d8f2ec2"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/InvoiceInformationInfo.tsx",
+      "sha256": "d0bfe1a2ec6436a9b666c556c902378302421ff057a2efaf42cf627d8b470058"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/ItemsInfo.tsx",
+      "sha256": "c695a0d0fc1995727174a5037c2c788e4d27580cf02739c0d047bda10be53d8a"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/LogoInfo.tsx",
+      "sha256": "6d7ca0e40fb32bbf195a3f7730ef6561f459a52a3b44f069620e447f84eabf2f"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/NotesInfo.tsx",
+      "sha256": "6d77b976a98a7d827d45b65379a6a5d873c6464497730d2cc0da871486f6d86c"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/PDFDocument.tsx",
+      "sha256": "bd250476e6c1f6f2286bfb41f17ac5f21a63d1bd45ad1b5e42ba9a09589b29bf"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/PageCounterInfo.tsx",
+      "sha256": "054511fb9f8053a9b3f447d81313cd9e52f8d6f07a0d76ff3ea6ce0485ac198e"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/PaymentInfo.tsx",
+      "sha256": "d6a0d0e1ae113193514d0d051ef8412d47d6e950540231a18ad9f2ec0c956f6b"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/QRCodeInfo.tsx",
+      "sha256": "fa62b824c1a43b3440271dc148c4504f60446d8bc22958fb478ad7f43a466dfd"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/SignatureInfo.tsx",
+      "sha256": "c7db0552a0d33688f6edc7461e491e2bd79cc5a81772e832eb939b67429d0c35"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/TitleInfo.tsx",
+      "sha256": "87d38f9e15d4b0b5cd3e2ba097abd29bf1441f1c844fffd88be771dc81cc1f94"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/WatermarkInfo.tsx",
+      "sha256": "e687642d2dc216e8bc65413225d9fc16ab42054a92a0d9a01d33f9b845e2835b"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/WatermarkPaidInfo.tsx",
+      "sha256": "839bd25184d3adfd59a745c2c01ea5bc458193223ce55bbaa73aa01936441c35"
+    },
+    {
+      "path": "apps/renderer/src/pages/invoices/Preview/constant.ts",
+      "sha256": "02852b5a3fa82ad9c1bba93257f44b9a72ed69aa8cf0cacbe55a7a6ec07fada2"
+    },
+    {
+      "path": "apps/renderer/src/shared/enums/currencyFormat.ts",
+      "sha256": "471934d886cdaaedeb134d4b0b65e98a1aaa6e4bb6ebca48b31a9e2c67bbd3e0"
+    },
+    {
+      "path": "apps/renderer/src/shared/enums/reportDateType.ts",
+      "sha256": "060abcab5bdaa853ebc0d21312decbdfbb900641b68dc9cd7eed358bed46b54f"
+    },
+    {
+      "path": "apps/renderer/src/shared/utils/formatFunctions.ts",
+      "sha256": "53bc297a222dddbea78b0a1d1555d02711b2a767e19172c326ff47b3c1652c8a"
+    },
+    {
+      "path": "apps/renderer/src/shared/utils/invoiceFunctions.ts",
+      "sha256": "0b53db2f774983c488fdc460c9fb6f3cdb3ed5fb50204ceac3bcf6cb24ebf951"
+    },
+    {
+      "path": "apps/renderer/src/state/constant.ts",
+      "sha256": "c333eef21de776f26cbb77518d5fbfb0b59613ded0a3602c0a4dffb6badb1da7"
+    },
+    {
+      "path": "packages/contracts/src/enums/alignment.ts",
+      "sha256": "5353ecc9dc2c3e8e41975c59e5bf6e146536b6e0d526cd30d37a6d8316e581d2"
+    },
+    {
+      "path": "packages/contracts/src/enums/amountFormat.ts",
+      "sha256": "2775bb27598b3b8e91d63b582bc876ca61e31fd74f5316301013151b15906f50"
+    },
+    {
+      "path": "packages/contracts/src/enums/databaseType.ts",
+      "sha256": "ee95eb0ac0a64167c95b6e033b712c3c7a891de4d804f17a3b5089f37ebb7f91"
+    },
+    {
+      "path": "packages/contracts/src/enums/dateFormat.ts",
+      "sha256": "e2cb3b1fda112f7d3f9484e47daabf9fcd1dc72602027602e0fb3e1d02f13ed6"
+    },
+    {
+      "path": "packages/contracts/src/enums/dbInitType.ts",
+      "sha256": "0a9b8af953ab06efd781f9bd563d92e26276b28e436b0d3a03a41e8d0342c183"
+    },
+    {
+      "path": "packages/contracts/src/enums/discountType.ts",
+      "sha256": "b858c390938966527bae42b4632b03dc89a89745799a19c1a814341ef1201227"
+    },
+    {
+      "path": "packages/contracts/src/enums/einvoice.ts",
+      "sha256": "07d8423e6a953956c86e441255a074e7533fb33030df8a699e3306e41a3f0ad9"
+    },
+    {
+      "path": "packages/contracts/src/enums/filterType.ts",
+      "sha256": "c52fdfd50317aece1b8a873a9365dacbc867dc0061a0ef2057f23d24cb53c2cc"
+    },
+    {
+      "path": "packages/contracts/src/enums/fontFamily.ts",
+      "sha256": "6b356f95dc7a51763fc8315d4899e9e04bbf95565b8a42893a2fa57335aa082d"
+    },
+    {
+      "path": "packages/contracts/src/enums/invoiceStatus.ts",
+      "sha256": "bd6175bef9baf57553b49729ebc44c3e23e5c6e424e477c010eac68239da373c"
+    },
+    {
+      "path": "packages/contracts/src/enums/invoiceTaxOptionType.ts",
+      "sha256": "df63e2a73f030d9f77bf0b02c73213426bf081998aa0a2ee12f6de13cabcb492"
+    },
+    {
+      "path": "packages/contracts/src/enums/invoiceType.ts",
+      "sha256": "82a0051320d5b2d840a14d657df335415cfed223b4e5a346a7830c364cb11503"
+    },
+    {
+      "path": "packages/contracts/src/enums/language.ts",
+      "sha256": "8b3a96f19c55e8bef3d16d9322b9827d3bcf63790ff3d8f36e24be4ca4e5c92b"
+    },
+    {
+      "path": "packages/contracts/src/enums/pageFormat.ts",
+      "sha256": "62fa32916a4a0dcdca6e011d166a985f636ed090d2322fa623742e26ea316504"
+    },
+    {
+      "path": "packages/contracts/src/enums/paymentType.ts",
+      "sha256": "a7f34c3181f12b4a4d33a83cbf8421d9f2aaeef75d8730bf72caaea90678af2e"
+    },
+    {
+      "path": "packages/contracts/src/enums/sizeType.ts",
+      "sha256": "f4b88f7e0acd47c0fb4c9e700afc7d8ce4c02522e0574d5bccfce815666c45f4"
+    },
+    {
+      "path": "packages/contracts/src/enums/tableHeaderStyle.ts",
+      "sha256": "69a4c93a928060954d37bd6d376845a051e6ff970a213c8edbe441564b220188"
+    },
+    {
+      "path": "packages/contracts/src/enums/tableRowStyle.ts",
+      "sha256": "3a5d294a95affb4d7dc0a83d2a2847526e849f5e9305e7d52d253fa00dbb4054"
+    },
+    {
+      "path": "packages/contracts/src/enums/taxType.ts",
+      "sha256": "21caa992345e2abadac758eacfc763224a9b468f074d51d7c3cbccf5ff7b3c0c"
+    },
+    {
+      "path": "packages/contracts/src/index.ts",
+      "sha256": "085a6e785541542b8fae6fa11185d25d8bfb00f82e4d3e6cdae0f8321774c659"
+    },
+    {
+      "path": "packages/contracts/src/ipc/channels.ts",
+      "sha256": "df67fdf4709b44e725686a613972bfc87bdc3ce06ff608e21b0f33bea693dd61"
+    },
+    {
+      "path": "packages/contracts/src/ipc/electronApi.ts",
+      "sha256": "5bf0b9a27b9bba4f071f1847a76b4a59e8c2f6b0aef525db7bd140727e4c3af1"
+    },
+    {
+      "path": "packages/contracts/src/types/bank.ts",
+      "sha256": "62d9cabb34da2d3bb34633f58db8f0d4605b4c7b4aa57027fcd373f3b974f08b"
+    },
+    {
+      "path": "packages/contracts/src/types/business.ts",
+      "sha256": "cbd63fa0d4330f8353362d0179f12dfbd3169bae292c717033da784e55fe57cf"
+    },
+    {
+      "path": "packages/contracts/src/types/category.ts",
+      "sha256": "25299719519dda6b847384799c8a178721eb717ec5eb983aa94b076d3d1353b3"
+    },
+    {
+      "path": "packages/contracts/src/types/client.ts",
+      "sha256": "4733d137535e47af2675fb6e3144006d7e6dc3b2bf4b559d0a704bcf34e6ad96"
+    },
+    {
+      "path": "packages/contracts/src/types/currency.ts",
+      "sha256": "42da7c7d7cebd67d7258129883fbff97b5c84963fb28ec7a2c1a997849b852b0"
+    },
+    {
+      "path": "packages/contracts/src/types/dbSelector.ts",
+      "sha256": "26b63c07a48efae57a53fd365b75399fa7daaf25582e824145ffe5638e8967e2"
+    },
+    {
+      "path": "packages/contracts/src/types/exportMeta.ts",
+      "sha256": "1ce559b12da2670a11cb3b4b20cf25774ea1e4d6dcc666b9cdf167cfef3a2101"
+    },
+    {
+      "path": "packages/contracts/src/types/filter.ts",
+      "sha256": "9c8cc3b0d1f3d3f5032c2f42c93896f56719c9077ead1104761a3fdf5e505ec8"
+    },
+    {
+      "path": "packages/contracts/src/types/invoice.ts",
+      "sha256": "72f572147341fde72c6b5d73a11e9b012ae9e985b2623a2151bfefa29e45e550"
+    },
+    {
+      "path": "packages/contracts/src/types/item.ts",
+      "sha256": "dff6d246ae6f3d8ebed97e5e48b2304c522d348639e9c66f01a2ca0bb81cd25a"
+    },
+    {
+      "path": "packages/contracts/src/types/layouts.ts",
+      "sha256": "5314fbb9d596a74d6de1385b319533f7e44523c0d9f0d721f01565239a120e1e"
+    },
+    {
+      "path": "packages/contracts/src/types/pdfText.ts",
+      "sha256": "9065a7b796a98b1197e4df6f75cfc5bda944776967aa8b7892d19c1731544cc8"
+    },
+    {
+      "path": "packages/contracts/src/types/postgresConfig.ts",
+      "sha256": "bf1597a0f97d7127e0c4c691f61a82aaaaf74bc51543877714830139b4b77108"
+    },
+    {
+      "path": "packages/contracts/src/types/preset.ts",
+      "sha256": "c75ab54685d8c00f587869cff2bb7ca8e45a65dcdb90d5152b4f97b79ba5dc75"
+    },
+    {
+      "path": "packages/contracts/src/types/response.ts",
+      "sha256": "3c357722ac420d70d10db8ec80fcc2ef1d1e807f234ef6829e4e52a0003ba333"
+    },
+    {
+      "path": "packages/contracts/src/types/settings.ts",
+      "sha256": "14ebe776977473526c0c82d3dfa7d25354bb4cc4aea27d3a2dd72a378c04e140"
+    },
+    {
+      "path": "packages/contracts/src/types/sortOrder.ts",
+      "sha256": "dfded916ad9a5ab0c9d2d7eb48f5e927eb900bc44a5a1cd83892bd2ef9bbd4a5"
+    },
+    {
+      "path": "packages/contracts/src/types/styleProfiles.ts",
+      "sha256": "b478062f0b3160d6fd5d7d5ad0c6d845cc199b750a59b7a5714c8ecc6e88e97f"
+    },
+    {
+      "path": "packages/contracts/src/types/unit.ts",
+      "sha256": "53124eca6cabf56022ab93b99707ae6e415fa5c30bcc17b28ce01572deaeb308"
+    },
+    {
+      "path": "packages/contracts/src/types/updater.ts",
+      "sha256": "a36cd5de08bfb48840b302d11e1375fd5c151ba943004a7a068c1be027c9f6ad"
+    }
+  ],
+  "generated": [
+    {
+      "path": "src/vendor/money.js",
+      "sha256": "e58adcdeb442cd779a66e5537841238af33671a39ef5baf40f6f0b68df027841"
+    },
+    {
+      "path": "src/vendor/pdf.js",
+      "sha256": "6155f347864efe55535248dc0b63536318c236e6a201c2d8e2192fdb0da1ce9b"
+    }
+  ]
+}

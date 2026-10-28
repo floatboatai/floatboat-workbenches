@@ -1,0 +1,81 @@
+{
+  "version": "0.7.0",
+  "status": "local-verified",
+  "hostImport": "unverified",
+  "hostLlm": "not-used",
+  "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "nativeEngine": {
+    "repository": "piratuks/invoice-builder",
+    "commit": "2979d91742008be0d2376e919be9e404657a900b",
+    "reactPdf": "4.9.0",
+    "pdfjs": "6.4.299",
+    "sourceFiles": 64,
+    "font": "static Workbench Sans SC 400/700, OFL"
+  },
+  "unitTests": 11,
+  "previewUrl": "http://127.0.0.1:55676/",
+  "browser": {
+    "url": "http://127.0.0.1:49697",
+    "checks": [
+      "input autosaves without blur and remains focused",
+      "invalid numeric draft reloads without replacing the confirmed invoice",
+      "actual recovery file imports a new document with unfinished fields intact",
+      "original logo bytes survive the actual full-project round trip",
+      "PDF generation freezes its request and discards a result made stale by newer edits",
+      "a late PDF response cannot open in or overwrite a newly selected document",
+      "typing remains enabled during delayed autosave and the later value wins",
+      "committed-but-lost receipt retries the same mutation without duplicate project creation",
+      "two-window optimistic conflict preserves the stale writer without overwriting the newer invoice",
+      "brand-new offline draft can be switched away from and restored from local storage",
+      "actual 1.9MB confirmed working draft downloads and imports under the shared budget",
+      "multi-page native PDF has continuous first/last items and readable CJK pages",
+      "375px editing, paper and real PDF proof remain contained with keyboard and reduced-motion",
+      "final natural screenshot and real PDF exported with no page errors"
+    ],
+    "pageErrors": [],
+    "multipage": 3
+  },
+  "pdfZoom": {
+    "url": "http://127.0.0.1:55676/",
+    "checks": [
+      "375px PDF proof zooms to300% and pans inside its own scroll container",
+      "page width stays bounded at375px",
+      "Escape closes proof and returns keyboard focus",
+      "no page errors"
+    ],
+    "errors": []
+  },
+  "pdfReview": {
+    "singlePageTotal": "CNY 7,250.40",
+    "multiPageTotal": "CNY 6,042.00",
+    "pages": 3,
+    "items": "01–60 continuous",
+    "independentPrimaryReview": "render and text extraction passed; CJK, font weights, unit price, amounts and page counters readable"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/invoice-builder.png",
+    "dimensions": [
+      1440,
+      1050
+    ],
+    "sha256": "64edaf214cdfb14730442e43d2c55335da906b1b630dfe45c849f187f9b7bbc2"
+  },
+  "limitations": [
+    "Local build, tests and Chrome only; imported client unverified",
+    "No invoicing network, email, payment or ledger mutations",
+    "First-party workbench projects/recovery import; upstream native JSON export only",
+    "80 lines,150KiB/4MP per PNG/JPEG,850KB formal,2MB restore data,1.95MB whole request",
+    "Original source code MIT and fonts OFL remain separate"
+  ],
+  "package": {
+    "file": "invoice-builder-0.7.0.fbworkbench",
+    "sha256": "449bbbc9e00c19a4f8736546cab8efbcf4294971beae6234597b064d6df2f5de",
+    "bytes": 12864773,
+    "crc": "passed",
+    "sourceFilesMatched": 41,
+    "assetFilesMatched": 71,
+    "transferHashes": "all passed",
+    "dataIncluded": false,
+    "status": "verified"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.42e2677d-43cf-457a-9dd7-b48bb9db858d",
+  "registryName": "invoice-builder-studio",
+  "name": "Invoice Builder 工作台",
+  "description": "报价与商业发票制作、明细核对和PDF校样",
+  "version": "0.7.0",
+  "changelog": "上游计价与PDF模板、完整工作稿恢复、独立单据桌",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "fonts",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "fonts"
+    },
+    {
+      "id": "notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    },
+    {
+      "id": "third-party-notices",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "THIRD-PARTY-NOTICES.md"
+    }
+  ]
+}
