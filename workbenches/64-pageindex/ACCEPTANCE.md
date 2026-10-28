@@ -25,3 +25,7 @@ PDF最多8MiB/40页/30万原文字符/250章节。原生Flash关闭模型摘要�
 ## 界面复核
 
 App.tsx、ReviewPane.tsx、DocumentPage.tsx和style.css按Web Interface Guidelines检查：字段标签、原生按钮、焦点、错误恢复、375px布局、reduced-motion、原页实际显示与来源对应通过。截图使用普通示例，等待已自动保存。详细时间、截图摘要与包信息见[acceptance-evidence.json](acceptance-evidence.json)。
+
+## 恢复与切换补验
+
+2026-10-28：真实Chrome验证实际恢复稿下载→作为新项目导入→刷新；保留便笺和未应用JSON，历史未确认提问不重放。用明确404合同模拟目标缺少原件，补齐相同PDF后原页图像成功解码且便笺不变。延迟旧项目保存回执期间，新建锁住全部编辑控件，确认旧便笺入库后才切换。4项补验和9项应用测试通过。

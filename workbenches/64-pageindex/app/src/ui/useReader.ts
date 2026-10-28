@@ -23,16 +23,33 @@ export function useReader() {
     model: false,
     parserMessage: "正在检查服务…",
   });
+  const operationLock = useRef(false);
+  function begin() {
+    if (operationLock.current || project.loading || project.busy) return false;
+    operationLock.current = true;
+    return true;
+  }
   const epoch = useRef(project.documentKey);
   epoch.current = project.documentKey;
   const file = useRef<HTMLInputElement>(null),
-    portable = useRef<HTMLInputElement>(null);
+    portable = useRef<HTMLInputElement>(null),
+    recoveryFile = useRef<HTMLInputElement>(null);
   const sourceId = project.data.document?.id,
     currentId = project.current?.id;
   const pending = isRecord(project.draft.pendingQuestion)
     ? project.draft.pendingQuestion
     : null;
   const mutable = !project.loading && !project.busy && !operation;
+  async function navigate(action: () => Promise<boolean>) {
+    if (!begin()) return false;
+    setOperation("正在切换项目…");
+    try {
+      return await action();
+    } finally {
+      operationLock.current = false;
+      setOperation("");
+    }
+  }
   async function refreshStatus() {
     try {
       const raw = await request("/api/status");
@@ -116,11 +133,12 @@ export function useReader() {
       project.setNotice("已打开文档，编辑内容会自动保存。");
     }
   }
-  async function loadPdf(selected: File) {
+  async function loadPdf(selected: File, repair = false) {
     if (selected.size > 8 * 1024 * 1024) {
       project.report(new Error("PDF不能超过8MiB。"));
       return;
     }
+    if (!begin()) return;
     const key = epoch.current;
     setOperation("准备上传…");
     try {
@@ -129,14 +147,29 @@ export function useReader() {
         selected.name,
         setOperation,
       );
-      if (epoch.current === key) await replaceDocument(doc);
+      if (epoch.current === key) {
+        if (repair) {
+          if (
+            !project.data.document ||
+            doc.source.id !== project.data.document.id ||
+            doc.source.pages !== project.data.document.pages
+          )
+            throw new Error("这不是恢复稿对应的原PDF，请选择原始文件。");
+          setIndex(doc);
+          project.setError("");
+          const saved = await project.save();
+          if (saved) project.setNotice("原PDF已补齐，便笺与工作稿已保留。");
+        } else await replaceDocument(doc);
+      }
     } catch (e) {
       if (epoch.current === key) project.report(e);
     } finally {
+      operationLock.current = false;
       setOperation("");
     }
   }
   async function sample() {
+    if (!begin()) return;
     const key = epoch.current;
     setOperation("正在索引示例手册…");
     try {
@@ -145,10 +178,12 @@ export function useReader() {
     } catch (e) {
       if (epoch.current === key) project.report(e);
     } finally {
+      operationLock.current = false;
       setOperation("");
     }
   }
   async function ask() {
+    if (!begin()) return;
     const key = epoch.current;
     setOperation(pending ? "正在核对提交…" : "正在提交提问…");
     try {
@@ -181,6 +216,7 @@ export function useReader() {
     } catch (e) {
       if (epoch.current === key) project.report(e);
     } finally {
+      operationLock.current = false;
       setOperation("");
     }
   }
@@ -191,6 +227,7 @@ export function useReader() {
     ].filter((a, i, list) => list.findIndex((x) => x.id === a.id) === i);
   }
   async function exportProject() {
+    if (!begin()) return;
     setOperation("正在准备完整项目…");
     try {
       let latest = runs;
@@ -236,25 +273,35 @@ export function useReader() {
     } catch (e) {
       project.report(e);
     } finally {
+      operationLock.current = false;
       setOperation("");
     }
   }
   async function importProject(selected: File) {
+    if (!begin()) return;
     const key = epoch.current;
     setOperation("正在读取完整项目…");
     try {
       if (selected.size > 15 * 1024 * 1024)
         throw new Error("项目文件超过15MiB。");
-      const raw: unknown = JSON.parse(await selected.text());
+      const input: unknown = JSON.parse(await selected.text());
+      if (!isRecord(input)) throw new Error("不是PageIndex项目或恢复草稿。");
+      const recovery =
+        isRecord(input.snapshot) && isRecord(input.snapshot.data);
+      const raw = recovery
+        ? {
+            ...(input.snapshot as Record<string, unknown>),
+            draft: (input.snapshot as Record<string, unknown>).extra,
+          }
+        : input;
       if (
-        !isRecord(raw) ||
-        raw.format !== "floatboat-pageindex" ||
-        raw.version !== 1
+        !recovery &&
+        (raw.format !== "floatboat-pageindex" || raw.version !== 1)
       )
         throw new Error("不是PageIndex工作台项目。");
       const data = readerValue(raw.data),
         title = boundedText(raw.title, 120);
-      if (data.document) {
+      if (data.document && !recovery) {
         if (typeof raw.pdf !== "string") throw new Error("项目没有原PDF。");
         const doc = await uploadPdf(
           fromBase64(raw.pdf),
@@ -279,10 +326,18 @@ export function useReader() {
         extra.importedPendingQuestion = extra.pendingQuestion;
         delete extra.pendingQuestion;
       }
-      if (epoch.current === key) await project.replace(data, title, extra);
+      if (
+        epoch.current === key &&
+        (await project.replace(data, title, extra)) &&
+        recovery
+      )
+        project.setNotice(
+          "已恢复为新副本。恢复稿不包含原PDF；如缺失，请点击补齐原PDF。未确认提问不会重放。",
+        );
     } catch (e) {
       if (epoch.current === key) project.report(e);
     } finally {
+      operationLock.current = false;
       setOperation("");
     }
   }
@@ -313,6 +368,7 @@ export function useReader() {
     pending,
     file,
     portable,
+    recoveryFile,
     refreshStatus,
     loadPdf,
     sample,
@@ -321,5 +377,7 @@ export function useReader() {
     exportProject,
     importProject,
     exportReview,
+    newProject: () => navigate(() => project.fresh()),
+    openProject: (id: string) => navigate(() => project.open(id)),
   };
 }

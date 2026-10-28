@@ -47,11 +47,16 @@
     "sha256": "2dc1c47f5b2419e6b8fefdc236d76efd24f5e5b00a1577b63b7314b63caa7964"
   },
   "package": {
-    "filename": "pageindex-studio-0.5.0.fbworkbench",
-    "sha256": "79de8a7cd7c23590d0a8a853f4c1214a3dd1f1a98db236d7d2a68ee7dfa873e3",
-    "bytes": 60291,
+    "filename": "pageindex-studio-0.5.0-final.fbworkbench",
+    "sha256": "1d5029f9c94cdb3bf01b4439b4e345be0e614a3b4eaf25cb306e303fe918c1bc",
+    "bytes": 61114,
     "crc": "passed",
-    "sourceAndResourceBytes": "matched",
     "businessData": "excluded"
-  }
+  },
+  "recoveryAndNavigation": [
+    "actual recovery snapshot imports as a new project and archived pending question is not replayed",
+    "missing-original recovery UI accepts matching PDF and preserves note and raw JSON through reload",
+    "project transition disables edits while awaiting old document save",
+    "no automatic model calls or runtime errors"
+  ]
 }

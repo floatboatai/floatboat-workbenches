@@ -41,6 +41,7 @@ export function ReviewPane({
             disabled={
               !mutable ||
               !doc ||
+              !desk.index ||
               !status.model ||
               running ||
               !!pending ||

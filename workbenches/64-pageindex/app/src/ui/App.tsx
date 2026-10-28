@@ -106,14 +106,14 @@ export function App() {
             id={project.current?.id}
             disabled={!mutable || !!pending}
             onOpen={(id) => {
-              void project.open(id);
+              void desk.openProject(id);
             }}
           />
         </div>
         <div className="file-tools">
           <button
             disabled={!mutable || !!pending}
-            onClick={() => void project.fresh()}
+            onClick={() => void desk.newProject()}
           >
             新建
           </button>
@@ -156,6 +156,18 @@ export function App() {
           }}
         />
       </header>
+      <input
+        ref={desk.recoveryFile}
+        hidden
+        type="file"
+        accept="application/pdf,.pdf"
+        aria-label="补齐恢复稿原PDF"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.currentTarget.value = "";
+          if (file) void desk.loadPdf(file, true);
+        }}
+      />
       <div className="status-line">
         <span className={`save-state ${project.autoState.phase}`} role="status">
           {project.autoState.message}
@@ -171,7 +183,9 @@ export function App() {
             <button onClick={() => void project.save()}>重试保存</button>
             <button onClick={project.exportDraft}>导出恢复草稿</button>
             {project.current ? (
-              <button onClick={() => void project.open(project.current!.id)}>
+              <button
+                onClick={() => void desk.openProject(project.current!.id)}
+              >
                 打开服务器版本
               </button>
             ) : null}
@@ -207,183 +221,198 @@ export function App() {
           </button>
         ))}
       </nav>
-      <main id="reading-desk" className="desk" data-tab={tab}>
-        <aside className="outline">
-          <div className="pane-label">
-            <h2>文档目录</h2>
-            <span>CONTENTS</span>
-          </div>
-          <div className="document-label">
-            <strong>{doc?.name ?? "尚未打开文档"}</strong>
-            {doc ? (
-              <small>{doc.pages} 页 · PDF</small>
+      <main id="reading-desk">
+        <fieldset className="desk" data-tab={tab} disabled={!mutable}>
+          <aside className="outline">
+            <div className="pane-label">
+              <h2>文档目录</h2>
+              <span>CONTENTS</span>
+            </div>
+            <div className="document-label">
+              <strong>{doc?.name ?? "尚未打开文档"}</strong>
+              {doc ? (
+                <small>{doc.pages} 页 · PDF</small>
+              ) : (
+                <small>打开一份报告开始阅读</small>
+              )}
+            </div>
+            <button
+              className="upload"
+              disabled={!mutable || !!pending}
+              onClick={() => desk.file.current?.click()}
+            >
+              ＋ 打开 PDF
+            </button>
+            {index ? (
+              <Contents
+                nodes={index.index.structure}
+                page={data.page}
+                onSelect={setPage}
+              />
+            ) : doc ? (
+              <p className="muted">正在读取章节…</p>
             ) : (
-              <small>打开一份报告开始阅读</small>
+              <p className="muted">
+                章节会随文档建立，点击目录可直接定位原页。
+              </p>
             )}
-          </div>
-          <button
-            className="upload"
-            disabled={!mutable || !!pending}
-            onClick={() => desk.file.current?.click()}
-          >
-            ＋ 打开 PDF
-          </button>
-          {index ? (
-            <Contents
-              nodes={index.index.structure}
-              page={data.page}
-              onSelect={setPage}
-            />
-          ) : doc ? (
-            <p className="muted">正在读取章节…</p>
-          ) : (
-            <p className="muted">章节会随文档建立，点击目录可直接定位原页。</p>
-          )}
-          <div className="outline-footer">
-            <button
-              disabled={!index || !mutable}
-              onClick={() =>
-                index &&
-                download(
-                  new Blob([JSON.stringify(index.index, null, 2)], {
-                    type: "application/json",
-                  }),
-                  "pageindex-structure.json",
-                )
-              }
-            >
-              导出章节索引
-            </button>
-            <button
-              onClick={() => setJsonOpen((v) => !v)}
-              aria-expanded={jsonOpen}
-            >
-              项目 JSON 草稿
-            </button>
-          </div>
-        </aside>
-        <section className="reading">
-          <div className="reading-toolbar">
-            <span>{doc ? "原文阅读" : "阅读桌"}</span>
-            {doc ? (
-              <div className="page-controls">
-                <button
-                  aria-label="上一页"
-                  disabled={data.page <= 1 || !mutable}
-                  onClick={() => setPage(data.page - 1)}
-                >
-                  ←
-                </button>
-                <label>
-                  <span className="sr-only">当前页码</span>
-                  <select
-                    aria-label="当前页码"
-                    value={data.page}
-                    onChange={(e) => setPage(Number(e.target.value))}
+            <div className="outline-footer">
+              <button
+                disabled={!index || !mutable}
+                onClick={() =>
+                  index &&
+                  download(
+                    new Blob([JSON.stringify(index.index, null, 2)], {
+                      type: "application/json",
+                    }),
+                    "pageindex-structure.json",
+                  )
+                }
+              >
+                导出章节索引
+              </button>
+              <button
+                onClick={() => setJsonOpen((v) => !v)}
+                aria-expanded={jsonOpen}
+              >
+                项目 JSON 草稿
+              </button>
+            </div>
+          </aside>
+          <section className="reading">
+            <div className="reading-toolbar">
+              <span>{doc ? "原文阅读" : "阅读桌"}</span>
+              {doc ? (
+                <div className="page-controls">
+                  <button
+                    aria-label="上一页"
+                    disabled={data.page <= 1 || !mutable}
+                    onClick={() => setPage(data.page - 1)}
                   >
-                    {Array.from({ length: doc.pages }, (_, i) => (
-                      <option key={i} value={i + 1}>
-                        {i + 1} / {doc.pages}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    ←
+                  </button>
+                  <label>
+                    <span className="sr-only">当前页码</span>
+                    <select
+                      aria-label="当前页码"
+                      value={data.page}
+                      onChange={(e) => setPage(Number(e.target.value))}
+                    >
+                      {Array.from({ length: doc.pages }, (_, i) => (
+                        <option key={i} value={i + 1}>
+                          {i + 1} / {doc.pages}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    aria-label="下一页"
+                    disabled={data.page >= doc.pages || !mutable}
+                    onClick={() => setPage(data.page + 1)}
+                  >
+                    →
+                  </button>
+                </div>
+              ) : null}
+              <button
+                disabled={!doc || !mutable || data.notes.length >= 60}
+                onClick={addNote}
+              >
+                摘录本页
+              </button>
+            </div>
+            {index ? (
+              <DocumentPage
+                id={index.source.id}
+                page={data.page}
+                text={index.pages[data.page - 1]?.text ?? ""}
+              />
+            ) : (
+              <div className="empty-paper">
+                <small>一份文档，一张阅读桌</small>
+                <h2>{doc ? "原PDF尚未恢复。" : "把问题带回原文。"}</h2>
+                <p>
+                  {doc
+                    ? "选择最初的PDF，已有便笺、问题和草稿会保留。"
+                    : "打开PDF，沿章节阅读，留下有页码的摘录与意见。"}
+                </p>
                 <button
-                  aria-label="下一页"
-                  disabled={data.page >= doc.pages || !mutable}
-                  onClick={() => setPage(data.page + 1)}
+                  className="solid"
+                  disabled={!mutable || !!pending}
+                  onClick={() =>
+                    doc
+                      ? desk.recoveryFile.current?.click()
+                      : desk.file.current?.click()
+                  }
                 >
-                  →
+                  {doc ? "补齐原PDF" : "选择 PDF"}
+                </button>
+                <button
+                  className="text-button"
+                  disabled={!mutable || !!pending}
+                  onClick={() => void desk.sample()}
+                >
+                  打开示例操作手册
+                </button>
+                <span>支持带文字的 PDF · 最多40页 / 8MiB</span>
+              </div>
+            )}
+            {doc ? (
+              <div className="paper-caption">
+                <span>{doc.name}</span>
+                <button
+                  disabled={!mutable}
+                  onClick={() =>
+                    void blobRequest(`/api/documents/${doc.id}/pdf`)
+                      .then((b) => download(b, doc.name))
+                      .catch(project.report)
+                  }
+                >
+                  下载原 PDF
                 </button>
               </div>
             ) : null}
-            <button
-              disabled={!doc || !mutable || data.notes.length >= 60}
-              onClick={addNote}
-            >
-              摘录本页
-            </button>
-          </div>
-          {index ? (
-            <DocumentPage
-              id={index.source.id}
-              page={data.page}
-              text={index.pages[data.page - 1]?.text ?? ""}
-            />
-          ) : (
-            <div className="empty-paper">
-              <small>一份文档，一张阅读桌</small>
-              <h2>把问题带回原文。</h2>
-              <p>打开PDF，沿章节阅读，留下有页码的摘录与意见。</p>
-              <button
-                className="solid"
-                disabled={!mutable || !!pending}
-                onClick={() => desk.file.current?.click()}
-              >
-                选择 PDF
-              </button>
-              <button
-                className="text-button"
-                disabled={!mutable || !!pending}
-                onClick={() => void desk.sample()}
-              >
-                打开示例操作手册
-              </button>
-              <span>支持带文字的 PDF · 最多40页 / 8MiB</span>
-            </div>
-          )}
-          {doc ? (
-            <div className="paper-caption">
-              <span>{doc.name}</span>
-              <button
-                disabled={!mutable}
-                onClick={() =>
-                  void blobRequest(`/api/documents/${doc.id}/pdf`)
-                    .then((b) => download(b, doc.name))
-                    .catch(project.report)
-                }
-              >
-                下载原 PDF
-              </button>
-            </div>
-          ) : null}
-          {jsonOpen ? (
-            <section className="json-panel">
-              <h2>项目 JSON 草稿</h2>
-              <label htmlFor="project-json">未应用内容也会保存</label>
-              <textarea
-                id="project-json"
-                name="projectJson"
-                spellCheck={false}
-                autoComplete="off"
-                value={rawJson}
-                maxLength={180000}
-                onChange={(e) =>
-                  project.setDraft((d) => ({ ...d, inputJson: e.target.value }))
-                }
-              />
-              <button
-                disabled={!mutable || !!pending}
-                onClick={() => {
-                  try {
-                    const next = readerValue(JSON.parse(rawJson));
-                    if (next.document?.id !== doc?.id)
-                      throw new Error(
-                        "请通过打开PDF创建新文档，JSON草稿不能替换原文件。",
-                      );
-                    project.setData(next);
-                    project.setNotice("已应用项目内容。");
-                  } catch (e) {
-                    project.report(e);
+            {jsonOpen ? (
+              <section className="json-panel">
+                <h2>项目 JSON 草稿</h2>
+                <label htmlFor="project-json">未应用内容也会保存</label>
+                <textarea
+                  id="project-json"
+                  name="projectJson"
+                  spellCheck={false}
+                  autoComplete="off"
+                  value={rawJson}
+                  maxLength={180000}
+                  onChange={(e) =>
+                    project.setDraft((d) => ({
+                      ...d,
+                      inputJson: e.target.value,
+                    }))
                   }
-                }}
-              >
-                应用 JSON
-              </button>
-            </section>
-          ) : null}
-        </section>
-        <ReviewPane desk={desk} setPage={setPage} addNote={addNote} />
+                />
+                <button
+                  disabled={!mutable || !!pending}
+                  onClick={() => {
+                    try {
+                      const next = readerValue(JSON.parse(rawJson));
+                      if (next.document?.id !== doc?.id)
+                        throw new Error(
+                          "请通过打开PDF创建新文档，JSON草稿不能替换原文件。",
+                        );
+                      project.setData(next);
+                      project.setNotice("已应用项目内容。");
+                    } catch (e) {
+                      project.report(e);
+                    }
+                  }}
+                >
+                  应用 JSON
+                </button>
+              </section>
+            ) : null}
+          </section>
+          <ReviewPane desk={desk} setPage={setPage} addNote={addNote} />
+        </fieldset>
       </main>
       <footer className="footer">
         <span>PAGEINDEX · 页码连接每一条证据</span>
