@@ -1,0 +1,129 @@
+{
+  "version": "0.8.0",
+  "date": "2026-10-28",
+  "timezone": "America/New_York",
+  "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "mainSourceCommit": "5841d56ffe38e07ca1804fd2940d3bd6d99705c2",
+  "workbenches": 3,
+  "totalImplemented": 56,
+  "catalogTotal": 78,
+  "applicationTests": 26,
+  "toolingTests": 19,
+  "exportedSourceTests": {
+    "passed": 26,
+    "environment": "Node22.23.3 Linux, network none, unpacked source and read-only prepared dependencies",
+    "scope": "exported-source tests; not client import"
+  },
+  "browser": "native product task flows, working-copy recovery and integration review passed",
+  "hostImport": "unverified",
+  "hostLlm": "not-used",
+  "githubActions": "See Actions for current published revision; local acceptance is separate",
+  "packages": [
+    {
+      "directory": "workbenches/76-oasis-editor",
+      "version": "0.8.0",
+      "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
+      "filename": "76-oasis-editor-0.8.0.fbworkbench",
+      "bytes": 20231599,
+      "sha256": "39af33f96027fcdb1e8823927e5ac94df226d1624b53ba199c35ecf8b0d6271f",
+      "crc": "passed",
+      "sourceFilesMatched": 42,
+      "assetFilesMatched": 20,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "license": "MIT",
+      "deliveryPath": "workbench-oasis-editor/oasis-editor-studio-0.8.0.fbworkbench",
+      "introductionFile": "workbench-oasis-editor/presentation.json",
+      "transferHashes": "passed"
+    },
+    {
+      "directory": "workbenches/77-circuitjs",
+      "version": "0.8.0",
+      "appId": "workbench.9a20add2-4f04-44aa-b343-61f5374fc989",
+      "filename": "77-circuitjs-0.8.0.fbworkbench",
+      "bytes": 2030788,
+      "sha256": "77acb5d4dfab8b45ada8e905fa707b880a494b8a72d1c146ff6097b944604eb8",
+      "crc": "passed",
+      "sourceFilesMatched": 32,
+      "assetFilesMatched": 706,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "license": "GPL-2.0-or-later",
+      "deliveryPath": "workbench-circuitjs/circuitjs-studio-0.8.0.fbworkbench",
+      "introductionFile": "workbench-circuitjs/presentation.json",
+      "transferHashes": "passed"
+    },
+    {
+      "directory": "workbenches/78-gltf-transform",
+      "version": "0.8.0",
+      "appId": "workbench.cdaf06c7-7f94-47f3-8c2b-0b77757a6ba4",
+      "filename": "78-gltf-transform-0.8.0.fbworkbench",
+      "bytes": 75396,
+      "sha256": "6da3706103e50fe73320d8f8318326bdbef07b525774b1393ab15c94da3e0d56",
+      "crc": "passed",
+      "sourceFilesMatched": 34,
+      "assetFilesMatched": 5,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "license": "MIT",
+      "deliveryPath": "workbench-gltf-transform/gltf-transform-studio-0.8.0.fbworkbench",
+      "introductionFile": "workbench-gltf-transform/presentation.json",
+      "transferHashes": "passed"
+    }
+  ],
+  "independentArtifactReviews": {
+    "oasisEditor": {
+      "status": "passed",
+      "documents": [
+        {
+          "file": "oasis-external-roundtrip.docx",
+          "sha256": "59942dc7c11a8e27f97b480587f5c878b01a6f42c72a1e6b7851b2093a5afb19",
+          "tables": 3,
+          "images": 1,
+          "fontNames": "normalized single family with eastAsia",
+          "customXml": "<proof xmlns=\"urn:floatboat:oasis:proof\">UNCHANGED-OOXML-PART</proof>",
+          "members": 27
+        },
+        {
+          "file": "oasis-external-roundtrip2.docx",
+          "sha256": "f777c0a3f23bd2a9923735fd34e189d04d11031ca340348fc0760ebf7b4e43f0",
+          "tables": 3,
+          "images": 1,
+          "fontNames": "normalized single family with eastAsia",
+          "customXml": "<proof xmlns=\"urn:floatboat:oasis:proof\">UNCHANGED-OOXML-PART</proof>",
+          "members": 27
+        }
+      ],
+      "pdfs": [
+        {
+          "file": "oasis-external-roundtrip.pdf",
+          "sha256": "4d52b365c9a66d091e2a7dfc646e0be9f6a244c0fbcb82ed420bf01e43855f49",
+          "pages": 3,
+          "eachPageVisual": "passed; readable Chinese, table and image where present; no clipping/overlap"
+        },
+        {
+          "file": "oasis-office-font-review/oasis-external-roundtrip2.pdf",
+          "sha256": "d25e0c7db9d317792f7ea831aba0776e7c533457634b74feb1cba78209f3fdf5",
+          "pages": 3,
+          "eachPageVisual": "passed; readable Chinese, table and image where present; no clipping/overlap"
+        }
+      ],
+      "officeFonts": "private fontconfig includes host system fonts and app/fonts; no system installation",
+      "limitation": "Consumer pagination and font metrics vary; no pixel-identical Word claim"
+    },
+    "gltfTransform": {
+      "status": "passed",
+      "source": "mesh-final-animation.glb",
+      "result": "gltf-browser-animated-result.glb",
+      "resultSha256": "2b1b62e7b357cd538e5cad9f67eb3a1c1d6915cd310bcb6bf2e2fc9a048165ef",
+      "bytes": 610664,
+      "accessors": 141,
+      "images": 1,
+      "skins": 1,
+      "joints": 66,
+      "animations": 1,
+      "allDecodedAccessorBytesAndImageHashes": "identical",
+      "scope": "final GLB exported through real UI, independent binary inspection"
+    }
+  }
+}

@@ -6,9 +6,9 @@
 
 ## 当前进度
 
-当前批次 **0.7.0** · **53 / 75 个工作台已完成本地功能验收**，其余22个为计划项目。本批新增Ray Optics、Invoice Builder和Mesh2Motion，分别用于光学实验、单据制作与角色动画。Floatboat客户端导入尚未实测。
+当前批次 **0.8.0** · **56 / 78 个工作台已完成本地功能验收**，其余22个为计划项目。本批新增Oasis Editor、CircuitJS和glTF Transform，分别用于分页文档、电路实验与3D模型检查。Floatboat客户端导入尚未实测。
 
-本批3项均保留真实上游核心，完成自动保存、未完成草稿与恢复稿回导、产品独立布局、真实Chrome验收和导出源码复验。实际范围及34项应用测试见[0.7.0验收](docs/release-0.7.0.md)。GitHub检查与上传进度见[Actions](https://github.com/floatboatai/floatboat-workbenches/actions)；WASM画布升级仍等待客户端与模板就绪。
+本批3项均保留真实上游核心，完成自动保存、未完成草稿与恢复稿回导、产品独立布局、真实Chrome验收和导出源码复验。实际范围及26项应用测试见[0.8.0验收](docs/release-0.8.0.md)。GitHub检查与上传进度见[Actions](https://github.com/floatboatai/floatboat-workbenches/actions)；WASM画布升级仍等待客户端与模板就绪。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
@@ -65,6 +65,9 @@
 | [Ray Optics Simulation](workbenches/73-ray-optics/) | 原生光路编辑、CPU模拟、探测器与PNG/场景/工程导出 | 光路主屏、器材架与实验读数 |
 | [Invoice Builder](workbenches/74-invoice-builder/) | 原生计价与PDF模板、报价/发票、图片及工程恢复 | 明细填写、纸张校样与PDF预览 |
 | [Mesh2Motion](workbenches/75-mesh2motion/) | 原生人形绑定、87动作预览、动画GLB与完整工程 | 三维舞台、骨架树、关节参数与动作轨 |
+| [Oasis Editor](workbenches/76-oasis-editor/) | 分页DOCX编辑、原始文档保留、表格/图片校样、中文PDF与DOCX及完整工程导出 | 纸张编辑区、分页校样与文档边栏 |
+| [CircuitJS1](workbenches/77-circuitjs/) | 基础RLC电路编辑、原生求解与示波器、参数草稿、原生电路与读数导出 | 电路画布、仪表与示波轨 |
+| [glTF Transform](workbenches/78-gltf-transform/) | 自包含GLB检查、节点与PBR材质修改、JSON元数据、保留蒙皮/动画/贴图的结果与工程导出 | 浅色模型陈列、结构树与材质检查器 |
 
 0.4.0批次统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
 
@@ -74,7 +77,7 @@
 
 仓库级 React Best Practices 与 Web Design Guidelines 已安装，入口见 `AGENTS.md`；各产品的设计原则见 [设计说明](docs/design-principles.md)。
 
-新增选题：[Reddit与X的23项调研](docs/research/social-shortlist-2026-10-28.md)；本批已转化其中3项，其余保持研究状态。
+新增选题：[Reddit与X的23项调研](docs/research/social-shortlist-2026-10-28.md)；已分两批转化其中6项，其余保持研究状态。
 
 X选题补充：[9个项目与转化优先级](docs/research/x-project-shortlist-2026-10-27.md)（2026-10-27，原帖、GitHub关注度与产品范围分开核验）。
 
@@ -84,7 +87,7 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 
 ## 工作台实景
 
-以下为 53 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
+以下为 56 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
 
 | | |
 | --- | --- |
@@ -115,6 +118,8 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[React Email · 邮件稿件、收件人变量与多尺寸校样](workbenches/42-react-email/)**<br>[<img src="docs/screenshots/react-email.png" alt="React Email 工作台实景" width="440">](workbenches/42-react-email/) | **[Bruno · 请求集合、编辑器与响应控制台](workbenches/45-bruno/)**<br>[<img src="docs/screenshots/bruno.png" alt="Bruno 工作台实景" width="440">](workbenches/45-bruno/) |
 | **[Ray Optics Simulation · 光路主屏、器材架与实验读数](workbenches/73-ray-optics/)**<br>[<img src="docs/screenshots/ray-optics.png" alt="Ray Optics Simulation 工作台实景" width="440">](workbenches/73-ray-optics/) | **[Invoice Builder · 明细填写、纸张校样与PDF预览](workbenches/74-invoice-builder/)**<br>[<img src="docs/screenshots/invoice-builder.png" alt="Invoice Builder 工作台实景" width="440">](workbenches/74-invoice-builder/) |
 | **[Mesh2Motion · 三维舞台、骨架树、关节参数与动作轨](workbenches/75-mesh2motion/)**<br>[<img src="docs/screenshots/mesh2motion.png" alt="Mesh2Motion 工作台实景" width="440">](workbenches/75-mesh2motion/) |  |
+| **[Oasis Editor · 纸张编辑区、分页校样与文档边栏](workbenches/76-oasis-editor/)**<br>[<img src="docs/screenshots/oasis-editor.png" alt="Oasis Editor 工作台实景" width="440">](workbenches/76-oasis-editor/) | **[CircuitJS1 · 电路画布、仪表与示波轨](workbenches/77-circuitjs/)**<br>[<img src="docs/screenshots/circuitjs.png" alt="CircuitJS1 工作台实景" width="440">](workbenches/77-circuitjs/) |
+| **[glTF Transform · 浅色模型陈列、结构树与材质检查器](workbenches/78-gltf-transform/)**<br>[<img src="docs/screenshots/gltf-transform.png" alt="glTF Transform 工作台实景" width="440">](workbenches/78-gltf-transform/) |  |
 
 自动保存区分待保存、同步中、已保存、待完善草稿、离线和版本冲突。后台保存时仍可编辑；项目导入创建独立项目，未完成输入可恢复。浏览器本机缓存限定同一来源。
 
@@ -147,4 +152,4 @@ GitHub CI 会自动检查、测试并打包全部已验收工作台，产物同�
 
 ## 许可
 
-已验收工作台的原创集成与封装代码采用 MIT，范围及完整文本见各应用的 `app/LICENSE`。第三方源码、资源、字体、依赖、商业扩展和模板 SDK 保留各自许可；这不是覆盖整个仓库或候选项目清单的统一 MIT 授权。参考各工作台 README、`notices/` 与[许可边界](docs/licensing.md)。
+56个已验收工作台中，55个应用的原创集成与封装代码采用 MIT；CircuitJS 衍生工作台整体采用 GPL-2.0-or-later，完整对应源码与重建说明随包交付。范围及完整文本见各应用的 `app/LICENSE`。第三方源码、资源、字体、依赖、商业扩展和模板 SDK 保留各自许可；这不是覆盖整个仓库或候选项目清单的统一 MIT 授权。参考各工作台 README、`notices/` 与[许可边界](docs/licensing.md)。

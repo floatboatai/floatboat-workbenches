@@ -114,5 +114,37 @@
     "Only TRS default-value normalization allows 1e-5 absolute tolerance; accessor arrays and embedded images remain exact.",
     "Resource reattachment reloads the same content ID.",
     "Saved working input and recipe identity remain stable after schema normalization."
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/78-gltf-transform",
+    "version": "0.8.0",
+    "appId": "workbench.cdaf06c7-7f94-47f3-8c2b-0b77757a6ba4",
+    "filename": "78-gltf-transform-0.8.0.fbworkbench",
+    "bytes": 75396,
+    "sha256": "6da3706103e50fe73320d8f8318326bdbef07b525774b1393ab15c94da3e0d56",
+    "crc": "passed",
+    "sourceFilesMatched": 34,
+    "assetFilesMatched": 5,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "license": "MIT",
+    "deliveryPath": "workbench-gltf-transform/gltf-transform-studio-0.8.0.fbworkbench",
+    "introductionFile": "workbench-gltf-transform/presentation.json"
+  },
+  "integratedApplicationTests": 11,
+  "exportedSourceLinuxTests": {
+    "passed": 11,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked dependencies mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/gltf-transform.png",
+    "dimensions": [
+      1440,
+      1231
+    ],
+    "sha256": "6dda94b53c15541f5d2642d6d8743dcd2b00844e391fe11341d3217673b3a1e3"
+  }
 }

@@ -3428,12 +3428,12 @@
     "category": "分页文档",
     "kind": "原生工具/组件",
     "workbench": "DOCX分页编辑、校样与文档交付",
-    "core_features": "原生Canvas分页编辑、DOCX读写和PDF导出",
+    "core_features": "分页DOCX编辑、原始文档保留、表格/图片校样、中文PDF与DOCX及完整工程导出",
     "integration": "固定原生核心，适配官方模板和完整工作副本",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "早期编辑器；先验证真实格式往返与资源完整性，不承诺完整Word兼容。",
+    "caveat": "外部DOCX排版依赖字体和消费者；复杂OOXML能力按验收范围，不能保证Word像素级还原；Floatboat客户端导入未验证。",
     "url": "https://github.com/celsowm/oasis-editor",
     "archived": false,
     "sources": [
@@ -3445,8 +3445,32 @@
     "id": 76,
     "slug": "oasis-editor",
     "directory": "workbenches/76-oasis-editor",
-    "status": "planned",
-    "version": "0.8.0"
+    "status": "local-verified",
+    "version": "0.8.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/oasis-editor.png",
+          "caption": "Oasis Editor · 纸张编辑区、分页校样与文档边栏"
+        }
+      ]
+    },
+    "verification": {
+      "build": "passed",
+      "tests": 9,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/oasis-editor.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.8.0.md",
+      "acceptance": "workbenches/76-oasis-editor/ACCEPTANCE.md",
+      "upstream": "celsowm/oasis-editor 0.0.195 · ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195 · MIT"
+    }
   },
   {
     "name": "CircuitJS1",
@@ -3454,12 +3478,12 @@
     "category": "电子工程",
     "kind": "原生工具/组件",
     "workbench": "电路实验、示波器和实验记录",
-    "core_features": "原生TypeScript电路编辑、求解、波形与电路快照",
+    "core_features": "基础RLC电路编辑、原生求解与示波器、参数草稿、原生电路与读数导出",
     "integration": "固定原生核心，适配官方模板和完整工作副本",
     "effort": "中–高",
     "priority": "A",
     "license": "GPL-2.0-or-later",
-    "caveat": "按GPL源代码声明保留许可；不接真实硬件，恢复不自动运行或播放音频。",
+    "caveat": "首版限定基础电路类型；工程恢复保持暂停；GPL交付不等于当前MIT限定商店可上架；Floatboat客户端导入未验证。",
     "url": "https://github.com/pfalstad/circuitjs1",
     "archived": false,
     "sources": [
@@ -3471,8 +3495,33 @@
     "id": 77,
     "slug": "circuitjs",
     "directory": "workbenches/77-circuitjs",
-    "status": "planned",
-    "version": "0.8.0"
+    "status": "local-verified",
+    "version": "0.8.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/circuitjs.png",
+          "caption": "CircuitJS1 · 电路画布、仪表与示波轨"
+        }
+      ],
+      "fullDescription": "CircuitJS 电路工作台集成原生 TypeScript 电路求解、编辑与示波器。应用整体按 GPL-2.0-or-later 提供，完整对应源代码、上游版本和重建说明随包交付。首版限定基础 RLC、电压源、开关等经过验收的类型；恢复项目不会自动运行。官方上传仅暂存交付包与介绍，不选择许可证；当前商店发布接口只接受 MIT，本 GPL 应用不能据此宣称已公开上架。"
+    },
+    "verification": {
+      "build": "passed",
+      "tests": 6,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/circuitjs.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.8.0.md",
+      "acceptance": "workbenches/77-circuitjs/ACCEPTANCE.md",
+      "upstream": "pfalstad/circuitjs1 · e952e788a4135a693bfd4cee7883f9b3314e3e76 · GPL-2.0-or-later"
+    }
   },
   {
     "name": "glTF Transform",
@@ -3480,12 +3529,12 @@
     "category": "三维资产",
     "kind": "原生工具/组件",
     "workbench": "模型材质检查、修整和GLB交付",
-    "core_features": "原生NodeIO/core读写、节点/材质修改和GLB复验",
+    "core_features": "自包含GLB检查、节点与PBR材质修改、JSON元数据、保留蒙皮/动画/贴图的结果与工程导出",
     "integration": "固定原生核心，适配官方模板和完整工作副本",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "普通自包含模型优先；压缩、特殊扩展和纹理编码逐项验证。",
+    "caveat": "普通无扩展GLB，1.4MB、50000顶点及贴图预算；压缩、Morph及未验证扩展明确拒绝；Floatboat客户端导入未验证。",
     "url": "https://github.com/donmccurdy/glTF-Transform",
     "archived": false,
     "sources": [
@@ -3497,7 +3546,31 @@
     "id": 78,
     "slug": "gltf-transform",
     "directory": "workbenches/78-gltf-transform",
-    "status": "planned",
-    "version": "0.8.0"
+    "status": "local-verified",
+    "version": "0.8.0",
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/gltf-transform.png",
+          "caption": "glTF Transform · 浅色模型陈列、结构树与材质检查器"
+        }
+      ]
+    },
+    "verification": {
+      "build": "passed",
+      "tests": 11,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "passed",
+      "package": "passed",
+      "screenshot": "docs/screenshots/gltf-transform.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-28",
+      "record": "docs/release-0.8.0.md",
+      "acceptance": "workbenches/78-gltf-transform/ACCEPTANCE.md",
+      "upstream": "@gltf-transform/core 4.5.1 · 895b70777fda68aa321358d17dab2105e8564d08；Three 0.185.0 · MIT"
+    }
   }
 ]

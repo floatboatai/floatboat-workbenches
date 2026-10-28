@@ -227,5 +227,37 @@
       "bytes": 40858,
       "sha256": "f777c0a3f23bd2a9923735fd34e189d04d11031ca340348fc0760ebf7b4e43f0"
     }
-  ]
+  ],
+  "integratedPackage": {
+    "directory": "workbenches/76-oasis-editor",
+    "version": "0.8.0",
+    "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
+    "filename": "76-oasis-editor-0.8.0.fbworkbench",
+    "bytes": 20231599,
+    "sha256": "39af33f96027fcdb1e8823927e5ac94df226d1624b53ba199c35ecf8b0d6271f",
+    "crc": "passed",
+    "sourceFilesMatched": 42,
+    "assetFilesMatched": 20,
+    "businessData": "excluded",
+    "hostImport": "unverified",
+    "license": "MIT",
+    "deliveryPath": "workbench-oasis-editor/oasis-editor-studio-0.8.0.fbworkbench",
+    "introductionFile": "workbench-oasis-editor/presentation.json"
+  },
+  "integratedApplicationTests": 9,
+  "exportedSourceLinuxTests": {
+    "passed": 9,
+    "environment": "node:22-bookworm / Node22.23.3",
+    "network": "none",
+    "resourceMapping": "passed",
+    "dependencies": "prepared locked dependencies mounted read-only"
+  },
+  "screenshot": {
+    "path": "../../docs/screenshots/oasis-editor.png",
+    "dimensions": [
+      1440,
+      1000
+    ],
+    "sha256": "3fa2f77b47687955371ddab4271845b640bf90e51a0a8891b9b5076d86b4d1bd"
+  }
 }

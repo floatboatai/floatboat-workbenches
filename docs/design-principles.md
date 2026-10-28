@@ -107,3 +107,11 @@ Vercel React Best Practices 用于加载、数据获取和渲染效率；Web Des
 | Ray Optics Simulation | 光路主屏、器材架与实验读数 |
 | Invoice Builder | 明细填写、纸张校样与PDF预览 |
 | Mesh2Motion | 三维舞台、骨架树、关节参数与动作轨 |
+
+## 0.8.0 分页文档、电路与模型检查
+
+| 产品 | 工作空间 |
+| --- | --- |
+| Oasis Editor | 纸张编辑区、分页校样与文档边栏 |
+| CircuitJS1 | 电路画布、仪表与示波轨 |
+| glTF Transform | 浅色模型陈列、结构树与材质检查器 |
