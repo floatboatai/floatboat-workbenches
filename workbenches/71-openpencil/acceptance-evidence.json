@@ -20,5 +20,18 @@
   "limitations": [
     "Scoped component drafting, not complete upstream GUI",
     "Advanced FIG/CanvasKit parity and external Figma import unverified"
-  ]
+  ],
+  "recoveryExportImportReload": {
+    "passed": true,
+    "schema": "snapshot:{title,data,extra}",
+    "newDocumentId": true,
+    "unappliedDraftsRetained": true,
+    "pendingOperationsReplayed": false
+  },
+  "navigationDuringDelayedSave": {
+    "passed": true,
+    "allVisibleEditFieldsDisabled": true,
+    "oldAndNewDocumentsPreserved": true,
+    "sharedAutosaveChanged": false
+  }
 }

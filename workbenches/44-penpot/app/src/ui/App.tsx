@@ -38,7 +38,22 @@ export function App() {
   const file = useRef<HTMLInputElement>(null),
     epoch = useRef(p.documentKey);
   epoch.current = p.documentKey;
-  const mutable = !p.loading && !p.busy && !busy;
+  const [transitioning, setTransitioning] = useState(false);
+  const transitionRef = useRef(false);
+  async function transition(action: () => Promise<unknown>) {
+    if (transitionRef.current) return;
+    transitionRef.current = true;
+    setTransitioning(true);
+    try {
+      await action();
+    } catch (e) {
+      p.report(e);
+    } finally {
+      transitionRef.current = false;
+      setTransitioning(false);
+    }
+  }
+  const mutable = !p.loading && !p.busy && !transitioning && !busy;
   let issue = "";
   try {
     kitValue(p.data);
@@ -203,10 +218,10 @@ export function App() {
           items={p.items}
           id={p.current?.id}
           disabled={!mutable}
-          onOpen={(id) => void p.open(id)}
+          onOpen={(id) => void transition(() => p.open(id))}
         />
         <div className="top-actions">
-          <button disabled={!mutable} onClick={() => void p.fresh()}>
+          <button disabled={!mutable} onClick={() => void transition(() => p.fresh())}>
             <Plus size={15} />
             新建
           </button>
@@ -224,7 +239,7 @@ export function App() {
           accept=".json,.penpot,.zip"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void importFile(f);
+            if (f) void transition(() => importFile(f));
           }}
         />
       </header>
@@ -678,7 +693,7 @@ export function App() {
               }
             />
           </label>
-          <button disabled={!mutable} onClick={() => void applyJson()}>
+          <button disabled={!mutable} onClick={() => void transition(() => applyJson())}>
             作为新项目导入
           </button>
         </section>
@@ -689,10 +704,10 @@ export function App() {
         </span>
         {["offline", "draft", "conflict"].includes(p.autoState.phase) && (
           <>
-            <button onClick={() => void p.save()}>重试保存</button>
+            <button disabled={!mutable} onClick={() => void p.save()}>重试保存</button>
             <button onClick={p.exportDraft}>导出恢复稿</button>
             {p.current && (
-              <button onClick={() => void p.open(p.current!.id)}>
+              <button disabled={!mutable} onClick={() => void transition(() => p.open(p.current!.id))}>
                 打开服务器版本
               </button>
             )}

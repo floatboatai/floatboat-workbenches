@@ -28,5 +28,18 @@
   "limitations": [
     "Scoped prototype proofing, not full desktop GUI",
     "Native GUI re-open and Floatboat import not separately verified"
-  ]
+  ],
+  "recoveryExportImportReload": {
+    "passed": true,
+    "schema": "snapshot:{title,data,extra}",
+    "newDocumentId": true,
+    "unappliedDraftsRetained": true,
+    "pendingOperationsReplayed": false
+  },
+  "navigationDuringDelayedSave": {
+    "passed": true,
+    "allVisibleEditFieldsDisabled": true,
+    "oldAndNewDocumentsPreserved": true,
+    "sharedAutosaveChanged": false
+  }
 }

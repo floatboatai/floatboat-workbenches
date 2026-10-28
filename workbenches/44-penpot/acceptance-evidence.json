@@ -21,5 +21,18 @@
     "Design asset/sample workbench, not full Penpot editor",
     "Native import extracts supported solid color/typography assets only",
     "Full Penpot client import/font fidelity and Floatboat import unverified"
-  ]
+  ],
+  "recoveryExportImportReload": {
+    "passed": true,
+    "schema": "snapshot:{title,data,extra}",
+    "newDocumentId": true,
+    "unappliedDraftsRetained": true,
+    "pendingOperationsReplayed": false
+  },
+  "navigationDuringDelayedSave": {
+    "passed": true,
+    "allVisibleEditFieldsDisabled": true,
+    "oldAndNewDocumentsPreserved": true,
+    "sharedAutosaveChanged": false
+  }
 }

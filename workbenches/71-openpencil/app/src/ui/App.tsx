@@ -93,7 +93,22 @@ export function App() {
   const values = selected
     ? { ...properties(selected), ...(stored ?? {}) }
     : null;
-  const mutable = !p.loading && !p.busy && !actionBusy;
+  const [transitioning, setTransitioning] = useState(false);
+  const transitionRef = useRef(false);
+  async function transition(action: () => Promise<unknown>) {
+    if (transitionRef.current) return;
+    transitionRef.current = true;
+    setTransitioning(true);
+    try {
+      await action();
+    } catch (e) {
+      p.report(e);
+    } finally {
+      transitionRef.current = false;
+      setTransitioning(false);
+    }
+  }
+  const mutable = !p.loading && !p.busy && !transitioning && !actionBusy;
   function choose(id: string) {
     p.setDraft((d) => ({ ...d, selectedId: id }));
   }
@@ -243,10 +258,10 @@ export function App() {
           items={p.items}
           id={p.current?.id}
           disabled={!mutable}
-          onOpen={(id) => void p.open(id)}
+          onOpen={(id) => void transition(() => p.open(id))}
         />
         <div className="actions">
-          <button disabled={!mutable} onClick={() => void p.fresh()}>
+          <button disabled={!mutable} onClick={() => void transition(() => p.fresh())}>
             <Plus size={16} />
             新建
           </button>
@@ -271,7 +286,7 @@ export function App() {
           hidden
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void importFile(f);
+            if (f) void transition(() => importFile(f));
           }}
         />
       </header>
@@ -489,7 +504,7 @@ export function App() {
                 }
               }}
             >
-              <fieldset disabled={p.loading || p.busy}>
+              <fieldset disabled={!mutable}>
                 <label>
                   图层名称
                   <input
@@ -592,7 +607,7 @@ export function App() {
             <h2>交付备注</h2>
             <textarea
               aria-label="交付备注"
-              disabled={p.loading || p.busy}
+              disabled={!mutable}
               name="notes"
               value={p.data.notes}
               onChange={(e) =>
@@ -608,14 +623,14 @@ export function App() {
             未应用项目 JSON
             <textarea
               aria-label="项目 JSON 草稿"
-              disabled={p.loading || p.busy}
+              disabled={!mutable}
               value={json}
               onChange={(e) =>
                 p.setDraft((d) => ({ ...d, json: e.target.value }))
               }
             />
           </label>
-          <button onClick={() => void applyJson()} disabled={!mutable}>
+          <button onClick={() => void transition(() => applyJson())} disabled={!mutable}>
             作为新项目导入
           </button>
         </section>
@@ -626,10 +641,10 @@ export function App() {
         </span>
         {["offline", "conflict", "draft"].includes(p.autoState.phase) && (
           <>
-            <button onClick={() => void p.save()}>重试保存</button>
+            <button disabled={!mutable} onClick={() => void p.save()}>重试保存</button>
             <button onClick={p.exportDraft}>导出恢复稿</button>
             {p.current && (
-              <button onClick={() => void p.open(p.current!.id)}>
+              <button disabled={!mutable} onClick={() => void transition(() => p.open(p.current!.id))}>
                 打开服务器版本
               </button>
             )}

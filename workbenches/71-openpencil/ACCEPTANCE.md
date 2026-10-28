@@ -23,3 +23,9 @@
 `app/src/ui/App.tsx`: pass（字段名称、原生按钮、加载/错误、草稿、删除确认与焦点）。
 
 `app/src/ui/style.css`: pass（窄屏工作区、min-width、焦点、reduced-motion、无外部字体）。
+
+## 2026-10-28补充回归
+
+- 实际点击共享“导出恢复稿”，将`{snapshot:{title,data,extra}}`导入为新副本并刷新，确认项目编号独立、未完成属性和未应用JSON均精确保留。导入不重放任何历史pending操作。
+- 业务层切换锁覆盖新建、打开、文件导入和JSON导入的整个异步过程。真实Chrome延迟旧项目autosave时点击新建，确认全部可见编辑字段及项目选择禁用；释放保存后旧项目保留最后输入，新项目输入保存后刷新仍在。共享自动保存模块未修改。
+- 补丁后重新通过check/test/package。

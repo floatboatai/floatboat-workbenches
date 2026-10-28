@@ -68,7 +68,22 @@ export function App() {
       seq.current++;
     };
   }, [p.documentKey, p.data.file, p.loading, frameId, refresh]);
-  const mutable = !p.loading && !p.busy && !busy,
+  const [transitioning, setTransitioning] = useState(false);
+  const transitionRef = useRef(false);
+  async function transition(action: () => Promise<unknown>) {
+    if (transitionRef.current) return;
+    transitionRef.current = true;
+    setTransitioning(true);
+    try {
+      await action();
+    } catch (e) {
+      p.report(e);
+    } finally {
+      transitionRef.current = false;
+      setTransitioning(false);
+    }
+  }
+  const mutable = !p.loading && !p.busy && !transitioning && !busy,
     selected = view?.frames.find((x) => x.id === view.selectedId),
     texts = isRecord(p.draft.texts) ? p.draft.texts : {};
   const names = isRecord(p.draft.frameNames) ? p.draft.frameNames : {};
@@ -225,10 +240,10 @@ export function App() {
           items={p.items}
           id={p.current?.id}
           disabled={!mutable}
-          onOpen={(id) => void p.open(id)}
+          onOpen={(id) => void transition(() => p.open(id))}
         />
         <div className="header-actions">
-          <button disabled={!mutable} onClick={() => void p.fresh()}>
+          <button disabled={!mutable} onClick={() => void transition(() => p.fresh())}>
             <Plus size={15} />
             新建
           </button>
@@ -257,7 +272,7 @@ export function App() {
           aria-label="导入校样项目"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void importFile(f);
+            if (f) void transition(() => importFile(f));
           }}
         />
       </header>
@@ -283,7 +298,7 @@ export function App() {
             <button
               className={view.selectedId === f.id ? "selected" : ""}
               key={f.id}
-              disabled={busy || loading}
+              disabled={!mutable || loading}
               onClick={() => p.setDraft((d) => ({ ...d, frameId: f.id }))}
             >
               <span className="frame-number">
@@ -324,7 +339,7 @@ export function App() {
               {["png", "svg", "pdf"].map((f) => (
                 <button
                   key={f}
-                  disabled={!view || busy || loading}
+                  disabled={!view || !mutable || loading}
                   onClick={() => void exportFile(f)}
                 >
                   {f.toUpperCase()}
@@ -383,7 +398,7 @@ export function App() {
                       id={"text-" + n.id}
                       aria-label={"文案 " + n.id}
                       value={value}
-                      disabled={p.loading || p.busy}
+                      disabled={!mutable}
                       onChange={(e) => draftText(n.id, e.target.value)}
                     />
                     <button
@@ -441,7 +456,7 @@ export function App() {
                 id="review-note"
                 aria-label="交付备注"
                 value={p.data.notes[selected.id] ?? ""}
-                disabled={p.loading || p.busy}
+                disabled={!mutable}
                 onChange={(e) =>
                   p.setData((d) => ({
                     ...d,
@@ -480,7 +495,7 @@ export function App() {
               }
             />
           </label>
-          <button disabled={!mutable} onClick={() => void applyJson()}>
+          <button disabled={!mutable} onClick={() => void transition(() => applyJson())}>
             作为新项目导入
           </button>
         </section>
@@ -491,10 +506,10 @@ export function App() {
         </span>
         {["offline", "draft", "conflict"].includes(p.autoState.phase) && (
           <>
-            <button onClick={() => void p.save()}>重试保存</button>
+            <button disabled={!mutable} onClick={() => void p.save()}>重试保存</button>
             <button onClick={p.exportDraft}>导出恢复稿</button>
             {p.current && (
-              <button onClick={() => void p.open(p.current!.id)}>
+              <button disabled={!mutable} onClick={() => void transition(() => p.open(p.current!.id))}>
                 打开服务器版本
               </button>
             )}
