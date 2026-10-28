@@ -1,0 +1,18 @@
+{
+  "source": "https://github.com/google/fonts/blob/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+  "originalSha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+  "license": "OFL-1.1",
+  "modification": "Static instancing at weight400 and700 using fontTools4.68.0; family renamed Workbench Sans SC; original glyph coverage retained.",
+  "files": [
+    {
+      "file": "WorkbenchSansSC-Bold.ttf",
+      "sha256": "58dac73ced33d8ada7dfc5d28f3a128b5f981a43f5d41749780386c23b8e337a",
+      "bytes": 10585476
+    },
+    {
+      "file": "WorkbenchSansSC-Regular.ttf",
+      "sha256": "62b799fffb675e625d00857e5f2bbb2871957f8d1d202a94ffc5a09292a96eaf",
+      "bytes": 10595932
+    }
+  ]
+}

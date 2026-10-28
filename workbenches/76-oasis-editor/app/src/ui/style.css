@@ -1,0 +1,574 @@
+:root {
+  font-family: Inter, "PingFang SC", "Microsoft Yahei", sans-serif;
+  color: #302b2d;
+  background: #e7e3de;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+select {
+  cursor: pointer;
+}
+button {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+button:hover {
+  background: #e8e1e6;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #784765;
+  outline-offset: 3px;
+}
+input,
+select,
+textarea {
+  border: 1px solid #d8d0d2;
+  border-radius: 3px;
+  color: inherit;
+  background: #fffdfa;
+  padding: 7px;
+}
+a {
+  color: inherit;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.manuscript-app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+}
+.masthead {
+  height: 91px;
+  flex-shrink: 0;
+  background: #f8f5f0;
+  border-bottom: 1px solid #d4cccf;
+  display: flex;
+  align-items: center;
+  padding: 16px 25px;
+  gap: 30px;
+}
+.brand {
+  text-decoration: none;
+  color: #68405b;
+  font-family: Georgia, serif;
+  font-size: 44px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand span {
+  font: 10px/1.7 sans-serif;
+  letter-spacing: 2px;
+  width: 80px;
+}
+.title-area {
+  display: grid;
+  gap: 5px;
+  flex: 1;
+  min-width: 80px;
+}
+.title-area input {
+  font-size: 18px;
+  font-weight: 600;
+  border: 0;
+  padding: 3px 0;
+  background: transparent;
+  width: 100%;
+}
+.save-state {
+  font-size: 11px;
+  color: #6c7164;
+}
+.save-state.offline,
+.save-state.conflict,
+.save-state.draft {
+  color: #a44927;
+}
+.file-actions {
+  display: flex;
+  gap: 7px;
+  font-size: 12px;
+}
+.file-actions button {
+  border: 1px solid #c9bcc4;
+}
+.primary {
+  background: #67445c !important;
+  color: #fff;
+}
+.editing-bar {
+  padding: 9px 24px;
+  background: #fffdfa;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #d6cfd2;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.tools button {
+  padding: 5px 8px;
+}
+.tools select {
+  padding: 3px;
+}
+.tools label {
+  white-space: nowrap;
+}
+.divider {
+  height: 22px;
+  width: 1px;
+  background: #d3cbce;
+  margin: 0 7px;
+}
+.bold {
+  font-weight: 700;
+}
+.panel-toggle {
+  white-space: nowrap;
+}
+.message {
+  background: #f5eee0;
+  padding: 8px 24px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.message.error {
+  background: #f9e5df;
+  color: #812c23;
+}
+.message button {
+  min-height: 20px;
+  padding: 0 10px;
+}
+.desk {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) 254px;
+  flex: 1;
+  min-height: 0;
+}
+.desk.notes-hidden {
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+.pages-panel {
+  background: #f2eeea;
+  border-right: 1px solid #d6cfd2;
+  padding: 24px 19px 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.sidebar-caption {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 10px;
+  color: #82787d;
+  margin-bottom: 15px;
+}
+.pages-panel select {
+  font-size: 11px;
+  width: 100%;
+  padding: 6px;
+}
+.new-document {
+  font-size: 11px;
+  text-align: left;
+  margin-top: 7px;
+}
+.page-heading {
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #d8d0d1;
+  margin-top: 20px;
+  padding-top: 20px;
+  color: #797076;
+}
+.page-thumbnails {
+  overflow: auto;
+  flex: 1;
+  margin: 8px -4px;
+}
+.page-thumbnails > button {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.mini-paper {
+  height: 135px;
+  background: #fffefd;
+  box-shadow: 0 2px 6px #51434b16;
+  border: 1px solid #d9cbd4;
+  position: relative;
+  padding: 19px 16px;
+  text-align: left;
+}
+.mini-paper span {
+  font:
+    9px Georgia,
+    serif;
+  color: #877780;
+  display: block;
+  margin-bottom: 10px;
+}
+.mini-paper i {
+  display: block;
+  height: 2px;
+  margin: 7px 0;
+  background: #ded7d6;
+}
+.mini-paper i:nth-child(3) {
+  width: 66%;
+}
+.mini-paper b {
+  position: absolute;
+  bottom: 7px;
+  right: 9px;
+  font:
+    11px Georgia,
+    serif;
+  color: #816676;
+}
+.page-thumbnails small {
+  font-size: 10px;
+  color: #81757d;
+  display: block;
+  margin-top: 7px;
+}
+.sidebar-bottom {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #998e94;
+  border-top: 1px solid #ddd4d7;
+  padding-top: 12px;
+}
+.paper-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.paper-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 26px;
+  font-size: 11px;
+  color: #81757e;
+  flex-shrink: 0;
+}
+.paper-caption label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.paper-caption select {
+  padding: 3px 5px;
+  background: #f2eeea;
+  font-size: 11px;
+  border: none;
+}
+.native-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.native-host {
+  height: 100%;
+  min-height: 500px;
+}
+.loading-paper {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 12px;
+}
+.native-host .oasis-editor {
+  --oasis-bg: #e7e3de;
+  --oasis-accent: #67445c;
+  --oasis-selection-bg: #67445c22;
+  --oasis-radius-lg: 0px;
+  --oasis-radius: 0px;
+  height: 100%;
+}
+.native-host [class*="status-bar"] {
+  display: none;
+}
+.proof-panel {
+  background: #f8f5f0;
+  padding: 24px 22px;
+  overflow: auto;
+  border-left: 1px solid #d6cfd2;
+}
+.proof-panel h2 {
+  font:
+    24px/1.5 Georgia,
+    "Songti SC",
+    serif;
+  font-weight: 400;
+  margin: 5px 0 25px;
+  color: #67445c;
+}
+.proof-panel label {
+  font-size: 11px;
+  display: block;
+  color: #76666f;
+  margin-bottom: 8px;
+}
+.proof-panel textarea {
+  width: 100%;
+  height: 155px;
+  resize: vertical;
+  min-height: 80px;
+  background: repeating-linear-gradient(#fffdfa, #fffdfa 27px, #e6dfdb 28px);
+  font-size: 12px;
+  line-height: 28px;
+  padding: 6px 10px;
+  border-color: #e5dbdf;
+}
+.proof-panel h3 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0 0 8px;
+}
+.proof-panel p {
+  font-size: 11px;
+  line-height: 1.85;
+  color: #887a82;
+}
+.proof-details,
+.recovery-actions {
+  margin-top: 23px;
+  border-top: 1px solid #dcd2d7;
+  padding-top: 19px;
+}
+.proof-panel button {
+  font-size: 11px;
+  border: 1px solid #d8cbd3;
+  margin: 3px 3px 3px 0;
+  min-height: 29px;
+  padding: 4px 8px;
+}
+.proof-panel .source-name {
+  overflow-wrap: anywhere;
+}
+.proof-panel .source-warning {
+  font-size: 10px;
+}
+.delete {
+  color: #944a48;
+}
+.desk-footer {
+  height: 29px;
+  flex-shrink: 0;
+  background: #f0ebe7;
+  border-top: 1px solid #d5cccf;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 24px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #8b7b84;
+}
+@media (max-width: 1100px) {
+  .desk {
+    grid-template-columns: 150px minmax(0, 1fr) 220px;
+  }
+  .desk.notes-hidden {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+  .brand span {
+    display: none;
+  }
+  .masthead {
+    gap: 15px;
+  }
+  .proof-panel {
+    padding: 22px 15px;
+  }
+  .editing-bar {
+    padding: 8px 15px;
+  }
+}
+@media (max-width: 760px) {
+  .masthead {
+    height: auto;
+    min-height: 107px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    gap: 9px 14px;
+  }
+  .brand {
+    font-size: 31px;
+  }
+  .title-area {
+    flex: 1;
+  }
+  .title-area input {
+    font-size: 15px;
+  }
+  .file-actions {
+    width: 100%;
+    justify-content: flex-end;
+    font-size: 11px;
+  }
+  .file-actions button {
+    min-height: 31px;
+  }
+  .editing-bar {
+    gap: 5px;
+    padding: 5px 10px;
+  }
+  .tools {
+    max-height: 76px;
+    overflow: auto;
+    font-size: 11px;
+  }
+  .tools button {
+    min-height: 29px;
+  }
+  .panel-toggle {
+    font-size: 11px;
+    padding: 5px;
+  }
+  .desk,
+  .desk.notes-hidden {
+    display: flex;
+    position: relative;
+  }
+  .pages-panel {
+    display: none;
+  }
+  .paper-column {
+    flex: 1;
+  }
+  .proof-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 240px;
+    z-index: 5;
+    box-shadow: -5px 0 20px #4d3b4b20;
+  }
+  .paper-caption {
+    padding: 9px 14px;
+  }
+  .desk-footer {
+    padding: 8px 12px;
+    letter-spacing: 0;
+  }
+  .desk-footer span:last-child {
+    display: none;
+  }
+  .message {
+    padding: 6px 14px;
+  }
+  .native-host {
+    min-width: 320px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.native-host .oasis-editor-app,
+.native-host .oasis-editor-main-container,
+.native-host .oasis-editor-stage {
+  background: #e7e3de !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+.native-host .oasis-editor-editor-shell {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.native-host .oasis-editor-editor {
+  background: transparent !important;
+}
+.native-host .oasis-editor-paper {
+  border-radius: 0 !important;
+  box-shadow: 0 3px 12px #41323d14 !important;
+}
+.native-host .oasis-editor-editor-scroll-content {
+  padding: 18px 20px !important;
+}
+.native-host .oasis-editor-status-bar,
+.native-host .oasis-editor-statusbar {
+  display: none !important;
+}
+
+.mobile-documents {
+  display: none;
+}
+@media (max-width: 760px) {
+  .mobile-documents {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f7f3ef;
+    border-bottom: 1px solid #d5ccd0;
+    padding: 6px 12px;
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+  .mobile-documents select {
+    flex: 1;
+    min-width: 0;
+    max-width: 240px;
+    padding: 5px;
+  }
+  .mobile-documents button {
+    white-space: nowrap;
+    min-height: 28px;
+    padding: 4px 6px;
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "package": "oasis-editor@0.0.195",
+  "commit": "ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195",
+  "upstream": {
+    "index-K-7FcXvb.js": "5953977179a64542711b7d3aebf198f4274fc6b87d3eb5677008918d665f40e5",
+    "OasisEditorApp-CQRNpkya.js": "a156412f98108aeaf6b69989ad19506c2198735b8c96c366eee48c41a7d61151",
+    "LICENSE": "fd230f62df58abdb2192b8809bf1be4979789d0ffd21b37127255bcf954c882b",
+    "oasis-editor.js": "f0341461fb793db6ab8c860076a1ca9e30c422d34ed5a97555a6df0fa4c347eb",
+    "oasis-editor.css": "ea6ee43ad47902aa2a13d430b6658a42d11dc9e79063d93488cbbb2495484c08",
+    "mountController-D2srsZ5t.js": "47ca851537318ee47b9098b20cc6a6c419d5df3e487bfdfca8c1e04ca6c16aa9",
+    "importDocxWorker-D5fxy-0f.js": "6d076c4d2659a015eeb0b2e47679c93935f826a76d16bd70651007a82c1ff94e"
+  },
+  "modification": "Add setWorkbenchFonts(regular,bold) hook replacing bundled font bytes consistently for Canvas metrics, FontFace, PDF. No editor algorithms changed.",
+  "adaptedFiles": {
+    "index-K-7FcXvb.js": {
+      "sha256": "24b2768d9d26f29f34cf2873ca7f02187fdb29bfab6f116195164893db9e53ef",
+      "bytes": 5785299
+    },
+    "OasisEditorApp-CQRNpkya.js": {
+      "sha256": "a156412f98108aeaf6b69989ad19506c2198735b8c96c366eee48c41a7d61151",
+      "bytes": 1886709
+    },
+    "LICENSE": {
+      "sha256": "fd230f62df58abdb2192b8809bf1be4979789d0ffd21b37127255bcf954c882b",
+      "bytes": 1069
+    },
+    "oasis-editor.js": {
+      "sha256": "c6b1691c1011c82a41cadd20b9747fed115d3e8fc5bfaeae6c8a8ac7e9360d80",
+      "bytes": 2359
+    },
+    "oasis-editor.css": {
+      "sha256": "ea6ee43ad47902aa2a13d430b6658a42d11dc9e79063d93488cbbb2495484c08",
+      "bytes": 116888
+    },
+    "oasis-editor.d.ts": {
+      "sha256": "c6af33203541595f50b27fff319d3365dc494932ff36e12b28b1616c78d36a4b",
+      "bytes": 106
+    },
+    "mountController-D2srsZ5t.js": {
+      "sha256": "47ca851537318ee47b9098b20cc6a6c419d5df3e487bfdfca8c1e04ca6c16aa9",
+      "bytes": 243
+    },
+    "assets/importDocxWorker-D5fxy-0f.js": {
+      "sha256": "ae44e04df13e4ba43405b1e1e98c413726e088ed03624c6781585cff138beb51",
+      "bytes": 402063
+    }
+  },
+  "modifications": [
+    "Add setWorkbenchFonts(regular,bold): one static CJK byte source for Canvas metrics, FontFace and native PDF, before editor initialization.",
+    "Normalize imported CSS font-family lists to one family in main/worker and export a single OOXML typeface plus eastAsia. The adapter final ZIP boundary normalizes preserved rFonts too, without changing other parts.",
+    "Lower UI zoom minimum from 50% to 25% for small viewports."
+  ],
+  "runtimeWasm": "No WebAssembly path loaded; Canvas, static DOCX worker and PDF exercised under unchanged template CSP.",
+  "inspectedUpstreamHead": "d69f25e4f751ce6904a45ff56253e6d1bbc83c49",
+  "npmIntegrity": "sha512-Ht82MA8z6Tp9sGQEKWR7Yv8yls7/zrHT3IHcodhbW2t/iE9UbHil2XvdoZqsCIxdUGFXgeGIB1wqqCDRut5rWg=="
+}

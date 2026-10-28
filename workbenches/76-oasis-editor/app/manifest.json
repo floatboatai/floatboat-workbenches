@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
+  "registryName": "oasis-editor-studio",
+  "name": "Oasis Editor 工作台",
+  "description": "分页文档编辑、DOCX往返、纸张校样与完整工作稿",
+  "version": "0.8.0",
+  "changelog": "原生Canvas分页编辑、DOCX/PDF往返、中文静态字体、完整OOXML与原件恢复、自动保存。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "native",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "src/vendor/oasis-editor"
+    },
+    {
+      "id": "fonts",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "fonts"
+    },
+    {
+      "id": "notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    },
+    {
+      "id": "originals",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "originals",
+      "access": "read-write"
+    },
+    {
+      "id": "third-party-notices",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "THIRD-PARTY-NOTICES.md"
+    }
+  ]
+}
