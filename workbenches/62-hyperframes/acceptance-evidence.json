@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-28T03:29:04.008Z",
+  "projectSaveReload": true,
+  "rawDraftReload": true,
+  "sceneOperations": true,
+  "importNewProject": true,
+  "actualHyperframesRender": true,
+  "downloadAndReload": true,
+  "desktop": [
+    1440,
+    1080
+  ],
+  "mobile": [
+    375,
+    900
+  ],
+  "noOverflow": true,
+  "pageErrors": [],
+  "delayedEdit": true,
+  "lostReceipt": true,
+  "invalidDurationRestore": true,
+  "optimisticConflict": true,
+  "version": "0.5.0",
+  "applicationTests": 6,
+  "rendererTests": 3,
+  "engine": "hyperframes@0.8.210",
+  "actualRender": {
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "durationSeconds": 11
+  },
+  "hostLlm": "not-used",
+  "hostImport": "unverified",
+  "screenshot": {
+    "path": "../../docs/screenshots/hyperframes.png",
+    "sha256": "06fbaec2a0fbd0584c011f26b2f692a4e281b1ffd36c180f095f346442dcbed2",
+    "dimensions": [
+      1440,
+      1149
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "floatboat-hyperframes-renderer",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-strip-types server.mjs",
+    "test": "node --experimental-strip-types --test contract.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.16.0 <23"
+  },
+  "dependencies": {
+    "hyperframes": "0.8.210"
+  }
+}
