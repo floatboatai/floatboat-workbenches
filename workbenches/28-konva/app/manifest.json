@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.405cc043-fcc0-47f9-9a88-98489103d95b",
+  "registryName": "konva-studio",
+  "name": "Konva 标注画板",
+  "description": "图片标注、标签与图形编排，保留原图和可编辑工程",
+  "version": "0.6.0",
+  "changelog": "原生 Konva 标注、变换、图层及完整工程，工作稿自动保存。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "originals",
+      "kind": "directory",
+      "role": "data",
+      "location": "data",
+      "path": "originals",
+      "access": "read-write"
+    },
+    {
+      "id": "third-party-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "licenses"
+    }
+  ]
+}

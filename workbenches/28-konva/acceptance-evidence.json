@@ -1,0 +1,166 @@
+{
+  "url": "http://127.0.0.1:49233/",
+  "evidence": [
+    {
+      "name": "automatic save",
+      "passed": true,
+      "documentId": "9d408d83-2c11-45ad-9743-fef7756022a2"
+    },
+    {
+      "name": "native editable text and properties",
+      "passed": true
+    },
+    {
+      "name": "native Konva drag",
+      "passed": true,
+      "x": 110
+    },
+    {
+      "name": "resize rotation and layer order",
+      "passed": true
+    },
+    {
+      "name": "durable PNG original",
+      "passed": true,
+      "sha256": "ef2587cebde687be106aeb8636d3b565d8e17abf75dc123e3eaed36691b8e1f7"
+    },
+    {
+      "name": "canvas pixels and native PNG dimensions",
+      "passed": true,
+      "pixels": 145164,
+      "width": 1000,
+      "height": 640
+    },
+    {
+      "name": "refresh preserves invalid JSON and unapplied property",
+      "passed": true
+    },
+    {
+      "name": "actual cacheValue recovery imports as a new document",
+      "passed": true
+    },
+    {
+      "name": "portable original bytes round trip",
+      "passed": true
+    },
+    {
+      "name": "editing continues through delayed response without rollback",
+      "passed": true
+    },
+    {
+      "name": "server commit with lost response retries same mutation",
+      "passed": true
+    },
+    {
+      "name": "transition locks synchronously before delayed leave",
+      "passed": true
+    },
+    {
+      "name": "two windows conflict does not overwrite and reload cannot bypass conflict",
+      "passed": true
+    },
+    {
+      "name": "375px keyboard reduced motion",
+      "passed": true,
+      "overflow": {
+        "width": 375,
+        "scroll": 375
+      }
+    },
+    {
+      "name": "no unexpected console or page errors",
+      "passed": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: net::ERR_FAILED"
+  ],
+  "hostImport": "unverified",
+  "version": "0.6.0",
+  "status": "local-verified",
+  "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "engine": {
+    "name": "konva",
+    "version": "10.9.0",
+    "license": "MIT"
+  },
+  "preview": "http://127.0.0.1:50345/",
+  "tests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "check": "passed",
+  "extra": {
+    "transformerWidth": 436.5867145899856,
+    "pngDecoded": {
+      "width": 1000,
+      "height": 640,
+      "painted": 145164
+    },
+    "offlineNewCopy": true
+  },
+  "immutablePng": {
+    "delayedOriginal": true,
+    "editedDuringExport": true,
+    "exportPixel": [
+      228,
+      233,
+      223,
+      255
+    ],
+    "livePixel": [
+      0,
+      0,
+      255,
+      255
+    ],
+    "consoleErrors": []
+  },
+  "package": {
+    "path": "artifacts/konva-studio-0.6.0.fbworkbench",
+    "sha256": "7839a7659761b4af65bec35483733a38d1842718c29b6ead6294b59b1eeb32ad",
+    "crc": "passed",
+    "sourceCorrespondence": [
+      "application/DESIGN.md",
+      "application/ENGINEERING.md",
+      "application/LICENSE",
+      "application/REQUIREMENTS.md",
+      "application/index.html",
+      "application/migrations/0001_initial.sql",
+      "application/migrations/0002_projects.sql",
+      "application/migrations/0003_autosave.sql",
+      "application/package.json",
+      "application/pnpm-lock.yaml",
+      "application/src/contracts/autosave.ts",
+      "application/src/contracts/board.ts",
+      "application/src/contracts/project.ts",
+      "application/src/server/autosave.ts",
+      "application/src/server/images.ts",
+      "application/src/server/index.ts",
+      "application/src/server/store.ts",
+      "application/src/ui/App.tsx",
+      "application/src/ui/Canvas.tsx",
+      "application/src/ui/autosave-cache.ts",
+      "application/src/ui/autosave-client.ts",
+      "application/src/ui/connection.ts",
+      "application/src/ui/main.tsx",
+      "application/src/ui/requests.ts",
+      "application/src/ui/style.css",
+      "application/src/ui/workspace.tsx",
+      "application/tests/board.test.ts",
+      "application/tsconfig.json",
+      "application/workbench-assets/assets/third-party-notices/KONVA-LICENSE.txt",
+      "application/workbench-assets/assets/third-party-notices/NOTICE.md"
+    ],
+    "businessDataIncluded": false,
+    "transformedMetadata": [
+      "application/manifest.json"
+    ]
+  },
+  "limitations": [
+    "Not Polotno or arbitrary Konva JSON.",
+    "Recovery copies reference originals; portable complete projects include original bytes.",
+    "200 objects, 750 KB per image, 16 million pixels.",
+    "No undo, multiselect, free draw or filters."
+  ]
+}

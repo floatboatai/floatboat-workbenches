@@ -1,13 +1,13 @@
-# Konva 工作台
+# Konva 标注画板
 
-状态：计划中，尚未实现。
+0.6.0 · local-verified · [Konva](https://github.com/konvajs/konva) 10.9.0 / MIT
 
-目标：轻量设计工作台：图片标注、证书/标签排版、交互图形编辑
+原生 Konva 图形标注工作台：创建矩形、文字、箭头与 PNG/JPEG 原图，通过拖动、Transformer 或精确属性调整位置/尺寸/旋转，管理图层顺序。全幅校样画板与可收起属性工具，不是 Polotno。
 
-上游：https://github.com/konvajs/konva
+所有未应用输入与工程自动保存；延迟保存继续编辑、乐观冲突、离线副本和恢复稿重导入已验证。完整 JSON 工程包含原图；恢复稿只带原件引用，跨实例请使用完整工程。原生 PNG 在点击时冻结场景，后续编辑不改变正在导出的图像。
 
-适配路线：使用浏览器端 Konva/react-konva，工作台存业务图形模型和素材，Agent 操作明确的对象属性。
+![Konva 标注画板](../../docs/screenshots/konva.png)
 
-限制：基础引擎需要自行补齐编辑器 UI；不要混同为商用 Polotno SDK，Node 渲染还需原生后端。
+运行：根目录 `pnpm workbench prepare konva`，然后本目录 `pnpm workbench:check`、`pnpm test`、`pnpm dev -- --no-watch`。`pnpm package` 生成 `artifacts/konva-studio-0.6.0.fbworkbench`。客户端路径：Floatboat → My → Workbenches → Import workbench；hostImport=unverified。
 
-许可：MIT
+本地验收与限制见 [ACCEPTANCE.md](ACCEPTANCE.md) 与 [acceptance-evidence.json](acceptance-evidence.json)。原图每张最多 750 KB / 1600 万像素，最多 200 对象。暂不包含自由画笔、滤镜、多选、历史撤销、SVG 编辑和任意 Konva JSON。
