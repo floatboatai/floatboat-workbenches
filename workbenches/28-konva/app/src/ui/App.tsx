@@ -14,7 +14,11 @@ import {
   seed,
   validateBoard,
   restoreBoard,
-  parseImport,
+  parseProjectText,
+  assertProjectBytes,
+  serializeProject,
+  assertItemCapacity,
+  appendItem,
   makeItem,
   sourceValue,
   type Item,
@@ -105,9 +109,14 @@ export function App() {
   function add(kind: Item["kind"]) {
     if (transitionRef.current) return;
     const next = makeItem(kind, p.data.items.length % 8);
-    p.setData((b) => ({ ...b, items: [...b.items, next] }));
-    setSelected(next.id);
-    setInspector(true);
+    try {
+      p.setData((b) => appendItem(b, next));
+      p.setError("");
+      setSelected(next.id);
+      setInspector(true);
+    } catch (e) {
+      p.report(e);
+    }
   }
   function field(key: string, value: string) {
     if (!item || transitionRef.current) return;
@@ -154,9 +163,14 @@ export function App() {
     }
   }
   async function attach(file: File) {
+    if (transitionRef.current || p.loading || p.busy) return;
     const key = p.documentKey;
-    setAssetBusy(true);
     try {
+      p.setData((b) => {
+        assertItemCapacity(b);
+        return b;
+      });
+      setAssetBusy(true);
       if (file.size > 750000) throw new Error("每张原图最多 750 KB。");
       const source = sourceValue(
         await request("/api/originals", {
@@ -174,7 +188,8 @@ export function App() {
         width: Math.min(500, source.width),
         height: (source.height * Math.min(500, source.width)) / source.width,
       };
-      p.setData((b) => ({ ...b, items: [...b.items, next] }));
+      p.setData((b) => appendItem(b, next));
+      p.setError("");
       setSelected(next.id);
       p.setNotice("原图已加入画板并保存。");
     } catch (e) {
@@ -185,8 +200,8 @@ export function App() {
   }
   async function importFile(file: File) {
     await transition(async () => {
-      if (file.size > 12000000) throw new Error("工程文件超过 12 MB。");
-      const value = parseImport(JSON.parse(await file.text()));
+      assertProjectBytes(file.size);
+      const value = parseProjectText(await file.text());
       for (const raw of value.originals) {
         if (!isRecord(raw)) throw new Error("工程原图格式无效");
         const source = sourceValue(
@@ -228,11 +243,11 @@ export function App() {
       download(
         new Blob(
           [
-            JSON.stringify(
-              { format: "konva-annotation/v1", ...snapshot, originals },
-              null,
-              2,
-            ),
+            serializeProject({
+              format: "konva-annotation/v1",
+              ...snapshot,
+              originals,
+            }),
           ],
           { type: "application/json" },
         ),

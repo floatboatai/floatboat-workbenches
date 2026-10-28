@@ -84,9 +84,9 @@
     "version": "10.9.0",
     "license": "MIT"
   },
-  "preview": "http://127.0.0.1:50345/",
+  "preview": "http://127.0.0.1:49732/",
   "tests": {
-    "passed": 10,
+    "passed": 16,
     "failed": 0
   },
   "check": "passed",
@@ -117,9 +117,10 @@
     "consoleErrors": []
   },
   "package": {
-    "path": "artifacts/konva-studio-0.6.0.fbworkbench",
-    "sha256": "7839a7659761b4af65bec35483733a38d1842718c29b6ead6294b59b1eeb32ad",
+    "path": "konva-0.6.0-capacity-final.fbworkbench",
+    "sha256": "d52242cf51e3740c897d27189a63b0a7eec34da2883f92ecde6d82d913395ba0",
     "crc": "passed",
+    "files": 34,
     "sourceCorrespondence": [
       "application/DESIGN.md",
       "application/ENGINEERING.md",
@@ -148,19 +149,43 @@
       "application/src/ui/style.css",
       "application/src/ui/workspace.tsx",
       "application/tests/board.test.ts",
+      "application/tests/capacity-fixtures.ts",
+      "application/tests/capacity.test.ts",
       "application/tsconfig.json",
       "application/workbench-assets/assets/third-party-notices/KONVA-LICENSE.txt",
       "application/workbench-assets/assets/third-party-notices/NOTICE.md"
     ],
+    "transferHashes": "all verified",
     "businessDataIncluded": false,
     "transformedMetadata": [
-      "application/manifest.json"
+      "application/manifest.json",
+      "application/workbench.lock.json"
     ]
   },
   "limitations": [
     "Not Polotno or arbitrary Konva JSON.",
     "Recovery copies reference originals; portable complete projects include original bytes.",
-    "200 objects, 750 KB per image, 16 million pixels.",
+    "200 formal objects; existing over-limit working copies preserved; 750 KB per image, 16 million pixels; 16 MiB complete-project import/export.",
     "No undo, multiselect, free draw or filters."
-  ]
+  ],
+  "capacityReview": {
+    "url": "http://127.0.0.1:64480/",
+    "checks": [
+      "shape and image entrypoints reject at 200 without writing an extra object",
+      "image completion rechecks latest working board after another action fills slot 200",
+      "201-object existing draft survives import autosave refresh and recovery download",
+      "13 real PNG originals export above 12MB and re-import byte-for-byte within 16MiB",
+      "over-16MiB export reports error and does not download or omit originals",
+      "over-16MiB import uses the same byte gate before resource writes"
+    ],
+    "errors": [],
+    "thirteenImageBytes": 12503377,
+    "budgetBytes": 16777216,
+    "objectCap": 200,
+    "existingDraftCount": 201,
+    "finalConfirmation": {
+      "url": "http://127.0.0.1:49732/",
+      "limitErrorClearedAfterDeleteAndSuccessfulAdd": true
+    }
+  }
 }

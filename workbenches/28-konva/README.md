@@ -10,4 +10,4 @@
 
 运行：根目录 `pnpm workbench prepare konva`，然后本目录 `pnpm workbench:check`、`pnpm test`、`pnpm dev -- --no-watch`。`pnpm package` 生成 `artifacts/konva-studio-0.6.0.fbworkbench`。客户端路径：Floatboat → My → Workbenches → Import workbench；hostImport=unverified。
 
-本地验收与限制见 [ACCEPTANCE.md](ACCEPTANCE.md) 与 [acceptance-evidence.json](acceptance-evidence.json)。原图每张最多 750 KB / 1600 万像素，最多 200 对象。暂不包含自由画笔、滤镜、多选、历史撤销、SVG 编辑和任意 Konva JSON。
+本地验收与限制见 [ACCEPTANCE.md](ACCEPTANCE.md) 与 [acceptance-evidence.json](acceptance-evidence.json)。原图每张最多 750 KB / 1600 万像素，最多 200 对象；新增时同步检查，已有超限工作稿可恢复。完整工程导入/导出统一为 16 MiB，超限会明确提示且不会省略原图。暂不包含自由画笔、滤镜、多选、历史撤销、SVG 编辑和任意 Konva JSON。

@@ -29,6 +29,8 @@ export type Board = {
   items: Item[];
 };
 export const MAX_IMAGE_BYTES = 750000;
+export const MAX_ITEMS = 200;
+export const MAX_PROJECT_BYTES = 16 * 1024 * 1024;
 export function dimensions(width: number, height: number) {
   if (
     !Number.isInteger(width) ||
@@ -69,7 +71,6 @@ export function restoreBoard(v: unknown): Board {
     typeof v.height !== "number" ||
     typeof v.background !== "string" ||
     !Array.isArray(v.items) ||
-    v.items.length > 200 ||
     JSON.stringify(v).length > 1800000
   )
     throw new Error("画板格式或工作稿容量无效。");
@@ -98,6 +99,10 @@ export function restoreBoard(v: unknown): Board {
 }
 export function validateBoard(v: unknown): Board {
   const b = restoreBoard(v);
+  if (b.items.length > MAX_ITEMS)
+    throw new Error(
+      "正式画板最多 200 个对象，已有超限工作稿仍保留。请先删除多余对象。",
+    );
   if (
     b.width < 200 ||
     b.width > 2400 ||
@@ -293,4 +298,29 @@ export function parseImport(raw: unknown): {
     extra: (snapshot.extra ?? {}) as Record<string, unknown>,
     originals: Array.isArray(raw.originals) ? raw.originals : [],
   };
+}
+
+// Called inside the synchronous working-copy updater, including after an upload.
+export function assertItemCapacity(board: Board): void {
+  if (board.items.length >= MAX_ITEMS)
+    throw new Error("画板最多 200 个对象。请先删除不需要的对象，再添加。");
+}
+export function appendItem(board: Board, item: Item): Board {
+  assertItemCapacity(board);
+  return { ...board, items: [...board.items, item] };
+}
+export function assertProjectBytes(bytes: number): void {
+  if (bytes > MAX_PROJECT_BYTES)
+    throw new Error(
+      "完整工程超过 16 MiB，无法导入或导出。请拆分画板或减少原图；不会省略原图。",
+    );
+}
+export function serializeProject(value: unknown): string {
+  const text = JSON.stringify(value, null, 2);
+  assertProjectBytes(new TextEncoder().encode(text).length);
+  return text;
+}
+export function parseProjectText(text: string): ReturnType<typeof parseImport> {
+  assertProjectBytes(new TextEncoder().encode(text).length);
+  return parseImport(JSON.parse(text));
 }

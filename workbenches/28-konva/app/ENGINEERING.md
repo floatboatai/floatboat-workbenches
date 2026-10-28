@@ -9,3 +9,5 @@
 `server/images.ts` 验证 PNG/JPEG 魔数/尺寸，SHA-256 命名，原子写入已声明的 originals。GET 只接受哈希，无路径穿越。浏览器用 data:image/png/jpeg，不用 blob 图片或远程 CDN。工程图片逐张上传以适配约 2MB HTTP 请求限制。导出不读取外部 URL。
 
 验证：pnpm workbench:check；pnpm test；真实 Chrome 浏览器主流程/自动保存故障矩阵；pnpm package。app/licenses 为声明的固定 asset。源码包排除 originals、SQLite、IndexedDB 和浏览器测试数据。
+
+容量审查修复：appendItem 在同步 useProjects.setData 函数更新器内读取最新工作稿并执行 200 对象上限，图片入口在开始上传和响应完成两处检查。restoreBoard 不使用正式对象数量上限，已有超限对象仍按完整 wire 恢复；validateBoard 单独拒绝 >200 的正式模型。assertProjectBytes / serializeProject / parseProjectText 统一 16 MiB 工程预算，序列化后按 UTF-8 字节核验，超限不会产生下载或省略原件。
