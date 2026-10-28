@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "appId": "workbench.adb4b4ec-7b70-4b75-86e1-55b9532c0255",
+  "registryName": "geoinflow-studio",
+  "name": "抓取观测 · GEOInflow",
+  "description": "AI爬虫声明、访问证据与内容覆盖审查",
+  "version": "0.5.0",
+  "changelog": "接入GEOInflow原生爬虫分类核心，提供日志与内容清单导入、覆盖分析、处理记录和自动保存。",
+  "sdkVersion": "1.0.0",
+  "runtime": "node22-sqlite-v1",
+  "build": {
+    "profile": "typescript-react-v1",
+    "server": "src/server/index.ts",
+    "ui": "index.html"
+  },
+  "server": "dist/server/index.mjs",
+  "ui": "dist/ui",
+  "migrations": "migrations",
+  "capabilities": [],
+  "contributions": [],
+  "dependencies": [],
+  "resources": [
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    }
+  ]
+}

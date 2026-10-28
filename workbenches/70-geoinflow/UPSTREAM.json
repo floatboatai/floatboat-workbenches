@@ -1,0 +1,50 @@
+{
+  "repository": "https://github.com/yaojingang/GEOInflow",
+  "commit": "9eb3aefc5a3fa8d4be8026fe468d6927cd017ed4",
+  "license": "MIT",
+  "files": [
+    {
+      "path": "crawlers/registry.ts",
+      "upstream": "src/lib/liekan/crawlers/registry.ts",
+      "sha256": "5cade167e6f75ad76f694a5666b76c1fc83ef55febe92792d16f5a74f8a93e7d"
+    },
+    {
+      "path": "crawlers/catalog-metadata.ts",
+      "upstream": "src/lib/liekan/crawlers/catalog-metadata.ts",
+      "sha256": "edd27d36f093f770864601216f34d54fe64354595939c101883ac1eae3562472"
+    },
+    {
+      "path": "help/types.ts",
+      "upstream": "src/lib/liekan/help/types.ts",
+      "sha256": "e763258309394ed6c874dca4d7ea6d7619fe895a8c6fbe6af2b91af4f4ff5467"
+    },
+    {
+      "path": "rules/bots.ts",
+      "upstream": "src/lib/liekan/rules/bots.ts",
+      "sha256": "ae6dccdb52e07bfc95300781563bc9a76dd612805edd9c4e6692e28f7d2cabad"
+    },
+    {
+      "path": "strict-date.ts",
+      "upstream": "src/lib/liekan/strict-date.ts",
+      "sha256": "20f8fb56497c208679aabd96c9e9ccb5b77fb85a072a166d7b3526e710217e49"
+    },
+    {
+      "path": "coverage.json",
+      "upstream": "config/liekan/ai-platform-coverage.json",
+      "sha256": "0a1768b383d55e5fc3bcd67422304265fad5ce66dfc2bbbbec05b10f7e84cd23"
+    },
+    {
+      "path": "contracts/sources.ts",
+      "upstream": "src/lib/liekan/contracts/sources.ts",
+      "sha256": "1d840546edff0c266646836bbbef5dd8450621328a25a7a13d585bfd8f4d21d4"
+    }
+  ],
+  "adaptation": "Static published catalog shim; sources.ts relative JSON import and explicit index types; bots.ts non-null type assertion after filtering HTTP entries. Classification behavior preserved; no upstream database/tracker/IP verification service included. Relative TypeScript imports include .ts for Node22 native test execution.",
+  "adaptedFiles": {
+    "crawlers/published.ts": "ea90ff01d17e87daf894e872b2af613a82a64027c4dab7c87d4e7930b4e9dc51",
+    "contracts/sources.ts": "d743cb1b1c213dd0e9507287a29f54d7f1c3d3be5a50d16bbec584d7f7e3117e",
+    "rules/bots.ts": "b955c4de0dd0d8524a30f7c9d5a269904fe157280f561664289bb2fa431ea96a",
+    "crawlers/registry.ts": "a37c21e08cb7a12aa69f458421357799f9297f05ff65e8fbff176d007a7ee6b6",
+    "crawlers/catalog-metadata.ts": "03358238ae05089a9b5621ccdc8b98fa6b641421b450cd1ed99cb6fb1a5449e2"
+  }
+}

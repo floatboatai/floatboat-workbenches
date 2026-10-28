@@ -1,0 +1,46 @@
+{
+  "version": "0.5.0",
+  "verifiedAt": "2026-10-28",
+  "build": "passed",
+  "applicationTests": 13,
+  "browserChecks": [
+    "native classifier metrics match nine imported records and eight-page inventory",
+    "HTTP filtering and CSV export use identical request population",
+    "page investigation note, owner and review state autosave across reload",
+    "typing during delayed acknowledgement retains newest note",
+    "committed save with lost acknowledgement retries without duplicate project",
+    "unfinished date remains a recoverable draft and does not present false metrics",
+    "partial parse reports rejected rows and refuses adopting a stale candidate",
+    "late parsing response preserves changed source text and cannot replace data",
+    "actual recovery download imports as a new copy preserving both unfinished editors",
+    "stale-tab writes remain conflicts without overwriting confirmed project",
+    "new-site transition locks all controls until old working copy is saved",
+    "375px ledger scrolls within its region and keyboard focus works",
+    "no browser runtime errors"
+  ],
+  "nativeCore": {
+    "repository": "https://github.com/yaojingang/GEOInflow",
+    "commit": "9eb3aefc5a3fa8d4be8026fe468d6927cd017ed4",
+    "uaClassifier": "passed",
+    "referralCatalog": "passed",
+    "strictDates": "passed",
+    "sourceHashes": "passed"
+  },
+  "hostLlm": "not-used",
+  "externalService": "not-required",
+  "hostImport": "unverified",
+  "screenshot": {
+    "path": "../../docs/screenshots/geoinflow.png",
+    "dimensions": [
+      1440,
+      1941
+    ],
+    "sha256": "64f321a6fed1bfd363a50f9cfd80eed256bbf6474f2e99e1eba0415c2d5d9ce7"
+  },
+  "limitations": [
+    "UA and Referer are declarations, no IP/DNS verification",
+    "Sample logs are synthetic ordinary demonstration data",
+    "No live tracking or model-answer attribution",
+    "Native vendor catalogs and unchanged shared autosave exceed module-size advisory"
+  ]
+}
