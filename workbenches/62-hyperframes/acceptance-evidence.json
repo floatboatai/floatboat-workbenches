@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-28T03:29:04.008Z",
+  "at": "2026-10-28T03:39:29.922Z",
   "projectSaveReload": true,
   "rawDraftReload": true,
   "sceneOperations": true,
@@ -35,7 +35,7 @@
   "hostImport": "unverified",
   "screenshot": {
     "path": "../../docs/screenshots/hyperframes.png",
-    "sha256": "06fbaec2a0fbd0584c011f26b2f692a4e281b1ffd36c180f095f346442dcbed2",
+    "sha256": "c24389c51798d7e300f9bf2d37625f31c691628ddadf15705c2e7912f62258a4",
     "dimensions": [
       1440,
       1149
