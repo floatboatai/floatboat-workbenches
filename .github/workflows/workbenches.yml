@@ -97,4 +97,5 @@ jobs:
         env:
           FLOATBOAT_UPLOAD_URL: ${{ secrets.FLOATBOAT_UPLOAD_URL }}
           FLOATBOAT_UPLOAD_API_KEY: ${{ secrets.FLOATBOAT_UPLOAD_API_KEY }}
+          FLOATBOAT_PUBLISH_ENABLED: ${{ vars.FLOATBOAT_PUBLISH_ENABLED }}
         run: node scripts/upload-workbenches.mjs "$RUNNER_TEMP/workbench-artifacts"

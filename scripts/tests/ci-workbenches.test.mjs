@@ -18,6 +18,8 @@ import {
 } from "../ci-workbenches.mjs";
 import {
   readUploadBundle,
+  publishEndpoint,
+  submitForReview,
   uploadBundle,
   uploadEndpoint,
 } from "../upload-workbenches.mjs";
@@ -371,4 +373,89 @@ test("temporary server failures stop after three attempts without echoing respon
     { message: "Upload failed with HTTP 503." },
   );
   assert.equal(requests, 3);
+});
+
+const receipt = {
+  objectId: `wbpkg_${"a".repeat(64)}`,
+  registryName: "example-studio",
+  version: "1.2.3",
+};
+test("review endpoint is the upload endpoint's sibling", () => {
+  assert.equal(
+    publishEndpoint("https://example.com/api/workbenches/upload"),
+    "https://example.com/api/workbenches/publish",
+  );
+  assert.throws(() => publishEndpoint("http://example.com/upload"), /HTTPS/);
+});
+test("review submission sends only the receipt identity and confirms it", async () => {
+  const outcome = await submitForReview(receipt, {
+    url: "https://example.com/api/workbenches/publish",
+    apiKey: "official-fixture-key",
+    fetchImpl: async (url, options) => {
+      assert.equal(url, "https://example.com/api/workbenches/publish");
+      assert.equal(options.redirect, "error");
+      assert.equal(options.headers.Authorization, "Bearer official-fixture-key");
+      assert.deepEqual(JSON.parse(options.body), { objectId: receipt.objectId });
+      return Response.json({
+        code: 0,
+        data: { registryName: "example-studio", version: "1.2.3", status: "submitted" },
+      });
+    },
+  });
+  assert.deepEqual(outcome, { status: "submitted" });
+  await assert.rejects(
+    submitForReview(receipt, {
+      url: "https://example.com/p",
+      apiKey: "k",
+      fetchImpl: async () =>
+        Response.json({ code: 0, data: { registryName: "other", version: "1.2.3" } }),
+    }),
+    /identity/,
+  );
+});
+test("non-MIT packages are skipped, other refusals fail without retry", async () => {
+  const refuse = (errorCode, status = 400) => async () =>
+    Response.json({ code: -1, message: "secret detail", errorCode }, { status });
+  assert.deepEqual(
+    await submitForReview(receipt, {
+      url: "https://example.com/p",
+      apiKey: "k",
+      fetchImpl: refuse("WORKBENCH_MIT_REQUIRED"),
+    }),
+    { skipped: "not MIT licensed" },
+  );
+  let calls = 0;
+  await assert.rejects(
+    submitForReview(receipt, {
+      url: "https://example.com/p",
+      apiKey: "k",
+      fetchImpl: async (...args) => {
+        calls++;
+        return refuse("WORKBENCH_SUBMISSION_CONFLICT", 409)(...args);
+      },
+    }),
+    (error) =>
+      /HTTP 409 \(WORKBENCH_SUBMISSION_CONFLICT\)/.test(error.message) &&
+      !error.message.includes("secret detail"),
+  );
+  assert.equal(calls, 1);
+});
+test("review submission retries transient failures", async () => {
+  let calls = 0;
+  const outcome = await submitForReview(receipt, {
+    url: "https://example.com/p",
+    apiKey: "k",
+    sleep: async () => {},
+    fetchImpl: async () => {
+      calls++;
+      if (calls === 1) throw new Error("socket reset");
+      if (calls === 2) return new Response("busy", { status: 503 });
+      return Response.json({
+        code: 0,
+        data: { registryName: "example-studio", version: "1.2.3", status: "submitted" },
+      });
+    },
+  });
+  assert.equal(calls, 3);
+  assert.equal(outcome.status, "submitted");
 });

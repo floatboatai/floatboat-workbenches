@@ -165,10 +165,72 @@ export async function uploadBundle(
           throw new Error(
             "Upload response did not confirm the package identity.",
           );
-        return;
+        return result.data;
       }
       failure = `Upload failed with HTTP ${response.status}.`;
       await response.body?.cancel();
+      if (![408, 429].includes(response.status) && response.status < 500)
+        throw new Error(failure);
+    }
+    if (attempt < 2) await sleep(1000 * 2 ** attempt);
+  }
+  throw new Error(failure);
+}
+
+// The review submission endpoint is the upload endpoint's sibling, so no new secret is needed.
+export function publishEndpoint(uploadUrl) {
+  return new URL("publish", uploadEndpoint(uploadUrl)).href;
+}
+
+// A licence the store does not list (e.g. GPL CircuitJS) is a standing policy, not a failure.
+const SKIPPED = new Map([["WORKBENCH_MIT_REQUIRED", "not MIT licensed"]]);
+
+/** Submits a staged upload receipt for store review; returns { status } or { skipped }. */
+export async function submitForReview(
+  receipt,
+  { url, apiKey, fetchImpl = fetch, sleep = delay } = {},
+) {
+  if (!/^wbpkg_[a-f0-9]{64}$/u.test(receipt?.objectId ?? ""))
+    throw new Error("Upload receipt has no object identity.");
+  let failure = "Review submission failed.";
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let response;
+    try {
+      response = await fetchImpl(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ objectId: receipt.objectId }),
+        redirect: "error",
+        signal: AbortSignal.timeout(120_000),
+      });
+    } catch {
+      failure = "Review submission transport failed or timed out.";
+    }
+    if (response) {
+      let result = null;
+      try {
+        result = await response.json();
+      } catch {
+        /* Error bodies are optional; never echo raw text. */
+      }
+      if (response.ok && result?.code === 0) {
+        if (
+          result.data?.registryName !== receipt.registryName ||
+          result.data?.version !== receipt.version
+        )
+          throw new Error("Review response did not confirm the package identity.");
+        return { status: String(result.data.status ?? "submitted") };
+      }
+      const code =
+        typeof result?.errorCode === "string" &&
+        /^[A-Z0-9_]{1,80}$/u.test(result.errorCode)
+          ? result.errorCode
+          : "";
+      if (SKIPPED.has(code)) return { skipped: SKIPPED.get(code) };
+      failure = `Review submission failed with HTTP ${response.status}${code ? ` (${code})` : ""}.`;
       if (![408, 429].includes(response.status) && response.status < 500)
         throw new Error(failure);
     }
@@ -192,16 +254,38 @@ async function main() {
     )
     .sort((a, b) => a.name.localeCompare(b.name));
   if (!entries.length) throw new Error("No workbench bundles found.");
+  // Review submission is opt-in until the backend exposes the publish endpoint.
+  const review =
+    process.env.FLOATBOAT_PUBLISH_ENABLED === "true" ? publishEndpoint(url) : null;
+  const failures = [];
   // Validate all bundles before making any authenticated network request.
   for (const entry of entries)
     await readUploadBundle(join(directory, entry.name));
   for (const entry of entries) {
     const bundle = await readUploadBundle(join(directory, entry.name));
-    await uploadBundle(bundle, { url, apiKey });
-    console.log(
-      `Uploaded ${bundle.presentation.registryName} ${bundle.presentation.version}.`,
-    );
+    const receipt = await uploadBundle(bundle, { url, apiKey });
+    const label = `${bundle.presentation.registryName} ${bundle.presentation.version}`;
+    console.log(`Uploaded ${label}.`);
+    if (!review) continue;
+    try {
+      const outcome = await submitForReview(receipt, {
+        url: review,
+        apiKey,
+      });
+      console.log(
+        outcome.skipped
+          ? `Skipped review for ${label}: ${outcome.skipped}.`
+          : `Submitted ${label} for review (${outcome.status}).`,
+      );
+    } catch (error) {
+      failures.push(`${label}: ${error.message}`);
+      console.error(`Review submission failed for ${label}: ${error.message}`);
+    }
   }
+  if (failures.length)
+    throw new Error(
+      `${failures.length} review submission(s) failed:\n${failures.join("\n")}`,
+    );
 }
 if (
   process.argv[1] &&

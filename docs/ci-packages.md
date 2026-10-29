@@ -44,6 +44,15 @@ GitHub Actions 的 [Workbench packages](../.github/workflows/workbenches.yml) �
 
 平台现有作者资料已经支持封面和截图画廊。此次 CI 补齐的是工作台源码包、介绍图和作者资料之间的交付流程；后端将图片登记为该账号持有的媒体引用，沿用已有的展示及审核格式。
 
+## 提交商店审核
+
+上传接口只把包和介绍图暂存为官方账号的上传回执，不会出现在后台的上架审核里。后端提供 `POST /api/workbenches/publish`（与上传同一官方账号和 API Key）后，在仓库 Actions Variables 设置 `FLOATBOAT_PUBLISH_ENABLED=true`，上传作业会在每个包上传成功后用回执的 `objectId` 提交审核：
+
+- 地址由上传地址推出（同目录的 `publish`），不需要新的 Secret。
+- 后端沿用桌面端提交规则：仅接受 MIT 包、名称归属官方账号、版本号递增；同一版本重复提交是幂等的。已有商品的简介和截图会写入作者资料草稿。
+- 非 MIT 包（如 CircuitJS）记为“跳过”；其余拒绝（例如同一版本号对应了不同的包）会让上传作业失败并逐项列出，其他工作台继续提交。
+- 提交结果是待审核版本，批准和公开上架仍在后台审核中完成。
+
 ## 上传协议
 
 请求使用 `Authorization: Bearer <platform API key>` 和 `multipart/form-data`：
