@@ -14,6 +14,8 @@ export type DocumentData = {
   notes: string;
   source: Source | null;
   zoom: number;
+  /** Track-changes mode of this manuscript (added in 0.9.0; absent means off). */
+  trackChanges?: boolean;
 };
 export const seed: DocumentData = {
   schema: 1,
@@ -34,7 +36,8 @@ export function restoreDocument(value: unknown): DocumentData {
     typeof value.zoom !== "number" ||
     !Number.isFinite(value.zoom) ||
     value.zoom < 25 ||
-    value.zoom > 150
+    value.zoom > 150 ||
+    (value.trackChanges !== undefined && typeof value.trackChanges !== "boolean")
   )
     throw Error("工作稿字段无效。");
   if (bytes(value) > 2000000)
@@ -104,6 +107,13 @@ export function validateDocument(value: unknown): DocumentData {
   if (bytes(d) > 850000)
     throw Error("正式稿超过850KB；完整恢复稿已保留，请导出DOCX或恢复稿。");
   return d;
+}
+/** An import is refused (not kept as a draft) when it cannot become a formal save. */
+export function validateImport(value: unknown): DocumentData {
+  const d = restoreDocument(value);
+  if (bytes(d) > 850000)
+    throw Error("导入后的文稿超过850KB正式保存上限（多为图片），本次未导入；请压缩文中图片后再试，原文件不受影响。");
+  return validateDocument(d);
 }
 export function decodeRecovery(value: unknown) {
   if (

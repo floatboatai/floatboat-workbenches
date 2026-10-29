@@ -1,38 +1,23 @@
 import { normalizeDocxFonts } from "../contracts/docx-fonts";
 import { packNative, unpackNative } from "../contracts/source-package";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type {
-  EditorDocument,
-  OasisEditorClient,
-  OasisCommandName,
-} from "oasis-editor";
-import {
-  seed,
-  validateDocument,
-  restoreDocument,
-  decodeRecovery,
-} from "../contracts/document";
+import type { EditorDocument, OasisEditorClient, OasisCommandName } from "oasis-editor";
+import { seed, validateDocument, validateImport, restoreDocument, decodeRecovery } from "../contracts/document";
 import { useWorkbenchState } from "./autosave-client";
 import { NativeEditor } from "./NativeEditor";
 import { blank, importNative } from "./engine";
-import {
-  fromBase64,
-  storeOriginal,
-  loadOriginal,
-  preflight,
-  imageCount,
-  tableCount,
-} from "./files";
+import { fromBase64, storeOriginal, loadOriginal, preflight, imageCount, tableCount } from "./files";
 import { download } from "./requests";
-import {
-  FileDialog,
-  FormatBar,
-  SideNote,
-  PageIndex,
-  type Panel,
-} from "./DocumentChrome";
+import { FileDialog, SideNote, PageIndex, ReadingBar, type Panel } from "./DocumentChrome";
+import { Ribbon, type RibbonTab } from "./Ribbon";
+import { CommentsPanel } from "./ReviewTools";
+import { useEditorSnapshot } from "./ribbon-kit";
+import { useFitZoom } from "./fit-zoom";
+import { useReview } from "./use-review";
+import { DocumentBar, MessageBar } from "./DocumentBar";
+import { insertImageFile } from "./images";
 export function App() {
-  const p = useWorkbenchState(seed, validateDocument, "春日社区阅读计划", {
+  const p = useWorkbenchState(seed, validateDocument, "城南社区共享书房改造项目建议书", {
     storageKey: "oasis-editor-v1",
     restoreDraftData: restoreDocument,
   });
@@ -40,6 +25,19 @@ export function App() {
   live.current = p;
   const editor = useRef<OasisEditorClient | null>(null),
     version = useRef(0);
+  const [client, setClient] = useState<OasisEditorClient | null>(null);
+  const [snapshot, refreshSnapshot] = useEditorSnapshot(client);
+  const [tab, setTab] = useState<RibbonTab>("home");
+  const surface = useRef<HTMLElement>(null);
+  const zoom = useFitZoom(surface, snapshot.page?.width ?? 794, p.data.zoom);
+  const review = useReview({
+    editor,
+    documentKey: p.documentKey,
+    refresh: refreshSnapshot,
+    report: (e) => live.current.report(e),
+    saveTrack: (enabled) =>
+      live.current.setData((d) => ({ ...d, trackChanges: enabled })),
+  });
   const [ready, setReady] = useState(false),
     [switching, setSwitching] = useState(false),
     [operation, setOperation] = useState(""),
@@ -56,7 +54,7 @@ export function App() {
       requestAnimationFrame(() => panelTrigger.current?.focus());
   }
   useEffect(() => {
-    if (panel !== "notes" && panel !== "pages") return;
+    if (panel !== "notes" && panel !== "pages" && panel !== "comments") return;
     const escape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -70,6 +68,7 @@ export function App() {
     recoveryInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     editor.current = null;
+    setClient(null);
     setReady(false);
     version.current++;
   }, [p.documentKey]);
@@ -139,10 +138,7 @@ export function App() {
           (d) => d.message,
         ),
       ];
-      const candidate = validateDocument({
-        ...seed,
-        ...packNative(result.document),
-      });
+      const candidate = validateImport({ ...seed, ...packNative(result.document) });
       const source = await storeOriginal(bytes, file.name, warnings);
       unchanged(key, v);
       if (
@@ -228,8 +224,15 @@ export function App() {
     } catch (e) {
       p.report(e);
     }
+    refreshSnapshot();
+  }
+  function startComment(trigger: HTMLElement | null) {
+    if (!review.beginComment()) return;
+    panelTrigger.current = trigger;
+    setPanel("comments");
   }
   const key = p.documentKey;
+  const images = useMemo(() => imageCount(p.data.document), [p.data.document]);
   const mountedDocument = useMemo(
     () => unpackNative(p.data.document, p.data.archive),
     [key],
@@ -260,96 +263,66 @@ export function App() {
       >
         跳到正文
       </a>
-      <header className="document-bar">
-        <div className="file-anchor">
-          <span className="wordmark" aria-hidden="true">
-            oasis
-          </span>
-          <button
-            className="file-trigger"
-            aria-haspopup="dialog"
-            aria-expanded={panel === "file" || panel === "info"}
-            onClick={(event) => showPanel("file", event.currentTarget)}
-          >
-            文稿 <span aria-hidden="true">⌄</span>
-          </button>
-        </div>
-        <div className="document-heading">
-          <h1 className="sr-only">文稿编辑器</h1>
-          <label className="sr-only" htmlFor="document-title">
-            文稿名称
-          </label>
-          <input
-            id="document-title"
-            name="document-title"
-            autoComplete="off"
-            disabled={p.loading || switching}
-            value={p.title}
-            maxLength={120}
-            onChange={(event) => {
-              version.current++;
-              p.setTitle(event.target.value);
-            }}
-            placeholder="未命名文稿…"
-          />
-          <span className={"save-state " + p.autoState.phase} role="status">
-            {operation || p.autoState.message}
-          </span>
-        </div>
-        <div className="document-output">
-          <button
-            className="notes-trigger"
-            aria-haspopup="dialog"
-            aria-expanded={panel === "notes"}
-            onClick={(event) => showPanel("notes", event.currentTarget)}
-          >
-            笔记
-            {p.data.notes && <span className="note-dot" aria-hidden="true" />}
-          </button>
-          <button
-            className="pdf-action"
-            disabled={locked || !ready}
-            onClick={() => void exportFormat("pdf")}
-          >
-            PDF 校样 <span aria-hidden="true">↗</span>
-          </button>
-        </div>
-      </header>
-      <FormatBar disabled={locked || !ready} command={command} />
-      {(p.error || p.notice) && (
-        <div
-          className={"message " + (p.error ? "error" : "")}
-          role={p.error ? "alert" : "status"}
-        >
-          <span>{p.error || p.notice}</span>
-          <button
-            aria-label="关闭提示"
-            onClick={() => {
-              p.setError("");
-              p.setNotice("");
-            }}
-          >
-            ×
-          </button>
-        </div>
-      )}
-      <section className="writing-surface" id="paper" aria-label="文稿纸张">
+      <DocumentBar
+        title={p.title}
+        titleDisabled={p.loading || switching}
+        onTitle={(value) => {
+          version.current++;
+          p.setTitle(value);
+        }}
+        status={operation || p.autoState.message}
+        phase={p.autoState.phase}
+        panel={panel}
+        showPanel={showPanel}
+        hasNotes={!!p.data.notes}
+        pdfDisabled={locked || !ready}
+        onPdf={() => void exportFormat("pdf")}
+      />
+      <Ribbon
+        client={client}
+        snapshot={snapshot}
+        tab={tab}
+        setTab={setTab}
+        disabled={locked || !ready}
+        run={command}
+        author={review.author}
+        setAuthor={review.setAuthor}
+        onTrackChange={review.setTrackChanges}
+        onComment={() => startComment(document.activeElement as HTMLElement | null)}
+        commentsOpen={panel === "comments"}
+        toggleComments={(trigger) => showPanel("comments", trigger)}
+        onImage={(file) => void task("处理图片…", async () => {
+          const note = await insertImageFile(file);
+          if (note) live.current.setNotice(note);
+        })}
+      />
+      <MessageBar
+        error={p.error}
+        notice={p.notice}
+        dismiss={() => {
+          p.setError("");
+          p.setNotice("");
+        }}
+      />
+      <section
+        ref={surface}
+        className="writing-surface"
+        id="paper"
+        aria-label="文稿纸张"
+      >
         {!p.loading && (
           <NativeEditor
             key={key}
             document={mountedDocument}
-            zoom={p.data.zoom}
+            zoom={zoom.effective}
             onChange={(doc) => changed(key, doc)}
-            onReady={(client) => {
+            onReady={(next) => {
               if (live.current.documentKey === key) {
-                editor.current = client;
-                setReady(!!client);
-                if (
-                  client &&
-                  window.innerWidth < 760 &&
-                  live.current.data.zoom > 35
-                )
-                  live.current.setData((data) => ({ ...data, zoom: 35 }));
+                editor.current = next;
+                if (next)
+                  review.applySavedTrack(next, !!live.current.data.trackChanges);
+                setClient(next);
+                setReady(!!next);
               }
             }}
             onError={p.report}
@@ -357,41 +330,33 @@ export function App() {
           />
         )}
       </section>
-      <footer className="reading-bar">
-        <button
-          className="pages-trigger"
-          aria-haspopup="dialog"
-          aria-expanded={panel === "pages"}
-          onClick={(event) => showPanel("pages", event.currentTarget)}
-        >
-          {pages} 页 <span aria-hidden="true">⌃</span>
-        </button>
-        <span className="reading-label">
-          {imageCount(p.data.document) > 0
-            ? `${imageCount(p.data.document)} 张图片`
-            : ""}
-        </span>
-        <label>
-          缩放{" "}
-          <select
-            aria-label="页面缩放"
-            value={p.data.zoom}
-            onChange={(event) => {
-              version.current++;
-              p.setData((data) => ({
-                ...data,
-                zoom: Number(event.target.value),
-              }));
-            }}
-          >
-            {[25, 35, 50, 65, 80, 100, 125, 150].map((value) => (
-              <option key={value} value={value}>
-                {value}%
-              </option>
-            ))}
-          </select>
-        </label>
-      </footer>
+      <ReadingBar
+        pages={pages}
+        images={images}
+        pagesOpen={panel === "pages"}
+        onPages={(trigger) => showPanel("pages", trigger)}
+        zoom={p.data.zoom}
+        fit={zoom.clamped ? zoom.effective : null}
+        onZoom={(value) => {
+          zoom.choose();
+          if (value === null) return;
+          version.current++;
+          p.setData((data) => ({ ...data, zoom: value }));
+        }}
+      />
+      <CommentsPanel
+        open={panel === "comments"}
+        close={() => {
+          review.setComposing(null);
+          closePanel();
+        }}
+        client={client}
+        version={snapshot.commentsKey}
+        composing={review.composing}
+        setComposing={review.setComposing}
+        onAdd={review.addComment}
+        onUpdate={review.updateComment}
+      />
       <SideNote
         open={panel === "notes"}
         close={() => closePanel()}

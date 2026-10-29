@@ -83,4 +83,4 @@ export {
   et as validateDocument
 };
 
-export { setWorkbenchFonts } from "./index-K-7FcXvb.js";
+export { setWorkbenchFonts, registerWorkbenchLocale, setWorkbenchRevisionAuthor } from "./index-K-7FcXvb.js";

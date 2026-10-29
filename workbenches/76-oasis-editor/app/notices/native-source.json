@@ -10,31 +10,31 @@
     "mountController-D2srsZ5t.js": "47ca851537318ee47b9098b20cc6a6c419d5df3e487bfdfca8c1e04ca6c16aa9",
     "importDocxWorker-D5fxy-0f.js": "6d076c4d2659a015eeb0b2e47679c93935f826a76d16bd70651007a82c1ff94e"
   },
-  "modification": "Add setWorkbenchFonts(regular,bold) hook replacing bundled font bytes consistently for Canvas metrics, FontFace, PDF. No editor algorithms changed.",
+  "modification": "Workbench patches (0.8.x fonts + 0.9.0 editing fixes) listed in `modifications`; layout algorithms changed only where listed.",
   "adaptedFiles": {
     "index-K-7FcXvb.js": {
-      "sha256": "24b2768d9d26f29f34cf2873ca7f02187fdb29bfab6f116195164893db9e53ef",
-      "bytes": 5785299
+      "sha256": "5d76b35da066cc3902e463e48eaf754f10e2f965067c1f509dfefc24d50c4df2",
+      "bytes": 5789085
     },
     "OasisEditorApp-CQRNpkya.js": {
-      "sha256": "a156412f98108aeaf6b69989ad19506c2198735b8c96c366eee48c41a7d61151",
-      "bytes": 1886709
+      "sha256": "cc3476781a22a96154b113344f2e5c58c59b7f56ec47ec3a5ff0fabed8e7991f",
+      "bytes": 1888430
     },
     "LICENSE": {
       "sha256": "fd230f62df58abdb2192b8809bf1be4979789d0ffd21b37127255bcf954c882b",
       "bytes": 1069
     },
     "oasis-editor.js": {
-      "sha256": "c6b1691c1011c82a41cadd20b9747fed115d3e8fc5bfaeae6c8a8ac7e9360d80",
-      "bytes": 2359
+      "sha256": "0628fc65fc0dbd4a2f8a5ab145ee724ac3b2eebf8be5d4d33f6a51bec5c88416",
+      "bytes": 2412
     },
     "oasis-editor.css": {
       "sha256": "ea6ee43ad47902aa2a13d430b6658a42d11dc9e79063d93488cbbb2495484c08",
       "bytes": 116888
     },
     "oasis-editor.d.ts": {
-      "sha256": "c6af33203541595f50b27fff319d3365dc494932ff36e12b28b1616c78d36a4b",
-      "bytes": 106
+      "sha256": "2a9a7b978684ac6f03b48e02c25fa46d93255f4875d94ad735202bcc3faef628",
+      "bytes": 255
     },
     "mountController-D2srsZ5t.js": {
       "sha256": "47ca851537318ee47b9098b20cc6a6c419d5df3e487bfdfca8c1e04ca6c16aa9",
@@ -48,7 +48,17 @@
   "modifications": [
     "Add setWorkbenchFonts(regular,bold): one static CJK byte source for Canvas metrics, FontFace and native PDF, before editor initialization.",
     "Normalize imported CSS font-family lists to one family in main/worker and export a single OOXML typeface plus eastAsia. The adapter final ZIP boundary normalizes preserved rFonts too, without changing other parts.",
-    "Lower UI zoom minimum from 50% to 25% for small viewports."
+    "Lower UI zoom minimum from 50% to 25% for small viewports.",
+    "0.9.0: add registerWorkbenchLocale(id, strings) so the host app can supply a zh-CN table for native menus, context menus and dialogs; the image caption label uses 图 for zh locales.",
+    "0.9.0: add setWorkbenchRevisionAuthor(name); new tracked changes record the reviewer name instead of the hard-coded \"User\".",
+    "0.9.0: paint inserted (blue underline) and deleted (red strikethrough) tracked runs on the Canvas; upstream only marked table-cell revisions.",
+    "0.9.0: run normalization no longer merges runs with different revisions, and typing continues the caret's own insertion revision, so tracked insertions are kept instead of being merged away.",
+    "0.9.0: state commits keep activeZone/activeSectionIndex/activeFootnoteId/trackChangesEnabled/showMargins/showParagraphMarks when a producer omits them (caret-movement producers returned {document, selection} only, which switched track changes off and broke footnote editing), and ignore a commit of the live state proxy itself (infinite Proxy recursion).",
+    "0.9.0: client.setSelection switches the active story (main/footnote/header) to the story that owns the target paragraph.",
+    "0.9.0: line breaking treats each CJK character as a break opportunity with basic kinsoku (no line-start closing punctuation, no line-end opening punctuation), and no longer emits an empty first line when a long token starts a line; first-line and hanging indents now render for Chinese paragraphs.",
+    "0.9.0: header/footer zones are no longer tinted grey while editing the body.",
+    "0.9.0: source-backed DOCX export declares the DrawingML/VML namespaces (wp, a, pic, r, mc, wps, wpg, m, v, o, w10) on the fragment wrappers used to merge table cells, so pictures inside table cells no longer abort export with a NamespaceError.",
+    "0.9.0: paragraph export omits w:hanging=\"0\" when a first-line indent is set; ECMA-376 ignores w:firstLine whenever w:hanging is present, so Word and re-import dropped first-line indents."
   ],
   "runtimeWasm": "No WebAssembly path loaded; Canvas, static DOCX worker and PDF exercised under unchanged template CSP.",
   "inspectedUpstreamHead": "d69f25e4f751ce6904a45ff56253e6d1bbc83c49",

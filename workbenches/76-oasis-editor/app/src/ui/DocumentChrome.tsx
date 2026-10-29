@@ -1,109 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
-import type { OasisCommandName } from "oasis-editor";
 import type { ProjectSummary } from "../contracts/project";
 import type { Source } from "../contracts/document";
-export type Panel = "file" | "info" | "notes" | "pages" | null;
-export function FormatBar({
-  disabled,
-  command,
-}: {
-  disabled: boolean;
-  command: (name: OasisCommandName, payload?: unknown) => void;
-}) {
-  return (
-    <nav
-      className="format-bar"
-      aria-label="文字与段落格式"
-      onFocusCapture={(event) => {
-        if (event.target instanceof HTMLElement)
-          event.target.scrollIntoView({
-            block: "nearest",
-            inline: "nearest",
-            behavior: "auto",
-          });
-      }}
-    >
-      <div className="format-tools">
-        <div className="tool-group">
-          <button
-            aria-label="撤销"
-            title="撤销"
-            disabled={disabled}
-            onClick={() => command("undo")}
-          >
-            ↶
-          </button>
-          <button
-            aria-label="重做"
-            title="重做"
-            disabled={disabled}
-            onClick={() => command("redo")}
-          >
-            ↷
-          </button>
-        </div>
-        <div className="tool-group">
-          <button
-            className="tool-bold"
-            disabled={disabled}
-            onClick={() => command("bold")}
-          >
-            加粗
-          </button>
-          <button
-            className="tool-italic"
-            disabled={disabled}
-            onClick={() => command("italic")}
-          >
-            斜体
-          </button>
-          <button
-            className="tool-underline"
-            disabled={disabled}
-            onClick={() => command("underline")}
-          >
-            下划线
-          </button>
-          <label className="size-control">
-            字号{" "}
-            <select
-              aria-label="字号"
-              defaultValue="12"
-              disabled={disabled}
-              onChange={(e) => command("setFontSize", Number(e.target.value))}
-            >
-              {[10, 12, 14, 16, 20, 24, 32].map((n) => (
-                <option key={n}>{n}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div className="tool-group">
-          <button disabled={disabled} onClick={() => command("alignLeft")}>
-            左对齐
-          </button>
-          <button disabled={disabled} onClick={() => command("alignCenter")}>
-            居中
-          </button>
-          <button disabled={disabled} onClick={() => command("bulletList")}>
-            项目符号
-          </button>
-        </div>
-        <div className="tool-group">
-          <button
-            disabled={disabled}
-            onClick={() => command("insertTable", { rows: 3, columns: 3 })}
-          >
-            表格
-          </button>
-          <button disabled={disabled} onClick={() => command("pageBreak")}>
-            分页
-          </button>
-        </div>
-      </div>
-    </nav>
-  );
-}
+export type Panel = "file" | "info" | "notes" | "pages" | "comments" | null;
 const dateFormat = new Intl.DateTimeFormat("zh-CN", {
   month: "short",
   day: "numeric",
@@ -413,5 +311,56 @@ export function PageIndex({
         ))}
       </ol>
     </aside>
+  );
+}
+
+const ZOOMS = [25, 35, 50, 65, 80, 100, 125, 150];
+export function ReadingBar({
+  pages,
+  images,
+  pagesOpen,
+  onPages,
+  zoom,
+  fit,
+  onZoom,
+}: {
+  pages: number;
+  images: number;
+  pagesOpen: boolean;
+  onPages: (trigger: HTMLElement) => void;
+  zoom: number;
+  /** Effective zoom when the page is shrunk to the window width. */
+  fit: number | null;
+  onZoom: (value: number | null) => void;
+}) {
+  return (
+    <footer className="reading-bar">
+      <button
+        className="pages-trigger"
+        aria-haspopup="dialog"
+        aria-expanded={pagesOpen}
+        onClick={(event) => onPages(event.currentTarget)}
+      >
+        {pages} 页 <span aria-hidden="true">⌃</span>
+      </button>
+      <span className="reading-label">{images > 0 ? `${images} 张图片` : ""}</span>
+      <label>
+        缩放{" "}
+        <select
+          aria-label="页面缩放"
+          value={fit !== null ? "fit" : zoom}
+          onChange={(event) =>
+            onZoom(event.target.value === "fit" ? null : Number(event.target.value))
+          }
+        >
+          {fit !== null && <option value="fit">适合宽度 {fit}%</option>}
+          {ZOOMS.map((value) => (
+            <option key={value} value={value}>
+              {value}%
+            </option>
+          ))}
+        </select>
+      </label>
+    </footer>
   );
 }

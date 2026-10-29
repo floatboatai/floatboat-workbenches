@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key2, value) => key2 in obj ? __defProp(obj, key2, { enumerable: true, configurable: true, writable: true, value }) : obj[key2] = value;
 var __publicField = (obj, key2, value) => __defNormalProp(obj, typeof key2 !== "symbol" ? key2 + "" : key2, value);
-import { E as EMPTY_PROJECTION_CONTEXT, d as domTextMeasurer, g as getProjectedParagraphBlockHeight, e as estimateTableBlockHeight, p as projectParagraphLayout, a as getPageBodyBottom, b as getPageBodyTop, c as getPageContentWidth, F as FOOTNOTE_MARKER_GUTTER_PX, f as getParagraphText, h as getBlockParagraphs, i as getRunFootnoteReference, l as listReferencedEndnotes, j as getFootnoteDisplayMarker, k as createProjectionContext, m as getDocumentSections, n as getRunField, o as projectBlocksLayout, q as createSignal, r as cloneEditorState, s as createEditorStateFromDocument, t as createInitialEditorState, S as STANDARD_FONT_SIZES_PT, u as fontSizePxToPt, v as probeLocalFontFamilies, w as createEditorParagraphFromRuns, x as isInlineObjectRun, y as stylesEqual, z as cloneStyle, A as createEditorStyledRun, B as cloneParagraphList, C as cloneParagraph, D as getParagraphLength, G as cloneRun, H as getActiveZone, I as getActiveSectionIndex, J as getParagraphs, K as normalizeSelection, L as positionToParagraphOffset, M as cloneParagraphs, N as paragraphOffsetToPosition, O as findParagraphIndex, P as createCollapsedSelection, Q as isSelectionCollapsed, R as MATH_OBJECT_REPLACEMENT, T as setValueStyle, U as setBooleanStyle, V as parseFontSizePtToPx, W as formatFontSizePt, X as setParagraphStyleValue, Y as createEditorParagraph, Z as cloneBlocks, _ as resolveDefaultParagraphStyleId, $ as findParagraphTablePathLocation, a0 as findParagraphLocation, a1 as resolveTablePath, a2 as buildTableCellLayout, a3 as PT_PER_PX, a4 as createEditorTableCell, a5 as createEditorTableRow, a6 as createEditorTable, a7 as clampPosition, a8 as PX_PER_POINT, a9 as underlineStyleToCssDecorationStyle, aa as resolveImageSrc, ab as listKindForTag, ac as isParagraphTag, ad as collectInlineRuns, ae as parseParagraphStyle, af as getRunImage, ag as InlineShell, ah as BalloonShell, ai as DocumentShell, aj as findParagraphTableLocation, ak as createMemo, al as getCaretRectFromSnapshot, am as getParagraphRectFromSnapshot, an as createComponent, ao as CaretOverlay, ap as Show, aq as createRenderEffect, ar as style, as as setStyleProperty, at as setAttribute, au as memo, av as template, aw as Button, ax as useI18n, ay as createEffect, az as TextField, aA as Dialog, aB as insert, aC as className, aD as Grid, aE as SelectField, aF as StatusText, aG as ColorField, aH as UNDERLINE_STYLE_OPTIONS, aI as Stack, aJ as For, aK as ToggleChip, aL as FormField, aM as Checkbox, aN as FieldGroup, aO as Tabs, aP as NumberField, aQ as parseNumber, aR as createStore, aS as reconcile, aT as RadioGroup, aU as Radio$1, aV as TextAreaField, aW as COMMON_SYMBOLS, aX as getRecentSymbols, aY as SYMBOL_CATEGORIES, aZ as rememberSymbol, a_ as delegateEvents, a$ as EMPTY_EDITOR_MATH_EXPRESSION, b0 as serializeLinearMath, b1 as parseLinearMath, b2 as Text, b3 as SurfaceButton, b4 as onMount, b5 as onCleanup, b6 as CheckIcon, b7 as use, b8 as PluginUiHost, b9 as OasisEditorEditor, ba as OasisBrandMark, bb as setPreciseFontPreference, bc as setWelcomeSeen, bd as enablePreciseFontMode, be as WORD_NS$6, bf as XMLSerializer, bg as DOMParser, bh as WORD14_NS, bi as mergeNestedExtensionMarkup, bj as resolveOpcRelationships, bk as parseOpcRelationships, bl as JSZip, bm as normalizeOpcPartPath, bn as OPC_CONTENT_TYPES_PATH, bo as getOpcRelationshipOwnerPath, bp as serializeOpcRelationships, bq as OPC_ROOT_RELATIONSHIPS_PATH, br as hashDocxPartBytes, bs as parseOpcContentTypes, bt as serializeOpcContentTypes, bu as mergeParagraphPropertiesXmlSource, bv as setEditorRunOoxmlSource, bw as mergeRunOoxmlSourceIntoGeneratedXml, bx as mergeTableCellPropertiesXmlSource, by as mergeTableRowPropertiesXmlSource, bz as mergeTablePropertiesXmlSource, bA as getDocumentSectionsCanonical, bB as exportEditorDocumentToDocxBlob, bC as exportEditorDocumentToDocx, bD as pxToPt$1, bE as resolveFloatingObjectRect, bF as getTextBoxFloatingGeometry, bG as getPresetPathSegments, bH as buildListLabels, bI as assertNever, bJ as lineDashPatternPt, bK as DEFAULT_FONT_SIZE_PX, bL as resolveGradientAxis, bM as isDoubleUnderlineStyle, bN as isWavyUnderlineStyle, bO as underlineStyleLineWidthPx, bP as WAVY_UNDERLINE_WAVELENGTH_PX, bQ as WAVY_UNDERLINE_AMPLITUDE_PX, bR as DOUBLE_UNDERLINE_OFFSET_PX, bS as underlineStyleDashArray, bT as resolveEffectiveParagraphStyle, bU as EMPHASIS_GLYPH, bV as parseHexColorToRgb255, bW as rgb255ToHex, bX as getImageFloatingGeometry, bY as resolveEffectiveTextStyleForParagraph, bZ as textStyleToFontSizePt, b_ as mathDisplayText, b$ as TEXT_BASELINE_RATIO, c0 as resolveTextAlignmentBaselineOffset, c1 as resolveRenderedTextChar, c2 as resolveOpenTypeFeatureTags, c3 as isLowercaseSmallCapsChar, c4 as resolveDecorationLineY, c5 as DOUBLE_STRIKE_OFFSET_PX, c6 as resolveListLabel, c7 as getListLabelInset, c8 as getAlignedListLabelInset, c9 as getParagraphBorderInsets, ca as buildSegmentTable, cb as buildCanvasTableLayout, cc as resolveCanvasTableWidth, cd as resolveFloatingTableRect, ce as paragraphBetweenBorderMatches, cf as normalizeFamily, cg as ROBOTO_FONT_FILES, ch as loadFontAsset, ci as getRemotePdfFontFaces, cj as OFFICE_COMPAT_FONT_FAMILIES, ck as BinaryReader, cl as buildSfnt, cm as defaultFontDecoderRegistry, cn as SfntFontProgram, co as zlibSync, cp as renumberImageCaptionsInDocument, cq as collectPdfFontFamilies, cr as outlineFrom, cs as getPageHeaderZoneTop, ct as getPageColumnRects, cu as findFootnoteReference, cv as resolveImporterForFile, cw as roundTo, cx as getDocumentParagraphsCanonical, cy as getDocumentParagraphs, cz as getImageCaptionText, cA as isImageCaptionParagraph, cB as updateImageCaptionParagraph, cC as createImageCaptionParagraph, cD as renumberImageCaptionParagraphs, cE as getCaptionSelectionOffset, cF as PX_PER_CM, cG as getDocumentPageSettings, cH as getTableCellContentWidthForParagraph, cI as layoutMetricsEpoch, cJ as bumpLayoutMetricsEpoch, cK as createCanvasLayoutSnapshotProvider, cL as on, cM as debounce, cN as unwrap, cO as cloneSection, cP as perfTimer, cQ as prepareDocumentFonts, cR as getRunTextBox, cS as EMU_PER_PX, cT as createEditorDocument, cU as cloneBlock, cV as resolveResizedDimensions, cW as axisSignForDirection, cX as clamp$1, cY as MIN_RESIZE_SIZE_PX, cZ as resolveTextBoxRenderHeight, c_ as getToolbarStyleState, c$ as VERTICAL_HIT_WEIGHT, d0 as getCachedCanvasImage, d1 as measureParagraphMinContentWidthPx, d2 as createSectionBoundaryParagraph, d3 as normalizePageSettings, d4 as DEFAULT_EDITOR_PAGE_SETTINGS, d5 as markStart, d6 as markEnd, d7 as getParagraphEntries, d8 as getParagraphById, d9 as createEditorFootnote, da as createFootnoteReferenceRun, db as renumberFootnotes, dc as iterateFootnoteReferenceRuns, dd as preciseFontModeVersion, de as isPreciseFontModeEnabled, df as getRunFieldChar, dg as getRunFieldInstruction, dh as getHeadingLevel, di as createEditorRun, dj as TWIPS_PER_INCH, dk as PX_PER_INCH, dl as togglePreciseFontMode, dm as nextFontSizePt, dn as previousFontSizePt, dp as fontSizePtToPx, dq as resolveNamedTextStyle, dr as resolveNamedTableStyle, ds as resolveEffectiveTableStyle, dt as createDefaultToolbarPreset, du as MenuRegistry, dv as createToolbarRegistry, dw as Editor, dx as resolveCommandRef, dy as commandRefName, dz as createOasisEditorClient, dA as createEditorZoom, dB as startLongTaskObserver, dC as installGlobalReport, dD as applyStoredPreciseFontPreference, dE as getWelcomeSeen, dF as isLocalFontAccessSupported, dG as EDITOR_SCROLL_PADDING_PX, dH as Toolbar, dI as OasisEditorLoading, dJ as I18nProvider, dK as createTranslator, dL as registerDomStatsSurface, dM as createEditorLogger } from "./index-K-7FcXvb.js";
+import { E as EMPTY_PROJECTION_CONTEXT, d as domTextMeasurer, g as getProjectedParagraphBlockHeight, e as estimateTableBlockHeight, p as projectParagraphLayout, a as getPageBodyBottom, b as getPageBodyTop, c as getPageContentWidth, F as FOOTNOTE_MARKER_GUTTER_PX, f as getParagraphText, h as getBlockParagraphs, i as getRunFootnoteReference, l as listReferencedEndnotes, j as getFootnoteDisplayMarker, k as createProjectionContext, m as getDocumentSections, n as getRunField, o as projectBlocksLayout, q as createSignal, r as cloneEditorState, s as createEditorStateFromDocument, t as createInitialEditorState, S as STANDARD_FONT_SIZES_PT, u as fontSizePxToPt, v as probeLocalFontFamilies, w as createEditorParagraphFromRuns, x as isInlineObjectRun, y as stylesEqual, z as cloneStyle, A as createEditorStyledRun, B as cloneParagraphList, C as cloneParagraph, D as getParagraphLength, G as cloneRun, H as getActiveZone, I as getActiveSectionIndex, J as getParagraphs, K as normalizeSelection, L as positionToParagraphOffset, M as cloneParagraphs, N as paragraphOffsetToPosition, O as findParagraphIndex, P as createCollapsedSelection, Q as isSelectionCollapsed, R as MATH_OBJECT_REPLACEMENT, T as setValueStyle, U as setBooleanStyle, V as parseFontSizePtToPx, W as formatFontSizePt, X as setParagraphStyleValue, Y as createEditorParagraph, Z as cloneBlocks, _ as resolveDefaultParagraphStyleId, $ as findParagraphTablePathLocation, a0 as findParagraphLocation, a1 as resolveTablePath, a2 as buildTableCellLayout, a3 as PT_PER_PX, a4 as createEditorTableCell, a5 as createEditorTableRow, a6 as createEditorTable, a7 as clampPosition, a8 as PX_PER_POINT, a9 as underlineStyleToCssDecorationStyle, aa as resolveImageSrc, ab as listKindForTag, ac as isParagraphTag, ad as collectInlineRuns, ae as parseParagraphStyle, af as getRunImage, ag as InlineShell, ah as BalloonShell, ai as DocumentShell, aj as findParagraphTableLocation, ak as createMemo, al as getCaretRectFromSnapshot, am as getParagraphRectFromSnapshot, an as createComponent, ao as CaretOverlay, ap as Show, aq as createRenderEffect, ar as style, as as setStyleProperty, at as setAttribute, au as memo, av as template, aw as Button, ax as useI18n, ay as createEffect, az as TextField, aA as Dialog, aB as insert, aC as className, aD as Grid, aE as SelectField, aF as StatusText, aG as ColorField, aH as UNDERLINE_STYLE_OPTIONS, aI as Stack, aJ as For, aK as ToggleChip, aL as FormField, aM as Checkbox, aN as FieldGroup, aO as Tabs, aP as NumberField, aQ as parseNumber, aR as createStore, aS as reconcile, aT as RadioGroup, aU as Radio$1, aV as TextAreaField, aW as COMMON_SYMBOLS, aX as getRecentSymbols, aY as SYMBOL_CATEGORIES, aZ as rememberSymbol, a_ as delegateEvents, a$ as EMPTY_EDITOR_MATH_EXPRESSION, b0 as serializeLinearMath, b1 as parseLinearMath, b2 as Text, b3 as SurfaceButton, b4 as onMount, b5 as onCleanup, b6 as CheckIcon, b7 as use, b8 as PluginUiHost, b9 as OasisEditorEditor, ba as OasisBrandMark, bb as setPreciseFontPreference, bc as setWelcomeSeen, bd as enablePreciseFontMode, be as WORD_NS$6, bf as XMLSerializer, bg as DOMParser, bh as WORD14_NS, bi as mergeNestedExtensionMarkup, bj as resolveOpcRelationships, bk as parseOpcRelationships, bl as JSZip, bm as normalizeOpcPartPath, bn as OPC_CONTENT_TYPES_PATH, bo as getOpcRelationshipOwnerPath, bp as serializeOpcRelationships, bq as OPC_ROOT_RELATIONSHIPS_PATH, br as hashDocxPartBytes, bs as parseOpcContentTypes, bt as serializeOpcContentTypes, bu as mergeParagraphPropertiesXmlSource, bv as setEditorRunOoxmlSource, bw as mergeRunOoxmlSourceIntoGeneratedXml, bx as mergeTableCellPropertiesXmlSource, by as mergeTableRowPropertiesXmlSource, bz as mergeTablePropertiesXmlSource, bA as getDocumentSectionsCanonical, bB as exportEditorDocumentToDocxBlob, bC as exportEditorDocumentToDocx, bD as pxToPt$1, bE as resolveFloatingObjectRect, bF as getTextBoxFloatingGeometry, bG as getPresetPathSegments, bH as buildListLabels, bI as assertNever, bJ as lineDashPatternPt, bK as DEFAULT_FONT_SIZE_PX, bL as resolveGradientAxis, bM as isDoubleUnderlineStyle, bN as isWavyUnderlineStyle, bO as underlineStyleLineWidthPx, bP as WAVY_UNDERLINE_WAVELENGTH_PX, bQ as WAVY_UNDERLINE_AMPLITUDE_PX, bR as DOUBLE_UNDERLINE_OFFSET_PX, bS as underlineStyleDashArray, bT as resolveEffectiveParagraphStyle, bU as EMPHASIS_GLYPH, bV as parseHexColorToRgb255, bW as rgb255ToHex, bX as getImageFloatingGeometry, bY as resolveEffectiveTextStyleForParagraph, bZ as textStyleToFontSizePt, b_ as mathDisplayText, b$ as TEXT_BASELINE_RATIO, c0 as resolveTextAlignmentBaselineOffset, c1 as resolveRenderedTextChar, c2 as resolveOpenTypeFeatureTags, c3 as isLowercaseSmallCapsChar, c4 as resolveDecorationLineY, c5 as DOUBLE_STRIKE_OFFSET_PX, c6 as resolveListLabel, c7 as getListLabelInset, c8 as getAlignedListLabelInset, c9 as getParagraphBorderInsets, ca as buildSegmentTable, cb as buildCanvasTableLayout, cc as resolveCanvasTableWidth, cd as resolveFloatingTableRect, ce as paragraphBetweenBorderMatches, cf as normalizeFamily, cg as ROBOTO_FONT_FILES, ch as loadFontAsset, ci as getRemotePdfFontFaces, cj as OFFICE_COMPAT_FONT_FAMILIES, ck as BinaryReader, cl as buildSfnt, cm as defaultFontDecoderRegistry, cn as SfntFontProgram, co as zlibSync, cp as renumberImageCaptionsInDocument, cq as collectPdfFontFamilies, cr as outlineFrom, cs as getPageHeaderZoneTop, ct as getPageColumnRects, cu as findFootnoteReference, cv as resolveImporterForFile, cw as roundTo, cx as getDocumentParagraphsCanonical, cy as getDocumentParagraphs, cz as getImageCaptionText, cA as isImageCaptionParagraph, cB as updateImageCaptionParagraph, cC as createImageCaptionParagraph, cD as renumberImageCaptionParagraphs, cE as getCaptionSelectionOffset, cF as PX_PER_CM, cG as getDocumentPageSettings, cH as getTableCellContentWidthForParagraph, cI as layoutMetricsEpoch, cJ as bumpLayoutMetricsEpoch, cK as createCanvasLayoutSnapshotProvider, cL as on, cM as debounce, cN as unwrap, cO as cloneSection, cP as perfTimer, cQ as prepareDocumentFonts, cR as getRunTextBox, cS as EMU_PER_PX, cT as createEditorDocument, cU as cloneBlock, cV as resolveResizedDimensions, cW as axisSignForDirection, cX as clamp$1, cY as MIN_RESIZE_SIZE_PX, cZ as resolveTextBoxRenderHeight, c_ as getToolbarStyleState, c$ as VERTICAL_HIT_WEIGHT, d0 as getCachedCanvasImage, d1 as measureParagraphMinContentWidthPx, d2 as createSectionBoundaryParagraph, d3 as normalizePageSettings, d4 as DEFAULT_EDITOR_PAGE_SETTINGS, d5 as markStart, d6 as markEnd, d7 as getParagraphEntries, d8 as getParagraphById, d9 as createEditorFootnote, da as createFootnoteReferenceRun, db as renumberFootnotes, dc as iterateFootnoteReferenceRuns, dd as preciseFontModeVersion, de as isPreciseFontModeEnabled, df as getRunFieldChar, dg as getRunFieldInstruction, dh as getHeadingLevel, di as createEditorRun, dj as TWIPS_PER_INCH, dk as PX_PER_INCH, dl as togglePreciseFontMode, dm as nextFontSizePt, dn as previousFontSizePt, dp as fontSizePtToPx, dq as resolveNamedTextStyle, dr as resolveNamedTableStyle, ds as resolveEffectiveTableStyle, dt as createDefaultToolbarPreset, du as MenuRegistry, dv as createToolbarRegistry, dw as Editor, dx as resolveCommandRef, dy as commandRefName, dz as createOasisEditorClient, dA as createEditorZoom, dB as startLongTaskObserver, dC as installGlobalReport, dD as applyStoredPreciseFontPreference, dE as getWelcomeSeen, dF as isLocalFontAccessSupported, dG as EDITOR_SCROLL_PADDING_PX, dH as Toolbar, dI as OasisEditorLoading, dJ as I18nProvider, dK as createTranslator, dL as registerDomStatsSurface, dM as createEditorLogger, getWorkbenchRevisionAuthor } from "./index-K-7FcXvb.js";
 function projectHeaderFooterBlocksWithDependencies(blocks, deps, context = {}) {
   const {
     pageIndex,
@@ -27060,6 +27060,12 @@ function createEditorAppState(options) {
     }
   });
   const commitState = (next) => {
+    if (next === state) return;
+    if (next && stateSnapshot) {
+      for (const key2 of ["activeSectionIndex", "activeZone", "activeFootnoteId", "trackChangesEnabled", "showMargins", "showParagraphMarks"]) {
+        if (!(key2 in next) && key2 in stateSnapshot) next = { ...next, [key2]: stateSnapshot[key2] };
+      }
+    }
     stateSnapshot = next;
     setStateSignal(next);
   };
@@ -27219,7 +27225,7 @@ function normalizeRuns(runs, fallbackStyles) {
       continue;
     }
     const previous = merged[merged.length - 1];
-    if (previous && !isInlineObjectRun(run) && !isInlineObjectRun(previous) && stylesEqual(previous.styles, run.styles)) {
+    if (previous && !isInlineObjectRun(run) && !isInlineObjectRun(previous) && stylesEqual(previous.styles, run.styles) && workbenchSameRevision(previous.revision, run.revision)) {
       previous.text += run.text;
       continue;
     }
@@ -27232,6 +27238,22 @@ function normalizeRuns(runs, fallbackStyles) {
     return merged;
   }
   return [createEditorStyledRun("", fallbackStyles)];
+}
+function workbenchSameRevision(a, b) {
+  if (!a || !b) return !a && !b;
+  return a.id === b.id && a.type === b.type && a.author === b.author;
+}
+function workbenchInsertRevisionBefore(paragraph, offset) {
+  let start = 0;
+  for (const run of paragraph.runs) {
+    const end = start + run.text.length;
+    if (offset > start && offset <= end) {
+      const revision = run.revision;
+      return revision && revision.type === "insert" && !revision.move && revision.author === getWorkbenchRevisionAuthor() ? revision : void 0;
+    }
+    start = end;
+  }
+  return void 0;
 }
 function buildParagraphFromRuns(paragraph, runs, fallbackStyles) {
   return {
@@ -27718,7 +27740,7 @@ function deleteSelectionRange(state) {
   }
   if (state.trackChangesEnabled) {
     const revisionId = `rev:${Math.random().toString(36).slice(2, 9)}`;
-    const author = "User";
+    const author = getWorkbenchRevisionAuthor();
     const date = Date.now();
     const nextParagraphs2 = paragraphs.map(
       (paragraph, paragraphIndex) => {
@@ -27987,10 +28009,11 @@ function insertTextAtSelection(state, text, styleOverride) {
     kind: "text"
   };
   if (collapsedState.trackChangesEnabled) {
-    insertedRun.revision = {
+    const continued = workbenchInsertRevisionBefore(paragraph, offset);
+    insertedRun.revision = continued ? { ...continued } : {
       id: `rev:${Math.random().toString(36).slice(2, 9)}`,
       type: "insert",
-      author: "User",
+      author: getWorkbenchRevisionAuthor(),
       date: Date.now()
     };
   }
@@ -28171,7 +28194,7 @@ function deleteBackward(state) {
           revision: {
             id: `rev:${Math.random().toString(36).slice(2, 9)}`,
             type: "delete",
-            author: "User",
+            author: getWorkbenchRevisionAuthor(),
             date: Date.now()
           }
         };
@@ -28280,7 +28303,7 @@ function deleteForward(state) {
           revision: {
             id: `rev:${Math.random().toString(36).slice(2, 9)}`,
             type: "delete",
-            author: "User",
+            author: getWorkbenchRevisionAuthor(),
             date: Date.now()
           }
         };
@@ -29220,7 +29243,7 @@ function createParagraphDialogBridge(deps) {
 function createTableRevisionMetadata() {
   return {
     id: `rev:${Math.random().toString(36).slice(2, 9)}`,
-    author: "User",
+    author: getWorkbenchRevisionAuthor(),
     date: Date.now()
   };
 }
@@ -55210,7 +55233,7 @@ function createAppCommandsControllerImpl(deps) {
     openLinkDialog: (initialHref) => deps.setLinkDialog({ isOpen: true, initialHref }),
     openImageAltDialog: (initialAlt) => deps.setImageAltDialog({ isOpen: true, initialAlt }),
     openImageCaptionDialog: (initialCaption) => deps.setImageCaptionDialog({ isOpen: true, initialCaption }),
-    imageCaptionLabel: () => deps.locale().startsWith("en") ? "Figure" : "Figura"
+    imageCaptionLabel: () => deps.locale().startsWith("zh") ? "图" : deps.locale().startsWith("en") ? "Figure" : "Figura"
   });
   const keyboardCommandsController = {
     ...commandsController,
@@ -56142,8 +56165,16 @@ function connectEditorClientHost(controller, deps) {
     },
     getSelection: () => snapshot().selection,
     setSelection: (selection) => {
+      const current = snapshot();
+      const location = findParagraphLocation(current.document, selection.focus.paragraphId);
+      const zonePatch = location && location.zone && location.zone !== (current.activeZone ?? "main") ? {
+        activeZone: location.zone,
+        activeFootnoteId: location.zone === "footnote" ? location.footnoteId : void 0,
+        ...location.sectionIndex !== void 0 ? { activeSectionIndex: location.sectionIndex } : {}
+      } : {};
       deps.applyState({
-        ...snapshot(),
+        ...current,
+        ...zonePatch,
         selection
       });
       deps.focusInput();

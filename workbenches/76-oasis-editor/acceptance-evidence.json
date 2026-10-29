@@ -1,265 +1,298 @@
 {
   "schemaVersion": 1,
   "project": "oasis-editor",
-  "workbenchVersion": "0.8.1",
-  "date": "2026-10-28",
+  "workbenchVersion": "0.9.0",
+  "date": "2026-10-29",
   "hostImport": "unverified",
-  "scope": "Document-first structural redesign; file lifecycle in menu, optional notes/page index/document information",
-  "baseline": {
-    "git": "b2c9079",
-    "version": "0.8.0",
-    "nativeVersion": "oasis-editor@0.0.195",
-    "nativeCommit": "ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195",
-    "nativeFontServerDataAndAutosaveTreesUnchanged": true,
-    "previousPackageSha256": "39af33f96027fcdb1e8823927e5ac94df226d1624b53ba199c35ecf8b0d6271f",
-    "complexOfficeAndCapacityProbes": "retained baseline; not rerun for UI-only change"
-  },
-  "businessTests": {
-    "passed": 9,
-    "failed": 0,
-    "runs": 1
-  },
-  "browser": {
-    "url": "http://127.0.0.1:60834/",
-    "steps": [
-      {
-        "name": "file/notes/pages keep canvas and caret; Escape returns trigger; native no-blur save",
-        "pass": true
-      },
-      {
-        "name": "file menu new/open and reload",
-        "pass": true
-      },
-      {
-        "name": "delayed save permits continued native typing",
-        "pass": true
-      },
-      {
-        "name": "DOCX/PDF export, file chooser import, exact original and real recovery copy",
-        "pass": true
-      },
-      {
-        "name": "375px full file lifecycle, notes and reduced motion",
-        "pass": true,
-        "dimensions": {
-          "width": 375,
-          "scroll": 375,
-          "canvas": 285.6000061035156,
-          "motion": true
-        }
-      }
+  "scope": "Editing depth: ribbon (Home/Insert/Table contextual/Review/Layout), zh-CN native menus and dialogs, tracked changes display/navigation/accept/reject, comments, page setup, CJK line breaking and first-line indent, fit-width on narrow screens, realistic proposal demo, DOCX/PDF round trip",
+  "identity": {
+    "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
+    "storageKey": "oasis-editor-v1",
+    "migrationsChanged": false,
+    "newMigrations": 0,
+    "newPersistedFields": [
+      "document.trackChanges (optional boolean)"
     ],
-    "errors": []
+    "newDependencies": []
   },
-  "keyboard": {
-    "focusSteps": [
-      {
-        "name": "撤销",
-        "left": 10,
-        "right": 35.515625,
-        "viewport": 375,
-        "toolbarScroll": 0
-      },
-      {
-        "name": "重做",
-        "left": 37.515625,
-        "right": 63.03125,
-        "viewport": 375,
-        "toolbarScroll": 0
-      },
-      {
-        "name": "加粗",
-        "left": 81.03125,
-        "right": 119.03125,
-        "viewport": 375,
-        "toolbarScroll": 0
-      },
-      {
-        "name": "斜体",
-        "left": 121.03125,
-        "right": 159.03125,
-        "viewport": 375,
-        "toolbarScroll": 0
-      },
-      {
-        "name": "下划线",
-        "left": 161.03125,
-        "right": 210.03125,
-        "viewport": 375,
-        "toolbarScroll": 0
-      },
-      {
-        "name": "字号",
-        "left": 246.03125,
-        "right": 286.03125,
-        "viewport": 375,
-        "toolbarScroll": 0
-      },
-      {
-        "name": "左对齐",
-        "left": 304.03125,
-        "right": 353.03125,
-        "viewport": 375,
-        "toolbarScroll": 0
-      },
-      {
-        "name": "居中",
-        "left": 317.03125,
-        "right": 355.03125,
-        "viewport": 375,
-        "toolbarScroll": 38
-      },
-      {
-        "name": "项目符号",
-        "left": 295.03125,
-        "right": 355.03125,
-        "viewport": 375,
-        "toolbarScroll": 100
-      },
-      {
-        "name": "表格",
-        "left": 287.03125,
-        "right": 325.03125,
-        "viewport": 375,
-        "toolbarScroll": 186
-      },
-      {
-        "name": "分页",
-        "left": 327.03125,
-        "right": 365.03125,
-        "viewport": 375,
-        "toolbarScroll": 186
-      }
-    ],
-    "modalFocusTrap": true,
-    "escapeReturn": true,
-    "errors": []
+  "structuralReview": {
+    "status": "retained-from-0.8.1",
+    "note": "Spatial structure (centred paper, top-left 文稿 menu, on-demand margin tools) unchanged; the ribbon is one contextual row above the paper; the comments panel opens on demand like notes/pages. Rationale and comparison in app/DESIGN.md."
   },
-  "exports": {
-    "pdfPages": 3,
-    "pdfChineseReadable": true,
-    "docxCRC": "passed",
-    "docxRetainedText": true,
-    "docxTables": true,
-    "media": [
-      "word/media/image1.png"
-    ]
-  },
-  "package": {
-    "filename": "oasis-editor-0.8.1-final.fbworkbench",
-    "formatVersion": 2,
-    "files": 65,
-    "packageId": "7e122b80c156808d29d5a9ff160260fb6794df3c09b1acf3a12364db2fa50e47",
-    "packageIdVerified": true,
-    "packageSha256": "18eddfc9977b8d2acd0a1ec0179b4adbde98cdd566656b29df443d59fac116ab",
-    "packageBytes": 20236181,
-    "CRC": "passed",
-    "transferHashes": "passed",
-    "sourceFilesMatched": 41,
-    "resourceBytesMatched": true,
-    "dataExcluded": true,
-    "nativeHashes": "passed",
-    "lock": {
-      "version": 1,
-      "dependencies": [],
-      "resources": [
+  "functionalAcceptance": {
+    "status": "local-verified",
+    "browser": "Chrome for Testing (playwright-core), fresh data directory per run, preview --no-watch",
+    "accept": {
+      "passed": 36,
+      "total": 36,
+      "consoleErrors": 0,
+      "steps": [
         {
-          "id": "native",
-          "status": "bundled",
-          "bytes": 8194736,
-          "files": 8,
-          "directory": "application/workbench-assets/assets/native",
-          "sha256": "332b04c4e82aea0a235d3f57bfc9fb41c2e896084fe2e09fc2a9492b4138ca22"
+          "name": "首次打开即有示例项目建议书并自动保存",
+          "pass": true,
+          "detail": "{\"tables\":2,\"images\":1,\"revIns\":2,\"revDel\":1,\"footnoteRefs\":1,\"lists\":7,\"footnotes\":1,\"comments\":1}"
         },
         {
-          "id": "fonts",
-          "status": "bundled",
-          "bytes": 21186504,
-          "files": 4,
-          "directory": "application/workbench-assets/assets/fonts",
-          "sha256": "d6dda50091fa8c4653e0c9679c7596a187b47b96769d437d89e39a633926450c"
+          "name": "首次打开为",
+          "pass": true,
+          "detail": "A4 纸 793.7333333333333"
         },
         {
-          "id": "notices",
-          "status": "bundled",
-          "bytes": 25935,
-          "files": 7,
-          "directory": "application/workbench-assets/assets/notices",
-          "sha256": "1227c32f0df132da3bad4148d9c0ebc31b812a25d282b22a50ae60ed02e5c1fb"
+          "name": "右键菜单为中文",
+          "pass": true,
+          "detail": ""
         },
         {
-          "id": "originals",
-          "status": "excluded",
-          "bytes": 0,
-          "files": 0
+          "name": "加粗按钮反映选区状态",
+          "pass": true,
+          "detail": ""
         },
         {
-          "id": "third-party-notices",
-          "status": "bundled",
-          "bytes": 1352,
-          "files": 1,
-          "directory": "application/workbench-assets/assets/third-party-notices",
-          "sha256": "750778af8b706276f728354e699b678e29e6cfae05609d521e6a35ee4ab2c97d"
+          "name": "行距下拉显示当前值",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "段落样式切换为标题",
+          "pass": true,
+          "detail": "3 "
+        },
+        {
+          "name": "撤销恢复正文样式",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "光标进入表格后出现“表格”上下文选项卡",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "脚注编辑时显示“返回正文”",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "修订开启后输入与删除记为修订",
+          "pass": true,
+          "detail": "3 处修订 → 5 处修订"
+        },
+        {
+          "name": "下一处修订定位并说明作者",
+          "pass": true,
+          "detail": "王敏插入：“，并为连续服务满一年的志愿者颁发证书”"
+        },
+        {
+          "name": "拒绝一处修订后计数减少",
+          "pass": true,
+          "detail": "5 处修订 → 4 处修订"
+        },
+        {
+          "name": "批注面板列出新批注",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "批注可标为已解决",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "页边距预设被识别为“窄”",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "横向按钮按下",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "查找替换对话框为中文",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "编辑后自动保存",
+          "pass": true,
+          "detail": "已自动保存"
+        },
+        {
+          "name": "保存的数据含修订模式/批注/脚注/表格/图片",
+          "pass": true,
+          "detail": "{\"tables\":3,\"images\":2,\"revIns\":2,\"revDel\":2,\"footnoteRefs\":2,\"lists\":7,\"footnotes\":2,\"comments\":2}"
+        },
+        {
+          "name": "已解决批注被保存",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "新修订记录修订者姓名",
+          "pass": true,
+          "detail": "周晓岚,李宁"
+        },
+        {
+          "name": "刷新后修订模式仍开启",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "刷新后修订计数一致",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "刷新后修订者姓名保留",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "DOCX",
+          "pass": true,
+          "detail": "含插入/删除修订 ins=2 del=2"
+        },
+        {
+          "name": "DOCX",
+          "pass": true,
+          "detail": "含脚注与批注 refs=2 ranges=2"
+        },
+        {
+          "name": "DOCX",
+          "pass": true,
+          "detail": "含表格、编号与图片 tbl=3 num=7 img=2"
+        },
+        {
+          "name": "DOCX",
+          "pass": true,
+          "detail": "为 A4 纵向 <w:pgSz w:w=\"11906\" w:h=\"16838\"/>"
+        },
+        {
+          "name": "DOCX",
+          "pass": true,
+          "detail": "修订作者 周晓岚,李宁"
+        },
+        {
+          "name": "DOCX",
+          "pass": true,
+          "detail": "首行缩进不被 hanging=0 覆盖 7 <w:ind w:left=\"0\" w:right=\"0\" w:firstLine=\"420\"/>"
+        },
+        {
+          "name": "PDF",
+          "pass": true,
+          "detail": "有效且至少 3 页 pages=4 bytes=2893559"
+        },
+        {
+          "name": "导入",
+          "pass": true,
+          "detail": "DOCX 创建新文稿 1 → 2"
+        },
+        {
+          "name": "重新打开导出的",
+          "pass": true,
+          "detail": "DOCX 保留修订/脚注/批注/表格/图片 {\"tables\":3,\"images\":2,\"revIns\":2,\"revDel\":2,\"footnoteRefs\":2,\"lists\":7,\"footnotes\":2,\"comments\":2}"
+        },
+        {
+          "name": "导入稿保留首行缩进",
+          "pass": true,
+          "detail": "indented=7"
+        },
+        {
+          "name": "导入稿的修订计数可见",
+          "pass": true,
+          "detail": "4 处修订"
+        },
+        {
+          "name": "无控制台错误或页面异常",
+          "pass": true,
+          "detail": ""
         }
       ]
+    },
+    "autosave": {
+      "passed": 8,
+      "total": 8,
+      "consoleErrors": "only the injected net::ERR_FAILED of the lost-response test",
+      "steps": [
+        {
+          "name": "首次打开创建一份正式稿",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "延迟保存期间继续输入：较新的文字也被保存",
+          "pass": true,
+          "detail": "held=true"
+        },
+        {
+          "name": "刷新后恢复并可继续编辑",
+          "pass": true,
+          "detail": ""
+        },
+        {
+          "name": "响应丢失后重试幂等：单一项目、文字仅一份、无冲突",
+          "pass": true,
+          "detail": "state=已自动保存 msg="
+        },
+        {
+          "name": "超出正式稿预算时说明原因并保留恢复稿",
+          "pass": true,
+          "detail": "草稿已自动保存，待完善输入。 正式稿超过850KB；完整恢复稿已保留，请导出DOCX或恢复稿。"
+        },
+        {
+          "name": "超限草稿不覆盖正式稿",
+          "pass": true,
+          "detail": "formal images=7"
+        },
+        {
+          "name": "刷新后作为草稿恢复（含新图片），并提示未成为正式稿",
+          "pass": true,
+          "detail": "bar=8 页 ⌃8 张图片缩放 25%35%50%65%80%100%125%150% state=草稿已自动保存，待完善输入。 正式稿超过850KB；完整恢复稿已保留，请导出DOCX或恢复稿。 msg="
+        },
+        {
+          "name": "无控制台错误（注入的网络中断除外）",
+          "pass": true,
+          "detail": "Failed to load resource: net::ERR_FAILED"
+        }
+      ]
+    },
+    "narrow375": {
+      "scrollWidth": 375,
+      "viewport": 375,
+      "canvasLeft": 17,
+      "canvasRight": 358,
+      "zoom": "适合宽度 43%",
+      "consoleErrors": 0
+    },
+    "downloadedFilesValidated": {
+      "docx": "unzipped: w:ins=2 w:del=2 authors 周晓岚/李宁; footnoteReference=2; commentRangeStart=2 with text and author; w:tbl=3; numPr=7; images=2; pgSz 11906x16838; 7 w:ind firstLine without w:hanging",
+      "pdf": "%PDF- header, 4 pages",
+      "reimport": "exported DOCX imported through the file chooser as a new document (1→2) with revisions, footnotes, comments, tables, images and first-line indents preserved"
     }
   },
-  "screenshots": [
-    {
-      "name": "oasis-desktop.png",
-      "sha256": "99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6",
-      "bytes": 130119
+  "checks": {
+    "check": "pass (one WORKBENCH_LARGE_MODULE warning on autosave-client.ts, which the brief forbids editing)",
+    "test": {
+      "passed": 23,
+      "failed": 0
     },
-    {
-      "name": "oasis-mobile.png",
-      "sha256": "207c71bc15d2d5546a9a872b0f1f2f328af5b4a6b92f050e96a66509526b5ec3",
-      "bytes": 72401
-    },
-    {
-      "name": "oasis-mobile-menu.png",
-      "sha256": "bdad79712e8278e41c3c3d91c40ce9703040a0de84c3e90b9b1006991b2a5dd0",
-      "bytes": 67087
-    }
-  ],
-  "warnings": [
-    "Large module maintenance warnings: autosave-client and App"
-  ],
-  "boundaries": [
-    "Host import unverified",
-    "External DOCX layout depends on fonts and consumer",
-    "Full screen-reader document semantics not separately verified"
-  ],
-  "preview": "http://127.0.0.1:54511/",
-  "legacyPreviewPreserved": "http://127.0.0.1:55070/",
-  "integratedPackage": {
-    "directory": "workbenches/76-oasis-editor",
-    "version": "0.8.1",
-    "appId": "workbench.3e32d86a-3d81-4334-a859-0d93894350c4",
-    "filename": "76-oasis-editor-0.8.1.fbworkbench",
-    "bytes": 20236181,
-    "sha256": "18eddfc9977b8d2acd0a1ec0179b4adbde98cdd566656b29df443d59fac116ab",
-    "crc": "passed",
-    "sourceFilesMatched": 43,
-    "assetFilesMatched": 20,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-oasis-editor/oasis-editor-studio-0.8.1.fbworkbench",
-    "introductionFile": "workbench-oasis-editor/presentation.json",
-    "license": "MIT"
+    "webInterfaceGuidelines": "reviewed changed source; added spellCheck=false on reviewer name, autoComplete=off on margin inputs, explicit select colour"
   },
-  "integratedApplicationTests": 9,
-  "screenshot": {
-    "path": "../../docs/screenshots/oasis-editor.png",
-    "dimensions": [
-      1440,
-      1000
-    ],
-    "sha256": "99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6"
+  "package": {
+    "file": "artifacts/oasis-editor-studio-0.9.0.fbworkbench",
+    "bytes": 20289179,
+    "sha256": "07bffe85730f417eebce84d5cfe274f5580830da94a99575fd619673cdf1da0f",
+    "packageId": "63410e769cdc0b6c7212be61d02d278cdc640d7c121ceb205eb1f31c39291033",
+    "formatVersion": 2,
+    "transferFiles": 80,
+    "businessData": "excluded"
   },
-  "integratedSourcePackage": {
-    "sourceAndResources": "byte-matched with integrated source",
-    "UIComponents": "present in package",
-    "runtime": "local check and targeted Chrome flows passed",
-    "clientImport": "unverified"
-  }
+  "nativePatches": "app/notices/native-source.json (13 listed modifications with adapted SHA-256)",
+  "screenshot": "docs/screenshots/oasis-editor.png (1440x900, fresh demo, Review tab with comments panel)",
+  "limitations": [
+    "No Word pixel-exact layout; external pagination depends on fonts (re-import of the exported proposal paginates as 3 pages instead of 4)",
+    "Comments are authored into the document model by the workbench; the native engine has no reply threads",
+    "Pictures count against the 850 KB formal budget; large photos are re-encoded on insert",
+    "Screen-reader document semantics and Floatboat client import not specifically verified"
+  ]
 }

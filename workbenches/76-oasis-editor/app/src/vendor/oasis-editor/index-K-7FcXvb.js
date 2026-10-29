@@ -2740,6 +2740,10 @@ const locales = {
   en,
   "pt-BR": ptBR
 };
+export function registerWorkbenchLocale(id, strings) { locales[id] = { ...en, ...strings }; }
+let workbenchRevisionAuthor = "User";
+export function setWorkbenchRevisionAuthor(name) { workbenchRevisionAuthor = String(name ?? "").trim().slice(0, 80) || "User"; }
+export function getWorkbenchRevisionAuthor() { return workbenchRevisionAuthor; }
 function createTranslator(getLocale) {
   return (key, params = []) => {
     const localeStrings = locales[getLocale()] || locales["en"];
@@ -2750,6 +2754,7 @@ function createTranslator(getLocale) {
     return template2;
   };
 }
+const WORKBENCH_TINT_INACTIVE_ZONES = false;
 const defaultTranslator = createTranslator(() => "pt-BR");
 const I18nContext = createContext(defaultTranslator);
 function useI18n() {
@@ -17230,12 +17235,21 @@ function tokenizeMeasuredChars(chars2) {
     const nextKind = /\s/.test(char.char) ? "whitespace" : "text";
     if (currentKind && currentKind !== nextKind) {
       flush();
+    } else if (nextKind === "text" && current.length > 0 && isWorkbenchCjkBreak(current[current.length - 1].char, char.char)) {
+      flush();
     }
     currentKind = nextKind;
     current.push(char);
   }
   flush();
   return tokens;
+}
+const WORKBENCH_CJK = /[\u2E80-\u2FFF\u3000-\u303F\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFFEF]/;
+const WORKBENCH_NO_LINE_START = /[、。，．,.:;?!：；？！）〕］｝〉》」』】〙〗〟”’)\]}%‰℃・ー々〻ぁぃぅぇぉっゃゅょゎゕゖァィゥェォッャュョヮヵヶ…—～]/;
+const WORKBENCH_NO_LINE_END = /[（〔［｛〈《「『【〘〖〝“‘(\[{]/;
+function isWorkbenchCjkBreak(previous, next) {
+  if (!WORKBENCH_CJK.test(previous) && !WORKBENCH_CJK.test(next)) return false;
+  return !WORKBENCH_NO_LINE_START.test(next) && !WORKBENCH_NO_LINE_END.test(previous);
 }
 const DEFAULT_LIST_GUTTER = 24;
 const LIST_LEVEL_INDENT_STEP = 24;
@@ -18217,8 +18231,10 @@ function composeMeasuredParagraphLines(options) {
         }
       }
     }
-    flushLine();
-    resetLine(token.chars[0].offset);
+    if (!isEmptyLine) {
+      flushLine();
+      resetLine(token.chars[0].offset);
+    }
     layoutFreshWord(token.chars);
   }
   const endsWithTrailingLineBreak = ((_a2 = tokens[tokens.length - 1]) == null ? void 0 : _a2.kind) === "newline";
@@ -24671,11 +24687,19 @@ function drawParagraph(ctx, paragraph, lines, state, originX, originY, onUpdate,
       ctx.restore();
     }
     for (const fragment of line.fragments) {
-      const styles = resolveEffectiveTextStyleForParagraph(
+      const workbenchBaseStyles = resolveEffectiveTextStyleForParagraph(
         fragment.styles,
         (_c = paragraph.style) == null ? void 0 : _c.styleId,
         state.document.styles
       );
+      const workbenchRevisionType = fragment.revision == null ? void 0 : fragment.revision.type;
+      const styles = workbenchRevisionType === "insert" || workbenchRevisionType === "delete" ? {
+        ...workbenchBaseStyles,
+        color: workbenchRevisionType === "insert" ? "#1d6fb8" : "#b42318",
+        underline: workbenchRevisionType === "insert" ? true : workbenchBaseStyles.underline,
+        underlineColor: workbenchRevisionType === "insert" ? "#1d6fb8" : workbenchBaseStyles.underlineColor,
+        strike: workbenchRevisionType === "delete" ? true : workbenchBaseStyles.strike
+      } : workbenchBaseStyles;
       if (styles.hidden) continue;
       const fontSize = styles.fontSize ?? DEFAULT_FONT_SIZE_PX;
       const metricFamily = resolveMetricCompatibleFamily(
@@ -25473,7 +25497,7 @@ function createCanvasPageRenderer(options) {
       invalidatePage();
       schedulePaint();
     };
-    if (activeZone === "main") {
+    if (activeZone === "main" && WORKBENCH_TINT_INACTIVE_ZONES) {
       ctx.save();
       ctx.fillStyle = "rgba(148, 163, 184, 0.08)";
       if (bodyTop > 0) {
@@ -43488,7 +43512,7 @@ function directWordChildren$1(parent, localName) {
 }
 function parseWordFragment$1(xml, expectedLocalName) {
   const wrapper = new DOMParser$1().parseFromString(
-    `<oasis:root xmlns:oasis="urn:oasis:docx" xmlns:w="${WORD_NS$1}" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml">${xml}</oasis:root>`,
+    `<oasis:root xmlns:oasis="urn:oasis:docx" xmlns:w="${WORD_NS$1}" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w10="urn:schemas-microsoft-com:office:word">${xml}</oasis:root>`,
     "application/xml"
   ).documentElement;
   if (!wrapper) return void 0;
@@ -43947,7 +43971,7 @@ function firstDirectWordChild(parent, localName) {
 }
 function parseWordFragment(xml, expectedLocalName) {
   const wrapper = new DOMParser$1().parseFromString(
-    `<oasis:root xmlns:oasis="urn:oasis:docx" xmlns:w="${WORD_NS$1}">${xml}</oasis:root>`,
+    `<oasis:root xmlns:oasis="urn:oasis:docx" xmlns:w="${WORD_NS$1}" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w10="urn:schemas-microsoft-com:office:word">${xml}</oasis:root>`,
     "application/xml"
   ).documentElement;
   if (!wrapper) {
@@ -44528,7 +44552,7 @@ function serializeParagraphStyleXml(style2) {
     if (left !== null) attrs.push(`w:left="${left}"`);
     if (right !== null) attrs.push(`w:right="${right}"`);
     if (firstLine !== null) attrs.push(`w:firstLine="${firstLine}"`);
-    if (hanging !== null) attrs.push(`w:hanging="${hanging}"`);
+    if (hanging !== null && (hanging !== 0 || !firstLine)) attrs.push(`w:hanging="${hanging}"`);
     if (attrs.length > 0) parts.push(`<w:ind ${attrs.join(" ")}/>`);
   }
   const tabs = serializeParagraphTabs(style2.tabs);
@@ -44595,7 +44619,7 @@ function serializeParagraphProperties(paragraph, numberingInfo, styles, override
     if (left !== null) attrs.push(`w:left="${left}"`);
     if (right !== null) attrs.push(`w:right="${right}"`);
     if (firstLine !== null) attrs.push(`w:firstLine="${firstLine}"`);
-    if (hanging !== null) attrs.push(`w:hanging="${hanging}"`);
+    if (hanging !== null && (hanging !== 0 || !firstLine)) attrs.push(`w:hanging="${hanging}"`);
     if (attrs.length > 0) parts.push(`<w:ind ${attrs.join(" ")}/>`);
   }
   const tabs = serializeParagraphTabs(style2.tabs);
