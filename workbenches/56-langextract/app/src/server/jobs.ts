@@ -56,7 +56,7 @@ export function jobStore(db: DatabaseSync) {
         )
         .get(id);
       if (old) {
-        if (old.input_json !== serialized || old.project_id !== projectId)
+        if (JSON.stringify(runInput(JSON.parse(String(old.input_json)))) !== serialized || old.project_id !== projectId)
           throw new StoreError(409, "任务标识已用于另一份输入，请创建新任务。");
         return { job: get(id), created: false };
       }

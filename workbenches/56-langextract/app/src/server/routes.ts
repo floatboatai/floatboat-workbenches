@@ -1,6 +1,7 @@
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { isRecord } from "../contracts/project.ts";
-import { validateProject, runInput } from "../contracts/evidence.ts";
+import { validateProject, runInput, serviceInput, DEFAULT_MODEL } from "../contracts/evidence.ts";
+import { createHostRuns } from "./host-runs.ts";
 import { createStore, StoreError } from "./store.ts";
 import { registerAutosaveRoutes } from "./autosave.ts";
 import {
@@ -12,7 +13,8 @@ import {
 } from "./jobs.ts";
 export function registerRoutes(app: WorkbenchServer) {
   const store = createStore(app.database, validateProject),
-    jobs = jobStore(app.database);
+    jobs = jobStore(app.database),
+    hostRuns = createHostRuns(app);
   registerAutosaveRoutes(app, validateProject);
   const fail = (e: unknown) =>
     Response.json(
@@ -69,13 +71,49 @@ export function registerRoutes(app: WorkbenchServer) {
       };
     }
   });
+  app.route("GET", "/api/host-status", async () => {
+    try {
+      const r = await app.host.capabilities.list({ domain: "llm" });
+      const available = r.capabilities.some(
+        (c) => c.operation === "generateText" && c.status === "available",
+      );
+      return {
+        available,
+        defaultModel: DEFAULT_MODEL,
+        message: available
+          ? "Floatboat 模型可用。"
+          : "Floatboat 已连接，但本工作台的模型权限不可用，请在 Floatboat 中检查工作台授权。",
+      };
+    } catch {
+      return {
+        available: false,
+        defaultModel: DEFAULT_MODEL,
+        message: "未连接 Floatboat。启动并登录 Floatboat 客户端后点“重新检查”。",
+      };
+    }
+  });
+  app.route("GET", "/api/host-runs", () => hostRuns.list());
+  app.route("GET", "/api/host-runs/:id", ({ params }) => {
+    try {
+      return hostRuns.get(params.id);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("POST", "/api/host-runs", ({ body }) => {
+    try {
+      return hostRuns.start(body, (id) => store.get(id));
+    } catch (e) {
+      return fail(e);
+    }
+  });
   app.route("GET", "/api/jobs", () => jobs.list());
   app.route("POST", "/api/jobs", async ({ body }) => {
     try {
       if (!isRecord(body) || typeof body.projectId !== "string")
         throw Error("任务输入无效。");
       const id = jobId(body.id),
-        input = runInput(body.input);
+        input = serviceInput(runInput(body.input));
       store.get(body.projectId);
       const config = serviceConfig();
       if (!config)
