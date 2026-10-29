@@ -2,7 +2,8 @@ import { isRecord, boundedText } from './project.ts';
 export type CircuitData={source:string;original:string;notes:string;view:number[];viewport:number[]};
 export const RC_SOURCE='$ 1 0.000005 10 50 5 50\nv 112 272 112 80 0 2 100 5 0 0 0.5\nr 112 80 336 80 0 1000\nc 336 80 336 272 0 0.000001 0\nw 336 272 112 272 0\no 2 4 0 4099 5 0.01 0 2 2 3\n';
 export const DC_SOURCE='$ 1 0.000005 10 50 5 50\nv 112 272 112 80 0 0 40 5 0 0 0.5\nr 112 80 336 80 0 1000\nr 336 80 336 272 0 1000\nw 336 272 112 272 0\no 2 4 0 4099 5 0.01 0 2 2 3\n';
-export const seed:CircuitData={source:RC_SOURCE,original:'',notes:'实验目的：观察一阶 RC 低通电路的阶跃响应。\n\nR = 1 kΩ，C = 1 μF，时间常数 τ = 1 ms。\n输入：100 Hz 方波，幅度 ±5 V。\n\n运行后，比较电容电压的充放电曲线；双击电阻或电容调整参数。',view:[],viewport:[]};
+export const TIMER_SOURCE='$ 1 0.00002 31 50 5 50\nw 112 192 112 224 0\nw 112 224 176 224 0\nc 112 224 112 288 0 0.000001 0\ng 112 288 112 304 0\nr 112 192 112 64 0 1000000\nw 112 64 240 64 0\nR 112 64 80 64 0 0 40 9 0 0 0.5\nO 352 160 416 160 0\n165 176 96 192 96 6 0\nw 240 64 304 64 0\nw 304 64 304 128 0\nw 352 160 304 160 0\nw 352 160 352 32 0\nr 352 32 160 32 0 47000\nw 160 32 160 192 0\nw 112 192 160 192 0\nw 160 192 176 192 0\ng 272 256 272 272 0\nr 352 160 352 224 0 470\n162 352 224 352 288 2 default-led 1 0 0 0.01\ng 352 288 352 304 0\no 2 32 0 4099 10 0.1 0 2 2 3\no 7 32 0 4106 10 0.1 1 1\n38 13 0 4700 220000 Timing\\sResistor\n';
+export const seed:CircuitData={source:TIMER_SOURCE,original:'',notes:'实验目的：观察 555 无稳态多谐振荡器驱动 LED 闪烁。\n\n9 V 电源；定时电容 1 μF，经 47 kΩ 从输出端充放电，周期约 1.4·R·C ≈ 66 ms。\n示波器上：电容电压在 1/3～2/3 电源之间锯齿往复，输出为方波。\n\n拖动下方「Timing Resistor」滑块改变频率；双击 555 或 LED 查看参数。',view:[],viewport:[]};
 export function restoreCircuit(value:unknown):CircuitData{
  if(!isRecord(value))throw Error('实验记录格式无效。');
  const source=boundedText(value.source,650000),original=boundedText(value.original,650000),notes=boundedText(value.notes,60000);

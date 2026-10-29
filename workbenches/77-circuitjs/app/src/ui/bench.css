@@ -1,0 +1,141 @@
+/* 0.9.0 additions: parts library, simulation controls, sliders, example browser. */
+.examples-trigger { border: 0; background: none; padding: 8px 9px; font-size: 12px; color: #b9cbcf; margin-left: -12px; }
+.examples-trigger:hover { color: #fff; }
+.icon-button { border: 0; background: transparent; padding: 6px; min-width: 28px; min-height: 28px; }
+button.primary { background: var(--green); color: #1c2d20; border-color: #b8e294; font-weight: 600; }
+button.primary:hover { background: #c6eba5; color: #142016; }
+.notice { display: flex; align-items: center; gap: 12px; }
+.notice-close { margin-left: auto; border: 0; background: transparent; padding: 4px; color: inherit; }
+
+.station { position: relative; }
+.component-rack { gap: 2px; }
+.component-rack button { min-height: 44px; }
+.component-rack b { font-size: 14px; letter-spacing: -.02em; white-space: nowrap; }
+.component-rack small { max-width: 52px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.component-rack .library-trigger { color: #cfe7bd; }
+.component-rack .library-trigger[aria-expanded=true] { background: #33443c; border-color: #6e8b64; }
+
+.parts-library { position: absolute; z-index: 5; top: 0; bottom: 0; left: 62px; width: 340px; display: flex; flex-direction: column; background: #1a252b; border-right: 1px solid #4a5d65; box-shadow: 18px 0 40px #0009; overscroll-behavior: contain; }
+.parts-library header { display: flex; align-items: center; gap: 6px; padding: 12px 10px 6px 14px; }
+.parts-search { flex: 1; display: flex; align-items: center; gap: 8px; border: 1px solid #44575f; border-radius: 3px; background: #121c21; padding: 0 9px; color: #8ea4ab; }
+.parts-search:focus-within { outline: 2px solid #f5c47d; outline-offset: 2px; }
+.parts-search input { flex: 1; border: 0; background: transparent; padding: 9px 0; outline: none; }
+.parts-count { margin: 0; padding: 0 14px 8px; font-size: 10px; color: #7f969d; }
+.parts-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 8px 18px; }
+.parts-scroll section { margin-top: 8px; }
+.parts-scroll h3 { display: flex; align-items: baseline; gap: 8px; margin: 10px 6px 6px; font-size: 11px; font-weight: 600; color: #c5d6d9; }
+.parts-scroll h3 small { font: 9px monospace; letter-spacing: .08em; color: #6f878f; text-transform: uppercase; }
+.parts-scroll ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.parts-scroll li button { width: 100%; justify-content: flex-start; gap: 8px; padding: 6px 7px; border-color: transparent; background: #212e34; text-align: left; min-height: 40px; }
+.parts-scroll li button:hover { background: #2f4047; }
+.parts-scroll li button[aria-pressed=true] { background: #3d4b47; border-color: #6e8b64; color: #c4e9aa; }
+.parts-scroll li b { flex: 0 0 34px; font: 11px/1 "SFMono-Regular", Consolas, monospace; color: #b0de86; text-align: center; overflow: hidden; }
+.parts-scroll li span { display: flex; flex-direction: column; min-width: 0; font-size: 12px; line-height: 1.25; }
+.parts-scroll li span small { font-size: 9px; color: #7f969d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.parts-blocked { margin: 18px 6px 0; font-size: 11px; color: #9aaeb4; }
+.parts-blocked summary { cursor: pointer; padding: 6px 0; }
+.parts-blocked ul { display: block; }
+.parts-blocked li { padding: 6px 0; border-top: 1px solid #33454c; line-height: 1.5; }
+.parts-blocked strong { display: block; color: #d4c39b; font-weight: 500; }
+
+.canvas-rim small.placing { color: #d7e9b9; }
+
+.instrument-console { grid-template-columns: minmax(330px, 1.35fr) minmax(250px, 1.1fr) minmax(150px, .8fr) minmax(150px, .8fr) 84px; padding: 13px 18px 12px 22px; min-height: 0; }
+.run-controls { margin-top: 8px; gap: 7px; }
+.run-controls button { min-height: 36px; padding: 6px 9px; }
+.elapsed { font-size: 16px; }
+.speed-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 9px; }
+.speed-controls label { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 7px; font-size: 10px; color: #9cb0b6; }
+.speed-controls small { grid-column: 2; font: 9px monospace; color: #7a9198; }
+input[type=range] { padding: 0; border: 0; background: transparent; accent-color: #a6dc7e; height: 22px; min-width: 60px; width: 100%; }
+.probe select { margin-top: 5px; }
+.probe-actions { gap: 12px; margin-top: 2px; }
+.probe-actions button { gap: 4px; }
+.probe-info { list-style: none; margin: 2px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; max-height: 44px; overflow-y: auto; font: 10px/14px "SFMono-Regular", Consolas, monospace; color: #9fb7a4; }
+.probe-info li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meter output { margin-top: 14px; font-size: 23px; }
+
+.slider-strip, .instrument-console, .parameter-draft { flex-shrink: 0; }
+.slider-strip { display: flex; align-items: center; gap: 18px; padding: 7px 22px; background: #172126; border-top: 1px solid #33444c; min-height: 46px; flex-wrap: wrap; }
+.slider-list { display: flex; gap: 22px; flex: 1; min-width: 0; overflow-x: auto; }
+.slider-item { display: grid; grid-template-columns: auto minmax(110px, 180px) auto auto; align-items: center; gap: 8px; }
+.slider-item label { display: flex; flex-direction: column; font-size: 11px; color: #d6e4e2; white-space: nowrap; }
+.slider-item label small { font-size: 9px; color: #7f969d; }
+.slider-item output { font: 12px "SFMono-Regular", Consolas, monospace; color: #e4d68b; min-width: 62px; font-variant-numeric: tabular-nums; }
+.slider-form { display: flex; align-items: flex-end; gap: 9px; flex-wrap: wrap; padding: 6px 10px; border: 1px solid #4b6056; border-radius: 3px; background: #1f2d29; }
+.slider-form strong { align-self: center; font: 11px monospace; color: #c4e9aa; }
+.slider-form label { display: flex; flex-direction: column; gap: 3px; font-size: 9px; color: #8fa7ad; }
+.slider-form label.check { flex-direction: row; align-items: center; gap: 5px; font-size: 11px; padding-bottom: 7px; }
+.slider-form input:not([type=checkbox]), .slider-form select { padding: 5px 7px; font-size: 12px; width: 108px; }
+.slider-form input[name=slider-label] { width: 130px; }
+.slider-form button { padding: 6px 10px; font-size: 11px; }
+
+.experiment-book[data-page=examples] { width: min(1080px, calc(100vw - 36px)); height: min(760px, calc(100dvh - 70px)); }
+.experiment-book[data-page=examples] .book-content { flex: 1; min-height: 0; padding-bottom: 18px; }
+.example-list { grid-template-columns: 1fr 1fr; }
+.examples-page { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 22px; height: 100%; min-height: 0; }
+.examples-browser { display: flex; flex-direction: column; min-height: 0; }
+.examples-browser .parts-search { flex: 0 0 auto; }
+.examples-browser .parts-count { padding: 7px 2px; }
+.example-groups { flex: 1; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid #33474f; }
+.example-groups details { border-bottom: 1px solid #2d3f46; content-visibility: auto; contain-intrinsic-size: auto 38px; }
+.example-groups summary { display: flex; align-items: baseline; gap: 8px; padding: 9px 4px; cursor: pointer; font-size: 12px; color: #d6e4e2; }
+.example-groups summary span { font-size: 10px; color: #6f878f; }
+.example-groups summary small { margin-left: auto; font: 10px monospace; color: #7f969d; }
+.example-groups h4 { margin: 6px 0 2px 12px; font-size: 10px; font-weight: 500; color: #8fa6af; }
+.example-groups ul { list-style: none; margin: 0 0 8px; padding: 0 0 0 8px; }
+.example-groups li button { width: 100%; justify-content: flex-start; border: 0; background: transparent; padding: 5px 8px; font-size: 12px; color: #b9cbcf; text-align: left; min-height: 28px; }
+.example-groups li button:hover { background: #2b3e45; color: #fff; }
+.example-groups li button[aria-current=true] { background: #33443c; color: #c4e9aa; }
+.example-detail { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; }
+.example-path { font: 10px monospace; color: #7f969d; letter-spacing: .04em; }
+.example-detail h3 { margin: 0; font-size: 18px; font-weight: 500; color: #e2ecea; letter-spacing: 0; }
+.example-preview { width: 100%; height: 300px; flex-shrink: 0; background: #05090b; border: 1px solid #2c3d44; border-radius: 3px; }
+.example-preview line { stroke-linecap: round; }
+.example-preview line.wire { stroke: #6f8790; stroke-width: 1.4; }
+.example-preview line.part { stroke: #b0de86; stroke-width: 7; stroke-linecap: butt; }
+.example-preview .post { fill: #e0cf55; }
+.preview-note, .license-note { margin: 0; font-size: 10px; color: #6f878f; }
+.check-state { margin: 4px 0 0; font-size: 12px; color: #9cb0b6; line-height: 1.6; }
+.check-state.ok { color: #a9dd8e; }
+.check-state.blocked { color: #f0c39a; }
+.example-parts { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.example-parts li { font-size: 11px; padding: 3px 8px; border: 1px solid #3a4e56; border-radius: 10px; color: #c5d6d9; }
+.example-parts small { margin-left: 4px; color: #7f969d; }
+.example-detail > button.primary { align-self: flex-start; margin-top: 4px; }
+
+@media (max-width: 1100px) {
+  .instrument-console { grid-template-columns: 1.4fr 1.1fr .8fr .8fr 64px; }
+  .speed-controls { gap: 8px; }
+}
+@media (max-width: 780px) {
+  /* Phones scroll the bench vertically instead of clipping sliders and instruments. */
+  .bench { height: auto; min-height: 100dvh; overflow: visible; }
+  .station { flex: 0 0 auto; height: 62dvh; min-height: 430px; }
+  .parts-library { left: 50px; width: min(340px, calc(100vw - 50px)); }
+  .instrument-console { grid-template-columns: 1fr 1fr 1fr; }
+  .timebase { grid-column: 1 / 3; }
+  .slider-strip { padding: 7px 12px; }
+  .examples-page { grid-template-columns: 1fr; height: auto; }
+  .example-groups { max-height: 300px; }
+  .example-preview { height: 220px; }
+}
+@media (max-width: 460px) {
+  .examples-trigger { margin-left: 0; font-size: 12px; padding: 7px; }
+  .parts-library { left: 43px; width: calc(100vw - 43px); }
+  .parts-scroll ul { grid-template-columns: 1fr; }
+  .instrument-console { min-height: 0; row-gap: 12px; }
+  .timebase { grid-column: 1 / 4; }
+  .speed-controls { grid-template-columns: 1fr 1fr; }
+  .probe { grid-column: 1 / 4; grid-row: 2; }
+  .voltage { grid-row: 3; grid-column: 1; }
+  .current { grid-row: 3; grid-column: 2; }
+  .notes-trigger { grid-row: 3; grid-column: 3; }
+  .instrument-console > div.probe { padding: 0; border-right: 0; }
+  .instrument-console > div.voltage { padding-left: 0; }
+  .meter output { margin-top: 8px; }
+  .slider-item { grid-template-columns: 1fr auto auto; grid-template-rows: auto auto; }
+  .slider-item input[type=range] { grid-column: 1 / 4; grid-row: 2; }
+  .slider-form input:not([type=checkbox]), .slider-form select { width: 96px; }
+  .experiment-book[data-page=examples] { width: calc(100vw - 18px); height: calc(100dvh - 30px); }
+}

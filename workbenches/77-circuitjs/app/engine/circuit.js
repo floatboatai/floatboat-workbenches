@@ -5488,9 +5488,9 @@ var init_ScopePlot = __esm({
         "#FFFF00",
         "#00FFFF"
       ];
-      assignColor(count) {
-        if (count > 0) {
-          this.color = _ScopePlot.colors[(count - 1) % 8];
+      assignColor(count2) {
+        if (count2 > 0) {
+          this.color = _ScopePlot.colors[(count2 - 1) % 8];
           return;
         }
         switch (this.units) {
@@ -6283,14 +6283,14 @@ var init_StringTokenizer = __esm({
        * @return the number of times nextTokens() will succeed
        */
       countTokens() {
-        let count = 0;
+        let count2 = 0;
         let delimiterCount = 0;
         let tokenFound = false;
         let tmpPos = this.pos;
         while (tmpPos < this.len) {
           if (this.delim.indexOf(this.str.charAt(tmpPos++)) >= 0) {
             if (tokenFound) {
-              count++;
+              count2++;
               tokenFound = false;
             }
             delimiterCount++;
@@ -6301,8 +6301,8 @@ var init_StringTokenizer = __esm({
           }
         }
         if (tokenFound)
-          count++;
-        return this.retDelims ? count + delimiterCount : count;
+          count2++;
+        return this.retDelims ? count2 + delimiterCount : count2;
       }
     };
   }
@@ -9134,8 +9134,8 @@ var init_ScopeTrigger = __esm({
       validDataCount(plot, ipa, w, scopePointCount) {
         if (!this.isTriggered() || this.frozen)
           return w;
-        const count = (plot.ptr - ipa & scopePointCount - 1) + 1;
-        return Math.min(count, w);
+        const count2 = (plot.ptr - ipa & scopePointCount - 1) + 1;
+        return Math.min(count2, w);
       }
       dumpXml(xmlElm) {
         if (!this.isActive())
@@ -11569,19 +11569,19 @@ var init_CircuitElm = __esm({
         }
         this.setPoints();
       }
-      flipX(center2, count) {
+      flipX(center2, count2) {
         this.x = center2 - this.x;
         this.x2 = center2 - this.x2;
         this.initBoundingBox();
         this.setPoints();
       }
-      flipY(center2, count) {
+      flipY(center2, count2) {
         this.y = center2 - this.y;
         this.y2 = center2 - this.y2;
         this.initBoundingBox();
         this.setPoints();
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         const nx = this.y + xmy;
         const ny = this.x - xmy;
         const nx2 = this.y2 + xmy;
@@ -12850,7 +12850,6 @@ var init_CustomLogicModel = __esm({
 var SubcircuitModel;
 var init_SubcircuitModel = __esm({
   "notices/upstream/ts/SubcircuitModel.ts"() {
-    "use strict";
     init_ExtListEntry();
     init_CustomLogicModel();
     init_DiodeModel();
@@ -13118,8 +13117,8 @@ var init_SubcircuitModel = __esm({
       // load models from a subcircuit library file and make them global
       static loadLibrary(xml, root) {
         const oldLocalMap = _SubcircuitModel.localModelMap;
-        const loaded = /* @__PURE__ */ new Map();
-        _SubcircuitModel.localModelMap = loaded;
+        const loaded2 = /* @__PURE__ */ new Map();
+        _SubcircuitModel.localModelMap = loaded2;
         try {
           xml.currentXmlElement = root;
           for (const child of xml.getChildElements()) {
@@ -13129,9 +13128,9 @@ var init_SubcircuitModel = __esm({
           }
         } finally {
           _SubcircuitModel.localModelMap = oldLocalMap;
-          for (const m of loaded.values()) m.makeGlobal();
+          for (const m of loaded2.values()) m.makeGlobal();
         }
-        return [...loaded.values()];
+        return [...loaded2.values()];
       }
       static loadModelFromStorage(data) {
         const doc = new DOMParser().parseFromString(data, "text/xml");
@@ -13819,13 +13818,13 @@ var init_MouseManager = __esm({
           if (me) this.mouseElm.setSelected(false);
           return false;
         }
-        let allowed2 = true;
+        let allowed = true;
         for (const ce of this.ui.elmList) {
           if (ce.isSelected() && !ce.allowMove(dx, dy))
-            allowed2 = false;
-          if (!allowed2) break;
+            allowed = false;
+          if (!allowed) break;
         }
-        if (allowed2) {
+        if (allowed) {
           for (const ce of this.ui.elmList) {
             if (ce.isSelected()) {
               ce.move(dx, dy);
@@ -13846,7 +13845,7 @@ var init_MouseManager = __esm({
           this.sim.needAnalyze();
         }
         if (me) this.mouseElm.setSelected(false);
-        return allowed2;
+        return allowed;
       }
       dragPost(x, y, all) {
         if (this.draggingPost === -1) {
@@ -15836,31 +15835,31 @@ var init_ChipElm = __esm({
         if (s === _ChipElm.SIDE_E) return _ChipElm.SIDE_W;
         return s;
       }
-      flipX(center2, count) {
+      flipX(center2, count2) {
         this.flags ^= _ChipElm.FLAG_FLIP_X;
-        if (count !== 1) {
+        if (count2 !== 1) {
           const xs = (this.flippedSizeX + 1) * this.cspc2;
           this.x = center2 - this.x - xs;
           this.x2 = center2 - this.x2;
         }
         this.setPoints();
       }
-      flipY(center2, count) {
+      flipY(center2, count2) {
         this.flags ^= _ChipElm.FLAG_FLIP_Y;
-        if (count !== 1) {
+        if (count2 !== 1) {
           const ys = (this.flippedSizeY - 1) * this.cspc2;
           this.y = center2 - this.y - ys;
           this.y2 = center2 - this.y2;
         }
         this.setPoints();
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= _ChipElm.FLAG_FLIP_XY;
         if (this.isFlippedX() !== this.isFlippedY())
           this.flags ^= _ChipElm.FLAG_FLIP_X | _ChipElm.FLAG_FLIP_Y;
-        if (count !== 1) {
+        if (count2 !== 1) {
           this.x += this.cspc2;
-          super.flipXY(xmy, count);
+          super.flipXY(xmy, count2);
           this.x -= this.cspc2;
         }
         this.setPoints();
@@ -15912,17 +15911,17 @@ var init_ChipElm = __esm({
       }
       setChipEditValue(n, ei) {
       }
-      makeBitPins(count, pos, side, offset, name, output, state, reversed) {
-        for (let i = 0; i !== count; i++) {
-          const ii = reversed ? offset + count - 1 - i : offset + i;
+      makeBitPins(count2, pos, side, offset, name, output, state, reversed) {
+        for (let i = 0; i !== count2; i++) {
+          const ii = reversed ? offset + count2 - 1 - i : offset + i;
           if (this.useBus()) {
             this.pins[ii] = new Pin(this, pos, side, name);
-            this.pins[ii].busWidth = count;
+            this.pins[ii].busWidth = count2;
             this.pins[ii].busZ = i;
           } else if (this.bitOrder === _ChipElm.BIT_ORDER_LSB_FIRST) {
             this.pins[ii] = new Pin(this, pos + i, side, name + i);
           } else {
-            this.pins[ii] = new Pin(this, pos + (count - 1 - i), side, name + i);
+            this.pins[ii] = new Pin(this, pos + (count2 - 1 - i), side, name + i);
           }
           this.pins[ii].output = output;
           this.pins[ii].state = state;
@@ -16519,18 +16518,18 @@ var init_SubcircuitElm = __esm({
       getPostWidth(n) {
         return this.chip ? this.chip.getPostWidth(n) : 1;
       }
-      flipX(center2, count) {
+      flipX(center2, count2) {
         this.flags ^= ChipElm.FLAG_FLIP_X;
-        if (count !== 1) {
+        if (count2 !== 1) {
           const xs = (this.chip.flippedSizeX + 1) * this.chip.cspc2;
           this.x = center2 - this.x - xs;
           this.x2 = center2 - this.x2;
         }
         this.setPoints();
       }
-      flipY(center2, count) {
+      flipY(center2, count2) {
         this.flags ^= ChipElm.FLAG_FLIP_Y;
-        if (count !== 1) {
+        if (count2 !== 1) {
           const xs = (this.chip.flippedSizeY - 1) * this.chip.cspc2;
           this.y = center2 - this.y - xs;
           this.y2 = center2 - this.y2;
@@ -16543,13 +16542,13 @@ var init_SubcircuitElm = __esm({
       isFlippedY() {
         return (this.flags & ChipElm.FLAG_FLIP_Y) !== 0;
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= ChipElm.FLAG_FLIP_XY;
         if (this.isFlippedX() !== this.isFlippedY())
           this.flags ^= ChipElm.FLAG_FLIP_X | ChipElm.FLAG_FLIP_Y;
-        if (count !== 1) {
+        if (count2 !== 1) {
           this.x += this.chip.cspc2;
-          super.flipXY(xmy, count);
+          super.flipXY(xmy, count2);
           this.x -= this.chip.cspc2;
         }
         this.setPoints();
@@ -23684,27 +23683,27 @@ var init_CommandManager = __esm({
         }
       }
       countSelected() {
-        let count = 0;
+        let count2 = 0;
         for (const ce of this.app.elmList)
           if (ce.isSelected())
-            count++;
-        return count;
+            count2++;
+        return count2;
       }
       prepareFlip() {
         this.app.undoManager?.pushUndo();
         this.setMenuSelection();
         let minx = 3e4, maxx = -3e4;
         let miny = 3e4, maxy = -3e4;
-        const count = this.countSelected();
+        const count2 = this.countSelected();
         for (const ce of this.app.elmList) {
-          if (ce.isSelected() || count == 0) {
+          if (ce.isSelected() || count2 == 0) {
             minx = Math.min(ce.x, Math.min(ce.x2, minx));
             maxx = Math.max(ce.x, Math.max(ce.x2, maxx));
             miny = Math.min(ce.y, Math.min(ce.y2, miny));
             maxy = Math.max(ce.y, Math.max(ce.y2, maxy));
           }
         }
-        return { cx: Math.trunc((minx + maxx) / 2), cy: Math.trunc((miny + maxy) / 2), count };
+        return { cx: Math.trunc((minx + maxx) / 2), cy: Math.trunc((miny + maxy) / 2), count: count2 };
       }
       // mirror horizontally (flip left-right)
       mirrorX() {
@@ -23944,13 +23943,10 @@ __export(Adjustable_exports, {
 var Adjustable;
 var init_Adjustable = __esm({
   "notices/upstream/ts/Adjustable.ts"() {
-    "use strict";
     init_CircuitElm();
     init_CirSim();
-    init_StringTokenizer();
     init_CustomLogicModel();
     init_UIManager();
-    init_CircuitXMLDeserializer();
     init_CircuitXMLSerializer();
     init_NumberParse();
     Adjustable = class _Adjustable {
@@ -27191,19 +27187,19 @@ var init_MosfetElm = __esm({
         const capCur = this.model.capGD > 0 && this.geqGD > 0 ? this.geqGD * (this.nodes[0].v - this.nodes[2].v) + this.ceqGD : 0;
         return -this.ids + this.diodeCurrent2 + capCur;
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.x === this.x2)
           this.flags ^= this.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.y === this.y2)
           this.flags ^= this.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= this.FLAG_FLIP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
     NMosfetElm = class extends MosfetElm {
@@ -28116,19 +28112,19 @@ var init_TransistorElm = __esm({
         }
         this.localSubIters = 0;
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.x === this.x2)
           this.flags ^= _TransistorElm.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.y === this.y2)
           this.flags ^= _TransistorElm.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= _TransistorElm.FLAG_FLIP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
       setFlipped(flip) {
         if ((this.flags & _TransistorElm.FLAG_FLIP) !== 0 !== flip)
@@ -29122,17 +29118,17 @@ var init_AnalogSwitchElm = __esm({
       isFlipped() {
         return this.hasFlag(this.FLAG_FLIPPED);
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         this.flags ^= this.FLAG_FLIPPED_X;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         this.flags ^= this.FLAG_FLIPPED_Y;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(c2, count) {
+      flipXY(c2, count2) {
         this.flags ^= this.FLAG_FLIPPED;
-        super.flipXY(c2, count);
+        super.flipXY(c2, count2);
       }
       setPoints() {
         super.setPoints();
@@ -30157,14 +30153,10 @@ var init_AntennaElm = __esm({
 var AudioOutputElm;
 var init_AudioOutputElm = __esm({
   "notices/upstream/ts/AudioOutputElm.ts"() {
-    "use strict";
     init_CircuitElm();
-    init_Graphics();
     init_Color();
     init_Point();
-    init_StringTokenizer();
     init_CircuitXMLSerializer();
-    init_CircuitXMLDeserializer();
     init_EditInfo();
     init_Choice();
     init_Locale();
@@ -33750,19 +33742,19 @@ var init_ComparatorElm = __esm({
         arr[1] = "V+ = " + CircuitElm.getVoltageText(this.nodes[1].v);
         arr[2] = "V- = " + CircuitElm.getVoltageText(this.nodes[0].v);
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.dx === 0)
           this.flags ^= this.FLAG_SWAP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.dy === 0)
           this.flags ^= this.FLAG_SWAP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= this.FLAG_SWAP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
   }
@@ -35881,13 +35873,13 @@ var init_CustomTransformerElm = __esm({
           this.parseDescription();
         }
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         this.flags ^= _CustomTransformerElm.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         this.flags ^= _CustomTransformerElm.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
       // vertical not supported
       canFlipXY() {
@@ -36612,17 +36604,17 @@ var init_DPDTSwitchElm = __esm({
           this.y = this.y2 = this.y - Math.trunc(this.dpy1 * this.openhs * 3);
         this.position = 1 - this.position;
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         this.flip();
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         this.flip();
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(c2, count) {
+      flipXY(c2, count2) {
         this.flip();
-        super.flipXY(c2, count);
+        super.flipXY(c2, count2);
       }
       validate() {
         if (this.resistance > 0)
@@ -39018,20 +39010,20 @@ var init_GyratorElm = __esm({
         if (n === 0 && ei.value > 0)
           this.gyrResistance = ei.value;
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.hasFlag(_GyratorElm.FLAG_VERTICAL))
           this.flags ^= _GyratorElm.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (!this.hasFlag(_GyratorElm.FLAG_VERTICAL))
           this.flags ^= _GyratorElm.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= _GyratorElm.FLAG_VERTICAL;
         this.width *= -1;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
   }
@@ -42910,10 +42902,10 @@ var init_MultiplexerElm = __esm({
       getVoltageSourceCount() {
         const M = _MultiplexerElm;
         if (this.inputMode === M.INPUT_MODE_BUS_BUS) {
-          let count = this.dataBusWidth;
+          let count2 = this.dataBusWidth;
           if (this.hasFlag(M.FLAG_INVERTED_OUTPUT))
-            count += this.dataBusWidth;
-          return count;
+            count2 += this.dataBusWidth;
+          return count2;
         }
         return this.hasFlag(M.FLAG_INVERTED_OUTPUT) ? 2 : 1;
       }
@@ -43263,19 +43255,19 @@ var init_NortonAmpElm = __esm({
         arr[3] = "Vout = " + CircuitElm.getVoltageText(this.nodes[2].v);
         arr[4] = "Iout = " + CircuitElm.getCurrentText(-this.getCurrentIntoNode(2));
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.dx === 0)
           this.flags ^= _NortonAmpElm.FLAG_SWAP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.dy === 0)
           this.flags ^= _NortonAmpElm.FLAG_SWAP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= _NortonAmpElm.FLAG_SWAP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
       addRoutingObstacle(router) {
         this.addRoutingObstacleWithLeads(router, this.opwidth);
@@ -43783,19 +43775,19 @@ var init_OpAmpElm = __esm({
           return -this.current;
         return 0;
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.dx === 0)
           this.flags ^= this.FLAG_SWAP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.dy === 0)
           this.flags ^= this.FLAG_SWAP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= this.FLAG_SWAP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
       addRoutingObstacle(router) {
         this.addRoutingObstacleWithLeads(router, this.opwidth);
@@ -44281,18 +44273,18 @@ var init_OptocouplerElm = __esm({
       canFlipXY() {
         return false;
       }
-      flipX(center2, count) {
+      flipX(center2, count2) {
         this.flags ^= ChipElm.FLAG_FLIP_X;
-        if (count !== 1) {
+        if (count2 !== 1) {
           const xs = 3 * this.cspc2;
           this.x = center2 - this.x - xs;
           this.x2 = center2 - this.x2;
         }
         this.setPoints();
       }
-      flipY(center2, count) {
+      flipY(center2, count2) {
         this.flags ^= ChipElm.FLAG_FLIP_Y;
-        if (count !== 1) {
+        if (count2 !== 1) {
           const ys = 1 * this.cspc2;
           this.y = center2 - this.y - ys;
           this.y2 = center2 - this.y2;
@@ -45234,19 +45226,19 @@ var init_PotElm = __esm({
       onMouseWheel(e) {
         this.slider?.onMouseWheel(e);
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         this.flags ^= this.FLAG_FLIP_OFFSET;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         this.flags ^= this.FLAG_FLIP_OFFSET;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         if (CircuitElm.abs(this.dx) === CircuitElm.abs(this.dy))
           this.flags ^= this.FLAG_FLIP;
         this.flags ^= this.FLAG_FLIP_OFFSET;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
   }
@@ -45736,14 +45728,10 @@ var init_PushSwitchElm = __esm({
 var SRAMElm;
 var init_SRAMElm = __esm({
   "notices/upstream/ts/SRAMElm.ts"() {
-    "use strict";
     init_ChipElm();
     init_CircuitElm();
     init_CircuitNode();
-    init_VoltageSource();
-    init_StringTokenizer();
     init_CircuitXMLSerializer();
-    init_CircuitXMLDeserializer();
     init_EditInfo();
     init_Checkbox();
     init_CirSim();
@@ -46792,19 +46780,19 @@ var init_RelayElm = __esm({
       getShortcut() {
         return "R".charCodeAt(0);
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.dx === 0)
           this.flags ^= this.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.dy === 0)
           this.flags ^= this.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= this.FLAG_FLIP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
   }
@@ -47188,17 +47176,17 @@ var init_SCRElm = __esm({
         this.x2 = pt.x;
         this.y2 = pt.y;
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         this.fixEnds();
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         this.fixEnds();
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(c2, count) {
+      flipXY(c2, count2) {
         this.fixEnds();
-        super.flipXY(c2, count);
+        super.flipXY(c2, count2);
       }
     };
   }
@@ -49185,18 +49173,18 @@ var init_Switch2Elm = __esm({
       getShortcut() {
         return "S".charCodeAt(0);
       }
-      flipX(c2, count) {
-        super.flipX(c2, count);
+      flipX(c2, count2) {
+        super.flipX(c2, count2);
         this.position = this.posCount - 1 - this.position;
         this.flags ^= _Switch2Elm.FLAG_FLIPPED;
       }
-      flipY(c2, count) {
-        super.flipY(c2, count);
+      flipY(c2, count2) {
+        super.flipY(c2, count2);
         this.position = this.posCount - 1 - this.position;
         this.flags ^= _Switch2Elm.FLAG_FLIPPED;
       }
-      flipXY(c2, count) {
-        super.flipXY(c2, count);
+      flipXY(c2, count2) {
+        super.flipXY(c2, count2);
         this.position = this.posCount - 1 - this.position;
         this.flags ^= _Switch2Elm.FLAG_FLIPPED;
       }
@@ -49615,17 +49603,17 @@ var init_TappedTransformerElm = __esm({
             this.flags |= Inductor.FLAG_BACK_EULER;
         }
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         this.flags ^= _TappedTransformerElm.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         this.flags ^= _TappedTransformerElm.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(c2, count) {
+      flipXY(c2, count2) {
         this.flags ^= _TappedTransformerElm.FLAG_FLIP;
-        super.flipXY(c2, count);
+        super.flipXY(c2, count2);
       }
     };
   }
@@ -51728,20 +51716,20 @@ var init_TransformerElm = __esm({
         this.y2 = yy;
         this.setPoints();
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.hasFlag(_TransformerElm.FLAG_VERTICAL))
           this.flags ^= _TransformerElm.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (!this.hasFlag(_TransformerElm.FLAG_VERTICAL))
           this.flags ^= _TransformerElm.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= _TransformerElm.FLAG_VERTICAL;
         this.width *= -1;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
   }
@@ -51997,17 +51985,17 @@ var init_TriStateElm = __esm({
           } else ei.setError("must be >= 1");
         }
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         this.flags ^= this.FLAG_FLIP | this.FLAG_FLIP_X;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         this.flags ^= this.FLAG_FLIP | this.FLAG_FLIP_Y;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(c2, count) {
+      flipXY(c2, count2) {
         this.flags ^= this.FLAG_FLIP;
-        super.flipXY(c2, count);
+        super.flipXY(c2, count2);
       }
     };
   }
@@ -52497,23 +52485,23 @@ var init_TriodeElm = __esm({
       getVoltageDiff() {
         return this.nodes[this.plateN].v - this.nodes[this.cathN].v;
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.x === this.x2)
           this.flags ^= _TriodeElm.FLAG_FLIP;
         if ((this.flags & _TriodeElm.FLAG_DSIGN_FIX) === 0 && this.x !== this.x2)
           this.flags ^= _TriodeElm.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.y === this.y2)
           this.flags ^= _TriodeElm.FLAG_FLIP;
         if ((this.flags & _TriodeElm.FLAG_DSIGN_FIX) === 0 && this.y !== this.y2)
           this.flags ^= _TriodeElm.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= _TriodeElm.FLAG_FLIP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
   }
@@ -52745,19 +52733,19 @@ var init_UnijunctionElm = __esm({
         arr[4] = "Vb2b1 = " + CircuitElm.getVoltageText(this.nodes[2].v - this.nodes[1].v);
         arr[5] = "P = " + CircuitElm.getUnitText(this.getPower(), "W");
       }
-      flipX(c2, count) {
+      flipX(c2, count2) {
         if (this.dx === 0)
           this.flags ^= _UnijunctionElm.FLAG_FLIP;
-        super.flipX(c2, count);
+        super.flipX(c2, count2);
       }
-      flipY(c2, count) {
+      flipY(c2, count2) {
         if (this.dy === 0)
           this.flags ^= _UnijunctionElm.FLAG_FLIP;
-        super.flipY(c2, count);
+        super.flipY(c2, count2);
       }
-      flipXY(xmy, count) {
+      flipXY(xmy, count2) {
         this.flags ^= _UnijunctionElm.FLAG_FLIP;
-        super.flipXY(xmy, count);
+        super.flipXY(xmy, count2);
       }
     };
   }
@@ -56835,8 +56823,115 @@ var JSInterface = class {
 
 // engine-src/bridge.js
 init_Scope();
+init_Adjustable();
+init_SubcircuitModel();
+init_SRAMElm();
+init_AudioOutputElm();
 var import_lz_string = __toESM(require_lz_string(), 1);
 var import_canvas2svg = __toESM(require_canvas2svg(), 1);
+
+// engine-src/policy.js
+var BLOCKED_ELEMENTS = Object.freeze({
+  AudioInputElm: "\u97F3\u9891\u8F93\u5165\u4F1A\u8BFB\u53D6\u672C\u673A\u97F3\u9891\u6587\u4EF6\u5E76\u7528 Web Audio \u89E3\u7801\u4F5C\u4E3A\u4FE1\u53F7\u6E90\uFF1B\u672C\u5DE5\u4F5C\u53F0\u4E0D\u8BFB\u53D6\u672C\u673A\u6587\u4EF6\u6216\u97F3\u9891\u8F93\u5165\u3002",
+  DataInputElm: "\u6570\u636E\u8F93\u5165\u4F1A\u8BFB\u53D6\u672C\u673A CSV/\u6587\u672C\u6587\u4EF6\u4F5C\u4E3A\u4FE1\u53F7\u6E90\uFF1B\u672C\u5DE5\u4F5C\u53F0\u4E0D\u5728\u5F15\u64CE\u5185\u8BFB\u53D6\u672C\u673A\u6587\u4EF6\u3002",
+  DataRecorderElm: "\u6570\u636E\u5BFC\u51FA\u5143\u4EF6\u53EA\u80FD\u628A\u91C7\u6837\u5199\u6210\u6D4F\u89C8\u5668\u4E0B\u8F7D\u6587\u4EF6\uFF1B\u5D4C\u5165\u5F15\u64CE\u6CA1\u6709\u4E0B\u8F7D\u6743\u9650\uFF0C\u8BB0\u5F55\u4F1A\u9759\u9ED8\u4E22\u5931\u3002"
+});
+var BLOCKED_LABELS = Object.freeze({
+  AudioInputElm: "\u97F3\u9891\u8F93\u5165",
+  DataInputElm: "\u6570\u636E\u8F93\u5165",
+  DataRecorderElm: "\u6570\u636E\u5BFC\u51FA"
+});
+var RACK_OMITTED = Object.freeze({
+  ExtVoltageElm: "\u7535\u538B\u53EA\u80FD\u7531\u9875\u9762\u5916\u90E8\u811A\u672C\u901A\u8FC7 CircuitJS JS \u63A5\u53E3\u8BBE\u7F6E\uFF1B\u672C\u5DE5\u4F5C\u53F0\u4E0D\u63D0\u4F9B\u811A\u672C\u5BBF\u4E3B\u3002\u542B\u6B64\u5143\u4EF6\u7684\u7535\u8DEF\u4ECD\u53EF\u6253\u5F00\u3002",
+  SubcircuitElm: "\u901A\u7528\u5B50\u7535\u8DEF\u5B9E\u4F8B\u9700\u8981\u5148\u5B9A\u4E49\u5B50\u7535\u8DEF\u6A21\u578B\uFF1B\u6587\u4EF6\u4E2D\u81EA\u5E26\u6A21\u578B\u7684\u5B50\u7535\u8DEF\u53EF\u6B63\u5E38\u6253\u5F00\uFF0C\u5185\u7F6E LM317 / TL431 \u5728\u5143\u4EF6\u5E93\u4E2D\u3002",
+  AudioOutputElm: "\u97F3\u9891\u8F93\u51FA\u53EA\u5728\u539F\u751F\u4FA7\u680F\u7684\u300CPlay Audio\u300D\u6309\u94AE\u4E0B\u53D1\u58F0\uFF0C\u5D4C\u5165\u65F6\u4E0D\u663E\u793A\u8BE5\u6309\u94AE\uFF1A\u7535\u8DEF\u7167\u5E38\u4EFF\u771F\u4F46\u4E0D\u53D1\u58F0\u3002\u542B\u6B64\u5143\u4EF6\u7684 13 \u4E2A\u5B98\u65B9\u6EE4\u6CE2/\u632F\u8361\u793A\u4F8B\u53EF\u6B63\u5E38\u6253\u5F00\u3002",
+  ScopeElm: "\u753B\u5E03\u5185\u5D4C\u793A\u6CE2\u5668\u7531\u6D6E\u52A8\u793A\u6CE2\u5668\u5165\u53E3\u521B\u5EFA\uFF08\u5C1A\u672A\u5F00\u653E\uFF09\uFF1B\u542B\u6B64\u5143\u4EF6\u7684\u7535\u8DEF\u4ECD\u53EF\u6253\u5F00\u4E0E\u8FD0\u884C\u3002"
+});
+var MOUSE_MODES = Object.freeze(["Select", "DragAll", "DragRow", "DragColumn", "DragSelected", "DragPost"]);
+var NON_ELEMENT_XML = Object.freeze(["o", "dm", "rlm", "tm", "mm", "clm", "ccm", "h", "adj", "test", "switchevent", "scopedata"]);
+var MAX_SOURCE_CHARS = 65e4;
+var MAX_ENTRIES = 4e3;
+var CODE = /* @__PURE__ */ __name((c) => c.charCodeAt(0), "CODE");
+var TEXT_SPECIAL = new Set(["o", "h", "$", "!", "%", "?", "B", "."].map(CODE));
+var TEXT_NUMERIC_SPECIAL = /* @__PURE__ */ new Set([32, 34, 38]);
+function emptyResult() {
+  return { entries: 0, classes: {}, unknown: [], blocked: [], library: false };
+}
+__name(emptyResult, "emptyResult");
+function count(result, cls) {
+  result.entries++;
+  result.classes[cls] = (result.classes[cls] ?? 0) + 1;
+  if (BLOCKED_ELEMENTS[cls] && !result.blocked.includes(cls)) result.blocked.push(cls);
+}
+__name(count, "count");
+function unknown(result, type) {
+  if (result.unknown.length < 12 && !result.unknown.includes(type)) result.unknown.push(type);
+}
+__name(unknown, "unknown");
+function checkTextSource(source, dumpTypeMap) {
+  const result = emptyResult();
+  for (const raw of String(source).split(/\r?\n|\r/)) {
+    const tokens = raw.split(/[ +\t\n\r\f]+/).filter(Boolean);
+    if (!tokens.length) continue;
+    const type = tokens[0];
+    let tint = CODE(type);
+    if (TEXT_SPECIAL.has(tint)) {
+      if (type === ".") {
+        for (const t of tokens) if (BLOCKED_ELEMENTS[t] && !result.blocked.includes(t)) result.blocked.push(t);
+      }
+      continue;
+    }
+    if (tint >= 48 && tint <= 57) tint = Number.parseInt(type, 10);
+    if (TEXT_NUMERIC_SPECIAL.has(tint)) continue;
+    const cls = tint === CODE("n") ? "NoiseElm" : dumpTypeMap.get(tint);
+    if (!cls) {
+      unknown(result, type);
+      continue;
+    }
+    count(result, cls);
+  }
+  return result;
+}
+__name(checkTextSource, "checkTextSource");
+function checkXmlDocument(doc, xmlDumpTypeMap) {
+  const result = emptyResult();
+  const root = doc.documentElement;
+  if (!root || root.tagName !== "cir" || doc.getElementsByTagName("parsererror").length) {
+    result.invalid = true;
+    return result;
+  }
+  if (root.getAttribute("sublib") === "1") result.library = true;
+  for (const node of Array.from(root.children)) {
+    const tag = node.tagName;
+    if (NON_ELEMENT_XML.includes(tag)) {
+      if (tag === "ccm") for (const inner of Array.from(node.getElementsByTagName("*"))) {
+        const cls2 = xmlDumpTypeMap.get(inner.tagName);
+        if (cls2 && BLOCKED_ELEMENTS[cls2] && !result.blocked.includes(cls2)) result.blocked.push(cls2);
+      }
+      continue;
+    }
+    if (node.getAttribute("x") == null) continue;
+    const cls = xmlDumpTypeMap.get(tag);
+    if (!cls) {
+      unknown(result, tag);
+      continue;
+    }
+    count(result, cls);
+  }
+  return result;
+}
+__name(checkXmlDocument, "checkXmlDocument");
+function describeCheck(result, labelFor = (cls) => BLOCKED_LABELS[cls] ?? cls) {
+  if (result.invalid) return "CircuitJS XML \u683C\u5F0F\u65E0\u6548\uFF0C\u539F\u6587\u4ECD\u4FDD\u7559\u3002";
+  if (result.library) return "\u8FD9\u662F\u5B50\u7535\u8DEF\u5E93\u6587\u4EF6\uFF08\u53EA\u542B\u6A21\u578B\uFF09\uFF0C\u4E0D\u662F\u53EF\u8FD0\u884C\u7684\u7535\u8DEF\uFF1B\u539F\u6587\u4ECD\u4FDD\u7559\u3002";
+  if (result.entries > MAX_ENTRIES) return `\u7535\u8DEF\u542B ${result.entries} \u4E2A\u5143\u4EF6\uFF0C\u8D85\u8FC7 ${MAX_ENTRIES} \u4E2A\u7684\u5B89\u5168\u4E0A\u9650\uFF1B\u539F\u6587\u4ECD\u4FDD\u7559\uFF0C\u8BF7\u62C6\u5206\u7535\u8DEF\u3002`;
+  if (result.blocked.length) return `\u542B\u6709\u672C\u5DE5\u4F5C\u53F0\u4E0D\u5F00\u653E\u7684\u5143\u4EF6\uFF1A${result.blocked.map((cls) => `${labelFor(cls)}\uFF08${BLOCKED_ELEMENTS[cls]}\uFF09`).join("\uFF1B")} \u539F\u6587\u4ECD\u4FDD\u7559\u3002`;
+  if (result.unknown.length) return `\u542B\u6709 CircuitJS1 \u4E0D\u8BC6\u522B\u7684\u6761\u76EE\u7C7B\u578B\uFF1A${result.unknown.join("\u3001")}\u3002\u539F\u6587\u4ECD\u4FDD\u7559\uFF0C\u53EF\u5728\u5B9E\u9A8C\u7C3F\u6587\u672C\u9875\u6838\u5BF9\u3002`;
+  return "";
+}
+__name(describeCheck, "describeCheck");
+
+// engine-src/bridge.js
 window.LZString = import_lz_string.default;
 HookRegistry.createJSInterface = (app2) => new JSInterface(app2);
 Menus.prototype.getSetupList = function() {
@@ -56845,6 +56940,19 @@ UndoManager.prototype.readRecovery = function() {
 };
 UndoManager.prototype.writeRecoveryToStorage = function() {
 };
+SubcircuitModel.loadModelsFromStorage = function() {
+};
+SRAMElm.loadFileSupported = () => false;
+AudioOutputElm.playAudio = () => {
+};
+var createSliderWithValue = Adjustable.prototype.createSliderWithValue;
+Adjustable.prototype.createSliderWithValue = function(sim, value) {
+  createSliderWithValue.call(this, sim, value);
+  if (this.slider) {
+    this.slider.max = 100;
+    this.slider.val = Math.min(100, Math.max(0, this.valueToSliderPosition(value)));
+  }
+};
 var stepHook = JSInterface.prototype.callTimeStepHook;
 JSInterface.prototype.callTimeStepHook = function() {
   if (captureComputed) {
@@ -56852,6 +56960,10 @@ JSInterface.prototype.callTimeStepHook = function() {
     captureComputed = false;
   }
   stepHook.call(this);
+  if (stepping) {
+    stepping = false;
+    this.app.setSimRunning(false);
+  }
 };
 var undo = UndoManager.prototype.doUndo;
 UndoManager.prototype.doUndo = function() {
@@ -56860,7 +56972,7 @@ UndoManager.prototype.doUndo = function() {
   return undo.call(this);
 };
 Scope.prototype.showProperties = function() {
-  post({ type: "error", message: "\u9996\u7248\u4FDD\u7559\u793A\u6CE2\u5668\u6CE2\u5F62\u4E0E\u53F3\u952E\u5FEB\u6377\u8BBE\u7F6E\uFF1B\u9AD8\u7EA7\u5C5E\u6027\u8868\u5355\u6682\u4E0D\u5F00\u653E\u3002" });
+  post({ type: "error", message: "\u793A\u6CE2\u5668\u6CE2\u5F62\u4E0E\u53F3\u952E\u5FEB\u6377\u8BBE\u7F6E\u53EF\u7528\uFF1B\u9AD8\u7EA7\u5C5E\u6027\u8868\u5355\u6682\u4E0D\u5F00\u653E\u3002" });
 };
 var apply = EditDialog.prototype.apply;
 EditDialog.prototype.apply = function() {
@@ -56895,6 +57007,7 @@ EditDialog.prototype.closeDialog = function() {
 };
 var app;
 var key = "";
+var loaded = false;
 var lastConfig = "";
 var lastView = "";
 var activeDialog = null;
@@ -56903,7 +57016,16 @@ var disposed = false;
 var frozen = false;
 var calculatedConfig = "";
 var captureComputed = true;
-var allowed = /* @__PURE__ */ new Set(["WireElm", "ResistorElm", "GroundElm", "CapacitorElm", "InductorElm", "VoltageElm", "DCVoltageElm", "ACVoltageElm", "RailElm", "DCRailElm", "ACRailElm", "SwitchElm", "Switch2Elm", "DiodeElm", "OpAmpElm", "TextElm", "OutputElm", "ProbeElm", "Select", "DragAll", "DragPost", "DragSelected"]);
+var stepping = false;
+var probeIndex = -1;
+var probeCache = { key: "", params: [] };
+var BLOCKED_MENU = ["sliders", "viewInFloatScope", "createsubcircuit"];
+var FILE_MENU = ["paste", "importfromtext", "importfromfile", "importfromlocalfile", "export", "exporturl", "exportasurl", "exportaslocalfile", "exportastext", "exportasimage", "exportassvg", "print", "newblankcircuit"];
+var strip = /* @__PURE__ */ __name((s) => String(s ?? "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim(), "strip");
+function placeable(tool) {
+  return typeof tool === "string" && (MOUSE_MODES.includes(tool) || !!app?.classToLabelMap?.has(tool) && !BLOCKED_ELEMENTS[tool.split(":")[0]]);
+}
+__name(placeable, "placeable");
 function post(value) {
   parent.postMessage({ bridge: "circuitjs-v08", key, ...value }, location.origin);
 }
@@ -56921,7 +57043,7 @@ function captureDraft() {
 }
 __name(captureDraft, "captureDraft");
 function emit(force = false) {
-  if (!app || disposed) return;
+  if (!app || !loaded || disposed) return;
   const config = app.dumpCircuit(false), view = JSON.stringify(app.transform);
   if (force || config !== lastConfig || view !== lastView) {
     if (config !== calculatedConfig) {
@@ -56942,28 +57064,100 @@ function signature(e) {
 }
 __name(signature, "signature");
 function readouts() {
-  return app.elmList.map((e, index) => ({ index, type: e.constructor.name.replace(/Elm$/, ""), voltage: e.getVoltageDiff(), current: e.getCurrent(), dump: signature(e) }));
+  return app.elmList.map((e, index) => ({ index, type: e.constructor.name.replace(/Elm$/, ""), voltage: safe(() => e.getVoltageDiff()), current: safe(() => e.getCurrent()), dump: signature(e) }));
 }
 __name(readouts, "readouts");
-function validateSource(source) {
-  if (typeof source !== "string" || source.length > 65e4 || /<!DOCTYPE|<!ENTITY/i.test(source)) throw Error("\u7535\u8DEF\u6587\u672C\u4E0D\u53D7\u652F\u6301\u6216\u8D85\u8FC7\u5BB9\u91CF\u3002\u539F\u6587\u4ECD\u4FDD\u7559\u3002");
-  if (source.trim().startsWith("<")) {
-    const doc = new DOMParser().parseFromString(source, "application/xml");
-    if (doc.documentElement.children.length > 256) throw Error("\u6700\u591A\u652F\u6301 256 \u4E2A\u7535\u8DEF\u6761\u76EE\uFF1B\u539F\u6587\u5DF2\u4FDD\u7559\u3002");
-    if (doc.querySelector("parsererror") || doc.documentElement.tagName !== "cir") throw Error("CircuitJS XML \u683C\u5F0F\u65E0\u6548\uFF0C\u539F\u6587\u4ECD\u4FDD\u7559\u3002");
-    const tags = /* @__PURE__ */ new Set(["w", "r", "g", "c", "l", "v", "R", "s", "S", "d", "a", "x", "O", "p", "o", "h", "adj", "dm"]);
-    for (const node of doc.documentElement.children) if (!tags.has(node.tagName)) throw Error(`\u9996\u7248\u672A\u9A8C\u8BC1\u5143\u4EF6 ${node.tagName}\uFF1B\u539F\u6587\u5DF2\u4FDD\u7559\uFF0C\u8BF7\u4F7F\u7528\u57FA\u7840 RLC / \u7535\u538B\u6E90 / \u5F00\u5173\u7535\u8DEF\u3002`);
-  } else {
-    if (source.split("\n").filter((x) => x.trim()).length > 256) throw Error("\u6700\u591A\u652F\u6301 256 \u4E2A\u7535\u8DEF\u6761\u76EE\uFF1B\u539F\u6587\u5DF2\u4FDD\u7559\u3002");
-    const types = /* @__PURE__ */ new Set(["$", "w", "r", "g", "c", "l", "v", "R", "s", "S", "d", "a", "x", "O", "p", "o", "h", "&"]);
-    for (const line of source.split("\n").filter((x) => x.trim())) if (!types.has(line.trim().split(/\s/)[0])) throw Error("\u9996\u7248\u672A\u9A8C\u8BC1\u6B64\u7535\u8DEF\u7C7B\u578B\uFF1B\u539F\u6587\u5DF2\u4FDD\u7559\u3002");
+function safe(read) {
+  try {
+    const v = read();
+    return Number.isFinite(v) ? v : NaN;
+  } catch {
+    return NaN;
   }
 }
-__name(validateSource, "validateSource");
+__name(safe, "safe");
+function liveItems() {
+  return app.elmList.map((e, index) => ({ index, type: e.constructor.name.replace(/Elm$/, ""), cls: e.constructor.name, voltage: safe(() => e.getVoltageDiff()), current: safe(() => e.getCurrent()) }));
+}
+__name(liveItems, "liveItems");
+function normalizeSource(source) {
+  const t = source.replace(/^﻿/, "");
+  return t.trimStart().startsWith("<") ? t.trimStart() : t;
+}
+__name(normalizeSource, "normalizeSource");
+function analyze(source) {
+  if (typeof source !== "string") return { message: "\u7535\u8DEF\u6587\u672C\u683C\u5F0F\u65E0\u6548\u3002", entries: 0, classes: {} };
+  if (source.length > MAX_SOURCE_CHARS) return { message: `\u7535\u8DEF\u6587\u672C\u8D85\u8FC7 ${MAX_SOURCE_CHARS} \u5B57\u7B26\u7684\u5BB9\u91CF\uFF1B\u539F\u6587\u4ECD\u4FDD\u7559\u3002`, entries: 0, classes: {} };
+  if (/<!DOCTYPE|<!ENTITY/i.test(source)) return { message: "\u7535\u8DEF XML \u4E0D\u5141\u8BB8 DOCTYPE/ENTITY \u58F0\u660E\uFF1B\u539F\u6587\u4ECD\u4FDD\u7559\u3002", entries: 0, classes: {} };
+  const text = normalizeSource(source);
+  const result = text.startsWith("<") ? checkXmlDocument(new DOMParser().parseFromString(text, "application/xml"), CirSim.xmlDumpTypeMap) : checkTextSource(text, CirSim.dumpTypeMap);
+  return { ...result, message: describeCheck(result) };
+}
+__name(analyze, "analyze");
+function adjustables() {
+  return app.adjustables.flatMap((a, index) => {
+    if (a.sharedSlider || !a.slider) return [];
+    let value = a.getSliderValue();
+    try {
+      const ei = a.elm?.getEditInfo(a.editItem);
+      if (ei && Number.isFinite(ei.value)) value = ei.value;
+    } catch {
+    }
+    return [{ index, label: strip(a.sliderText), element: app.elmList.indexOf(a.elm), param: strip(a.getEditItemName()), value, position: a.slider.getValue(), positions: a.slider.max ?? 99, min: a.minValue, max: a.maxValue, log: !!a.logarithmic, linked: app.adjustables.filter((x) => x.sharedSlider === a).length }];
+  });
+}
+__name(adjustables, "adjustables");
+function probe() {
+  const e = app.elmList[probeIndex];
+  if (!e) return null;
+  const arr = new Array(20).fill(null);
+  try {
+    e.getInfo(arr);
+  } catch {
+  }
+  const info = arr.filter((x) => typeof x === "string" && x.trim()).map(strip).slice(0, 12);
+  const cacheKey = probeIndex + "|" + signature(e) + "|" + app.adjustables.length;
+  if (probeCache.key !== cacheKey) {
+    const params = [];
+    for (let i = 0; i < 40; i++) {
+      let ei;
+      try {
+        ei = e.getEditInfo(i);
+      } catch {
+        break;
+      }
+      if (ei == null) break;
+      const name = strip(ei.name);
+      if (!name || !ei.canCreateAdjustable?.() || !Number.isFinite(ei.value)) continue;
+      params.push({ item: i, name, value: ei.value, min: ei.minVal, max: ei.maxVal, hasSlider: !!app.findAdjustable(e, i) });
+    }
+    probeCache = { key: cacheKey, params };
+  }
+  return { index: probeIndex, cls: e.constructor.name, info, params: probeCache.params };
+}
+__name(probe, "probe");
+function status() {
+  const config = app.dumpCircuit(false);
+  return {
+    type: "readouts",
+    valid: calculatedConfig === config && !app.stopMessage,
+    running: app.simIsRunning(),
+    time: app.sim.t,
+    stop: app.stopMessage,
+    items: liveItems(),
+    speed: app.ui.speedBar.getValue(),
+    currentSpeed: app.ui.currentBar.getValue(),
+    timeStep: app.sim.maxTimeStep,
+    tool: app.ui.mouseModeStr,
+    adjustables: adjustables(),
+    probe: probe()
+  };
+}
+__name(status, "status");
 async function initialize(message) {
   key = message.key;
-  validateSource(message.source);
-  window.startCircuitText = message.source;
+  if (typeof message.source !== "string") throw Error("\u7535\u8DEF\u6587\u672C\u683C\u5F0F\u65E0\u6548\u3002");
+  window.startCircuitText = "";
   app = new CirSim();
   app.isModified = () => false;
   const needAnalyze = app.needAnalyze.bind(app);
@@ -56974,29 +57168,77 @@ async function initialize(message) {
   };
   await app.init();
   app.setSimRunning(false);
-  for (const [code, tool] of app.shortcuts) if (!allowed.has(tool) && !tool.startsWith("cmd:")) app.shortcuts.delete(code);
+  for (const [code, tool] of app.shortcuts) if (!placeable(tool) && !tool.startsWith("cmd:")) app.shortcuts.delete(code);
   const command = app.commands.menuPerformed.bind(app.commands);
   app.commands.menuPerformed = (menu, item) => {
-    if (menu === "main" && !allowed.has(item)) {
-      post({ type: "error", message: "\u9996\u7248\u4EC5\u542F\u7528\u57FA\u7840\u7535\u8DEF\u5143\u4EF6\u3002" });
+    if (menu === "main" && !placeable(item)) {
+      post({ type: "error", message: BLOCKED_ELEMENTS[item] ?? "\u6B64\u5143\u4EF6\u5165\u53E3\u4E0D\u53EF\u7528\u3002" });
       return;
     }
-    if (["sliders", "viewInFloatScope", "createsubcircuit"].includes(item)) {
-      post({ type: "error", message: "\u9996\u7248\u4FDD\u7559\u57FA\u7840\u7535\u8DEF\u4E0E\u4E0B\u65B9\u793A\u6CE2\u5668\uFF1B\u6B64\u9AD8\u7EA7\u7F16\u8F91\u5165\u53E3\u6682\u4E0D\u5F00\u653E\u3002" });
+    if (BLOCKED_MENU.includes(item)) {
+      post({ type: "error", message: "\u6ED1\u5757\u8BF7\u5728\u4E0B\u65B9\u4EEA\u5668\u53F0\u300C\u6ED1\u5757\u300D\u4E2D\u6DFB\u52A0\uFF1B\u6D6E\u52A8\u793A\u6CE2\u5668\u4E0E\u5B50\u7535\u8DEF\u521B\u5EFA\u6682\u4E0D\u5F00\u653E\u3002" });
       return;
     }
-    if (["paste", "importfromtext", "importfromfile", "export", "exporturl", "newblankcircuit"].includes(item)) return;
+    if (FILE_MENU.includes(item)) return;
     command(menu, item);
     setTimeout(() => emit(true), 0);
   };
+  const check = analyze(message.source);
+  if (check.message) throw Error(check.message);
+  app.loader.readCircuit(normalizeSource(message.source));
+  app.unsavedChanges = false;
+  app.setSimRunning(false);
   if (Array.isArray(message.view) && message.view.length === 6 && message.view.every(Number.isFinite) && Array.isArray(message.viewport) && Math.abs(message.viewport[0] - innerWidth) < 10 && Math.abs(message.viewport[1] - innerHeight) < 10) app.transform = [...message.view];
   else app.centerCircuit();
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) app.menus.dotsCheckItem.setState(false);
+  loaded = true;
   app.repaint();
   emit(true);
   post({ type: "loaded" });
+  post({ type: "catalog", placeable: [...app.classToLabelMap.keys()].filter(placeable), blocked: { ...BLOCKED_ELEMENTS } });
 }
 __name(initialize, "initialize");
+function finite(x) {
+  return typeof x === "number" && Number.isFinite(x);
+}
+__name(finite, "finite");
+function addSlider(m) {
+  const e = app.elmList[m.element];
+  if (!e) throw Error("\u5143\u4EF6\u5DF2\u4E0D\u5B58\u5728\u3002");
+  const ei = e.getEditInfo(m.item);
+  if (!ei || !ei.canCreateAdjustable()) throw Error("\u8BE5\u53C2\u6570\u4E0D\u80FD\u7528\u6ED1\u5757\u8C03\u8282\u3002");
+  if (app.findAdjustable(e, m.item)) throw Error("\u8BE5\u53C2\u6570\u5DF2\u6709\u6ED1\u5757\u3002");
+  if (!finite(m.min) || !finite(m.max) || m.min >= m.max) throw Error("\u6ED1\u5757\u6700\u5C0F\u503C\u5FC5\u987B\u5C0F\u4E8E\u6700\u5927\u503C\u3002");
+  if (m.log && m.min <= 0) throw Error("\u5BF9\u6570\u6ED1\u5757\u7684\u6700\u5C0F\u503C\u5FC5\u987B\u5927\u4E8E 0\u3002");
+  const label = String(m.label ?? "").trim().slice(0, 60);
+  if (!label) throw Error("\u8BF7\u586B\u5199\u6ED1\u5757\u540D\u79F0\u3002");
+  app.undoManager.pushUndo();
+  const a = new Adjustable(e, m.item);
+  a.minValue = m.min;
+  a.maxValue = m.max;
+  a.sliderText = label;
+  a.logarithmic = !!m.log;
+  if (!a.createSlider(app)) throw Error("\u65E0\u6CD5\u4E3A\u8BE5\u53C2\u6570\u521B\u5EFA\u6ED1\u5757\u3002");
+  app.adjustables.push(a);
+  probeCache.key = "";
+  emit(true);
+}
+__name(addSlider, "addSlider");
+function removeSlider(index) {
+  const a = app.adjustables[index];
+  if (!a) return;
+  app.undoManager.pushUndo();
+  for (let i = app.adjustables.length - 1; i >= 0; i--) {
+    const x = app.adjustables[i];
+    if (x === a || x.sharedSlider === a) {
+      x.deleteSlider(app);
+      app.adjustables.splice(i, 1);
+    }
+  }
+  probeCache.key = "";
+  emit(true);
+}
+__name(removeSlider, "removeSlider");
 window.addEventListener("message", async (event) => {
   if (event.origin !== location.origin || event.source !== parent || event.data?.bridge !== "circuitjs-v08") return;
   const m = event.data;
@@ -57005,8 +57247,14 @@ window.addEventListener("message", async (event) => {
       await initialize(m);
       return;
     }
-    if (m.key !== key || !app || disposed) return;
+    if (m.key !== key || !app || !loaded || disposed) return;
+    if (m.type === "check-source") {
+      const r = analyze(m.source);
+      post({ type: "source-check", request: m.request, ok: !r.message, message: r.message, entries: r.entries ?? 0, classes: r.classes ?? {} });
+      return;
+    }
     if (m.type === "freeze") {
+      stepping = false;
       app.setSimRunning(false);
       frozen = true;
       post({ type: "frozen", source: app.dumpCircuit(true), view: [...app.transform], viewport: [innerWidth, innerHeight], draft: dirtyDialog ? captureDraft() : void 0 });
@@ -57017,25 +57265,65 @@ window.addEventListener("message", async (event) => {
       return;
     }
     if (frozen) return;
-    if (m.type === "run") app.setSimRunning(!app.simIsRunning());
+    if (m.type === "run") {
+      stepping = false;
+      app.setSimRunning(!app.simIsRunning());
+    }
     if (m.type === "stop") {
+      stepping = false;
       app.setSimRunning(false);
       emit(true);
     }
+    if (m.type === "step") {
+      if (app.stopMessage) throw Error(app.stopMessage);
+      app.setSimRunning(false);
+      stepping = true;
+      app.setSimRunning(true);
+    }
     if (m.type === "reset") {
+      const was = app.simIsRunning() && !stepping;
+      stepping = false;
       calculatedConfig = "";
       captureComputed = true;
       app.ui.resetAction();
-      app.setSimRunning(false);
+      app.setSimRunning(was);
       emit(true);
     }
-    if (m.type === "tool" && allowed.has(m.tool)) app.commands.menuPerformed("main", m.tool);
+    if (m.type === "speed" && finite(m.value)) {
+      app.ui.speedBar.setValue(Math.round(Math.min(259, Math.max(1, m.value))));
+      emit();
+    }
+    if (m.type === "current-speed" && finite(m.value)) {
+      app.ui.currentBar.setValue(Math.round(Math.min(99, Math.max(1, m.value))));
+      emit();
+    }
+    if (m.type === "tool") {
+      if (!placeable(m.tool)) throw Error(BLOCKED_ELEMENTS[m.tool] ?? "\u6B64\u5143\u4EF6\u5165\u53E3\u4E0D\u53EF\u7528\u3002");
+      app.commands.menuPerformed("main", m.tool);
+    }
+    if (m.type === "probe" && Number.isInteger(m.index)) {
+      probeIndex = m.index;
+      const e = app.elmList[m.index];
+      if (e && app.mouse?.setMouseElm) {
+        app.mouse.setMouseElm(e);
+        app.repaint();
+      }
+    }
     if (m.type === "edit" && app.elmList[m.index]) app.commands.doEdit(app.elmList[m.index]);
     if (m.type === "scope" && app.elmList[m.index]) {
       app.mouse.menuElm = app.elmList[m.index];
       app.commands.menuPerformed("elm", "viewInScope");
       emit(true);
     }
+    if (m.type === "slider" && finite(m.position)) {
+      const a = app.adjustables[m.index];
+      if (a && !a.sharedSlider && a.slider) {
+        a.slider.setValue(Math.round(m.position));
+        emit();
+      }
+    }
+    if (m.type === "add-slider") addSlider(m);
+    if (m.type === "remove-slider" && Number.isInteger(m.index)) removeSlider(m.index);
     if (m.type === "center") app.centerCircuit();
     if (m.type === "undo") {
       app.undoManager.doUndo();
@@ -57057,8 +57345,7 @@ window.addEventListener("message", async (event) => {
       captureDraft();
     }
     if (m.type === "export") {
-      app.setSimRunning(false);
-      app.ui.updateCircuit();
+      if (!app.simIsRunning()) app.ui.updateCircuit();
       emit(true);
       post({ type: "export", source: app.dumpCircuit(true), png: app.ui.cv.toDataURL("image/png"), readouts: readouts(), valid: calculatedConfig === app.dumpCircuit(false) && !app.stopMessage, time: app.sim.t, request: m.request });
     }
@@ -57069,7 +57356,13 @@ window.addEventListener("message", async (event) => {
 document.addEventListener("input", (event) => {
   if (event.target.closest("dialog")) captureDraft();
 }, true);
-document.addEventListener("pointerup", () => setTimeout(() => emit(true), 0));
+document.addEventListener("pointerup", () => setTimeout(() => {
+  if (!app || !loaded || frozen) return;
+  emit(true);
+  const hovered = app.mouse?.getMouseElm?.(), selected = app.elmList.filter((e) => e.isSelected());
+  const target = hovered && app.elmList.includes(hovered) ? hovered : selected.length === 1 ? selected[0] : null;
+  if (target) post({ type: "selection", index: app.elmList.indexOf(target) });
+}, 0));
 document.addEventListener("keyup", () => setTimeout(() => emit(), 0));
 document.addEventListener("keydown", (event) => {
   if ((event.ctrlKey || event.metaKey) && ["s", "o", "n"].includes(event.key.toLowerCase())) {
@@ -57078,7 +57371,7 @@ document.addEventListener("keydown", (event) => {
   }
 }, true);
 var poll = setInterval(() => {
-  if (!app || disposed || frozen) return;
+  if (!app || !loaded || disposed || frozen) return;
   const d = CirSim.editDialog;
   if (d !== activeDialog) {
     if (activeDialog && dirtyDialog && !d) {
@@ -57091,8 +57384,11 @@ var poll = setInterval(() => {
     for (const ei of d.einfos) if (ei?.textf) ei.textf.setAttribute("aria-label", ei.name);
   }
   emit();
-  const config = app.dumpCircuit(false);
-  post({ type: "readouts", valid: calculatedConfig === config && !app.stopMessage, running: app.simIsRunning(), time: app.sim.t, stop: app.stopMessage, items: readouts() });
+  try {
+    post(status());
+  } catch (e) {
+    console.warn("CircuitJS readout skipped", e);
+  }
 }, 350);
 window.addEventListener("pagehide", () => {
   disposed = true;
