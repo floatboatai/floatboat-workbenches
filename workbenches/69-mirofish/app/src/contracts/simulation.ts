@@ -10,17 +10,6 @@ export type Action = {
   result: unknown;
   success: boolean;
 };
-export type Review = {
-  simulationId: string;
-  origin: "example" | "file" | "service";
-  sourceName: string;
-  background: string;
-  assumptions: string;
-  conclusion: string;
-  actions: Action[];
-  annotations: Record<string, { note: string; reviewed: boolean }>;
-  actors: Record<string, string>;
-};
 function jsonLimit(v: unknown, max: number) {
   const text = JSON.stringify(v);
   if (typeof text !== "string" || text.length > max)
@@ -63,51 +52,10 @@ export function actionValue(v: unknown, platform = ""): Action {
   };
 }
 export const actorKey = (a: Action) => a.platform + ":" + a.agent_id;
-export const actionKey = (a: Action, i: number) =>
-  `${i}:${a.platform}:${a.agent_id}:${a.round_num}`;
-export function reviewValue(v: unknown): Review {
-  if (
-    !isRecord(v) ||
-    !Array.isArray(v.actions) ||
-    v.actions.length > 500 ||
-    !["example", "file", "service"].includes(String(v.origin)) ||
-    !isRecord(v.annotations) ||
-    !isRecord(v.actors)
-  )
-    throw new Error("复核工程格式无效，最多500条动作。");
-  const actions = v.actions.map((a) => actionValue(a)),
-    keys = new Set(actions.map(actionKey)),
-    actors = new Set(actions.map(actorKey));
-  const annotations: Review["annotations"] = {},
-    profiles: Review["actors"] = {};
-  for (const [k, value] of Object.entries(v.annotations)) {
-    if (!keys.has(k) || !isRecord(value) || typeof value.reviewed !== "boolean")
-      throw new Error("批注与动作不匹配");
-    annotations[k] = {
-      note: boundedText(value.note, 5000),
-      reviewed: value.reviewed,
-    };
-  }
-  for (const [k, value] of Object.entries(v.actors)) {
-    if (!actors.has(k)) throw new Error("角色说明与来源不匹配");
-    profiles[k] = boundedText(value, 5000);
-  }
-  const out = {
-    simulationId: boundedText(v.simulationId, 120),
-    origin: v.origin as Review["origin"],
-    sourceName: boundedText(v.sourceName, 200),
-    background: boundedText(v.background, 15000),
-    assumptions: boundedText(v.assumptions, 15000),
-    conclusion: boundedText(v.conclusion, 15000),
-    actions,
-    annotations,
-    actors: profiles,
-  };
-  jsonLimit(out, 850000);
-  return out;
-}
+export const NATIVE_LIMITS = { bytes: 40 * 1024 * 1024, actions: 100_000 };
 export function parseNative(text: string, fallbackPlatform = "") {
-  if (text.length > 850000) throw new Error("结果超过850KB，请分段导出。");
+  if (text.length > NATIVE_LIMITS.bytes)
+    throw new Error("结果超过40MB，请按轮次分段导出。");
   let raw: unknown;
   try {
     raw = JSON.parse(text);
@@ -147,53 +95,24 @@ export function parseNative(text: string, fallbackPlatform = "") {
   const actions = list
     .filter((v) => !(isRecord(v) && "event_type" in v))
     .map((v) => actionValue(v, fallbackPlatform));
-  if (actions.length > 500)
-    throw new Error("最多读取500条动作，请按轮次拆分。");
+  if (actions.length > NATIVE_LIMITS.actions)
+    throw new Error("最多读取100000条动作，请按轮次拆分。");
   return { simulationId, actions, ignoredEvents: events };
 }
-export function fromNative(
-  text: string,
-  name: string,
-  platform = "",
-  origin: Review["origin"] = "file",
-): Review {
-  const r = parseNative(text, platform);
-  return reviewValue({
-    simulationId: r.simulationId,
-    origin,
-    sourceName: name,
-    background: "",
-    assumptions: "",
-    conclusion: "",
-    actions: r.actions,
-    annotations: {},
-    actors: {},
-  });
-}
-export function nativeResult(v: Review) {
+export function nativeResult(simulationId: string, actions: Action[]) {
   return {
     success: true,
-    data: { simulation_id: v.simulationId, all_actions: v.actions },
+    data: { simulation_id: simulationId, all_actions: actions },
   };
 }
 export function content(a: Action) {
-  for (const key of ["content", "text", "message", "title"])
+  for (const key of ["content", "quote_content", "text", "message", "title"])
     if (typeof a.action_args[key] === "string")
       return a.action_args[key] as string;
   return JSON.stringify(a.action_args);
 }
-export function markdown(v: Review) {
-  return (
-    `# ${v.simulationId || "情景复核"}\n\n来源：${v.sourceName}\n\n## 背景\n${v.background}\n\n## 假设与限制\n${v.assumptions}\n\n## 人工结论\n${v.conclusion}\n\n## 动作审阅\n\n` +
-    v.actions
-      .map((a, i) => {
-        const n = v.annotations[actionKey(a, i)];
-        return `### 轮次${a.round_num} · ${a.agent_name || a.agent_id} · ${a.action_type}\n\n${content(a)}\n\n执行：${a.success ? "成功" : "失败"} / 审阅：${n?.reviewed ? "已复核" : "待复核"}\n\n${n?.note ?? ""}\n`;
-      })
-      .join("\n")
-  );
-}
-const example: Action[] = [
+/** Hand-written native records used by contract tests; not a simulation. */
+export const nativeExample: Action[] = [
   {
     round_num: 1,
     timestamp: "2026-10-27T09:00:00",
@@ -246,15 +165,3 @@ const example: Action[] = [
     success: true,
   },
 ];
-export const seed: Review = {
-  simulationId: "示例 · 周末市集",
-  origin: "example",
-  sourceName: "人工编写的原生格式示例",
-  background: "讨论社区公园周末市集的组织方式。",
-  assumptions:
-    "这些动作仅用于演示复核流程，未运行模型模拟；不代表真实居民意见。",
-  conclusion: "",
-  actions: example,
-  annotations: {},
-  actors: {},
-};

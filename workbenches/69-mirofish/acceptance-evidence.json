@@ -1,99 +1,170 @@
 {
-  "at": "2026-10-28T04:36:30.398Z",
-  "localReviewFlow": true,
-  "notesSaveReload": true,
-  "roundFilter": true,
-  "nativeJsonDraftRecovery": true,
-  "upstreamSerializerFixtureImport": true,
-  "nativeRoundTrip": true,
-  "portableNewProject": true,
-  "recoveryFileReimport": true,
-  "mobileNoOverflow": true,
-  "serviceDisconnectedTruthful": true,
-  "liveSimulation": false,
-  "pageErrors": [],
-  "delayedEdit": true,
-  "lostReceipt": true,
-  "optimisticConflict": true,
-  "version": "0.5.0",
-  "applicationTests": 14,
-  "upstreamCommit": "7657031ac01184afe2cb220f5ee3545573b5e843",
-  "upstreamSerializerVerified": true,
-  "upstreamHttpVerification": "local-contract-fixture-including-start-stop-status-not-live",
-  "liveOasisZep": "not-run-no-configured-service",
-  "hostLlm": "not-used",
-  "hostImport": "unverified",
-  "navigationTransitionLocksEditing": true,
+  "date": "2026-10-29",
+  "version": "0.9.0",
+  "node": "22.22.0",
+  "pnpm": "10.22.0",
+  "branch": "feat/mirofish-depth",
+  "check": "passed",
+  "applicationTests": {
+    "passed": 35,
+    "failed": 0
+  },
+  "autosaveContractTests": {
+    "passed": 7,
+    "failed": 0
+  },
+  "browser": {
+    "chrome": "143.0.7499.4",
+    "node": "v22.22.0",
+    "checks": [
+      "real offline status and example at 1440",
+      "file menu Escape returns focus",
+      "empty document -> real source files -> graph -> agents -> local simulation -> report",
+      "CSV / JSONL / graph / Markdown / self-contained HTML / scenario / recovery downloads",
+      "scenario import creates new document and preserves original; result regenerates",
+      "typing during delayed autosave keeps newer text",
+      "lost response after SQLite commit retries same mutation exactly once",
+      "invalid numeric draft restores after reload; valid model stays intact",
+      "optimistic conflict retains local draft across fresh tab",
+      "brand-new offline draft can be switched away from and recovered",
+      "501-page PDF imports last page; malformed PDF shows actionable error",
+      "1440 and 375 six stages, offline backend guidance, menu and screenshot",
+      "stale report cannot export unrelated charts and loading is not shown as failure",
+      "375 new/open/import/recovery and local run",
+      "native JSONL import, portable bundle and missing-platform draft retry"
+    ],
+    "errors": [
+      "Failed to load resource: net::ERR_FAILED",
+      "Failed to load resource: net::ERR_FAILED",
+      "Failed to load resource: net::ERR_FAILED",
+      "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    ],
+    "network": [],
+    "expectedFailures": [
+      "one ERR_FAILED from intentionally lost autosave response",
+      "ERR_FAILED while explicitly blocking offline draft writes",
+      "one 400 for native JSONL without platform"
+    ],
+    "example": {
+      "seeds": 4,
+      "entities": 17,
+      "agents": 26,
+      "actions": 232,
+      "fingerprint": "00c6bb8c00be1a"
+    },
+    "offlineRun": {
+      "rounds": 8,
+      "agents": 6,
+      "actions": 9,
+      "posts": 6,
+      "startMean": 0.306,
+      "endMean": 0.319,
+      "endSupport": 0.667,
+      "endNeutral": 0.167,
+      "endOppose": 0.167,
+      "polarization": 0.444,
+      "stanceKind": "model"
+    },
+    "completed": true
+  },
+  "hostMock": {
+    "mockOnly": true,
+    "calls": [
+      {
+        "kind": "personas",
+        "id": "29720e53-66a1-4f1d-8c1a-f2bdc8e17eef",
+        "entities": 16
+      },
+      {
+        "kind": "report",
+        "id": "7f149752-e51a-44fd-adc8-f8b5ac5b60c6",
+        "draftChars": 1883,
+        "fail": true
+      },
+      {
+        "kind": "report",
+        "id": "dc14a2ee-b891-442e-9b06-064fb54bb5e9",
+        "draftChars": 1883,
+        "fail": false
+      }
+    ],
+    "errors": [],
+    "blocked": [],
+    "checks": [
+      "persona suggestion is only applied after explicit acceptance",
+      "failed Host report keeps original report",
+      "report suggestion is only applied after explicit acceptance",
+      "Host disconnected state is truthful and actionable"
+    ],
+    "completed": true
+  },
+  "restart": {
+    "completed": true,
+    "newChromeProfile": true,
+    "previewProcessRestart": true,
+    "projectId": "953760e5-7ca4-42c5-8e23-bc2ff5203601",
+    "restoredStage": "report",
+    "notes": true,
+    "fullScenarioEqual": true,
+    "resultFingerprint": "00c6bb8c00be1a",
+    "errors": [],
+    "external": []
+  },
+  "functionalAcceptance": "local-verified",
+  "structuralReview": "passed",
   "screenshot": {
     "path": "../../docs/screenshots/mirofish.png",
-    "dimensions": [
-      1440,
-      1393
-    ],
-    "sha256": "e09aeb3bc89814586761cfc908366a7c98f501e092cd919b5552856ba58b0b32"
+    "width": 1440,
+    "height": 1000,
+    "sha256": "f7afa30872f63885bf89577ae53a1813bb6fdbaca6bfb58f748bdd3fa68186f6"
   },
+  "mobileScreenshot": "archive/2026-10-29-workbench-depth/mirofish/observe-375-codex.png",
   "package": {
-    "name": "mirofish-studio-0.5.0-run-control.fbworkbench",
-    "sha256": "5d08fe4c7874d196cc84ac906362c13dba228da4bbbd4d9be546eae9ffe4656b",
-    "files": 41,
-    "crcValid": true,
-    "licenseIncluded": true,
-    "businessDataExcluded": true,
-    "runMigrationIncluded": true
-  },
-  "runControl": {
-    "at": "2026-10-28T04:55:53.582Z",
-    "verification": "real-Chrome-with-local-HTTP-contract-fixture-not-live",
-    "explicitStartStop": true,
-    "slowPollDoesNotOverlap": true,
-    "pendingBeforeSend": true,
-    "lostPostReceiptAndBlockedPollRecovery": true,
-    "noAutomaticReplay": true,
-    "pendingNavigationGuard": true,
-    "terminalLateResponseProtected": true,
-    "sameRunResultRead": true,
-    "importDoesNotReplay": true,
-    "mobileNoOverflow": true,
-    "pageErrors": []
-  },
-  "offlineRunControl": {
-    "at": "2026-10-28T04:57:36.381Z",
-    "localReviewFlow": true,
-    "notesSaveReload": true,
-    "roundFilter": true,
-    "nativeJsonDraftRecovery": true,
-    "upstreamSerializerFixtureImport": true,
-    "nativeRoundTrip": true,
-    "portableNewProject": true,
-    "recoveryFileReimport": true,
-    "mobileNoOverflow": true,
-    "serviceDisconnectedTruthful": true,
-    "liveSimulation": false,
-    "pageErrors": []
-  },
-  "conditionalStopBoundary": "upstream stop accepts simulation_id only; cannot atomically exclude another client restarting after preflight",
-  "runControlScreenshot": {
-    "path": "docs/mirofish-run-control.png",
-    "sha256": "e09aeb3bc89814586761cfc908366a7c98f501e092cd919b5552856ba58b0b32",
-    "dimensions": [
-      1440,
-      1393
-    ]
-  },
-  "integratedPackage": {
-    "directory": "workbenches/69-mirofish",
-    "version": "0.5.0",
-    "appId": "workbench.bceedbaf-e0c0-4bbc-94c8-c219f83db6d6",
-    "filename": "69-mirofish-0.5.0.fbworkbench",
-    "bytes": 75446,
-    "sha256": "4a0362e52cc4dc378c9c455367a294bf3eb7d476fd8ea3e0f0e757f545d37430",
+    "file": "artifacts/mirofish-studio-0.9.0.fbworkbench",
+    "bytes": 1214383,
+    "sha256": "886948717a333c44e6c7fd1db059c49ebb8b5436ea71df53b9251b4d556c0e55",
     "crc": "passed",
-    "sourceFilesMatched": 38,
-    "assetFilesMatched": 2,
+    "transferHashes": "passed",
+    "entries": 242,
+    "applicationSourceFilesMatched": 66,
+    "documents": {
+      "REQUIREMENTS.md": "73c6eb8b87a8459bcf17d0ae30038be1a9750b463f6b01d8372a5d3bb0648998",
+      "DESIGN.md": "71978f8bf7ced4a74f360689190e7c716a5a741097ab47b291d992afa32c3c52",
+      "ENGINEERING.md": "bfc79b47177e55d397db8ed9ad21639577c8f92ef60176bb3b885ff575fb7384"
+    },
+    "manifest": "all fields equal; only declared resources normalized by template",
+    "resources": [
+      {
+        "id": "pdfjs-assets",
+        "files": 170,
+        "matched": true,
+        "normalizedPath": "workbench-assets/assets/pdfjs-assets"
+      },
+      {
+        "id": "notices",
+        "files": 2,
+        "matched": true,
+        "normalizedPath": "workbench-assets/assets/notices"
+      },
+      {
+        "id": "setup-guide",
+        "files": 1,
+        "matched": true,
+        "normalizedPath": "workbench-assets/assets/setup-guide/file"
+      }
+    ],
+    "generatedFiles": [
+      "application/workbench.lock.json"
+    ],
     "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-mirofish/mirofish-studio-0.5.0.fbworkbench",
-    "introductionFile": "workbench-mirofish/presentation.json",
-    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
-  }
+    "hostImport": "unverified"
+  },
+  "realHostLlm": "not-run",
+  "realOasisZep": "not-run",
+  "floatboatClientImport": "unverified",
+  "sharedChanges": false,
+  "pushed": false,
+  "warning": "WORKBENCH_LARGE_MODULE: unchanged shared autosave-client.ts",
+  "evidenceDirectory": "archive/2026-10-29-workbench-depth/mirofish",
+  "formatCheck": "passed excluding verbatim upstream pdfjs/cmaps/LICENSE whitespace"
 }

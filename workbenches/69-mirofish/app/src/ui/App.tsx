@@ -1,385 +1,123 @@
-import { SimulationControl } from "./SimulationControl";
-import {
-  Waves,
-  Upload,
-  Download,
-  Plus,
-  Check,
-  Users,
-  Filter,
-} from "lucide-react";
-import { ProjectPicker, Notice, download } from "./workspace";
-import {
-  nativeResult,
-  actorKey,
-  content,
-  markdown,
-} from "../contracts/simulation";
-import { useReviewDesk } from "./useReviewDesk";
-import { ReviewPanel } from "./ReviewPanel";
+// ABOUTME: 群体推演台外壳：一行文件条、六段推演流程带（资料→图谱→人设→推演→观察→报告）与当前阶段工作区。
+import { useEffect, useState } from "react";
+import { Menu } from "lucide-react";
+import { FileMenu } from "./FileMenu";
+import { Notice, RenderBoundary } from "./workspace";
+import { STAGES, useStudio, type Stage, type Studio } from "./useStudio";
+import { SeedStage } from "./SeedStage";
+import { GraphStage } from "./GraphStage";
+import { AgentsStage } from "./AgentsStage";
+import { RunStage } from "./RunStage";
+import { ObserveStage } from "./ObserveStage";
+import { ReportStage } from "./ReportStage";
+
+function stageNote(st: Studio, id: Stage) {
+  const s = st.s;
+  switch (id) {
+    case "seed":
+      return s.seeds.length ? `${s.seeds.length} 份 · ${s.seeds.reduce((n, d) => n + d.text.length, 0).toLocaleString()} 字` : "待添加";
+    case "graph":
+      return s.entities.length ? `${s.entities.length} 实体 · ${s.relations.length} 关系` : "待抽取";
+    case "agents":
+      return s.agents.length ? `${s.agents.length} 个智能体` : "待生成";
+    case "run":
+      return `${s.params.rounds} 轮 · ${s.events.length} 事件`;
+    case "observe":
+      return st.activeRun ? st.activeRun.label.replace(/ · .*$/, "") + ` · ${st.activeRun.summary.actions} 动作` : "尚无运行";
+    case "report":
+      return s.report.markdown ? (s.report.source === "host" ? "模型深化" : s.report.source === "rule" ? "规则生成" : "已编辑") : "未生成";
+  }
+}
+const done = (st: Studio, id: Stage) =>
+  id === "seed" ? st.s.seeds.length > 0 : id === "graph" ? st.s.entities.length > 0 : id === "agents" ? st.s.agents.length > 0 : id === "run" || id === "observe" ? st.s.runs.length > 0 : Boolean(st.s.report.markdown);
+
 export function App() {
-  const desk = useReviewDesk();
-  const {
-    p,
-    mutable,
-    raw,
-    platform,
-    actor,
-    round,
-    actors,
-    rounds,
-    filtered,
-    chosen,
-    note,
-    reviewed,
-    importOpen,
-    setImportOpen,
-    file,
-    bundle,
-    service,
-    simulations,
-    check,
-    annotate,
-    readNative,
-    applyNative,
-    importBundle,
-    fromService,
-  } = desk;
+  const st = useStudio();
+  const { p } = st;
+  const [files, setFiles] = useState(false);
+  const phase = p.autoState.phase;
+  useEffect(() => {
+    // Narrow screens scroll the stage ribbon; keep the current stage visible.
+    document.querySelector(".ribbon [aria-current]")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [st.stage]);
   return (
     <>
-      <a className="skip" href="#timeline">
-        跳到动作时间线
+      <a className="skip" href="#stage">
+        跳到当前阶段
       </a>
-      <header>
-        <div className="brand">
-          <Waves aria-hidden="true" />
-          <div>
-            <strong>MIROFISH</strong>
-            <span>情景复核 / SCENARIO REVIEW</span>
-          </div>
-        </div>
-        <input
-          aria-label="项目名称"
-          name="title"
-          autoComplete="off"
-          disabled={!mutable}
-          value={p.title}
-          onChange={(e) => p.setTitle(e.target.value)}
-        />
-        <ProjectPicker
-          items={p.items}
-          id={p.current?.id}
-          disabled={!mutable}
-          onOpen={(id) => void p.open(id)}
-        />
-        <nav>
-          <button disabled={!mutable} onClick={() => void p.fresh()}>
-            <Plus aria-hidden="true" size={15} />
-            新建
-          </button>
-          <button disabled={!mutable} onClick={() => file.current?.click()}>
-            <Upload aria-hidden="true" size={15} />
-            导入模拟结果
-          </button>
-          <button
-            onClick={() =>
-              download(
-                new Blob(
-                  [
-                    JSON.stringify(
-                      {
-                        format: "floatboat-mirofish-v1",
-                        title: p.title,
-                        data: p.data,
-                        draft: p.draft,
-                      },
-                      null,
-                      2,
-                    ),
-                  ],
-                  { type: "application/json" },
-                ),
-                p.title + ".json",
-              )
-            }
-          >
-            <Download aria-hidden="true" size={15} />
-            复核工程
-          </button>
-          <button disabled={!mutable} onClick={() => bundle.current?.click()}>
-            打开工程
-          </button>
-        </nav>
-        <input
-          ref={file}
-          hidden
-          type="file"
-          aria-label="导入原生结果文件"
-          accept=".json,.jsonl"
-          onChange={(e) => {
-            void readNative(e.target.files?.[0]);
-            e.target.value = "";
-          }}
-        />
-        <input
-          ref={bundle}
-          hidden
-          type="file"
-          aria-label="导入复核工程文件"
-          accept=".json"
-          onChange={(e) => {
-            void importBundle(e.target.files?.[0]);
-            e.target.value = "";
-          }}
-        />
-      </header>
-      <div className="savebar">
-        <span className={"save-state " + p.autoState.phase} role="status">
+      <header className="filebar">
+        <button className="files-button" aria-haspopup="dialog" onClick={() => setFiles(true)}>
+          <Menu size={16} aria-hidden="true" />
+          推演档案
+        </button>
+        <input className="title" aria-label="推演名称" name="title" autoComplete="off" value={p.title} disabled={!st.mutable} onChange={(e) => p.setTitle(e.target.value)} />
+        <span className={"save " + phase} role="status" aria-live="polite">
           {p.autoState.message}
         </span>
-        <span>
-          {p.data.origin === "example"
-            ? "人工示例 · 非模拟运行"
-            : p.data.origin === "service"
-              ? "来自MiroFish服务"
-              : "来自导入文件"}
-        </span>
-        <button onClick={() => p.exportDraft()}>恢复草稿</button>
-        {["offline", "conflict"].includes(p.autoState.phase) ? (
-          <>
+        {["offline", "conflict"].includes(phase) ? (
+          <span className="save-actions">
             <button onClick={() => void p.save()}>重试保存</button>
-            {p.current ? (
-              <button onClick={() => void p.open(p.current!.id)}>
-                打开服务器版本
-              </button>
-            ) : null}
-          </>
+            {p.current ? <button onClick={() => void st.open(p.current!.id)}>打开服务器版本</button> : null}
+            <button onClick={() => p.exportDraft()}>下载恢复稿</button>
+          </span>
         ) : null}
-      </div>
-      <Notice error={p.error} notice={p.notice} />
-      <div className="workspace">
-        <aside className="rail">
-          <div className="rail-title">
-            <Users aria-hidden="true" size={18} />
-            <h1>角色与假设</h1>
-          </div>
-          <button
-            className={"actor " + (actor === "all" ? "active" : "")}
-            onClick={() => p.setDraft((d) => ({ ...d, actor: "all" }))}
-          >
-            全部角色<span>{actors.length}</span>
+        <span className="spacer" />
+        <span className="channels" aria-label="推演通道">
+          <span className="chip ok" title="本地规则推演在工作台内运行，无需外部服务">
+            <i aria-hidden="true" />
+            本地引擎
+          </span>
+          <button className={"chip " + (st.service.available ? "ok" : "off")} onClick={() => p.setDraft((d) => ({ ...d, stage: "run", engine: "mirofish" }))}>
+            <i aria-hidden="true" />
+            MiroFish {st.service.available ? "已连接" : "未连接"}
           </button>
-          {actors.map((a) => (
-            <button
-              key={actorKey(a)}
-              className={"actor " + (actor === actorKey(a) ? "active" : "")}
-              onClick={() => p.setDraft((d) => ({ ...d, actor: actorKey(a) }))}
-            >
-              <span className={"avatar " + a.platform}>
-                {(a.agent_name || String(a.agent_id)).slice(0, 1)}
-              </span>
-              <span>
-                {a.agent_name || "角色 " + a.agent_id}
-                <small>
-                  {a.platform.toUpperCase()} · {a.agent_id}
-                </small>
-              </span>
-            </button>
-          ))}
-          {actor !== "all" ? (
-            <label>
-              角色复核说明
-              <textarea
-                disabled={!mutable}
-                value={p.data.actors[actor] ?? ""}
-                maxLength={5000}
-                onChange={(e) =>
-                  p.setData((d) => ({
-                    ...d,
-                    actors: { ...d.actors, [actor]: e.target.value },
-                  }))
-                }
-              />
-            </label>
-          ) : null}
-          <label>
-            背景材料
-            <textarea
-              aria-label="背景材料"
-              disabled={!mutable}
-              value={p.data.background}
-              maxLength={15000}
-              onChange={(e) =>
-                p.setData((d) => ({ ...d, background: e.target.value }))
-              }
-            />
-          </label>
-          <label>
-            假设与限制
-            <textarea
-              aria-label="假设与限制"
-              disabled={!mutable}
-              value={p.data.assumptions}
-              maxLength={15000}
-              onChange={(e) =>
-                p.setData((d) => ({ ...d, assumptions: e.target.value }))
-              }
-            />
-          </label>
-          <SimulationControl desk={desk} />
-        </aside>
-        <main id="timeline">
-          <div className="summary">
-            <div>
-              <span className="eyebrow">OBSERVE BEFORE YOU CONCLUDE</span>
-              <h2>沿着轮次，检查每一次互动。</h2>
-              <p>
-                {p.data.sourceName}{" "}
-                <span>· {p.data.simulationId || "未命名模拟"}</span>
-              </p>
-            </div>
-            <div className="review-count">
-              <strong>
-                {reviewed}
-                <small> / {p.data.actions.length}</small>
-              </strong>
-              <span>动作已复核</span>
-            </div>
-          </div>
-          <div className="rounds">
-            <button
-              className={round === "all" ? "chosen" : ""}
-              onClick={() => p.setDraft((d) => ({ ...d, round: "all" }))}
-            >
-              全部轮次
-            </button>
-            {rounds.map((r) => (
-              <button
-                key={r}
-                className={round === String(r) ? "chosen" : ""}
-                onClick={() => p.setDraft((d) => ({ ...d, round: String(r) }))}
-              >
-                <b>R{String(r).padStart(2, "0")}</b>
+          <span className={"chip " + (st.model.available ? "ok" : "off")} title={st.model.available ? "可用 Floatboat 模型改写人设与深化报告" : "未连接 Floatboat；规则人设与规则报告照常可用"}>
+            <i aria-hidden="true" />
+            模型 {st.model.available ? "可用" : "未连接"}
+          </span>
+        </span>
+      </header>
+      <nav className="ribbon" aria-label="推演流程">
+        <ol>
+          {STAGES.map((x, i) => (
+            <li key={x.id}>
+              <button aria-current={st.stage === x.id ? "step" : undefined} className={done(st, x.id) ? "done" : ""} onClick={() => st.setStage(x.id)}>
+                <b>{i + 1}</b>
                 <span>
-                  {p.data.actions.filter((a) => a.round_num === r).length} 动作
+                  {x.label}
+                  <small>{stageNote(st, x.id)}</small>
                 </span>
               </button>
-            ))}
-          </div>
-          <div className="list-heading">
-            <span>
-              <Filter aria-hidden="true" size={13} />
-              动作时间线 · {filtered.length} 条
-            </span>
-            <button onClick={() => setImportOpen(!importOpen)}>
-              原生 JSON / JSONL
-            </button>
-          </div>
-          {importOpen ? (
-            <section className="import-panel">
-              <label htmlFor="native-raw">原生结果草稿</label>
-              <textarea
-                id="native-raw"
-                spellCheck={false}
-                disabled={!mutable}
-                value={raw}
-                onChange={(e) =>
-                  p.setDraft((d) => ({ ...d, nativeRaw: e.target.value }))
-                }
-              />
-              <label>
-                JSONL日志平台
-                <select
-                  aria-label="日志平台"
-                  value={platform}
-                  onChange={(e) =>
-                    p.setDraft((d) => ({ ...d, logPlatform: e.target.value }))
-                  }
-                >
-                  <option value="">记录自身包含平台</option>
-                  <option value="reddit">Reddit日志</option>
-                  <option value="twitter">Twitter日志</option>
-                </select>
-              </label>
-              <button disabled={!mutable} onClick={() => void applyNative()}>
-                读取为新项目
-              </button>
-            </section>
-          ) : null}
-          <div className="actions">
-            {filtered.length === 0 ? (
-              <p className="empty">
-                此范围内没有动作。可切回全部角色/轮次，或导入新的结果。
-              </p>
-            ) : (
-              filtered.map(({ a, i, key }) => (
-                <button
-                  key={key}
-                  className={
-                    "action " +
-                    a.platform +
-                    (chosen?.key === key ? " selected" : "")
-                  }
-                  onClick={() => p.setDraft((d) => ({ ...d, selected: key }))}
-                >
-                  <div className="action-meta">
-                    <b>R{String(a.round_num).padStart(2, "0")}</b>
-                    <strong>{a.agent_name || "角色 " + a.agent_id}</strong>
-                    <span>{a.action_type}</span>
-                    {p.data.annotations[key]?.reviewed ? (
-                      <Check aria-label="已复核" size={15} />
-                    ) : null}
-                  </div>
-                  <p>{content(a)}</p>
-                  <small>
-                    {a.timestamp || "未记录时间"} · {a.platform} ·{" "}
-                    {a.success ? "动作成功" : "动作失败"}
-                  </small>
-                </button>
-              ))
-            )}
-          </div>
-          <section className="conclusion">
-            <label>
-              人工复核结论
-              <textarea
-                aria-label="人工复核结论"
-                disabled={!mutable}
-                maxLength={15000}
-                value={p.data.conclusion}
-                onChange={(e) =>
-                  p.setData((d) => ({ ...d, conclusion: e.target.value }))
-                }
-              />
-            </label>
-            <div>
-              <button
-                onClick={() =>
-                  download(
-                    new Blob([markdown(p.data)], { type: "text/markdown" }),
-                    p.title + ".md",
-                  )
-                }
-              >
-                导出复核报告
-              </button>
-              <button
-                onClick={() =>
-                  download(
-                    new Blob([JSON.stringify(nativeResult(p.data), null, 2)], {
-                      type: "application/json",
-                    }),
-                    "mirofish-actions.json",
-                  )
-                }
-              >
-                导出原生动作
-              </button>
-            </div>
-          </section>
-        </main>
-        <ReviewPanel {...desk} />
-      </div>
+            </li>
+          ))}
+        </ol>
+        {st.io ? (
+          <span className="busy" role="status">
+            {st.io}
+          </span>
+        ) : null}
+      </nav>
+      <Notice error={p.error} notice={p.notice} onClose={() => (p.setError(""), p.setNotice(""))} />
+      <main id="stage" className={"stage stage-" + st.stage} tabIndex={-1}>
+        <RenderBoundary>
+          {p.loading ? (
+            <p className="loading">正在打开上次的推演…</p>
+          ) : st.stage === "seed" ? (
+            <SeedStage st={st} />
+          ) : st.stage === "graph" ? (
+            <GraphStage st={st} />
+          ) : st.stage === "agents" ? (
+            <AgentsStage st={st} />
+          ) : st.stage === "run" ? (
+            <RunStage st={st} />
+          ) : st.stage === "observe" ? (
+            <ObserveStage st={st} />
+          ) : (
+            <ReportStage st={st} />
+          )}
+        </RenderBoundary>
+      </main>
+      <FileMenu st={st} open={files} close={() => setFiles(false)} />
     </>
   );
 }

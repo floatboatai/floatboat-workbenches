@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { createMiroFishClient } from "../src/server/mirofish-client.ts";
-import { seed } from "../src/contracts/simulation.ts";
+import { nativeExample } from "../src/contracts/simulation.ts";
+const seed = { actions: nativeExample };
 async function fixture<T>(
   handler: (path: string) => unknown,
   run: (url: string) => Promise<T>,
@@ -76,7 +77,7 @@ test("unsafe remote protocol, path traversal and oversized upstream body are rej
     async (url) => {
       const c = createMiroFishClient(url);
       await assert.rejects(() => c.result("../secret"), /编号/);
-      await assert.rejects(() => c.list(), /结果过大/);
+      await assert.rejects(() => c.list(), /超过容量上限/);
     },
   );
 });

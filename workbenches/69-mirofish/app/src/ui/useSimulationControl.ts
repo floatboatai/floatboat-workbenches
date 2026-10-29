@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { request, useProjects } from "./workspace";
+import { request } from "./requests";
+import type { useWorkbenchState } from "./autosave-client";
 import {
   commandInput,
   mergeRun,
@@ -9,9 +10,9 @@ import {
   type CommandInput,
   type Run,
 } from "../contracts/run";
-import type { Review } from "../contracts/simulation";
+import type { Scenario } from "../contracts/scenario";
 import { isRecord } from "../contracts/project";
-type Workspace = ReturnType<typeof useProjects<Review>>;
+type Workspace = ReturnType<typeof useWorkbenchState<Scenario>>;
 export function useSimulationControl(p: Workspace, available: boolean) {
   const [command, setCommand] = useState<Command | null>(null),
     [run, setRun] = useState<Run | null>(null),
