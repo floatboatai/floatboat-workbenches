@@ -2573,40 +2573,42 @@
     "kind": "行业核心库集成",
     "workbench": "MusicXML/MXL → 声部/版式审阅 → 乐谱图与批注清单",
     "license": "BSD-3-Clause",
-    "caveat": "是渲染器；完整制谱和播放器不计入首版",
+    "caveat": "基础合成音回放未做听音验收；大文件用生成乐谱验证；PDF 为栅格校样；客户端导入未验证。",
     "effort": "中",
     "priority": "A",
     "directory": "workbenches/55-opensheetmusicdisplay",
     "status": "local-verified",
-    "checked_at": "2026-10-27",
+    "checked_at": "2026-10-29",
     "researchId": "V27",
     "sources": [
       "https://github.com/opensheetmusicdisplay/opensheetmusicdisplay",
       "docs/research/niche-creative.md"
     ],
-    "version": "0.3.1",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 12,
+      "tests": 17,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
-      "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-retested",
+      "productLayout": "pending",
+      "screenshot": "docs/screenshots/opensheetmusicdisplay.png",
+      "hostLlm": "not-used",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
+      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。",
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/55-opensheetmusicdisplay/app/ACCEPTANCE.md",
+        "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
+      },
+      "upstream": "OSMD 2.2.1 原生渲染、光标、移调与声部控制；大谱与导出本地浏览器验证",
+      "acceptance": "workbenches/55-opensheetmusicdisplay/app/ACCEPTANCE.md"
     },
     "presentation": {
       "screenshots": [
@@ -2615,7 +2617,10 @@
           "caption": "OpenSheetMusicDisplay 工作台实景"
         }
       ]
-    }
+    },
+    "core_features": "MusicXML/MXL 原件库、光标与回放、移调与声部切换、谱面批注联动、PDF/PNG/SVG 导出",
+    "integration": "浏览器 OSMD 2.2.1 与 Web Audio；无需模型或外部服务",
+    "mode": "本地乐谱审校"
   },
   {
     "name": "LangExtract",
@@ -2624,21 +2629,21 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "证据字段抽取与人工复核台",
-    "core_features": "原文、JSONL证据定位、字段复核、人工修订与CSV/JSONL/项目导出",
-    "integration": "Python 核心＋自建任务服务；Apache-2.0",
+    "core_features": "多文档原文标注、类别与示例配方、区间对齐、审阅统计、JSONL/CSV/可视化 HTML 导出",
+    "integration": "Node 区间对齐与可选 Floatboat Host 抽取；Python 服务可选",
     "effort": "中–高",
     "priority": "A",
     "license": "Apache-2.0",
-    "caveat": "真实模型抽取、Host与客户端导入未验证。",
+    "caveat": "Host 模型抽取仅 mock 验证；Python 服务未接真实模型；正式批次上限 880 KB；客户端导入未验证。",
     "sources": [
       "https://github.com/google/langextract"
     ],
     "group": "AI 工具",
-    "mode": "独立服务与结果审阅",
-    "checked_at": "2026-10-27",
+    "mode": "本地证据标注与可选模型抽取",
+    "checked_at": "2026-10-29",
     "verification": {
       "build": "passed",
-      "tests": 17,
+      "tests": 34,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
@@ -2646,23 +2651,24 @@
       "package": "passed",
       "screenshot": "docs/screenshots/langextract.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.4.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/56-langextract/ACCEPTANCE.md",
-      "upstream": "真实LangExtract库＋明确stub提供者；真实模型未验证",
-      "hostLlm": "not-used",
+      "upstream": "LangExtract 式 few-shot 提示、JSONL 与原文对齐；Host mock 合同及本地浏览器验证",
+      "hostLlm": "mock-verified",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/56-langextract/ACCEPTANCE.md",
+        "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
+      },
+      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 56,
     "slug": "langextract",
     "directory": "workbenches/56-langextract",
     "status": "local-verified",
-    "version": "0.4.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
@@ -2846,45 +2852,46 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "音频转录与字幕审校台",
-    "core_features": "音频保存/回听、真实CPU转写、字幕时间编辑与SRT/VTT/完整项目导出",
-    "integration": "自建 Python 任务服务，CPU 可起步；MIT",
+    "core_features": "示例音频与逐词转写、波形入出点、拆分合并、查找替换、说话人标注、SRT/VTT/TXT/JSON 导出",
+    "integration": "浏览器字幕校对；本机 faster-whisper Python 服务提供转写",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "真实推理仅验证tiny.en英语短录音CPU路线；Python/模型独立部署，其他语种/GPU/客户端导入未验证。",
+    "caveat": "新音频自动转写仍需 Python 服务；small 中文 CPU 已有实测记录，翻译质量、GPU、长音频与客户端导入未验证。",
     "sources": [
       "https://github.com/SYSTRAN/faster-whisper"
     ],
     "group": "AI 工具",
-    "mode": "独立服务与结果审阅",
-    "checked_at": "2026-10-27",
+    "mode": "本地字幕校对与可选语音转写",
+    "checked_at": "2026-10-29",
     "verification": {
       "build": "passed",
-      "tests": 15,
+      "tests": 30,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/faster-whisper.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.4.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/60-faster-whisper/ACCEPTANCE.md",
-      "upstream": "真实tiny.en CPU INT8英语转写，主仓库完整链路复验",
+      "upstream": "已有 small 中文 CPU 真实转写与 tiny.en 英文记录；本轮复跑 30 项应用测试，未重复模型推理",
       "hostLlm": "not-used",
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/60-faster-whisper/ACCEPTANCE.md",
+        "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
+      },
+      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 60,
     "slug": "faster-whisper",
     "directory": "workbenches/60-faster-whisper",
     "status": "local-verified",
-    "version": "0.4.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
@@ -2901,21 +2908,21 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "资料、大纲与 AI 课件制作台",
-    "core_features": "资料、大纲、页序、备注、审阅、便携稿与异步制作服务连接器",
-    "integration": "外部 Docker/self-host API；Apache-2.0",
+    "core_features": "资料导入、大纲编辑、本地幻灯片生成、11 种版式与 5 套主题、原生图表 PPTX 与 PDF 导出",
+    "integration": "本地资料生成与 PptxGenJS 导出；Floatboat Host/Presenton 服务可选",
     "effort": "中–高",
     "priority": "A",
     "license": "Apache-2.0",
-    "caveat": "实际生成及PPTX/PDF递送需要配置Presenton服务，尚未live验证；客户端导入未验证。",
+    "caveat": "PDF 为栅格页；PowerPoint 内打开、真实 Host/Presenton 服务及客户端导入未验证；本地生成按规则整理原文。",
     "sources": [
       "https://github.com/presenton/presenton"
     ],
     "group": "AI 工具",
-    "mode": "独立服务与结果审阅",
-    "checked_at": "2026-10-27",
+    "mode": "资料到大纲与演示成稿",
+    "checked_at": "2026-10-29",
     "verification": {
       "build": "passed",
-      "tests": 29,
+      "tests": 49,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
@@ -2923,23 +2930,24 @@
       "package": "passed",
       "screenshot": "docs/screenshots/presenton.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.4.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/61-presenton/app/ACCEPTANCE.md",
-      "upstream": "本地编辑/导出与官方API合同；真实生成和上游文件递送未验证",
-      "hostLlm": "not-used",
+      "upstream": "PptxGenJS 原生图表导出、PDF 与导出结构验证；Host mock，真实 Presenton 服务未验证",
+      "hostLlm": "mock-verified",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/61-presenton/app/ACCEPTANCE.md",
+        "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
+      },
+      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 61,
     "slug": "presenton",
     "directory": "workbenches/61-presenton",
     "status": "local-verified",
-    "version": "0.4.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
@@ -3296,44 +3304,45 @@
     "category": "AI 工作台",
     "kind": "引擎/应用",
     "workbench": "研究计划、证据与报告交付",
-    "core_features": "研究提交、原生线程运行查询、来源复核和报告交付",
-    "integration": "需配置官方DeerFlow服务与模型；默认请求gemini-3.8-flash",
+    "core_features": "问题与可确认计划、本地检索、引用联动、来源核验、报告编辑、Markdown/HTML 导出及可选 SSE 研究服务",
+    "integration": "Node 检索与本地研究底稿；Floatboat Host/DeerFlow SSE 可选",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "真实官方序列化器与请求模型；运行HTTP契约通过，真实研究服务未验证；Floatboat客户端导入未验证。",
+    "caveat": "真实 DeerFlow、外网检索与 Host 未测；服务与检索用本机夹具，Host 用 mock；客户端导入未验证。",
     "sources": [
       "https://github.com/bytedance/deer-flow"
     ],
     "group": "AI 工具",
-    "mode": "引擎封装",
-    "checked_at": "2026-10-28",
+    "mode": "计划确认、研究执行与引用报告",
+    "checked_at": "2026-10-29",
     "slug": "deerflow",
     "directory": "workbenches/68-deerflow",
     "status": "local-verified",
-    "version": "0.5.1",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 19,
+      "tests": 53,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "pending",
       "package": "passed",
       "screenshot": "docs/screenshots/deerflow.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/68-deerflow/ACCEPTANCE.md",
-      "upstream": "真实官方序列化器与请求模型；运行HTTP契约通过，真实研究服务未验证",
-      "hostLlm": "not-used",
+      "upstream": "本机检索夹具、DeerFlow SSE 断线续接与请求合同；真实研究服务未验证",
+      "hostLlm": "mock-verified",
       "serviceTests": 0,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/68-deerflow/ACCEPTANCE.md",
+        "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
+      },
+      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "presentation": {
       "screenshots": [

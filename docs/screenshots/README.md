@@ -31,13 +31,13 @@
 | [seqviz.png](seqviz.png) | 0.2.0 | 1440 × 980 | 145.9 KiB | `d0dd49f1c4f92a298caa7107ced737694cbd8b3cb87000b07c221258733b2ea1` |
 | [farmos-map.png](farmos-map.png) | 0.2.0 | 1440 × 1000 | 129.5 KiB | `740a90faad06eb6aa22fcbebcfb3e3ad11ac84cddf40dac61f2ad5d0fd076814` |
 | [mirador.png](mirador.png) | 0.2.0 | 1440 × 1000 | 123.4 KiB | `24efe96f869e1be32cb1f43e47eb4902ca5d008f52ace32350d8db25c54360dc` |
-| [opensheetmusicdisplay.png](opensheetmusicdisplay.png) | 0.2.0 | 1440 × 1000 | 81.0 KiB | `05fb14de1ef33ba47f9138729959899a21a01cd053a737a8ad2b64a7a4c9f2d1` |
-| [langextract.png](langextract.png) | 0.4.0 | 1440 × 1243 | 160.8 KiB | `a5d4eef95117713c1fc8ce3f656659b4bf747e180e5fe7348cff8ef0dc19397d` |
+| [opensheetmusicdisplay.png](opensheetmusicdisplay.png) | 0.9.0 | 1440 × 900 | 207.2 KiB | `3b537ba8976f0b8678a0bc4a4015dbf155fd075a017c38eda25f0cc599483334` |
+| [langextract.png](langextract.png) | 0.9.0 | 1440 × 1100 | 240.6 KiB | `b35e0bc51a88619ddce1b31780b729606cb7b74645e0c5eadb73066e080de33f` |
 | [docling.png](docling.png) | 0.4.0 | 1440 × 1000 | 128.4 KiB | `9991beb70e9285d26fc7e1108b53ef01c83593a3e474c9bc372a0f37d655ce7c` |
 | [langgraph.png](langgraph.png) | 0.4.1 | 1440 × 1313 | 188.4 KiB | `686185f8275b53d40f075cb7c8f68e91f79a12476f0e2ee4da30cba675e212ea` |
 | [promptfoo.png](promptfoo.png) | 0.4.0 | 1440 × 1185 | 105.7 KiB | `5ab982dd8f1ab9830671fbf3ecfbcf76a5b5de9a99608e0c4b20da812134eb65` |
-| [faster-whisper.png](faster-whisper.png) | 0.4.0 | 1440 × 1392 | 145.7 KiB | `f662dd5659d280b5555fcb9a61abaefca01ac07541fccbcbf23bfa5195628d32` |
-| [presenton.png](presenton.png) | 0.4.0 | 1440 × 1206 | 185.5 KiB | `c26564d38a34c6620396e5d576d5e3ad0c098ab230597e1d7879003a4c1e70c3` |
+| [faster-whisper.png](faster-whisper.png) | 0.9.0 | 1440 × 960 | 246.1 KiB | `7786c80d85e2f9ae90cf1550fc24ebcdfdc02744e3cf8cb6c4f0abc84ae5ad2d` |
+| [presenton.png](presenton.png) | 0.9.0 | 1440 × 900 | 196.7 KiB | `1b0652eaf58a68e667277168f7efdae9767dc6c9fabdc8497f869af921b41c21` |
 | [penpot.png](penpot.png) | 0.5.0 | 1440 × 1000 | 72.0 KiB | `6fa3f9dfe034acc01869d8f4cd8b40b057ee3e2f454ae52bba161db7b9c79412` |
 | [hyperframes.png](hyperframes.png) | 0.5.0 | 1440 × 1149 | 128.0 KiB | `c24389c51798d7e300f9bf2d37625f31c691628ddadf15705c2e7912f62258a4` |
 | [graphify.png](graphify.png) | 0.5.0 | 1440 × 1100 | 115.8 KiB | `d75280a48fe240d3e3187471d2670897a25630726ca7c16b95bfb1c9b2975ee1` |
@@ -45,7 +45,7 @@
 | [deeptutor.png](deeptutor.png) | 0.9.0 | 1440 × 900 | 239.2 KiB | `359a289a06965c0dd2358cc514c3be731c81195bc3573cff89c8d65212ecc568` |
 | [agent-reach.png](agent-reach.png) | 0.9.0 | 1440 × 900 | 321.3 KiB | `a363ba029896dc2de954a34b6ce89a8e751ef0211b2b8618355f3cde282e2326` |
 | [openmontage.png](openmontage.png) | 0.5.0 | 1440 × 1100 | 122.7 KiB | `5a11fac21433b61856c62cdb9707fe5e08be448d4d83669376aa534489050bbe` |
-| [deerflow.png](deerflow.png) | 0.5.0 | 1440 × 1337 | 155.1 KiB | `afe240962bb7b23a5cf75ce632210058acb93c9d4b001036cfdee1b568955e69` |
+| [deerflow.png](deerflow.png) | 0.9.0 | 1440 × 900 | 394.8 KiB | `e2025ecf9f43b5c8012b9073e96b0eec1306da490f0158411fc4fb609da96af8` |
 | [mirofish.png](mirofish.png) | 0.5.0 | 1440 × 1393 | 225.9 KiB | `e09aeb3bc89814586761cfc908366a7c98f501e092cd919b5552856ba58b0b32` |
 | [geoinflow.png](geoinflow.png) | 0.5.0 | 1440 × 1941 | 176.0 KiB | `64f321a6fed1bfd363a50f9cfd80eed256bbf6474f2e99e1eba0415c2d5d9ce7` |
 | [openpencil.png](openpencil.png) | 0.5.0 | 1440 × 1000 | 108.4 KiB | `4d4471197e9fee67c626b9a80cfe34f6ae57b3dc824c662c416b7937ed9e51bc` |

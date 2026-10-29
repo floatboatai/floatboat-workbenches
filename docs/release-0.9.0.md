@@ -78,6 +78,22 @@
 | Oasis Editor | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/oasis-editor.png" alt="Oasis Editor 改版前" width="360"> | <img src="screenshots/oasis-editor.png" alt="Oasis Editor 0.9.0" width="360"> |
 | CircuitJS | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/circuitjs.png" alt="CircuitJS 改版前" width="360"> | <img src="screenshots/circuitjs.png" alt="CircuitJS 0.9.0" width="360"> |
 
+## 第3波 · 本地工作流与可选服务
+
+第三波范围为 10 项，当前 5 项已完成本地验收并纳入整合分支；Docling、Graphify、OpenMontage、Promptfoo、MiroFish 正在收尾。第4–6波的30项尚未开展。本地验收与商店上架、客户端导入分别记录。
+
+| 工作台 | 0.9.0 能力 | 应用测试 | 验收记录 |
+| --- | --- | ---: | --- |
+| OpenSheetMusicDisplay | MusicXML/MXL 原件库、光标与回放、移调与声部切换、谱面批注联动、PDF/PNG/SVG 导出 | 17 | [验收](../workbenches/55-opensheetmusicdisplay/app/ACCEPTANCE.md) |
+| LangExtract | 多文档原文标注、类别与示例配方、区间对齐、审阅统计、JSONL/CSV/可视化 HTML 导出 | 34 | [验收](../workbenches/56-langextract/ACCEPTANCE.md) |
+| faster-whisper | 示例音频与逐词转写、波形入出点、拆分合并、查找替换、说话人标注、SRT/VTT/TXT/JSON 导出 | 30 | [验收](../workbenches/60-faster-whisper/ACCEPTANCE.md) |
+| Presenton | 资料导入、大纲编辑、本地幻灯片生成、11 种版式与 5 套主题、原生图表 PPTX 与 PDF 导出 | 49 | [验收](../workbenches/61-presenton/app/ACCEPTANCE.md) |
+| DeerFlow | 问题与可确认计划、本地检索、引用联动、来源核验、报告编辑、Markdown/HTML 导出及可选 SSE 研究服务 | 53 | [验收](../workbenches/68-deerflow/ACCEPTANCE.md) |
+
+本次整合独立重跑上述五项 check 与应用测试，183 项通过；查看五张真实截图，并逐文件核对安装包代码及文档。OSMD 清理文件尾部空行后重新打包；DeerFlow 原安装包携带旧版应用说明，已在最终文档完成后重新打包并更新哈希。各项 1440/375 浏览器验收来自同日独立浏览器记录，未将历史运行记为本次重跑。
+
+真实 Floatboat Host/LLM 未调用，模型通道仅使用 mock；faster-whisper 的 small 中文 CPU 实测沿用本日原验收记录。外部服务范围以逐项验收为准。共享自动保存的约900KB项目上限仍存在；部分大文件通过独立内容库保存，不能把输入上限等同完整项目可保存容量。
+
 ## 新增 · ComfyUI（#79）
 
 基于 MIT 的 `@comfyorg/litegraph` 0.17.2 节点画布，经 ComfyUI 官方 HTTP/WebSocket API 连接用户自有服务；工作台为 MIT，不含 ComfyUI 或 ComfyUI_frontend 的 GPL 代码与模型权重。
