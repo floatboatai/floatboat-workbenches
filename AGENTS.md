@@ -16,4 +16,6 @@ Design each interface around its product's native task: canvas, technical sheet,
 
 Run `pnpm workbench prepare <slug>` to fetch the pinned official toolchain. Then read that project's `.template-guidance/SKILL.md` and relevant topics. Business code belongs in `app/`; the downloaded SDK/tooling and user data stay ignored. Preserve source identities and applied migrations.
 
+After a workbench change, release, store listing change or test-feedback fix, update the shared ledger with [.agents/skills/workbench-ledger/SKILL.md](.agents/skills/workbench-ledger/SKILL.md). Never write the testers' columns.
+
 Check, test, exercise persistence and failure states in a real browser, then package each implemented app. Distinguish local acceptance, real Host calls and imported-client verification. GitHub publishing is authorized for this public repository; credentials and preview data are outside publication scope.

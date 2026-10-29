@@ -221,7 +221,9 @@ export async function submitForReview(
           result.data?.registryName !== receipt.registryName ||
           result.data?.version !== receipt.version
         )
-          throw new Error("Review response did not confirm the package identity.");
+          throw new Error(
+            "Review response did not confirm the package identity.",
+          );
         return { status: String(result.data.status ?? "submitted") };
       }
       const code =
@@ -239,6 +241,23 @@ export async function submitForReview(
   throw new Error(failure);
 }
 
+/** Parses the CI release list (a JSON array of slugs); unset means every bundle. */
+export function releaseFilter(value) {
+  if (value === undefined || value === "") return null;
+  let slugs;
+  try {
+    slugs = JSON.parse(value);
+  } catch {
+    slugs = null;
+  }
+  if (
+    !Array.isArray(slugs) ||
+    !slugs.every((slug) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(slug))
+  )
+    throw new Error("FLOATBOAT_RELEASE_SLUGS must be a JSON array of slugs.");
+  return new Set(slugs.map((slug) => `workbench-${slug}`));
+}
+
 async function main() {
   const directory = process.argv[2];
   if (!directory)
@@ -248,15 +267,24 @@ async function main() {
   const url = uploadEndpoint(process.env.FLOATBOAT_UPLOAD_URL);
   const apiKey = process.env.FLOATBOAT_UPLOAD_API_KEY;
   if (!apiKey) throw new Error("FLOATBOAT_UPLOAD_API_KEY is required.");
+  // Rebuilt projects whose version is unchanged were already accepted by the store.
+  const releases = releaseFilter(process.env.FLOATBOAT_RELEASE_SLUGS);
   const entries = (await readdir(directory, { withFileTypes: true }))
     .filter(
-      (entry) => entry.isDirectory() && entry.name.startsWith("workbench-"),
+      (entry) =>
+        entry.isDirectory() &&
+        entry.name.startsWith("workbench-") &&
+        (!releases || releases.has(entry.name)),
     )
     .sort((a, b) => a.name.localeCompare(b.name));
+  if (releases && entries.length !== releases.size)
+    throw new Error("A planned release has no packaged bundle.");
   if (!entries.length) throw new Error("No workbench bundles found.");
   // Review submission is opt-in until the backend exposes the publish endpoint.
   const review =
-    process.env.FLOATBOAT_PUBLISH_ENABLED === "true" ? publishEndpoint(url) : null;
+    process.env.FLOATBOAT_PUBLISH_ENABLED === "true"
+      ? publishEndpoint(url)
+      : null;
   const failures = [];
   // Validate all bundles before making any authenticated network request.
   for (const entry of entries)
