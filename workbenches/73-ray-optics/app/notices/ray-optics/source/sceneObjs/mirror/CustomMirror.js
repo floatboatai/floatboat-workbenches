@@ -1,0 +1,724 @@
+/*
+ * Copyright 2024 The Ray Optics Simulation authors and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import BaseFilter from '../BaseFilter.js';
+import LineObjMixin from '../LineObjMixin.js';
+import i18next from 'i18next';
+import Simulator from '../../Simulator.js';
+import geometry from '../../geometry.js';
+import { evaluateLatex } from '../../equation.js';
+import { equationValueForListDisplay, latexToMathJS } from '../../propertyUtils/equationConversion.js';
+import escapeHtml from 'escape-html';
+import { Bezier } from 'bezier-js';
+import * as math from 'mathjs';
+import { curveTypePropertyInfoHtml } from '../ParamCurveObjMixin.js';
+
+const SMOOTH_NORMAL_LENGTH_RATIO_LIMIT = 10;
+
+function compileEquationDerivative(eqnLatex) {
+  const p = latexToMathJS(eqnLatex);
+  const p_der = math.derivative(p, 'x').toString();
+  const p_der_tex = math.parse(p_der).toTex()
+    .replaceAll('{+', '{')
+    .replaceAll('\\mathrm{x}', 'x');
+  return evaluateLatex(p_der_tex);
+}
+
+/**
+ * Mirror with shape defined by a custom equation.
+ * 
+ * Tools -> Mirror -> Custom equation
+ * @class
+ * @extends BaseFilter
+ * @memberof sceneObjs
+ * @property {Point} p1 - The point corresponding to (-1,0) in the coordinate system of the equation.
+ * @property {Point} p2 - The point corresponding to (1,0) in the coordinate system of the equation.
+ * @property {string} eqn - The equation of the mirror. The variable is x.
+ * @property {boolean} filter - Whether it is a dichroic mirror.
+ * @property {boolean} invert - If true, the ray with wavelength outside the bandwidth is reflected. If false, the ray with wavelength inside the bandwidth is reflected.
+ * @property {number} wavelength - The target wavelength if dichroic is enabled. The unit is nm.
+ * @property {number} bandwidth - The bandwidth if dichroic is enabled. The unit is nm.
+ * @property {Array<Point>} tmp_points - The points on the curve.
+ * @property {number} tmp_i - The index of the point on the curve where the ray is incident.
+ */
+class CustomMirror extends LineObjMixin(BaseFilter) {
+  static type = 'CustomMirror';
+  static isOptical = true;
+  static mergesWithGlass = true;
+  static serializableDefaults = {
+    p1: null,
+    p2: null,
+    eqn: "0.5\\cdot\\sqrt{1-x^2}",
+    curveStepSize: 0.1000001,
+    curveType: 'smoothNormal',
+    filter: false,
+    invert: false,
+    wavelength: Simulator.GREEN_WAVELENGTH,
+    bandwidth: 10
+  };
+
+  static getDescription(objData, scene, detailed = false) {
+    const base = i18next.t('main:tools.categories.mirror');
+    if (!detailed) {
+      return i18next.t('main:meta.parentheses', { main: base, sub: i18next.t('main:tools.CustomMirror.title') });
+    }
+    const eqn = objData?.eqn ?? '';
+    const shown = equationValueForListDisplay(eqn);
+    return shown ? i18next.t('main:meta.colon', { name: base, value: '<span style="font-family: monospace">' + escapeHtml(shown) + '</span>' }) : base;
+  }
+
+  static getPropertySchema(objData, scene) {
+    const eqnInfo = '<ul><li>' + i18next.t('simulator:sceneObjs.common.eqnInfo.mathjs') + '<br><code>+ - * / ^ sqrt sin cos tan sec csc cot sinh cosh tanh log exp asin acos atan asinh acosh atanh floor round ceil fix max min abs sign</code></li><li>' + i18next.t('simulator:sceneObjs.common.eqnInfo.customFunctions') + '</li></ul>';
+    const curveTypeOptions = {
+      polygonal: i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveTypes.polygonal'),
+      smoothNormal: i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveTypes.smoothNormal'),
+      cubicBezier: i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveTypes.cubicBezier'),
+    };
+    return [
+      ...super.getPropertySchema(objData, scene),
+      {
+        key: 'eqn',
+        type: 'equation',
+        label: 'f(x)',
+        variables: ['x'],
+        info: eqnInfo,
+      },
+      {
+        key: 'curveType',
+        type: 'dropdown',
+        label: i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveType'),
+        options: curveTypeOptions,
+        info: curveTypePropertyInfoHtml(),
+      },
+      {
+        key: 'curveStepSize',
+        type: 'number',
+        label: i18next.t('simulator:sceneObjs.common.curveStepSize') + ' (px)',
+        info: '<p>' + i18next.t('simulator:sceneObjs.common.eqnInfo.curveStepSize') + '</p>',
+      },
+    ];
+  }
+
+  populateObjBar(objBar) {
+    objBar.setTitle(i18next.t('main:tools.categories.mirror'));
+    objBar.createEquation('y = ', this.eqn, function (obj, value) {
+      obj.eqn = value;
+      // Invalidate points when equation changes
+      delete obj.tmp_points;
+    }, '<ul><li>' + i18next.t('simulator:sceneObjs.common.eqnInfo.constants') + '<br><code>pi e</code></li><li>' + i18next.t('simulator:sceneObjs.common.eqnInfo.operators') + '<br><code>+ - * / ^</code></li><li>' + i18next.t('simulator:sceneObjs.common.eqnInfo.functions') + '<br><code>sqrt sin cos tan sec csc cot sinh cosh tanh log</code> (' + i18next.t('simulator:sceneObjs.common.eqnInfo.naturalLog') + ') <code>exp arcsin arccos arctan arcsinh arccosh arctanh floor round ceil trunc sgn max min abs</code></li><li>' + i18next.t('simulator:sceneObjs.common.eqnInfo.module') + '</li></ul>');
+
+    if (objBar.showAdvanced(!this.arePropertiesDefault(['curveType']))) {
+      const curveTypeOptions = {
+        polygonal: i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveTypes.polygonal'),
+        smoothNormal: i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveTypes.smoothNormal'),
+        cubicBezier: i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveTypes.cubicBezier'),
+      };
+      objBar.createDropdown(i18next.t('simulator:sceneObjs.ParamCurveObjMixin.curveType'), this.curveType, curveTypeOptions, function (obj, value) {
+        obj.curveType = value;
+        delete obj.tmp_points;
+        delete obj.bezierSegments;
+      }, curveTypePropertyInfoHtml(), true);
+    }
+
+    if (objBar.showAdvanced(!this.arePropertiesDefault(['curveStepSize']))) {
+      objBar.createNumber(i18next.t('simulator:sceneObjs.common.curveStepSize') + ' (px)', 0.001, 1, 0.001, this.curveStepSize, function (obj, value) {
+        obj.curveStepSize = parseFloat(value);
+        delete obj.tmp_points;
+        delete obj.bezierSegments;
+      }, '<p>' + i18next.t('simulator:sceneObjs.common.eqnInfo.curveStepSize') + '</p>', true);
+    }
+
+    super.populateObjBar(objBar);
+  }
+
+  draw(canvasRenderer, isAboveLight, isHovered) {
+    const ctx = canvasRenderer.ctx;
+    const ls = canvasRenderer.lengthScale;
+
+    if (this.p1.x == this.p2.x && this.p1.y == this.p2.y) {
+      ctx.fillStyle = 'rgb(128,128,128)';
+      ctx.fillRect(this.p1.x - 1.5 * ls, this.p1.y - 1.5 * ls, 3 * ls, 3 * ls);
+      return;
+    }
+
+    this._invalidateCurveIfLengthScaleChanged();
+
+    // Initialize points if needed
+    if (!this.tmp_points) {
+      if (!this.initPoints()) {
+        // If initialization failed, draw error indicators
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.p1.x - 1.5 * ls, this.p1.y - 1.5 * ls, 3 * ls, 3 * ls);
+        ctx.fillRect(this.p2.x - 1.5 * ls, this.p2.y - 1.5 * ls, 3 * ls, 3 * ls);
+        return;
+      }
+    }
+
+    // Draw the curve
+    const colorArray = this.scene.simulator.wavelengthToColor(this.wavelength || Simulator.GREEN_WAVELENGTH, 1);
+    ctx.strokeStyle = isHovered ? this.scene.highlightColorCss : canvasRenderer.rgbaToCssColor(this.scene.simulateColors && this.wavelength && this.filter ? colorArray : this.scene.theme.mirror.color);
+    ctx.lineWidth = this.scene.theme.mirror.width * ls;
+    ctx.beginPath();
+    if (this.curveType === 'cubicBezier' && this._ensureBezierPathReady()) {
+      const p0 = this.bezierSegments[0].get(0);
+      ctx.moveTo(p0.x, p0.y);
+      for (const curve of this.bezierSegments) {
+        const pts = curve.points;
+        ctx.bezierCurveTo(pts[1].x, pts[1].y, pts[2].x, pts[2].y, pts[3].x, pts[3].y);
+      }
+    } else {
+      var pts = this.tmp_points;
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (var i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+    }
+    
+    ctx.stroke();
+    
+    if (isHovered) {
+      ctx.fillStyle = 'rgb(255,0,0)';
+      ctx.fillRect(this.p1.x - 1.5 * ls, this.p1.y - 1.5 * ls, 3 * ls, 3 * ls);
+      ctx.fillRect(this.p2.x - 1.5 * ls, this.p2.y - 1.5 * ls, 3 * ls, 3 * ls);
+    }
+  }
+
+  move(diffX, diffY) {
+    super.move(diffX, diffY);
+    // Invalidate points after moving
+    delete this.tmp_points;
+    delete this.bezierSegments;
+    return true;
+  }
+
+  rotate(angle, center = null) {
+    super.rotate(angle, center);
+    // Invalidate points after rotating
+    delete this.tmp_points;
+    delete this.bezierSegments;
+    return true;
+  }
+
+  scale(scale, center = null) {
+    super.scale(scale, center);
+    // Invalidate points after scaling
+    delete this.tmp_points;
+    delete this.bezierSegments;
+    return true;
+  }
+
+  onConstructMouseDown(mouse, ctrl, shift) {
+    super.onConstructMouseDown(mouse, ctrl, shift);
+    // Invalidate points during construction
+    delete this.tmp_points;
+    delete this.bezierSegments;
+  }
+
+  onConstructMouseMove(mouse, ctrl, shift) {
+    super.onConstructMouseMove(mouse, ctrl, shift);
+    // Invalidate points during construction
+    delete this.tmp_points;
+    delete this.bezierSegments;
+  }
+
+  onConstructMouseUp(mouse, ctrl, shift) {
+    const result = super.onConstructMouseUp(mouse, ctrl, shift);
+    // Invalidate points after construction
+    delete this.tmp_points;
+    delete this.bezierSegments;
+    return result;
+  }
+
+  checkMouseOver(mouse) {
+    let dragContext = {};
+    if (mouse.isOnPoint(this.p1) && geometry.distanceSquared(mouse.pos, this.p1) <= geometry.distanceSquared(mouse.pos, this.p2)) {
+      dragContext.part = 1;
+      dragContext.targetPoint = geometry.point(this.p1.x, this.p1.y);
+      return dragContext;
+    }
+    if (mouse.isOnPoint(this.p2)) {
+      dragContext.part = 2;
+      dragContext.targetPoint = geometry.point(this.p2.x, this.p2.y);
+      return dragContext;
+    }
+
+    this._invalidateCurveIfLengthScaleChanged();
+
+    // Initialize points if needed
+    if (!this.tmp_points) {
+      if (!this.initPoints()) {
+        return;
+      }
+    }
+    
+    if (this.curveType === 'cubicBezier' && this._ensureBezierPathReady()) {
+      for (let i = 0; i < this.bezierSegments.length; i++) {
+        if (mouse.isOnCurve(this.bezierSegments[i])) {
+          const mousePos = mouse.getPosSnappedToGrid();
+          dragContext.part = 0;
+          dragContext.mousePos0 = mousePos;
+          dragContext.mousePos1 = mousePos;
+          dragContext.snapContext = {};
+          return dragContext;
+        }
+      }
+    } else {
+      var i;
+      var pts = this.tmp_points;
+      for (i = 0; i < pts.length - 1; i++) {
+        var seg = geometry.line(pts[i], pts[i + 1]);
+        if (mouse.isOnSegment(seg)) {
+          // Dragging the entire this
+          const mousePos = mouse.getPosSnappedToGrid();
+          dragContext.part = 0;
+          dragContext.mousePos0 = mousePos; // Mouse position when the user starts dragging
+          dragContext.mousePos1 = mousePos; // Mouse position at the last moment during dragging
+          dragContext.snapContext = {};
+          return dragContext;
+        }
+      }
+    }
+  }
+
+  onDrag(mouse, dragContext, ctrl, shift) {
+    super.onDrag(mouse, dragContext, ctrl, shift);
+    // Invalidate points after any dragging operation
+    delete this.tmp_points;
+    delete this.bezierSegments;
+  }
+
+  getPrimitives() {
+    const primitiveCacheKey = JSON.stringify({
+      obj: this.serialize(),
+      lengthScale: this.scene.lengthScale,
+      simulateColors: this.scene.simulateColors
+    });
+    if (this._primitiveCache?.key === primitiveCacheKey) {
+      return this._primitiveCache.primitives;
+    }
+
+    this._invalidateCurveIfLengthScaleChanged();
+
+    if (!this.tmp_points && !this.initPoints()) {
+      return [];
+    }
+
+    if (this.curveType === 'cubicBezier') {
+      if (!this._ensureBezierPathReady()) {
+        return [];
+      }
+
+      const primitives = [];
+      for (const curve of this.bezierSegments) {
+        if (curve.points.length !== 4) continue;
+        const [start, control1, control2, end] = curve.points;
+        if (!isFinitePoint(start) || !isFinitePoint(end)) continue;
+
+        if (isFinitePoint(control1) && isFinitePoint(control2)) {
+          primitives.push(this.createMirrorPrimitive({
+            kind: 'cubicBezier',
+            params: {
+              start: { x: start.x, y: start.y },
+              control1: { x: control1.x, y: control1.y },
+              control2: { x: control2.x, y: control2.y },
+              end: { x: end.x, y: end.y }
+            }
+          }));
+        } else if (start.x !== end.x || start.y !== end.y) {
+          primitives.push(this.createMirrorPrimitive({
+            kind: 'lineSegment',
+            params: {
+              start: { x: start.x, y: start.y },
+              end: { x: end.x, y: end.y }
+            }
+          }));
+        }
+      }
+      this._primitiveCache = {
+        key: primitiveCacheKey,
+        primitives
+      };
+      return primitives;
+    }
+
+    const primitives = [];
+    const segmentInfos = this.tmp_points.slice(0, -1).map(
+      (start, index) => createSegmentInfo(
+        start,
+        this.tmp_points[index + 1]
+      )
+    );
+    for (let i = 0; i < this.tmp_points.length - 1; i++) {
+      const start = this.tmp_points[i];
+      const end = this.tmp_points[i + 1];
+      const segmentInfo = segmentInfos[i];
+      if (!segmentInfo) continue;
+
+      let curve;
+      if (
+        this.curveType === 'smoothNormal' &&
+        !isLargeSamplingSkip(segmentInfos, i)
+      ) {
+        curve = {
+          kind: 'smoothLineSegment',
+          params: {
+            start: { x: start.x, y: start.y },
+            end: { x: end.x, y: end.y },
+            startNormal: getCornerNormal(
+              segmentInfo,
+              segmentInfos[i - 1]
+            ),
+            endNormal: getCornerNormal(
+              segmentInfo,
+              segmentInfos[i + 1]
+            )
+          }
+        };
+      } else {
+        curve = {
+          kind: 'lineSegment',
+          params: {
+            start: { x: start.x, y: start.y },
+            end: { x: end.x, y: end.y }
+          }
+        };
+      }
+      primitives.push(this.createMirrorPrimitive(curve));
+    }
+    this._primitiveCache = {
+      key: primitiveCacheKey,
+      primitives
+    };
+    return primitives;
+  }
+
+  checkRayIntersects(ray) {
+    this._invalidateCurveIfLengthScaleChanged();
+
+    // Initialize points if needed
+    if (!this.tmp_points) {
+      if (!this.initPoints() || !this.checkRayIntersectFilter(ray)) {
+        return;
+      }
+    } else if (!this.checkRayIntersectFilter(ray)) {
+      return;
+    }
+    
+    if (this.curveType === 'cubicBezier' && this._ensureBezierPathReady()) {
+      let incidentPoint = null;
+      let incidentDist = Infinity;
+      const big = this.scene.lengthScale * 1e9;
+      const raySeg = geometry.line(ray.p1, geometry.point(
+        ray.p1.x + (ray.p2.x - ray.p1.x) * big,
+        ray.p1.y + (ray.p2.y - ray.p1.y) * big
+      ));
+      for (let i = 0; i < this.bezierSegments.length; i++) {
+        const curve = this.bezierSegments[i];
+        const us = curve.lineIntersects(raySeg);
+        for (let k = 0; k < us.length; k++) {
+          const rp = curve.get(us[k]);
+          if (!geometry.intersectionIsOnRay(rp, ray)) continue;
+          if (geometry.distance(ray.p1, rp) < Simulator.MIN_RAY_SEGMENT_LENGTH * this.scene.lengthScale) continue;
+          const d = geometry.distance(ray.p1, rp);
+          if (d < incidentDist) {
+            incidentDist = d;
+            incidentPoint = rp;
+            this.tmp_i = i;
+            this.tmp_bezierU = us[k];
+          }
+        }
+      }
+      if (incidentPoint) return incidentPoint;
+      return;
+    }
+
+    var i, j;
+    var pts = this.tmp_points;
+    var dir = geometry.distance(this.p2, ray.p1) > geometry.distance(this.p1, ray.p1);
+    var incidentPoint;
+    for (j = 0; j < pts.length - 1; j++) {
+      i = dir ? j : (pts.length - 2 - j);
+      var rp_temp = geometry.linesIntersection(geometry.line(ray.p1, ray.p2), geometry.line(pts[i], pts[i + 1]));
+      var seg = geometry.line(pts[i], pts[i + 1]);
+      // need Simulator.MIN_RAY_SEGMENT_LENGTH check to handle a ray that reflects off mirror multiple times
+      if (geometry.distance(ray.p1, rp_temp) < Simulator.MIN_RAY_SEGMENT_LENGTH * this.scene.lengthScale)
+        continue;
+      if (geometry.intersectionIsOnSegment(rp_temp, seg) && geometry.intersectionIsOnRay(rp_temp, ray)) {
+        if (!incidentPoint || geometry.distance(ray.p1, rp_temp) < geometry.distance(ray.p1, incidentPoint)) {
+          incidentPoint = rp_temp;
+          this.tmp_i = i;
+        }
+      }
+    }
+    if (incidentPoint) return incidentPoint;
+  }
+
+  onRayIncident(ray, rayIndex, incidentPoint) {
+    if (this.curveType === 'cubicBezier') {
+      return this.onRayIncidentBezier(ray, rayIndex, incidentPoint);
+    }
+    return this.onRayIncidentLinear(ray, incidentPoint, this.curveType === 'smoothNormal');
+  }
+
+  onRayIncidentLinear(ray, incidentPoint, smoothNormals) {
+    var rx = ray.p1.x - incidentPoint.x;
+    var ry = ray.p1.y - incidentPoint.y;
+    var i = this.tmp_i;
+    var pts = this.tmp_points;
+    var seg = geometry.line(pts[i], pts[i + 1]);
+    var mx = seg.p2.x - seg.p1.x;
+    var my = seg.p2.y - seg.p1.y;
+
+
+    ray.p1 = incidentPoint;
+    var frac;
+    if (Math.abs(mx) > Math.abs(my)) {
+      frac = (incidentPoint.x - seg.p1.x) / mx;
+    } else {
+      frac = (incidentPoint.y - seg.p1.y) / my;
+    }
+
+    if (!smoothNormals || (i == 0 && frac < 0.5) || (i == pts.length - 2 && frac >= 0.5)) {
+      ray.p2 = geometry.point(incidentPoint.x + rx * (my * my - mx * mx) - 2 * ry * mx * my, incidentPoint.y + ry * (mx * mx - my * my) - 2 * rx * mx * my);
+    } else {
+      // Use a simple trick to smooth out the slopes of outgoing rays so that image detection works.
+      // However, a more proper numerical algorithm from the beginning (especially to handle singularities) is still desired.
+
+      var outx = incidentPoint.x + rx * (my * my - mx * mx) - 2 * ry * mx * my;
+      var outy = incidentPoint.y + ry * (mx * mx - my * my) - 2 * rx * mx * my;
+
+      var segA;
+      if (frac < 0.5) {
+        segA = geometry.line(pts[i - 1], pts[i]);
+      } else {
+        segA = geometry.line(pts[i + 1], pts[i + 2]);
+      }
+      var mxA = segA.p2.x - segA.p1.x;
+      var myA = segA.p2.y - segA.p1.y;
+
+      var outxA = incidentPoint.x + rx * (myA * myA - mxA * mxA) - 2 * ry * mxA * myA;
+      var outyA = incidentPoint.y + ry * (mxA * mxA - myA * myA) - 2 * rx * mxA * myA;
+
+      var outxFinal;
+      var outyFinal;
+
+      if (frac < 0.5) {
+        outxFinal = outx * (0.5 + frac) + outxA * (0.5 - frac);
+        outyFinal = outy * (0.5 + frac) + outyA * (0.5 - frac);
+      } else {
+        outxFinal = outxA * (frac - 0.5) + outx * (1.5 - frac);
+        outyFinal = outyA * (frac - 0.5) + outy * (1.5 - frac);
+      }
+      //console.log(frac);
+      ray.p2 = geometry.point(outxFinal, outyFinal);
+    }
+  }
+
+  onRayIncidentBezier(ray, rayIndex, incidentPoint) {
+    const curve = this.bezierSegments?.[this.tmp_i];
+    if (!curve) return;
+    const deriv = curve.derivative(this.tmp_bezierU);
+    const mx = deriv.x;
+    const my = deriv.y;
+    if (mx * mx + my * my < 1e-20) return;
+    const rx = ray.p1.x - incidentPoint.x;
+    const ry = ray.p1.y - incidentPoint.y;
+    ray.p1 = incidentPoint;
+    ray.p2 = geometry.point(
+      incidentPoint.x + rx * (my * my - mx * mx) - 2 * ry * mx * my,
+      incidentPoint.y + ry * (mx * mx - my * my) - 2 * rx * mx * my
+    );
+  }
+  
+  /** Utility method */
+
+  _invalidateCurveIfLengthScaleChanged() {
+    if (this.tmp_points && this._curveCacheLengthScale !== this.scene.lengthScale) {
+      delete this.tmp_points;
+      delete this.bezierSegments;
+      delete this._curveCacheLengthScale;
+    }
+  }
+
+  _pathPairToHermiteBezier(p1, p2) {
+    const dt = p2.t - p1.t;
+    if (Math.abs(dt) < 1e-20) {
+      return new Bezier([
+        { x: p1.x, y: p1.y },
+        { x: p1.x, y: p1.y },
+        { x: p2.x, y: p2.y },
+        { x: p2.x, y: p2.y },
+      ]);
+    }
+    return new Bezier([
+      { x: p1.x, y: p1.y },
+      { x: p1.x + (p1.dxdt * dt) / 3, y: p1.y + (p1.dydt * dt) / 3 },
+      { x: p2.x - (p2.dxdt * dt) / 3, y: p2.y - (p2.dydt * dt) / 3 },
+      { x: p2.x, y: p2.y },
+    ]);
+  }
+
+  _ensureBezierPathReady() {
+    if (this.curveType !== 'cubicBezier') return true;
+    if (!this.tmp_points || this.tmp_points.length < 2) return false;
+    if (this.bezierSegments && this.bezierSegments.length === this.tmp_points.length - 1) return true;
+    this.bezierSegments = [];
+    for (let i = 0; i < this.tmp_points.length - 1; i++) {
+      this.bezierSegments.push(this._pathPairToHermiteBezier(this.tmp_points[i], this.tmp_points[i + 1]));
+    }
+    return true;
+  }
+
+  /**
+   * Initialize the points on the curve based on the equation.
+   * This method is called by draw() and checkRayIntersects() when needed.
+   * @returns {boolean} Whether the initialization was successful.
+   */
+  initPoints() {
+    if (this.p1.x == this.p2.x && this.p1.y == this.p2.y) {
+      delete this.tmp_points;
+      //this.error = "Invalid mirror: endpoints are the same";
+      return false;
+    }
+
+    var fn;
+    const wantBezier = this.curveType === 'cubicBezier';
+    var fn_der;
+    try {
+      fn = evaluateLatex(this.eqn);
+      if (wantBezier) {
+        fn_der = compileEquationDerivative(this.eqn);
+      }
+    } catch (e) {
+      delete this.tmp_points;
+      this.error = e.toString();
+      return false;
+    }
+
+    var p12d = geometry.distance(this.p1, this.p2);
+    // unit vector from p1 to p2
+    var dir1 = [(this.p2.x - this.p1.x) / p12d, (this.p2.y - this.p1.y) / p12d];
+    // perpendicular direction
+    var dir2 = [dir1[1], -dir1[0]];
+    // get height of (this section of) parabola
+    var x0 = p12d / 2;
+    var i;
+    
+    if (!(this.curveStepSize > 1e-6)) {
+      delete this.tmp_points;
+      this.error = i18next.t('simulator:sceneObjs.ParamCurveObjMixin.error.invalidStepSize', { step: this.curveStepSize });
+      return false;
+    }
+
+    this.tmp_points = [];
+    const step = this.curveStepSize * this.scene.lengthScale;
+    const sampleOffset = 0.5 * step;
+    const sampleEndExtension = 0.9 * step;
+    var lastError = "";
+    for (i = -step; i < p12d + sampleEndExtension; i += step) {
+      // avoid using exact integers to avoid problems with detecting intersections
+      var ix = i + sampleOffset;
+      if (ix < 0) ix = 0;
+      if (ix > p12d) ix = p12d;
+      var x = ix - x0;
+      var scaled_x = 2 * x / p12d;
+      var scaled_y;
+      try {
+        scaled_y = fn({ x: scaled_x, "pi": Math.PI });
+        var y = scaled_y * p12d * 0.5;
+        var pt = geometry.point(this.p1.x + dir1[0] * ix + dir2[0] * y, this.p1.y + dir1[1] * ix + dir2[1] * y);
+        if (wantBezier) {
+          const dydt = fn_der({ x: scaled_x, "pi": Math.PI });
+          pt.t = scaled_x;
+          pt.dxdt = dir1[0] * (p12d * 0.5) + dir2[0] * (p12d * 0.5) * dydt;
+          pt.dydt = dir1[1] * (p12d * 0.5) + dir2[1] * (p12d * 0.5) * dydt;
+        }
+        this.tmp_points.push(pt);
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    
+    if (this.tmp_points.length == 0) {
+      delete this.tmp_points;
+      this.error = lastError.toString();
+      return false;
+    }
+    
+    delete this.bezierSegments;
+    this.error = null;
+    this._curveCacheLengthScale = this.scene.lengthScale;
+    return true;
+  }
+};
+
+function isFinitePoint(point) {
+  return Number.isFinite(point?.x) && Number.isFinite(point?.y);
+}
+
+function createSegmentInfo(start, end) {
+  if (!isFinitePoint(start) || !isFinitePoint(end)) return null;
+  const tangentX = end.x - start.x;
+  const tangentY = end.y - start.y;
+  const length = Math.hypot(tangentX, tangentY);
+  if (!(length > 0)) return null;
+  return {
+    length,
+    normal: {
+      x: -tangentY / length,
+      y: tangentX / length
+    }
+  };
+}
+
+function getCornerNormal(segment, adjacentSegment) {
+  if (!lengthsAreComparable(segment, adjacentSegment)) {
+    return { ...segment.normal };
+  }
+  const x = segment.normal.x + adjacentSegment.normal.x;
+  const y = segment.normal.y + adjacentSegment.normal.y;
+  const length = Math.hypot(x, y);
+  if (!(length > 0)) {
+    return { ...segment.normal };
+  }
+  return {
+    x: x / length,
+    y: y / length
+  };
+}
+
+function lengthsAreComparable(first, second) {
+  if (!first || !second) return false;
+  return first.length / second.length < SMOOTH_NORMAL_LENGTH_RATIO_LIMIT &&
+    second.length / first.length < SMOOTH_NORMAL_LENGTH_RATIO_LIMIT;
+}
+
+function isLargeSamplingSkip(segments, index) {
+  const segment = segments[index];
+  const previous = segments[index - 1];
+  const next = segments[index + 1];
+  return Boolean(
+    (
+      previous &&
+      segment.length / previous.length >= SMOOTH_NORMAL_LENGTH_RATIO_LIMIT
+    ) ||
+    (
+      next &&
+      segment.length / next.length >= SMOOTH_NORMAL_LENGTH_RATIO_LIMIT
+    )
+  );
+}
+export default CustomMirror;

@@ -1,0 +1,221 @@
+diff -ru a/src/core/CanvasRenderer.js b/src/core/CanvasRenderer.js
+--- a/src/core/CanvasRenderer.js
++++ b/src/core/CanvasRenderer.js
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-import * as C2S from 'canvas2svg';
++import C2S from 'canvas2svg';
+ 
+ /**
+  * A class to render geometric figures from geometry.js on a canvas, and to handle the transformation and background image of the canvas.
+diff -ru a/src/core/Editor.js b/src/core/Editor.js
+--- a/src/core/Editor.js
++++ b/src/core/Editor.js
+@@ -17,7 +17,7 @@
+ import geometry from './geometry.js';
+ import * as sceneObjs from './sceneObjs.js';
+ import Mouse from './Mouse.js';
+-import * as C2S from 'canvas2svg';
++import C2S from 'canvas2svg';
+ import { saveAs } from 'file-saver';
+ import Scene from './Scene.js';
+ import Simulator from './Simulator.js';
+@@ -394,6 +394,11 @@
+   /**
+    * Initialize the canvas event listeners.
+    */
++  getCanvasPosition() {
++    const rect = this.canvas.getBoundingClientRect();
++    return { left: rect.left + window.scrollX, top: rect.top + window.scrollY };
++  }
++
+   initCanvas() {
+ 
+     let lastTouchTime = -1;
+@@ -458,6 +463,7 @@
+     let zoomThrottle = 16; // ~60fps for smoother feel
+ 
+     this.canvas.addEventListener('wheel', function (e) {
++      const canvasOffset = self.getCanvasPosition();
+       e.preventDefault(); // Prevent default scrolling
+       
+       var now = Date.now();
+@@ -488,8 +494,8 @@
+       // Apply zoom centered on mouse position
+       self.setScaleWithCenter(
+         finalScale / self.scene.lengthScale / 100,
+-        (e.pageX - e.target.offsetLeft) / self.scene.scale,
+-        (e.pageY - e.target.offsetTop) / self.scene.scale
++        (e.pageX - canvasOffset.left) / self.scene.scale,
++        (e.pageY - canvasOffset.top) / self.scene.scale
+       );
+       
+       self.onActionComplete();
+@@ -530,6 +536,7 @@
+ 
+ 
+     this.canvas.addEventListener('touchmove', function (e) {
++      const canvasOffset = self.getCanvasPosition();
+       if (self.scene.error) return;
+       self.lastDeviceIsTouch = true;
+       lastTouchTime = Date.now();
+@@ -583,7 +590,7 @@
+         self.scene.origin.y += dy2;
+ 
+         // Apply the scale transformation
+-        self.setScaleWithCenter(newScale, (x - e.target.offsetLeft) / self.scene.scale, (y - e.target.offsetTop) / self.scene.scale);
++        self.setScaleWithCenter(newScale, (x - canvasOffset.left) / self.scene.scale, (y - canvasOffset.top) / self.scene.scale);
+ 
+         // Update last values
+         lastX = x;
+@@ -654,6 +661,7 @@
+    * @param {MouseEvent} e - The event.
+    */
+   onCanvasMouseDown(e) {
++    const canvasOffset = this.getCanvasPosition();
+     if (e.changedTouches) {
+       var et = e.changedTouches[0];
+       this.lastDeviceIsTouch = true;
+@@ -663,8 +671,8 @@
+     }
+ 
+     // Get raw coordinates first
+-    const rawX = (et.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale;
+-    const rawY = (et.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale;
++    const rawX = (et.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale;
++    const rawY = (et.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale;
+ 
+     this.lastMousePos = geometry.point(rawX, rawY);
+     
+@@ -676,8 +684,8 @@
+     var mousePos2;
+     if (this.scene.snapToGrid && !(e.altKey && !this.isConstructing)) {
+       mousePos2 = geometry.point(
+-        Math.round(((et.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize,
+-        Math.round(((et.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize
++        Math.round(((et.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize,
++        Math.round(((et.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize
+       );
+     }
+     else {
+@@ -697,7 +705,7 @@
+     }
+ 
+     if (this.scene.snapToGrid) {
+-      this.mousePos = geometry.point(Math.round(((et.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize, Math.round(((et.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize);
++      this.mousePos = geometry.point(Math.round(((et.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize, Math.round(((et.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize);
+ 
+     }
+     else {
+@@ -837,6 +845,7 @@
+    * @param {MouseEvent} e - The event.
+    */
+   onCanvasMouseMove(e) {
++    const canvasOffset = this.getCanvasPosition();
+     if (e.changedTouches) {
+       var et = e.changedTouches[0];
+     } else {
+@@ -844,8 +853,8 @@
+     }
+     
+     // Get raw coordinates first
+-    const rawX = (et.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale;
+-    const rawY = (et.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale;
++    const rawX = (et.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale;
++    const rawY = (et.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale;
+ 
+     if (this.lastMousePos) {
+       // Calculate the distance moved
+@@ -864,8 +873,8 @@
+     var mousePos2;
+     if (this.scene.snapToGrid && !(e.altKey && !this.isConstructing)) {
+       mousePos2 = geometry.point(
+-        Math.round(((et.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize,
+-        Math.round(((et.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize
++        Math.round(((et.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize,
++        Math.round(((et.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize
+       );
+     }
+     else {
+@@ -1026,6 +1035,7 @@
+    * @param {MouseEvent} e - The event.
+    */
+   onCanvasMouseUp(e) {
++    const canvasOffset = this.getCanvasPosition();
+     if (e.changedTouches) {
+       var et = e.changedTouches[0];
+     } else {
+@@ -1033,8 +1043,8 @@
+     }
+ 
+     // Get raw coordinates first
+-    const rawX = (et.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale;
+-    const rawY = (et.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale;
++    const rawX = (et.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale;
++    const rawY = (et.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale;
+     
+     // Truncate to binary fractions
+     const truncX = this.truncateToBinaryFraction(rawX, this.scene.scale);
+@@ -1044,8 +1054,8 @@
+     var mousePos2;
+     if (this.scene.snapToGrid && !(e.altKey && !this.isConstructing)) {
+       mousePos2 = geometry.point(
+-        Math.round(((et.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize,
+-        Math.round(((et.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize
++        Math.round(((et.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize,
++        Math.round(((et.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale) / this.scene.gridSize) * this.scene.gridSize
+       );
+     }
+     else {
+@@ -1112,10 +1122,11 @@
+    * @param {MouseEvent} e - The event.
+    */
+   onCanvasDblClick(e) {
++    const canvasOffset = this.getCanvasPosition();
+     //console.log("dblclick");
+     // Get raw coordinates first
+-    const rawX = (e.pageX - e.target.offsetLeft - this.scene.origin.x) / this.scene.scale;
+-    const rawY = (e.pageY - e.target.offsetTop - this.scene.origin.y) / this.scene.scale;
++    const rawX = (e.pageX - canvasOffset.left - this.scene.origin.x) / this.scene.scale;
++    const rawY = (e.pageY - canvasOffset.top - this.scene.origin.y) / this.scene.scale;
+     
+     // Truncate to binary fractions
+     const truncX = this.truncateToBinaryFraction(rawX, this.scene.scale);
+diff -ru a/src/core/Mouse.js b/src/core/Mouse.js
+--- a/src/core/Mouse.js
++++ b/src/core/Mouse.js
+@@ -15,7 +15,7 @@
+  */
+ 
+ import geometry from './geometry.js';
+-import Bezier from 'bezier-js';
++import { Bezier } from 'bezier-js';
+ 
+ /**
+  * The Mouse class encapsulates the state of the mouse within the scene.
+diff -ru a/src/core/Scene.js b/src/core/Scene.js
+--- a/src/core/Scene.js
++++ b/src/core/Scene.js
+@@ -456,7 +456,7 @@
+     function expandObjs(objs) {
+       let expandedObjs = [];
+       for (let obj of objs) {
+-        if (obj.constructor === sceneObjs['ModuleObj']) {
++        if (obj.constructor.type === 'ModuleObj') {
+           expandedObjs = expandedObjs.concat(expandObjs(obj.objs));
+         } else {
+           expandedObjs.push(obj);
+diff -ru a/src/core/Simulator.js b/src/core/Simulator.js
+--- a/src/core/Simulator.js
++++ b/src/core/Simulator.js
+@@ -17,7 +17,7 @@
+ import CanvasRenderer from './CanvasRenderer.js';
+ import FloatColorRenderer from './FloatColorRenderer.js';
+ import geometry from './geometry.js';
+-import * as C2S from 'canvas2svg';
++import C2S from 'canvas2svg';
+ import * as sceneObjs from './sceneObjs.js';
+ import BaseGlass from './sceneObjs/BaseGlass.js';
+ import i18next from 'i18next';

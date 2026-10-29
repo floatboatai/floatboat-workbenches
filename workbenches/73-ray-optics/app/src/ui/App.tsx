@@ -1,119 +1,89 @@
-import { useRef, useState } from "react";
-import {
-  Play,
-  Square,
-  Plus,
-  Minus,
-  Focus,
-  FileDown,
-  FolderOpen,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Trash2,
-  FlaskConical,
-} from "lucide-react";
-import { NativeBench, type BenchHandle, type Reading } from "./NativeBench";
-import { useProjects, ProjectPicker, Notice, download } from "./workspace";
-import {
-  seed,
-  validateOptics,
-  restoreOptics,
-  sceneValue,
-  importOptics,
-  objectNames,
-  type OpticalObject,
-} from "../contracts/optics";
-import { objectDefaults } from "../contracts/native-schema";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BookOpen, ChevronDown, FileDown, FileJson, Focus, Minus, Plus, Redo2, Undo2 } from "lucide-react";
+import { NativeBench, type BenchHandle } from "./NativeBench";
+import { useProjects, Notice, download } from "./workspace";
+import { Shelf } from "./Shelf";
+import { Readouts } from "./Readouts";
+import { Inspector, type InspectorTab } from "./Inspector";
+import { ExperimentBook, type BookPage } from "./ExperimentBook";
+import { traceStore, idleTrace } from "./trace-store";
+import { loadOptics } from "./engine";
+import { seed, validateOptics, restoreOptics, sceneValue, importOptics, qualityBudgets, viewModes, type Optics, type Quality } from "../contracts/optics";
+import type { Example } from "../contracts/examples";
 import { isRecord } from "../contracts/project";
-interface ParametersDraft {
-  index: number;
-  base: string;
-  object: OpticalObject;
-  values: Record<string, string>;
+
+const blankScene = JSON.stringify({ version: 5, name: "空白光学平台", objs: [], showGrid: true, gridSize: 20, rayModeDensity: 0.2 }, null, 2);
+function fieldDrafts(value: unknown): Record<string, string> {
+  if (!isRecord(value) || isRecord(value.values)) return {};
+  return Object.fromEntries(Object.entries(value).filter((e): e is [string, string] => typeof e[1] === "string"));
 }
-function parameters(value: unknown): ParametersDraft | null {
-  if (
-    !isRecord(value) ||
-    !Number.isInteger(value.index) ||
-    typeof value.base !== "string" ||
-    !isRecord(value.object) ||
-    typeof value.object.type !== "string" ||
-    !isRecord(value.values) ||
-    Object.values(value.values).some((v) => typeof v !== "string")
-  )
-    return null;
-  return value as unknown as ParametersDraft;
+const fileName = (title: string, ext: string) => (title.replace(/[\\/:*?"<>|]+/g, " ").trim() || "光路实验") + ext;
+
+/** Upstream JSON older than version 5 is upgraded by the upstream Scene (versionUpdate). */
+async function upgradeScene(raw: unknown): Promise<unknown> {
+  if (!isRecord(raw) || raw.format === "ray-optics-workbench" || isRecord(raw.snapshot)) return raw;
+  if (typeof raw.version === "number" && raw.version >= 5) return raw;
+  if (!Array.isArray(raw.objs) && !Array.isArray(raw.obj)) return raw;
+  const { Scene } = await loadOptics();
+  const scene = new Scene();
+  scene.loadJSON(JSON.stringify(raw), () => {});
+  if (scene.error) throw Error("无法升级旧版场景：" + scene.error.replace(/<[^>]+>/g, ""));
+  return JSON.parse(scene.toJSON());
 }
-const numericLabels: Record<string, string> = {
-  "p1.x": "端点一 X",
-  "p1.y": "端点一 Y",
-  "p2.x": "端点二 X",
-  "p2.y": "端点二 Y",
-  x: "文字 X",
-  y: "文字 Y",
-  focalLength: "焦距",
-  brightness: "亮度",
-  refIndex: "折射率",
-  scaleInterval: "标尺间距",
-  fontSize: "文字大小",
-};
-function readProperty(o: OpticalObject, k: string): string {
-  const [first, second] = k.split(".");
-  if (second) return isRecord(o[first]) ? String(o[first][second] ?? "") : "";
-  return String(
-    o[first] ??
-      (
-        objectDefaults[o.type as keyof typeof objectDefaults] as Record<
-          string,
-          unknown
-        >
-      )?.[first] ??
-      "",
-  );
-}
+
 export function App() {
   const p = useProjects(seed, validateOptics, "凸透镜 · 平行光会聚", {
     storageKey: "ray-optics-v07",
     restoreDraftData: restoreOptics,
   });
   const bench = useRef<BenchHandle>(null),
-    transitionRef = useRef(false);
+    book = useRef<HTMLDialogElement>(null),
+    bookButton = useRef<HTMLButtonElement>(null),
+    transitionRef = useRef(false),
+    fitNext = useRef(false);
   const [transitioning, setTransitioning] = useState(false),
-    [files, setFiles] = useState(false),
-    [readings, setReadings] = useState<Reading[]>([]),
-    [rays, setRays] = useState<number | null>(null),
-    [truncated, setTruncated] = useState(false);
-  const locked = p.loading || p.busy || transitioning,
-    selected = typeof p.draft.selected === "number" ? p.draft.selected : -1,
-    draft = parameters(p.draft.parameters),
-    raw = typeof p.draft.raw === "string" ? p.draft.raw : p.data.scene;
-  let objects: OpticalObject[] = [],
-    parseError = "";
-  try {
-    objects = sceneValue(p.data.scene).objs;
-  } catch (e) {
-    parseError = e instanceof Error ? e.message : "场景无效";
-  }
-  const index = draft?.index ?? selected,
-    object = draft?.object ?? objects[index],
-    fields = object
-      ? [
-          "name",
-          ...(object.type === "TextLabel"
-            ? ["text", "x", "y", "fontSize"]
-            : ["p1.x", "p1.y", "p2.x", "p2.y"]),
-          ...(object.type === "IdealLens" ? ["focalLength"] : []),
-          ...(["Beam", "SingleRay"].includes(object.type)
-            ? ["brightness"]
-            : []),
-          ...(["CircleGlass", "PlaneGlass"].includes(object.type)
-            ? ["refIndex"]
-            : []),
-          ...(object.type === "Ruler" ? ["scaleInterval"] : []),
-        ]
-      : [];
+    [ready, setReady] = useState(false),
+    [tick, setTick] = useState(0),
+    [bookOpen, setBookOpen] = useState(false),
+    [bookPage, setBookPage] = useState<BookPage>("examples"),
+    [tab, setTab] = useState<InspectorTab>("element"),
+    [advanced, setAdvanced] = useState(false);
+  const locked = p.loading || p.busy || transitioning;
+  const selected = typeof p.draft.selected === "number" ? p.draft.selected : -1;
+  const drafts = fieldDrafts(p.draft.parameters);
+  const legacyDraft = isRecord(p.draft.parameters) && isRecord(p.draft.parameters.values);
+  const rawDraft = typeof p.draft.raw === "string" ? p.draft.raw : null;
+  const { scene, parseError } = useMemo(() => {
+    try {
+      return { scene: sceneValue(p.data.scene), parseError: "" };
+    } catch (e) {
+      return { scene: null, parseError: e instanceof Error ? e.message : "场景无效" };
+    }
+  }, [p.data.scene]);
+  // tick/data changes re-read the native element (derived values such as focal lengths move with drags).
+  const inspection = useMemo(
+    () => (ready && !locked ? (bench.current?.inspect(selected, advanced) ?? null) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tick, selected, advanced, p.documentKey, ready, locked, p.data.scene],
+  );
+  useEffect(() => {
+    document.title = p.title + " · 光路实验台";
+  }, [p.title]);
+  useEffect(() => {
+    setReady(false);
+    traceStore.set(idleTrace);
+  }, [p.documentKey]);
+  // Examples and imports are framed to the current bench once, like upstream's gallery opening.
+  useEffect(() => {
+    if (!ready || locked || !fitNext.current) return;
+    fitNext.current = false;
+    try {
+      bench.current?.fit();
+    } catch {
+      /* the bench re-frames on the next open */
+    }
+  }, [ready, locked]);
+
   function act(action: () => void) {
     try {
       if (transitionRef.current) return;
@@ -122,580 +92,298 @@ export function App() {
       p.report(e);
     }
   }
+  function setDraftKey(key: string, value: unknown) {
+    p.setDraft((extra) => {
+      if (extra[key] === value) return extra;
+      const next = { ...extra };
+      if (value === undefined) delete next[key];
+      else next[key] = value;
+      return next;
+    });
+  }
+  function setFieldDraft(key: string, value: string | null) {
+    p.setDraft((extra) => {
+      const current = fieldDrafts(extra.parameters);
+      if (value === null ? !(key in current) : current[key] === value) return extra;
+      const nextDrafts = { ...current };
+      if (value === null) delete nextDrafts[key];
+      else nextDrafts[key] = value;
+      const next = { ...extra };
+      if (Object.keys(nextDrafts).length) next.parameters = nextDrafts;
+      else delete next.parameters;
+      return next;
+    });
+  }
   async function transition(action: () => Promise<boolean>) {
-    if (transitionRef.current) return;
+    if (transitionRef.current) return false;
     transitionRef.current = true;
     setTransitioning(true);
     const resume = bench.current?.suspend();
     let moved = false;
     try {
       moved = await action();
-      if (moved) {
-        setReadings([]);
-        setRays(null);
-      }
+    } catch (e) {
+      p.report(e);
     } finally {
       if (!moved) resume?.();
       transitionRef.current = false;
       setTransitioning(false);
     }
+    if (moved) book.current?.close();
+    return moved;
   }
-  function field(key: string, value: string) {
-    const baseline = draft?.object ?? bench.current?.inspect(index) ?? object;
-    if (!baseline) return;
-    const pending: ParametersDraft = draft ?? {
-      index,
-      base: JSON.stringify(baseline),
-      object: baseline,
-      values: {},
-    };
-    p.setDraft((extra) => ({
-      ...extra,
-      parameters: { ...pending, values: { ...pending.values, [key]: value } },
-    }));
+  function openBook(page: BookPage) {
+    setBookPage(page);
+    setBookOpen(true);
+    book.current?.showModal();
   }
-  function apply() {
-    if (!draft) return;
-    act(() => {
-      const next: OpticalObject = structuredClone(draft.object);
-      for (const [key, value] of Object.entries(draft.values)) {
-        if (["name", "text"].includes(key)) {
-          next[key] = value;
-          continue;
-        }
-        if (!value.trim() || !Number.isFinite(Number(value)))
-          throw Error((numericLabels[key] ?? key) + " 尚未填写完整。");
-        const [a, b] = key.split(".");
-        if (b)
-          next[a] = {
-            ...(isRecord(next[a]) ? next[a] : {}),
-            [b]: Number(value),
-          };
-        else next[a] = Number(value);
-      }
-      if (!bench.current) throw Error("画布尚未就绪。");
-      bench.current.update(draft.index, draft.base, next);
-      p.setDraft((extra) => {
-        const n = { ...extra };
-        delete n.parameters;
-        return n;
-      });
-      p.setNotice("参数已应用，点击计算查看新光路。");
+  function openExample(e: Example) {
+    const data: Optics = { scene: JSON.stringify(JSON.parse(e.scene), null, 2), notes: "", original: "", originalName: "", quality: "standard", example: e.id };
+    fitNext.current = true;
+    void transition(() => p.replace(data, e.title)).then((moved) => {
+      if (!moved) fitNext.current = false;
     });
   }
   async function importFile(file: File) {
+    await transition(async () => {
+      if (file.size > 12 * 1024 * 1024) throw Error("文件超过 12 MiB，请先拆分场景。");
+      const content = await file.text();
+      try {
+        const value = importOptics(await upgradeScene(JSON.parse(content)), file.name);
+        fitNext.current = true;
+        const moved = await p.replace(value.data, value.title, value.extra);
+        if (!moved) fitNext.current = false;
+        return moved;
+      } catch (error) {
+        if (new TextEncoder().encode(content).length <= 850000) {
+          setDraftKey("raw", content);
+          setTab("scene");
+          p.setNotice("文件未能载入，原文已放入“场景 → 原生场景 JSON”，可修改后应用或下载；当前实验未被替换。");
+        } else p.setNotice("原文件未导入，请保留本地文件；当前实验未被替换。");
+        throw error;
+      }
+    });
+  }
+  function exportProject() {
+    act(() => {
+      const body = { title: p.title, data: p.data, extra: p.draft };
+      if (new TextEncoder().encode(JSON.stringify(body)).length > 1950000) throw Error("实验工作稿超过 1.95 MB，请先导出恢复稿并拆分。");
+      download(new Blob([JSON.stringify({ format: "ray-optics-workbench", ...body }, null, 2)], { type: "application/json" }), fileName(p.title, ".project.json"));
+    });
+  }
+  async function exportPng() {
     try {
-      await transition(async () => {
-        if (file.size > 12 * 1024 * 1024)
-          throw Error("文件超过 12 MiB，请先拆分场景。");
-        const content = await file.text();
-        try {
-          const value = importOptics(JSON.parse(content), file.name);
-          return p.replace(value.data, value.title, value.extra);
-        } catch (error) {
-          if (new TextEncoder().encode(content).length <= 850000)
-            p.setDraft((extra) => ({ ...extra, raw: content }));
-          else p.setNotice("原文件未导入，请保留本地文件；当前实验未被替换。");
-          throw error;
-        }
-      });
+      if (!bench.current) throw Error("光学平台尚未就绪。");
+      const { blob, partial } = await bench.current.png();
+      download(blob, fileName(p.title, ".png"));
+      p.setNotice(partial ? "已导出 PNG；光线达到质量上限或被停止，图像为当前已追踪部分。" : "已导出当前光路 PNG。");
     } catch (e) {
       p.report(e);
     }
   }
-  function exportProject() {
-    act(() => {
-      const result = JSON.stringify(
-        {
-          format: "ray-optics-workbench",
-          title: p.title,
-          data: p.data,
-          extra: p.draft,
-        },
-        null,
-        2,
-      );
-      if (
-        new TextEncoder().encode(
-          JSON.stringify({ title: p.title, data: p.data, extra: p.draft }),
-        ).length > 1950000
-      )
-        throw Error("实验工作稿超过 1.95 MB，请先导出恢复稿并拆分。");
-      download(
-        new Blob([result], { type: "application/json" }),
-        "光路实验.json",
-      );
-    });
-  }
+  const mode = String(scene?.mode ?? "rays");
+  const saveText = transitioning ? "正在保存并切换实验…" : p.loading ? "正在恢复实验…" : p.autoState.message;
+
   return (
-    <main>
-      <a className="skip" href="#optical-workspace">
-        跳到光路实验
+    <main className="app" aria-busy={transitioning}>
+      <a className="skip" href="#optical-bench">
+        跳到光学平台
       </a>
-      <header className="topbar">
-        <div className="identity">
-          <FlaskConical size={28} aria-hidden="true" />
-          <div>
-            <h1>光路实验台</h1>
-            <small>RAY OPTICS · GEOMETRIC OPTICS</small>
-          </div>
-        </div>
-        <input
-          aria-label="实验名称"
-          className="experiment-title"
-          name="experimentTitle"
-          autoComplete="off"
-          maxLength={120}
-          value={p.title}
-          disabled={locked}
-          onChange={(e) => p.setTitle(e.target.value)}
-        />
-        <span className={"save " + p.autoState.phase} role="status">
-          {p.autoState.message}
-        </span>
-        <button aria-expanded={files} onClick={() => setFiles(!files)}>
-          <FolderOpen size={16} aria-hidden="true" />
-          实验文件
+      <header className="rim">
+        <button ref={bookButton} type="button" className="book-trigger" aria-haspopup="dialog" aria-expanded={bookOpen} disabled={transitioning} onClick={() => openBook("examples")}>
+          <BookOpen size={17} aria-hidden="true" />
+          实验
+          <ChevronDown size={13} aria-hidden="true" />
         </button>
-      </header>
-      {files ? (
-        <section className="filebar" aria-label="实验文件">
-          <ProjectPicker
-            items={p.items}
-            id={p.current?.id}
-            disabled={locked}
-            onOpen={(id) => void transition(() => p.open(id))}
-          />
-          <button
-            disabled={locked}
-            onClick={() => void transition(() => p.fresh())}
-          >
-            新建实验
-          </button>
-          <label className={"file-button " + (locked ? "disabled" : "")}>
-            导入场景 / 工程
-            <input
-              aria-label="导入场景或工程"
-              type="file"
-              accept=".json,application/json"
-              disabled={locked}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void importFile(f);
-                e.target.value = "";
-              }}
-            />
-          </label>
-          <button onClick={exportProject} disabled={locked}>
-            完整工程
-          </button>
-          <button onClick={() => p.exportDraft()}>恢复稿</button>
-          <button onClick={() => void p.save()} disabled={locked}>
-            重试保存
-          </button>
-          {p.current ? (
-            <button
-              disabled={locked}
-              onClick={() => {
-                if (confirm("删除这个实验及其保存记录？"))
-                  void transition(() => p.remove());
-              }}
-            >
-              删除实验
-            </button>
-          ) : null}
-        </section>
-      ) : null}
-      <Notice error={p.error} notice={p.notice} />
-      {p.autoState.phase === "conflict" && p.current ? (
-        <div className="conflict">
-          <button onClick={() => p.exportDraft()}>导出当前恢复稿</button>
-          <button onClick={() => void transition(() => p.open(p.current!.id))}>
-            打开服务器版本
-          </button>
+        <div className="caption">
+          <span>RAY OPTICS</span>
+          <input aria-label="实验名称" className="title" name="experimentTitle" autoComplete="off" maxLength={120} value={p.title} disabled={locked} onChange={(e) => p.setTitle(e.target.value)} />
         </div>
-      ) : null}
-      <div className="instrument-rack" aria-label="光学器材">
-        {Object.entries(objectNames).map(([type, name]) => (
-          <button
-            key={type}
-            disabled={locked}
-            onClick={() => act(() => bench.current?.add(type))}
-          >
-            <span aria-hidden="true">
-              {
-                (
-                  {
-                    SingleRay: "↗",
-                    Beam: "≋",
-                    Mirror: "╱",
-                    IdealLens: "↕",
-                    CircleGlass: "◯",
-                    PlaneGlass: "◩",
-                    Blocker: "┃",
-                    Detector: "▤",
-                    Ruler: "┄",
-                    TextLabel: "T",
-                  } as Record<string, string>
-                )[type]
-              }
-            </span>
-            {name}
-          </button>
-        ))}
-      </div>
-      <div className="workspace" id="optical-workspace">
-        <section className="stage" aria-label="光路实验">
-          <div className="stagebar">
-            <div>
-              <button
-                className="run"
-                disabled={locked || Boolean(parseError)}
-                onClick={() => act(() => bench.current?.run())}
-              >
-                <Play size={16} aria-hidden="true" />
-                计算光路
+        <span className="save-state" role="status" data-phase={p.autoState.phase}>
+          {saveText}
+        </span>
+        {p.autoState.phase === "conflict" && p.current ? (
+          <span className="conflict">
+            <button type="button" onClick={() => p.exportDraft()}>
+              导出恢复稿
+            </button>
+            <button type="button" onClick={() => void transition(() => p.open(p.current!.id))}>
+              打开服务器版本
+            </button>
+          </span>
+        ) : null}
+      </header>
+      <Notice error={p.error} notice={p.notice} />
+      <div className="station">
+        <Shelf disabled={locked || !ready} onAdd={(type) => act(() => bench.current?.add(type))} />
+        <section className="stage" aria-label="光学平台">
+          <div className="stagebar" role="toolbar" aria-label="平台工具">
+            <div className="segmented" role="group" aria-label="视图模式">
+              {Object.entries(viewModes).map(([id, label]) => (
+                <button key={id} type="button" aria-pressed={mode === id} disabled={locked || !ready} onClick={() => act(() => bench.current?.setScene({ mode: id }))}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="toggle"
+              aria-pressed={Boolean(scene?.simulateColors)}
+              disabled={locked || !ready}
+              title="按波长模拟颜色：色散、光栅和彩色光源"
+              onClick={() => act(() => bench.current?.setScene({ simulateColors: !scene?.simulateColors }))}
+            >
+              <span className="spectrum" aria-hidden="true" />
+              波长色彩
+            </button>
+            <label className="quality" title="质量决定每次重绘最多追踪的光线段数，拖动时始终实时预览">
+              <span className="sr-only">追踪质量</span>
+              <select value={p.data.quality} disabled={locked} onChange={(e) => p.setData((v) => ({ ...v, quality: e.target.value as Quality }))}>
+                {Object.entries(qualityBudgets).map(([id, q]) => (
+                  <option key={id} value={id}>
+                    质量：{q.label} · {(q.rays / 10000).toLocaleString("zh-CN")} 万段
+                  </option>
+                ))}
+              </select>
+            </label>
+            <span className="spacer" />
+            <div className="tool-group">
+              <button type="button" className="icon" aria-label="撤销" title="撤销（Ctrl/⌘+Z）" disabled={locked || !ready} onClick={() => act(() => bench.current?.undo())}>
+                <Undo2 size={16} aria-hidden="true" />
               </button>
-              <button
-                disabled={locked}
-                onClick={() => act(() => bench.current?.stop())}
-              >
-                <Square size={13} aria-hidden="true" />
-                停止
+              <button type="button" className="icon" aria-label="重做" title="重做（Shift+Ctrl/⌘+Z）" disabled={locked || !ready} onClick={() => act(() => bench.current?.redo())}>
+                <Redo2 size={16} aria-hidden="true" />
+              </button>
+              <button type="button" className="icon" aria-label="缩小" title="缩小" disabled={locked || !ready} onClick={() => act(() => bench.current?.zoom(0.8))}>
+                <Minus size={16} aria-hidden="true" />
+              </button>
+              <button type="button" className="icon" aria-label="放大" title="放大" disabled={locked || !ready} onClick={() => act(() => bench.current?.zoom(1.25))}>
+                <Plus size={16} aria-hidden="true" />
+              </button>
+              <button type="button" className="icon" aria-label="适配视图" title="适配视图" disabled={locked || !ready} onClick={() => act(() => bench.current?.fit())}>
+                <Focus size={16} aria-hidden="true" />
               </button>
             </div>
-            <div>
-              <button
-                title="缩小"
-                aria-label="缩小画布"
-                disabled={locked}
-                onClick={() => act(() => bench.current?.zoom(0.8))}
-              >
-                <Minus size={16} />
+            <div className="tool-group">
+              <button type="button" disabled={locked || !ready} onClick={() => void exportPng()}>
+                <FileDown size={16} aria-hidden="true" />
+                PNG
               </button>
               <button
-                title="放大"
-                aria-label="放大画布"
-                disabled={locked}
-                onClick={() => act(() => bench.current?.zoom(1.25))}
+                type="button"
+                disabled={locked || Boolean(parseError)}
+                title="导出上游兼容的场景 JSON"
+                onClick={() => download(new Blob([p.data.scene], { type: "application/json" }), fileName(p.title, ".json"))}
               >
-                <Plus size={16} />
-              </button>
-              <button
-                disabled={locked}
-                onClick={() => act(() => bench.current?.fit())}
-              >
-                <Focus size={16} aria-hidden="true" />
-                适配
+                <FileJson size={16} aria-hidden="true" />
+                JSON
               </button>
             </div>
           </div>
-          {p.loading ? (
-            <div className="loading" role="status">
-              正在打开实验…
-            </div>
-          ) : (
-            <NativeBench
-              ref={bench}
-              documentKey={p.documentKey}
-              source={p.data.scene}
-              disabled={locked}
-              selected={selected}
-              onScene={(source) => {
-                p.setData((v) => ({ ...v, scene: source }));
-                setRays(null);
-                setReadings([]);
-              }}
-              onSelection={(n) =>
-                p.setDraft((extra) => ({ ...extra, selected: n }))
-              }
-              onError={p.report}
-              onInvalidate={() => {
-                setReadings([]);
-                setRays(null);
-              }}
-              onResult={(value, n, limit) => {
-                setReadings(value);
-                setRays(n);
-                setTruncated(limit);
-              }}
-            />
-          )}
-          <div className="stage-footer">
-            <span>
-              {objects.length} 个元件 ·{" "}
-              {rays === null
-                ? "等待计算"
-                : `${rays} 段光线${truncated ? " · 已达到计算上限" : ""}`}
-            </span>
-            <div>
-              <button
-                disabled={locked || Boolean(parseError)}
-                onClick={() =>
-                  download(
-                    new Blob([p.data.scene], { type: "application/json" }),
-                    "光路场景.json",
-                  )
-                }
-              >
-                场景 JSON
-              </button>
-              <button
+          <div className="bench-frame" id="optical-bench">
+            {p.loading ? (
+              <div className="loading" role="status">
+                正在打开实验…
+              </div>
+            ) : (
+              <NativeBench
+                ref={bench}
+                documentKey={p.documentKey}
+                source={p.data.scene}
+                quality={p.data.quality}
                 disabled={locked}
-                onClick={() => {
-                  void bench.current
-                    ?.png()
-                    .then((blob) => download(blob, "光路实验.png"))
-                    .catch(p.report);
+                selected={selected}
+                onScene={(source) => {
+                  p.setData((v) => ({ ...v, scene: source }));
+                  setTick((t) => t + 1);
                 }}
-              >
-                <FileDown size={15} aria-hidden="true" />
-                PNG 图像
-              </button>
-            </div>
+                onSelection={(n) => {
+                  setDraftKey("selected", n);
+                  setTick((t) => t + 1);
+                  if (n >= 0) setTab("element");
+                }}
+                onChange={() => setTick((t) => t + 1)}
+                onTrace={(t) => {
+                  traceStore.set(t);
+                  if (t.phase !== "loading") setReady(true);
+                }}
+                onError={p.report}
+              />
+            )}
           </div>
           {parseError ? (
             <p className="notice error" role="alert">
-              {parseError} 请在原生场景编辑器中修复，或导出恢复稿。
+              {parseError} 请在“场景 → 原生场景 JSON”中修复，或导出恢复稿。
             </p>
           ) : null}
-          <section className="readings" aria-label="探测器读数">
-            <h2>
-              探测器 <span>当前计算结果</span>
-            </h2>
-            {readings.length ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>探测器</th>
-                    <th>相对功率</th>
-                    <th>法向分量</th>
-                    <th>切向分量</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {readings.map((r) => (
-                    <tr key={r.index}>
-                      <td>{r.name}</td>
-                      <td>{r.power.toFixed(4)}</td>
-                      <td>{r.normal.toFixed(4)}</td>
-                      <td>{r.shear.toFixed(4)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>计算光路后，显示探测器的相对光功率和动量分量。</p>
-            )}
-          </section>
-          <label className="notes">
-            实验记录
-            <textarea
-              aria-label="实验记录"
-              name="notes"
-              maxLength={40000}
-              value={p.data.notes}
-              disabled={locked}
-              onChange={(e) =>
-                p.setData((v) => ({ ...v, notes: e.target.value }))
-              }
-            />
-          </label>
+          <Readouts quality={p.data.quality} onSelect={(i) => act(() => bench.current?.select(i))} onStop={() => bench.current?.stop()} />
         </section>
-        <aside className="inspector" aria-label="元件参数">
-          <div className="inspector-heading">
-            <h2>器材与参数</h2>
-            <span>{draft ? "参数稿" : "选中元件"}</span>
-          </div>
-          <label>
-            器材列表
-            <select
-              aria-label="选择元件"
-              value={selected}
-              disabled={locked}
-              onChange={(e) =>
-                act(() => bench.current?.select(Number(e.target.value)))
-              }
-            >
-              <option value={-1}>选择一个元件…</option>
-              {objects.map((o, i) => (
-                <option key={i} value={i}>
-                  {i + 1}. {o.name || objectNames[o.type]}
-                </option>
-              ))}
-            </select>
-          </label>
-          {object ? (
-            <>
-              <p className="object-kind">
-                {objectNames[object.type]}
-                <span>#{index + 1}</span>
-              </p>
-              <fieldset disabled={locked}>
-                <div className="field-grid">
-                  {fields.map((key) => (
-                    <label
-                      className={["name", "text"].includes(key) ? "full" : ""}
-                      key={key}
-                    >
-                      {key === "name"
-                        ? "元件名称"
-                        : key === "text"
-                          ? "标注文字"
-                          : numericLabels[key]}
-                      {key === "text" ? (
-                        <textarea
-                          aria-label="标注文字"
-                          name="elementText"
-                          maxLength={3000}
-                          value={
-                            draft?.values[key] ?? readProperty(object, key)
-                          }
-                          onChange={(e) => field(key, e.target.value)}
-                        />
-                      ) : (
-                        <input
-                          aria-label={
-                            key === "name" ? "元件名称" : numericLabels[key]
-                          }
-                          name={key}
-                          autoComplete="off"
-                          inputMode={
-                            ["name", "text"].includes(key) ? "text" : "decimal"
-                          }
-                          maxLength={key === "name" ? 120 : 40}
-                          value={
-                            draft?.values[key] ?? readProperty(object, key)
-                          }
-                          onChange={(e) => field(key, e.target.value)}
-                        />
-                      )}
-                    </label>
-                  ))}
-                </div>
-                {draft ? (
-                  <div className="draft-note">
-                    <p>参数输入自动保存为草稿，应用后才改变光路。</p>
-                    <button className="apply" onClick={apply}>
-                      应用参数
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm("放弃尚未应用的参数，重新读取画布元件？"))
-                          p.setDraft((extra) => {
-                            const n = { ...extra };
-                            delete n.parameters;
-                            return n;
-                          });
-                      }}
-                    >
-                      重新读取元件
-                    </button>
-                  </div>
-                ) : null}
-              </fieldset>
-              <div className="nudge">
-                <span>微调位置</span>
-                {[
-                  [ArrowLeft, -1, 0, "向左"],
-                  [ArrowRight, 1, 0, "向右"],
-                  [ArrowUp, 0, -1, "向上"],
-                  [ArrowDown, 0, 1, "向下"],
-                ].map(([Icon, x, y, label]) => {
-                  const I = Icon as typeof ArrowLeft;
-                  return (
-                    <button
-                      key={String(label)}
-                      aria-label={String(label)}
-                      disabled={locked || Boolean(draft)}
-                      onClick={() =>
-                        act(() =>
-                          bench.current?.nudge(index, Number(x), Number(y)),
-                        )
-                      }
-                    >
-                      <I size={16} />
-                    </button>
-                  );
-                })}
-                <button
-                  disabled={locked || Boolean(draft)}
-                  aria-label="删除选中元件"
-                  onClick={() => {
-                    if (confirm("删除这个光学元件？"))
-                      act(() => bench.current?.remove(index));
-                  }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </>
-          ) : (
-            <p className="empty">点击光路中的元件，或从上方器材架添加。</p>
-          )}
-          <details className="raw">
-            <summary>原生场景 JSON</summary>
-            <label>
-              场景输入
-              <textarea
-                aria-label="原生场景编辑器"
-                name="nativeScene"
-                spellCheck={false}
-                value={raw}
-                disabled={locked}
-                onChange={(e) =>
-                  p.setDraft((extra) => ({ ...extra, raw: e.target.value }))
+        <Inspector
+          bench={bench}
+          inspection={inspection}
+          scene={scene}
+          selected={selected}
+          locked={locked || !ready}
+          tab={tab}
+          setTab={setTab}
+          advanced={advanced}
+          setAdvanced={setAdvanced}
+          drafts={drafts}
+          legacyDraft={legacyDraft ? JSON.stringify((p.draft.parameters as Record<string, unknown>).values) : ""}
+          setFieldDraft={setFieldDraft}
+          clearDrafts={() => setDraftKey("parameters", undefined)}
+          act={act}
+          raw={rawDraft ?? p.data.scene}
+          rawPending={rawDraft !== null && rawDraft !== p.data.scene}
+          setRaw={(v) => setDraftKey("raw", v)}
+          applyRaw={() =>
+            act(() => {
+              const source = rawDraft ?? p.data.scene;
+              validateOptics({ ...p.data, scene: source });
+              p.setData((v) => ({ ...v, scene: source }));
+              setDraftKey("raw", undefined);
+              p.setNotice("原生场景已应用。");
+            })
+          }
+          downloadRaw={() => download(new Blob([rawDraft ?? p.data.scene], { type: "application/json" }), "原生场景输入.json")}
+          notes={p.data.notes}
+          setNotes={(v) => p.setData((d) => ({ ...d, notes: v }))}
+          original={
+            p.data.original
+              ? {
+                  name: p.data.originalName,
+                  download: () => download(new Blob([p.data.original], { type: "application/json" }), p.data.originalName || "导入原件.json"),
                 }
-              />
-            </label>
-            <button
-              disabled={locked}
-              onClick={() =>
-                act(() => {
-                  sceneValue(raw);
-                  validateOptics({ ...p.data, scene: raw });
-                  p.setData((v) => ({ ...v, scene: raw }));
-                  p.setDraft((extra) => {
-                    const next = { ...extra };
-                    delete next.raw;
-                    return next;
-                  });
-                  p.setNotice("原生场景已应用，点击计算光路。");
-                })
-              }
-            >
-              应用场景
-            </button>
-            <button
-              onClick={() =>
-                download(
-                  new Blob([raw], { type: "application/json" }),
-                  "原始输入.json",
-                )
-              }
-            >
-              下载输入
-            </button>
-          </details>
-          {p.data.original ? (
-            <button
-              onClick={() =>
-                download(
-                  new Blob([p.data.original], { type: "application/json" }),
-                  p.data.originalName || "导入原件.json",
-                )
-              }
-            >
-              下载导入原件
-            </button>
-          ) : null}
-          <p className="scope">
-            二维几何光学 · CPU 光线追踪
-            <br />
-            场景与未完成输入会分别保存。
-          </p>
-        </aside>
+              : null
+          }
+        />
       </div>
+      <ExperimentBook
+        ref={book}
+        page={bookPage}
+        setPage={setBookPage}
+        open={bookOpen}
+        locked={locked}
+        items={p.items}
+        currentId={p.current?.id}
+        currentExample={p.data.example}
+        onClose={() => {
+          setBookOpen(false);
+          bookButton.current?.focus();
+        }}
+        onExample={openExample}
+        onBlank={() =>
+          void transition(() => p.replace({ scene: blankScene, notes: "", original: "", originalName: "", quality: "standard", example: "" }, "空白光学平台"))
+        }
+        onOpen={(id) => void transition(() => p.open(id))}
+        onImport={(f) => void importFile(f)}
+        onExportProject={exportProject}
+        onExportRecovery={() => p.exportDraft()}
+        onRetrySave={() => void p.save()}
+        onDelete={() => {
+          if (confirm("删除这个实验及其保存记录？")) void transition(() => p.remove());
+        }}
+      />
     </main>
   );
 }

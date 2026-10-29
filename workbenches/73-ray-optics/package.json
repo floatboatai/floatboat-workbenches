@@ -1,7 +1,7 @@
 {
   "name": "floatboat-ray-optics",
   "private": true,
-  "version": "0.7.1",
+  "version": "0.9.0",
   "type": "module",
   "packageManager": "pnpm@10.22.0",
   "engines": {
@@ -25,12 +25,15 @@
     "bezier-js": "6.1.4",
     "canvas2svg": "1.0.16",
     "escape-html": "1.0.3",
+    "evaluatex": "2.2.0",
     "file-saver": "2.0.5",
     "i18next": "23.16.8",
     "lucide-react": "0.562.0",
+    "mathjs": "15.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "seedrandom": "3.0.5"
+    "seedrandom": "3.0.5",
+    "tex-math-parser": "2.0.5"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

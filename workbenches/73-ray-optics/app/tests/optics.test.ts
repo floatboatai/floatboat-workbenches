@@ -10,14 +10,17 @@ import {
   validateOptics,
   restoreOptics,
   importOptics,
-  makeObject,
+  qualityBudgets,
+  MAX_OBJECTS,
 } from "../src/contracts/optics.ts";
+import { presetObject, shelfTypes } from "../src/contracts/catalog.ts";
+import { examples } from "../src/contracts/examples.ts";
 import { createAutosaveStore } from "../src/server/autosave.ts";
 function native(source: string) {
   const s = new Scene();
   s.loadJSON(source, () => {});
   assert.equal(s.error, null);
-  const sim = new Simulator(s, null, null, null, null, null, false, 10000);
+  const sim = new Simulator(s, null, null, null, null, null, false, 100000);
   sim.updateSimulation();
   return { s, sim };
 }
@@ -58,68 +61,114 @@ test("native reflection sends a ray back through a detector behind its source", 
   assert.equal(sim.processedRayCount, 3);
   assert.equal(Math.abs(s.objs[2].power ?? 0), 1);
 });
-test("unsupported native inputs are rejected before loading instead of dropping fields", () => {
+test("unsupported or unsafe native inputs are rejected before loading instead of dropping fields", () => {
   const s = JSON.parse(seed.scene);
   for (const extra of [
     { version: 4 },
     { backgroundImage: "https://example.com/a.png" },
     { modules: { sample: {} } },
-    { colorMode: "linear" },
-    { mode: "observer" },
-    { objs: [{ type: "CustomMirror", equation: "x" }] },
+    { modules: [] },
+    { colorMode: "neon" },
+    { mode: "xray" },
+    { observer: { c: { x: 0, y: 0 }, r: 0 } },
+    { objs: [{ type: "Laser", p1: { x: 0, y: 0 }, p2: { x: 1, y: 1 } }] },
+    { objs: [{ ...s.objs[0], custom: "keep me" }] },
+    { objs: [{ type: "Mirror", p1: { x: 0, y: 0 } }] },
+    { objs: [{ type: "Glass", path: [{ x: 0, y: 0 }, { x: 1, y: 1 }] }] },
+    { objs: [{ type: "Glass", path: [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: "a" }] }] },
+    { objs: [{ type: "SphericalLens", p1: { x: 0, y: 0 } }] },
+    { objs: [{ type: "PointSource", x: 1 }] },
+    { objs: [{ type: "CustomGlass", p1: { x: 0, y: 0 }, p2: { x: 9, y: 0 }, eqn1: 3 }] },
+    { objs: [{ type: "ModuleObj", points: [] }] },
   ])
-    assert.throws(() => sceneValue(JSON.stringify({ ...s, ...extra })));
-  assert.throws(() =>
-    sceneValue(
-      JSON.stringify({ ...s, objs: [{ ...s.objs[0], custom: "keep me" }] }),
-    ),
-  );
+    assert.throws(() => sceneValue(JSON.stringify({ ...s, ...extra })), JSON.stringify(extra));
 });
 test("native numeric and object boundaries reject broken or unbounded scenes", () => {
   const s = JSON.parse(seed.scene);
   for (const extra of [
     { gridSize: 0 },
-    { gridSize: 0.001 },
     { scale: 100 },
-    { rayModeDensity: 2 },
+    { rayModeDensity: 2000 },
     { origin: { x: "0", y: 0 } },
-    { theme: { ray: { dash: ["x"] } } },
     { maxRayDepth: "Infinity" },
-    { objs: Array.from({ length: 101 }, () => s.objs[0]) },
-    {
-      objs: [
-        {
-          type: "IdealLens",
-          p1: { x: 1, y: 1 },
-          p2: { x: 1, y: 1 },
-          focalLength: 0,
-        },
-      ],
-    },
+    { redWavelength: 400, violetWavelength: 500 },
+    { objs: Array.from({ length: MAX_OBJECTS + 1 }, () => s.objs[0]) },
+    { objs: [{ type: "IdealLens", p1: { x: 1, y: 1 }, p2: { x: 1, y: 9 }, focalLength: 0 }] },
+    { objs: [{ type: "DiffractionGrating", p1: { x: 1, y: 1 }, p2: { x: 1, y: 9 }, lineDensity: -5 }] },
+    { objs: [{ type: "Beam", p1: { x: 1, y: 1 }, p2: { x: 1, y: 9 }, brightness: 1e9 }] },
   ])
-    assert.throws(() => sceneValue(JSON.stringify({ ...s, ...extra })));
+    assert.throws(() => sceneValue(JSON.stringify({ ...s, ...extra })), JSON.stringify(extra).slice(0, 80));
 });
-test("all toolbar instruments create usable native scene objects", () => {
-  for (const type of [
-    "SingleRay",
-    "Beam",
-    "Mirror",
-    "IdealLens",
-    "CircleGlass",
-    "PlaneGlass",
-    "Blocker",
-    "Detector",
-    "Ruler",
-    "TextLabel",
-  ]) {
-    const obj = makeObject(type, 3),
-      source = JSON.stringify({ version: 5, objs: [obj] });
+test("upstream 5.5.0 scene features validate: view modes, colours, modules, numeric strings and helper objects", () => {
+  const scene = {
+    version: 5,
+    mode: "observer",
+    observer: { c: { x: 300, y: 200 }, r: 12 },
+    simulateColors: true,
+    colorMode: "linear",
+    redWavelength: 650,
+    violetWavelength: 400,
+    modules: { Pair: { numPoints: 2, params: ["n=1:0.1:2:1.5"], objs: [{ type: "Mirror", p1: { x: "`x_1`", y: "`y_1`" }, p2: { x: "`x_2`", y: "`y_2`" } }] } },
+    objs: [
+      { type: "SphericalLens", path: [{ x: 0, y: 0, arc: false }, { x: 10, y: 0, arc: false }, { x: 20, y: 50, arc: true }, { x: 10, y: 100, arc: false }, { x: 0, y: 100, arc: false }, { x: -10, y: 50, arc: true }], refIndex: 1.774, cauchyB: "0.01342" },
+      { type: "AngleSource", p1: { x: 320, y: 400 }, p2: { x: 440, y: 520 }, brightness: 1, emisAngle: "15" },
+      { type: "ModuleObj", module: "Pair", points: [{ x: 0, y: 0 }, { x: 10, y: 10 }], params: { n: 1.5 } },
+      { type: "Handle", p1: { x: 1, y: 1 }, p2: { x: 1, y: 1 }, controlPoints: [{ dragContext: { part: 1 }, targetObjIndex: 0, newPoint: { x: 1, y: 2 } }], transformation: "rotation" },
+      { type: "Drawing", strokes: [[1, 2, 3, 4]] },
+      { type: "CropBox", p1: { x: 0, y: 0 }, p4: { x: 100, y: 80 } },
+      { type: "CustomSurface", p1: { x: 0, y: 0 }, p2: { x: 50, y: 0 }, outRays: [{ eqnTheta: "\\theta_0", eqnP: "P_0" }] },
+      { type: "Blocker", p1: { x: 5, y: 5 }, p2: { x: 5, y: 5 } },
+    ],
+  };
+  assert.equal(sceneValue(JSON.stringify(scene)).objs.length, 8);
+  const { s, sim } = native(JSON.stringify(scene));
+  assert.equal(s.objs.length, 8);
+  assert.ok(sim.processedRayCount > 0);
+  sceneValue(s.toJSON());
+});
+test("every equipment-shelf preset is a valid upstream object that traces and round-trips", () => {
+  assert.equal(shelfTypes.length, 27);
+  for (const type of shelfTypes) {
+    assert.ok(sceneObjs[type], type + " is vendored");
+    const obj = presetObject(type, { x: 300, y: 300 }, 60, 1);
+    const source = JSON.stringify({ version: 5, objs: [{ type: "PointSource", x: 120, y: 290 }, obj] });
     sceneValue(source);
-    const { s } = native(source);
-    s.pushObj(new sceneObjs[type](s, obj));
-    assert.equal(s.objs.length, 2);
+    const { s, sim } = native(source);
     assert.equal(s.objs[1].serialize().type, type);
+    assert.ok(sim.processedRayCount > 0, type);
+    assert.deepEqual(sceneValue(s.toJSON()).objs.length, 2);
   }
+  assert.throws(() => presetObject("Laser", { x: 0, y: 0 }, 10));
+});
+test("every gallery example validates, loads natively without errors and traces light", () => {
+  assert.ok(examples.length >= 18);
+  for (const e of examples) {
+    const scene = sceneValue(e.scene);
+    assert.ok(!scene.objs.some((o) => o.type === "CropBox"), e.id);
+    const { s, sim } = native(e.scene);
+    assert.equal(s.objs.filter((o) => o.error).length, 0, e.id);
+    assert.ok(sim.processedRayCount > 0, e.id);
+    if (e.origin === "upstream") {
+      assert.ok(e.contributors.length && e.upstreamPath?.startsWith("data/galleryScenes/"), e.id);
+      assert.doesNotMatch(e.scene, /\{\{\w+\}\}/, e.id + " placeholders resolved");
+    }
+  }
+  const fibre = native(examples.find((e) => e.id === "optical-fibre")!.scene).s;
+  const [exit, leak] = fibre.objs.filter((o) => o.serialize().type === "Detector");
+  assert.ok(Number(exit.power) > 5 && Number(leak.power) === 0, "fibre guides light by total internal reflection");
+});
+test("quality and example fields round-trip and 0.7 working copies restore with defaults", () => {
+  const legacy = { scene: seed.scene, notes: "旧笔记", original: "", originalName: "" };
+  const restored = restoreOptics(legacy);
+  assert.equal(restored.quality, "standard");
+  assert.equal(restored.example, "");
+  const fine = validateOptics({ ...seed, quality: "fine", example: "rainbows" });
+  assert.equal(importOptics({ format: "ray-optics-workbench", title: "t", data: fine }).data.quality, "fine");
+  assert.throws(() => restoreOptics({ ...seed, quality: "ultra" }));
+  assert.ok(qualityBudgets.draft.rays < qualityBudgets.standard.rays && qualityBudgets.standard.rays < qualityBudgets.fine.rays);
+  const upstream = importOptics(JSON.parse(examples.find((e) => e.id === "prisms")!.scene), "prisms.json");
+  assert.equal(upstream.title, "反射棱镜");
+  assert.equal(upstream.data.original, upstream.data.scene);
 });
 test("recovery import keeps unfinished parameter and JSON editor inputs", () => {
   const extra = {

@@ -3,9 +3,9 @@
   "appId": "workbench.ffa1db5f-b06e-4735-a26e-7789f23359d6",
   "registryName": "ray-optics-studio",
   "name": "Ray Optics Simulation 工作台",
-  "description": "搭建光路、调整元件并保存实验与场景",
-  "version": "0.7.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "description": "实时拖动光学元件观察光路、成像与色散，读取探测器并导出场景与图像",
+  "version": "0.9.0",
+  "changelog": "实时光路：拖动即重绘、随时导出；完整上游 5.5.0 元件（42 类，器材架 27 种）与 objBar 参数检查器；光线/延长线/成像/观察者模式与波长色彩；19 个示例（16 个上游画廊移植）；上游场景 JSON（含旧版本）导入导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
