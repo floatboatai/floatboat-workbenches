@@ -1,6 +1,6 @@
 // ABOUTME: 原页对照：pdf.js 渲染原 PDF 页面，按 DoclingDocument prov 坐标框选每个结构块，点选与结构目录、校订面板联动。
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist";
+import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { boxes, pageSizes, type Box, type Document, type Item } from "../contracts/docling.ts";
 import { loadSource } from "./library.ts";
@@ -144,8 +144,10 @@ export function PageView({
     let destroy: (() => void) | undefined;
     setPdf(null);
     setError("");
+    setCurrent(1);
     loadSource(sourceId)
       .then(async (bytes) => {
+        if (disposed) return;
         const task = openPdf(bytes);
         destroy = () => void task.destroy();
         const proxy = await task.promise;

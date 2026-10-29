@@ -7,7 +7,17 @@ import { DatabaseSync } from "node:sqlite";
 import { createBlobs, digest } from "../src/server/blobs.ts";
 import { parseDocument, type Document } from "../src/contracts/docling.ts";
 import { empty, summary, type Review } from "../src/contracts/review.ts";
-export const fixtureUrl = (name: string) => new URL("../fixtures/" + name, import.meta.url);
+// Packaging normalizes declared project resources under workbench-assets.
+// Resolve the manifest instead of assuming the source checkout's directory names.
+const manifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8")) as {
+  resources: { id: string; path: string }[];
+};
+export function resourceUrl(id: string, name: string): URL {
+  const resource = manifest.resources.find((r) => r.id === id);
+  if (!resource) throw new Error("Missing test resource: " + id);
+  return new URL("../" + resource.path + "/" + name, import.meta.url);
+}
+export const fixtureUrl = (name: string) => resourceUrl("examples", name);
 /** Real `docling-slim[format-html]==2.140.0` conversion of fixtures/sample.html. */
 export const realDocling = JSON.parse(readFileSync(fixtureUrl("docling-document.json"), "utf8"));
 export function database(file = ":memory:", migrate = true) {

@@ -145,6 +145,9 @@ export function App() {
   const docButton = useRef<HTMLButtonElement>(null),
     exportButton = useRef<HTMLButtonElement>(null),
     convertButton = useRef<HTMLButtonElement>(null);
+  // Keep focus effects stable while editors and background saves update the page.
+  const closeMenu = useCallback(() => setMenu(null), []);
+  const closeSheet = useCallback(() => setSheet(false), []);
   const engine = p.draft.engine === "serve" ? "serve" : "local";
   const options = useMemo<ServeOptions>(() => {
     try {
@@ -212,7 +215,9 @@ export function App() {
     });
   }
   async function openImported(result: Imported, notice: string) {
-    if (await replaceReview(result.review, result.title, result.extra)) {
+    // The conversion engine and Serve options carry over to the new document's working copy.
+    const keep = Object.fromEntries(Object.entries(working.current.extra).filter(([k]) => k === "engine" || k === "serveOptions"));
+    if (await replaceReview(result.review, result.title, { ...keep, ...result.extra })) {
       setSelected("");
       setSheet(false);
       setFile(null);
@@ -261,7 +266,7 @@ export function App() {
         const ref = await storeDocument(result.doc, ENGINES[src.format as "pdf"], src, setProgress);
         if (key !== epoch.current) return;
         await openImported(
-          { review: reviewFor(ref, "本地解析 · " + file.name), title: result.doc.name || file.name },
+          { review: reviewFor(ref, "本地解析 · " + file.name), title: result.doc.texts.find((t) => t.label === "title")?.text?.slice(0, 120) || result.doc.name || file.name },
           `已转换为新文档：${ref.items} 个结构项${ref.pages ? "，" + ref.pages + " 页" : ""}。` + (result.warnings.length ? " " + result.warnings.join(" ") : ""),
         );
       } else {
@@ -326,7 +331,7 @@ export function App() {
           <span className="brand-symbol" aria-hidden="true">
             <FileText size={18} />
           </span>
-          <strong>Docling</strong>
+          <strong translate="no">Docling</strong>
         </div>
         <div className="menu-anchor">
           <button ref={docButton} type="button" className="menu-button" aria-expanded={menu === "doc"} aria-haspopup="dialog" onClick={() => setMenu(menu === "doc" ? null : "doc")}>
@@ -336,7 +341,7 @@ export function App() {
           </button>
           <DocumentMenu
             open={menu === "doc"}
-            close={() => setMenu(null)}
+            close={closeMenu}
             trigger={docButton}
             locked={p.busy || busy}
             items={p.items}
@@ -370,7 +375,7 @@ export function App() {
             导出
             <ChevronDown size={13} aria-hidden="true" />
           </button>
-          <ExportMenu open={menu === "export"} close={() => setMenu(null)} trigger={exportButton} ready={!!doc} hasTable={!!active?.data} tableCount={tables} onExport={(k) => void exportAs(k)} />
+          <ExportMenu open={menu === "export"} close={closeMenu} trigger={exportButton} ready={!!doc} hasTable={!!active?.data} tableCount={tables} onExport={(k) => void exportAs(k)} />
         </div>
       </header>
       <Notice error={p.error || mismatch} notice={p.notice} />
@@ -397,7 +402,7 @@ export function App() {
       </nav>
       <ConvertSheet
         open={sheet}
-        close={() => setSheet(false)}
+        close={closeSheet}
         trigger={convertButton}
         busy={busy}
         progress={progress}

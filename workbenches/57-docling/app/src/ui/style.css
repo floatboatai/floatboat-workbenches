@@ -112,6 +112,7 @@ input,
 textarea,
 select {
   border: 1px solid #c3cdd7;
+  color: var(--ink);
   border-radius: 5px;
   background: #fff;
   padding: 7px 9px;
@@ -300,6 +301,7 @@ code {
 }
 .menu button {
   display: grid;
+  justify-content: start;
   justify-items: start;
   width: 100%;
   border-color: transparent;
@@ -421,6 +423,10 @@ code {
   padding: 0 6px 8px;
   overflow: auto;
   flex: 1;
+}
+.structure li {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 42px;
 }
 .structure li button {
   width: 100%;
@@ -639,8 +645,8 @@ code {
   cursor: pointer;
 }
 .box.shown {
-  border-color: rgba(47, 91, 128, 0.5);
-  background: rgba(47, 91, 128, 0.045);
+  border-color: rgba(47, 91, 128, 0.38);
+  background: rgba(47, 91, 128, 0.03);
 }
 .box.shown.table {
   border-color: rgba(23, 120, 106, 0.6);
@@ -707,6 +713,7 @@ code {
 }
 .segment {
   display: grid;
+  justify-content: stretch;
   justify-items: start;
   text-align: left;
   width: 100%;
@@ -896,6 +903,7 @@ code {
 }
 .paper th,
 .paper td {
+  font-variant-numeric: tabular-nums;
   border: 1px solid #c8d1da;
   padding: 4px 7px;
   text-align: left;
@@ -1048,6 +1056,7 @@ code {
 }
 .sheet-body {
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 14px 16px 28px;
   display: grid;
   gap: 14px;
@@ -1271,6 +1280,7 @@ legend {
 }
 .example-list button {
   display: grid;
+  justify-content: start;
   justify-items: start;
   text-align: left;
   gap: 1px;

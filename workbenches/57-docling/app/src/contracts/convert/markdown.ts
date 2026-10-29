@@ -37,13 +37,27 @@ export function convertMarkdown(source: string, filename: string, bytes?: Uint8A
   function list(token: Tokens.List, parent: string, at: [number, number]) {
     const group = b.group(parent, "list", "list");
     let n = typeof token.start === "number" ? token.start : 1;
+    let line = at[0];
     for (const item of token.items) {
-      const own = item.tokens.filter((t) => t.type !== "list");
-      const value = text(own.flatMap((t) => ("tokens" in t && Array.isArray(t.tokens) ? t.tokens : [t])));
+      const breaks = (item.raw.match(/\n/g) ?? []).length,
+        trailing = item.raw.match(/\n+$/)?.[0].length ?? 0;
+      const own: [number, number] = [line, Math.max(line, line + breaks - trailing)];
+      line += breaks;
+      const inline = item.tokens.filter((t) => t.type !== "list");
+      const value = text(inline.flatMap((t) => ("tokens" in t && Array.isArray(t.tokens) ? t.tokens : [t])));
       const marker = token.ordered ? `${n++}.` : "";
       const ref = b.listItem(group, (item.task ? (item.checked ? "[x] " : "[ ] ") : "") + value, token.ordered, marker);
-      segments.push({ kind: "list", text: (marker || "•") + " " + value, ref, lines: at });
-      for (const nested of item.tokens) if (nested.type === "list") list(nested as Tokens.List, ref, at);
+      segments.push({ kind: "list", text: (marker || "•") + " " + value, ref, lines: own });
+      // A parent item can contain continuation lines and blank paragraphs before its nested list.
+      let offset = 0;
+      for (const nested of item.tokens) {
+        const start = item.text.indexOf(nested.raw, offset);
+        if (start >= 0) offset = start + nested.raw.length;
+        if (nested.type === "list") {
+          const before = item.text.slice(0, Math.max(0, start));
+          list(nested as Tokens.List, ref, [own[0] + (before.match(/\n/g) ?? []).length, own[1]]);
+        }
+      }
     }
   }
   function block(t: Token, parent: () => string, at: [number, number]) {

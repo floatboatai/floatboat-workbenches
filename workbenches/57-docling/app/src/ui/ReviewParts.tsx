@@ -80,7 +80,7 @@ export const StructureRail = memo(function StructureRail({
         <span>结构</span>
         <span>{countable.length} 项</span>
       </div>
-      <input className="search" type="search" aria-label="查找结构项" placeholder="查找文字、类型或单元格…" value={query} onChange={(e) => setQuery(e.target.value)} />
+      <input className="search" type="search" name="structureQuery" autoComplete="off" aria-label="查找结构项" placeholder="查找文字、类型或单元格…" value={query} onChange={(e) => setQuery(e.target.value)} />
       <div className="filters" role="group" aria-label="筛选">
         {(
           [

@@ -90,6 +90,18 @@ export function ConvertSheet({
     if (!open) return;
     panel.current?.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
     const key = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        const controls = [...(panel.current?.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, [tabindex="0"]',
+        ) ?? [])].filter((el) => el.tabIndex >= 0 && el.getClientRects().length > 0);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (first && last && (event.shiftKey
+          ? document.activeElement === first || !panel.current?.contains(document.activeElement)
+          : document.activeElement === last || !panel.current?.contains(document.activeElement))) {
+          event.preventDefault();
+          (event.shiftKey ? last : first).focus();
+        }
+      }
       if (event.key === "Escape" && !event.defaultPrevented) {
         event.preventDefault();
         close();
@@ -195,7 +207,7 @@ export function ConvertSheet({
                   </select>
                 </label>
                 <label>OCR 语言
-                  <input value={options.ocr_lang.join(", ")} placeholder="引擎默认，例如 zh-Hans, en" autoComplete="off" spellCheck={false} onChange={(e) => onOptions({ ...options, ocr_lang: e.target.value.split(/[,\s，]+/).filter(Boolean) })} />
+                  <input value={options.ocr_lang.join(", ")} name="ocrLang" placeholder="引擎默认，例如 zh-Hans, en…" autoComplete="off" spellCheck={false} onChange={(e) => onOptions({ ...options, ocr_lang: e.target.value.split(/[,\s，]+/).filter(Boolean) })} />
                 </label>
                 <label className="check"><input type="checkbox" checked={options.do_table_structure} onChange={(e) => set("do_table_structure", e.target.checked)} />识别表格结构</label>
                 <label>表格模式
@@ -212,15 +224,15 @@ export function ConvertSheet({
                   </select>
                 </label>
                 <span className="range">
-                  <label>起始页<input inputMode="numeric" value={options.page_from ?? ""} onChange={(e) => set("page_from", e.target.value ? Number(e.target.value) : null)} /></label>
-                  <label>结束页<input inputMode="numeric" value={options.page_to ?? ""} onChange={(e) => set("page_to", e.target.value ? Number(e.target.value) : null)} /></label>
+                  <label>起始页<input name="pageFrom" autoComplete="off" inputMode="numeric" value={options.page_from ?? ""} onChange={(e) => set("page_from", e.target.value ? Number(e.target.value) : null)} /></label>
+                  <label>结束页<input name="pageTo" autoComplete="off" inputMode="numeric" value={options.page_to ?? ""} onChange={(e) => set("page_to", e.target.value ? Number(e.target.value) : null)} /></label>
                 </span>
                 <label className="check"><input type="checkbox" checked={options.do_pdf_heading_hierarchy} onChange={(e) => set("do_pdf_heading_hierarchy", e.target.checked)} />推断 PDF 标题层级</label>
                 <label className="check"><input type="checkbox" checked={options.do_code_enrichment} onChange={(e) => set("do_code_enrichment", e.target.checked)} />代码块识别</label>
                 <label className="check"><input type="checkbox" checked={options.do_formula_enrichment} onChange={(e) => set("do_formula_enrichment", e.target.checked)} />公式识别（LaTeX）</label>
                 <label className="check"><input type="checkbox" checked={options.do_picture_classification} onChange={(e) => set("do_picture_classification", e.target.checked)} />图片分类</label>
                 <label>单文档超时（秒）
-                  <input inputMode="numeric" value={options.document_timeout ?? ""} placeholder="服务默认" onChange={(e) => set("document_timeout", e.target.value ? Number(e.target.value) : null)} />
+                  <input name="documentTimeout" autoComplete="off" inputMode="numeric" value={options.document_timeout ?? ""} placeholder="服务默认…" onChange={(e) => set("document_timeout", e.target.value ? Number(e.target.value) : null)} />
                 </label>
                 <button type="button" className="quiet" onClick={() => onOptions(defaultOptions)}>恢复默认选项</button>
               </fieldset>
@@ -258,7 +270,7 @@ export function ConvertSheet({
                       <span className="attach">
                         <label>
                           服务日志中的任务 ID
-                          <input value={taskId} autoComplete="off" spellCheck={false} onChange={(e) => onTaskId(e.target.value)} />
+                          <input name="taskId" value={taskId} autoComplete="off" spellCheck={false} onChange={(e) => onTaskId(e.target.value)} />
                         </label>
                         <button type="button" disabled={!taskId.trim()} onClick={() => onJob(j, "attach")}>关联已有任务</button>
                       </span>

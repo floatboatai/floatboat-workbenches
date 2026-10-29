@@ -1,6 +1,6 @@
-// ABOUTME: PDF.js浏览器引擎：同源worker、字体与CMap资源，以及可读的打开错误。
-import { getDocument, GlobalWorkerOptions, OPS, type PDFDocumentLoadingTask } from "pdfjs-dist";
-import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+// ABOUTME: PDF.js浏览器引擎（legacy 构建，含新 Map API 等 polyfill，兼容较旧的 Chromium/Electron）：同源worker、字体与CMap资源，以及可读的打开错误。
+import { getDocument, GlobalWorkerOptions, OPS, type PDFDocumentLoadingTask } from "pdfjs-dist/legacy/build/pdf.mjs";
+import workerUrl from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 GlobalWorkerOptions.workerSrc = workerUrl;
 export const PDF_OPS = OPS as unknown as Record<string, number>;
 export function openPdf(bytes: Uint8Array): PDFDocumentLoadingTask {

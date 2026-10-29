@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { boxes, items, pageSizes, type Document, type Item } from "../src/contracts/docling.ts";
 import { convertLocal, alignSegments } from "../src/contracts/convert/index.ts";
 import { convertHtml } from "../src/contracts/convert/html.ts";
@@ -14,11 +14,11 @@ import { cleanText } from "../src/contracts/convert/builder.ts";
 import { parseXml } from "../src/contracts/convert/xml.ts";
 import { markdown } from "../src/contracts/exports.ts";
 import { EXAMPLES } from "../src/contracts/examples.ts";
-import { fixtureUrl } from "./helpers.ts";
+import { fixtureUrl, resourceUrl } from "./helpers.ts";
 const example = (f: string) => new Uint8Array(readFileSync(fixtureUrl("examples/" + f)));
 const pdfjs = await import(pathToFileURL(resolve("node_modules/pdfjs-dist/legacy/build/pdf.mjs")).href);
 async function pdfDoc(bytes: Uint8Array) {
-  const pdf = await pdfjs.getDocument({ data: bytes.slice(), cMapUrl: resolve("app/pdfjs/cmaps") + "/", cMapPacked: true, standardFontDataUrl: resolve("app/pdfjs/standard_fonts") + "/", useWasm: false, verbosity: 0 }).promise;
+  const pdf = await pdfjs.getDocument({ data: bytes.slice(), cMapUrl: fileURLToPath(resourceUrl("pdfjs-assets", "cmaps/")), cMapPacked: true, standardFontDataUrl: fileURLToPath(resourceUrl("pdfjs-assets", "standard_fonts/")), useWasm: false, verbosity: 0 }).promise;
   const { pages } = await readPdf(pdf, pdfjs.OPS);
   return layoutPdf(pages, "water-report.pdf", bytes);
 }
@@ -90,7 +90,7 @@ test("Word fallback: styles, numbering, merged cells, captions and header/footer
   assert.equal(segments.filter((s) => s.ref).length, segments.length);
 });
 test("HTML fallback: h1 title, nested headings, row spans, figure caption; segments carry source lines", () => {
-  const source = readFileSync(new URL("../tools/water-report.source.html", import.meta.url), "utf8");
+  const source = readFileSync(fixtureUrl("water-report.source.html"), "utf8");
   const { doc, segments } = convertHtml(source, "water-report.html");
   assert.equal(byLabel(doc, "title")[0]!.text, "城东水厂 2026 年第三季度出厂水水质报告");
   assert.equal(doc.tables.length, 4);
@@ -115,6 +115,13 @@ test("segments align to a document produced by another engine by text", () => {
   const aligned = alignSegments(local.segments, other);
   assert.equal(aligned[0]!.ref, "#/texts/0");
   assert.equal(aligned.filter((s) => s.ref).length, 2);
+});
+test("Markdown list source ranges follow continuation lines, blank lines and nested siblings", () => {
+  const source = "- Parent\n  continued\n\n  - Child one\n  - Child two\n- Sibling\n";
+  const lists = convertMarkdown(source, "ranges.md").segments.filter((s) => s.kind === "list");
+  assert.deepEqual(lists.map((s) => s.lines), [[1, 5], [4, 4], [5, 5], [6, 6]]);
+  const crlf = convertMarkdown(source.replaceAll("\n", "\r\n"), "ranges.md").segments;
+  assert.deepEqual(crlf, convertMarkdown(source, "ranges.md").segments);
 });
 test("text cleanup, line joining and XML entities", () => {
   assert.equal(cleanText("城东⽔⼚\u0001报告"), "城东水厂 报告");

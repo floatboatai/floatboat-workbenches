@@ -1,8 +1,10 @@
 # 第三方许可与内容来源
 
-- [Docling 2.140.0](https://github.com/docling-project/docling/tree/v2.140.0)，MIT，Copyright The Docling Contributors。[许可](https://github.com/docling-project/docling/blob/v2.140.0/LICENSE)。用于真实转换验证的 Python 包为 `docling-slim[format-html]==2.140.0`，没有将 Python 运行时或模型权重打进应用。
-- [Docling Serve 1.38.2](https://github.com/docling-project/docling-serve/tree/9c058dbb58f61021e3a16e37edb8a7527b2cb2d4)，MIT，Copyright (c) 2024 International Business Machines。[许可](https://github.com/docling-project/docling-serve/blob/9c058dbb58f61021e3a16e37edb8a7527b2cb2d4/LICENSE)。工作台通过公开 HTTP 合同连接独立部署的官方服务，不分发其源码或容器。
-- React / React DOM **19.2.3**，MIT；Lucide React **0.562.0**，ISC，沿用仓库模板锁定版本。没有新增生产依赖或远程字体。
-- `app/fixtures/sample.html` 为本项目原创设备试验记录；`docling-document.json` 是该 HTML 的真实转换输出。界面清楚标记为示例，不代表用户已执行一次服务转换。
+- Docling **2.140.0**，MIT，Copyright The Docling Contributors。历史真实 HTML/Word 转换与本轮导出 JSON 的原生 schema 校验使用独立 Python 环境；不分发 Python、模型权重或虚构官方模型输出。
+- Docling Serve **1.38.2**，MIT，Copyright (c) 2024 International Business Machines。客户端合同对应上游提交 `9c058dbb58f61021e3a16e37edb8a7527b2cb2d4`；本轮仅验证本机 HTTP fixture 和合同测试，未启动官方服务。
+- **pdfjs-dist 6.4.299**（Mozilla PDF.js），Apache-2.0。本地 PDF 文字提取和原页渲染；随包 CMap、标准字体及其许可位于 `app/pdfjs/`，包含 Foxit 字体许可和 Liberation 字体许可。
+- **parse5 7.3.0**（Ivan Nikulin 等），MIT；**marked 16.4.2**（MarkedJS / Christopher Jeffrey 等），MIT；**fflate 0.8.2**（Arjun Barrett），MIT。用于本地 HTML、Markdown、OOXML 与校对包处理。
+- React / React DOM **19.2.3**，MIT；Lucide React **0.562.0**，ISC；版本由锁文件固定，无远程字体。
+- `app/fixtures/examples/` 的水质报告、巡检指导书及交接记录是原创普通演示资料，结构 JSON 由本地解析器生成并以 SHA-256 核对；不是官方 Docling 推理结果。`app/fixtures/sample.html` 与 `docling-document.json` 保留早期真实 Docling HTML 转换兼容性样例。
 
-本适配器没有更改上游产品商标或许可。软件许可不授予用户导入文档的内容权利。发布源包不包含预览数据库、上传源文件、账户凭据、模型权重或私有服务地址。仓库未指定新的自有代码许可证；本次不擅自重新许可仓库代码。
+应用自有许可沿用 `app/LICENSE`，本次未更改授权。商标和导入文档权利仍归原权利人。源码包不含预览数据库、上传用户文件、凭据或模型权重。
