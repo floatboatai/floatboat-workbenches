@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.72ac1e9f-d1e4-4764-b108-cd5d20bc31bc",
   "registryName": "deerflow-studio",
-  "name": "研究交付 · DeerFlow",
-  "description": "研究任务提交、状态恢复、证据复核与报告交付",
-  "version": "0.5.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "name": "深度研究 · DeerFlow",
+  "description": "研究问题→可编辑计划与人工确认→本地检索或DeerFlow执行→带引用的报告",
+  "version": "0.9.0",
+  "changelog": "0.9.0：深度研究工作台。问题→计划（模板或Floatboat模型起草，逐步编辑、人工确认）→执行（Node内置网页直读/Jina/Exa/GitHub检索，或DeerFlow后台研究与SSE实时进度）→带[编号]引用的报告编辑器、来源核验与引用跳转、Markdown/HTML导出；DeerFlow地址可在页面设置并重新检查；示例为已完成的SQLite WAL选型研究。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,7 +16,9 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [],
+  "capabilities": [
+    "llm"
+  ],
   "contributions": [],
   "dependencies": [],
   "resources": [

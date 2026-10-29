@@ -1,32 +1,54 @@
-# DeerFlow 0.5.0 验收
+# DeerFlow 0.9.0 验收
 
-2026-10-28（America/New_York），Node22.22.2、固定模板、Chrome headless。
+2026-10-29，Node 22.22.0、pnpm 10.22.0、Chrome for Testing（playwright-core 1.57.0，headless）。预览以 `FLOATBOAT_HOST_MODE=offline` 运行，检索指向本机夹具 `RESEARCH_FIXTURE_ORIGIN`，DeerFlow 地址在页面上设置为本机 Gateway 合同夹具。**没有调用真实 Floatboat Host、任何模型、真实 DeerFlow 部署或外网检索。**
 
-## 已通过
+## 之前 → 现在
 
-- manifest、锁文件、类型与构建；19项测试通过（18项领域/格式/持久化/HTTP适配测试）。新增研究命令/上游适配/UI为独立模块；共享自动保存及主UI体积提示保留。
-- 真实官方DeerFlow序列化器（提交d4ed40075f9101db6424b2331ea410934af146ac）与LangChain Core1.4.9构造原生消息，验证wire字段、隐藏图片与内部通道过滤。另直接加载该提交的官方RunCreateRequest及依赖模块，Pydantic验证实际提交消息、context.model_name、metadata和on_disconnect；未知参数被官方模型拒绝。未执行模型推理。
-- 核对官方线程创建（客户端指定thread_id且幂等）、立即返回的后台run POST、Idempotency-Key、GET运行列表/详情和原生状态读取。上游services.py实际读取model_name并校验白名单，默认gemini-3.8-flash直接传该字段，不把Host文本模型伪装成DeerFlow。
-- 每个任务独立线程；命令及输入先写SQLite，再发线程POST，再持久标记submitting后发run POST。单项目未决命令受数据库唯一约束和服务检查保护；重复命令ID不重发，改变同ID输入拒绝。未知回执及重启后的提交态只查询，不自动重新POST；缺失匹配记录不认定未执行。服务地址改变拒绝把旧命令发往新服务。
-- Chrome与明确HTTP契约样例：提交→后台运行→刷新继续查询→成功读取→载入结果→采用答复。浏览器与上游同时丢回执，统计只出现1个线程POST和1个run POST；相同命令与查询不再启动任务。未接单样例保持unknown，刷新/轮询/手动查询不重发，提交按钮禁用。模型白名单拒绝准确显示；任务记录可以下载。
-- 结果载入保留人工报告，只有显式采用答复才替换；成功运行但快照读取失败保留运行状态，手动查询可重读而不重新运行。导入完整项目只恢复工作稿和历史ID，新副本不会自动关联/执行旧任务；空模型草稿刷新精确保留。
-- 原生REST状态/检查点历史和未知字段完整保留；来源从可见工具结果与文本链接提取；中间tool-call消息不作为完整报告；无效URL在工作稿保留但规范导出拒绝。完成复核要求报告和核验来源，后续修改回到复核状态。
-- 自动保存：延迟保存期间追加输入、刷新恢复、不完整URL和JSON草稿cacheValue导入新副本；已提交丢回执幂等恢复；两窗口冲突保护；项目切换锁覆盖新建/打开/文件/JSON导入。新增研究入口实测旧保存阻塞时新建，简报与模型等输入禁用，旧、新项目简报都保留。
-- 无服务配置时提交与同步禁用，显示Gateway、模型、工具、授权前置条件；文件导入与人工审阅仍可用。1440px、375px四视图无页面横向溢出，键盘、reduced-motion，无pageerror。Markdown禁用原始HTML和自动远端图片加载。
-- 源码包、ZIP CRC、许可、迁移和配置指南资源校验通过。截图为未连接上游的普通示例任务入口，没有伪造成功研究记录。
+| 之前（0.5.1） | 现在（0.9.0） |
+| --- | --- |
+| 核心动作需要完整 DeerFlow 部署，未配置时提交与同步禁用，从未实测 | 无任何服务即可完成整份研究：模板计划 + Node 内置检索（网页直读/Readability、Jina 回退、Exa 搜索、GitHub）+ 本地底稿 + 报告编辑器 + 导出 |
+| 没有计划概念，只有一段简报 | 可编辑计划（4 种步骤、增删排序）、人工确认、修改后需重新确认；Floatboat 模型计划建议（可选） |
+| 报告为纯文本框，来源与报告无关联 | 来源稳定编号，`[n]` 引用跳转、插入引用、引用检查、被引来源核验后才能交付；Markdown/HTML 导出 |
+| DeerFlow 每 5 秒轮询；地址只能用环境变量；连接失败显示原始错误 | 页面设置地址、“重新检查”读取模型列表、就地启动方式；官方运行事件流（SSE）+ Last-Event-ID 续接，页面 EventSource 实时进度；连接错误给出 ECONNREFUSED 等下一步 |
+| 原生会话 650KB / 300 条消息上限 | 导入 ≤8MB、3000 条消息，超出项目容量自动压缩并标记 |
+| 示例是未运行的示例会话 | 已完成的原创研究：SQLite WAL 选型，7 步计划、7 项已核验来源、约 1250 字带配置表的报告 |
+| 页头：项目下拉 + 新建/导入/完整项目 | “研究”文件菜单 + 三阶段进度；工作区 + 来源证据栏 |
 
-## 验证边界
+## 功能验收：local-verified
 
-已经实现官方DeerFlow后台研究入口、状态恢复、结果读取与报告交付。运行链路经过真实官方请求模型以及明确的HTTP契约样例服务验证；尚未接入真实DeerFlow部署、模型凭据与研究工具，没有执行live模型推理、真实检索或沙箱任务。默认样例不是模型研究结果。只有配置有效上游服务后提交才会真正启动研究，并消耗上游模型/工具配额。
+### 构建与测试
+- `pnpm workbench check deerflow`：manifest、锁文件、类型与构建通过（仅保留共享 autosave-client 体积提示）。
+- `pnpm workbench test deerflow`：53 项通过（之前 19 项）。新增覆盖：模板计划/确认规则/模型计划校验、DeerFlow 简报、检索合并保持编号与备注、本地底稿、Markdown/HTML 导出与转义、v1 升级、引用解析与交付门禁、示例完整性、大会话压缩；检索夹具（直读、Jina 回退、GitHub README、404/PDF 错误码、Exa 结果与私网结果丢弃、GitHub 限额说明、ECONNREFUSED）、SSRF（回环/链路本地/内网名/映射地址/DNS 解析后拒绝）、代理选择；mock Host 合同（状态、`generateObject` 计划、`generateText` 报告与编造编号、离线 503）；SSE 解码、帧摘要、断线后按 Last-Event-ID 续接且不重复 POST、gap 改读完整状态、反复失败暂停、页面事件流回放与收尾、`/api/models` 检查与授权/拒绝连接说明、地址配置；自动保存提交幂等、未完成网址草稿、冲突保护。原有运行账本测试（持久命令、丢回执只读恢复、模型白名单拒绝、地址变更保护、官方载荷与幂等键）全部保留。
+- `pnpm package`：`artifacts/deerflow-studio-0.9.0.fbworkbench`，72 个文件，不含业务数据，SHA-256 `f785d7207339bf0db288b71db1d61fc2c595e3380fb862358be5f9f4641b508b`。
 
-当前流程每次研究独立线程；未知回执不会重发，需持续查询或到上游核对。取消、人工确认、恢复interrupted运行须在DeerFlow处理。产物区显示原生路径，不下载原件。读取成功线程原生快照后，人工报告仍独立，采用答复是单独动作。原生JSON导出可重新导入本工作台，不声称DeerFlow提供检查点上传API。SQL任务账本独立保存，工作稿导入不执行历史任务。
+### 真实浏览器（空数据目录，1440×900）——55 项检查全部通过
+1. 首屏为已完成示例，页面加载只请求本机 API；导出 Markdown（参考来源 [1]–[7]）与独立 HTML（表格、`#source-n` 锚点）并核对文件内容；点击报告中的 [4] 定位并展开来源 [4]。
+2. 研究菜单 → 新研究 → 写问题与范围（含 3 个网址）→ 按模板生成 5 步 → 改 GitHub 检索词 → 确认计划（标题自动取自问题）→ 执行 3 个检索步骤：网页检索 2 项、GitHub 2 项、精读 3 个网址中脚本页经 Jina 回退成功、缺失网址显示 `NOT_FOUND` 说明；来源 5 项编号进入右栏；记录发现并标记人工步骤完成。
+3. 确认后修改步骤检索词，计划回到“待确认”。
+4. 汇编本地底稿 → 插入引用 [1] → “完成复核”被未核验引用阻止 → 核验被引来源 → 可交付 → 导出 Markdown；刷新后状态恢复。
+5. Floatboat 离线：起草按钮旁显示“未连接 Floatboat…重新检查”，模板与底稿照常可用。
+6. DeerFlow：未设置时显示启动方式与不可提交原因；填写未启动的端口显示 ECONNREFUSED 说明（无 fetch failed）；填写合同夹具后“已连接”并列出 2 个模型；提交后事件日志实时出现，夹具在第 3 帧主动断线，服务端以 `Last-Event-ID: 2-0` 续接直至“事件流结束”；夹具日志确认只有 1 次线程 POST 与 1 次运行 POST（带幂等键）；载入结果后来源并入（DeerFlow 2 项），采用最新答复进入报告；刷新后研究记录与事件仍在。
+7. 自动保存：第一次保存延迟 2.5 秒期间继续输入，刷新后完整；服务端已提交但回执丢失，显示“草稿已暂存本机”并自动重试，项目数不变；来源网址填 `https://` 显示为草稿，刷新后原样恢复；导出完整项目再导入成为新研究（项目数 +1）；坏 JSON 提示“JSON 语法有误”；研究菜单 Escape 关闭且焦点回到按钮。
+8. 无非预期 console 错误（唯一一条是测试故意中断回执产生的 `ERR_CONNECTION_RESET`）。
 
-Floatboat Host连接可用但未调用Host模型；Floatboat客户端源码包导入仍未实测。SDK/tooling/CSP和模板锁保持固定。
+### 375×812
+报告、计划、执行、DeerFlow 面板均无横向溢出；“工作区 / 来源”切换；点击引用自动切到来源并定位；研究菜单全屏可用；无 console 错误。
 
-## 界面检查
+测试脚本、夹具与截图保存在 `archive/2026-10-29-workbench-depth/deerflow/`，不入库。
 
-`app/src/ui/ResearchRunner.tsx`: pass（明确提交、持久记录、未知状态不重试、配置前置条件、模型草稿、结果载入保护）。
+## 结构审查：passed（改版后真实截图）
+- 去掉“项目下拉 + 新建/导入/完整项目”页头；文件生命周期全部在“研究”菜单；顶栏是研究名、三阶段进度与唯一主动作“导出报告”。
+- 主工作区随阶段变化（计划编辑 / 执行卡片 / 报告纸面），来源证据栏固定在右侧与引用互相跳转；主操作紧贴对象。
+- 与 Agent-Reach（目录—原文—摘录夹）、Oasis（居中单纸张）对照：本工作台以研究流程为骨架，报告与来源以编号联动。
+- 截图：`docs/screenshots/deerflow.png`（1440×900，示例研究报告分栏，来源 [1] 已展开）。
 
-`app/src/ui/App.tsx`: pass（标签/状态、独立报告与原生档案、来源复核、完整切换锁）。
+## Web Interface Guidelines
+App/PlanStage/ExecuteStage/DeerFlowPanel/ReportStage/SourcesPanel/FileMenu/style.css 自查：图标按钮均有 aria-label；分段控件用 aria-pressed；阶段导航 aria-current；表单字段有 label/name，网址与代码输入关闭拼写检查；占位文字以“…”结尾；状态用 role=status，事件日志 aria-live；删除与替换正文需确认；对话框 Escape、焦点循环与返回；滚动区 overscroll-behavior: contain；reduced-motion 关闭动画与平滑滚动；禁用按钮旁写明原因。未逐条拉取最新版规则（验收不访问外部服务）。
 
-`app/src/ui/style.css`: pass（任务左右分区、报告纸面、窄屏四视图、长内容折行、focus-visible与reduced-motion）。
+## 未覆盖与限制
+- 真实 Floatboat Host 未测：模型计划与报告草稿只经 mock Host 合同测试。
+- 真实 DeerFlow 部署未测：只验证官方源码中的接口形态与本机合同夹具；`verify_run_contract.py` 已加入 `stream_mode`，本轮未重新运行（需要上游源码目录与 Pydantic 环境）。取消、人工确认、恢复中断仍在 DeerFlow 处理；产物原件不下载。
+- 外网检索未在验收中调用：Exa/Jina/GitHub 的解析按 Agent-Reach 0.9.0 已实测的格式实现，并用本机夹具验证；Exa 免费额度、Jina 可用性与 GitHub 匿名限额取决于外部服务。网页直读不执行脚本；PDF 等非网页不读取。
+- DeerFlow 完成后本地计划步骤状态不会自动标记；两个通道的步骤进度分别记录。
+- 页面事件流为 50 秒轮换连接（EventSource 自动续接）；预览热重载会等待在途连接。
+- IndexedDB 恢复限同一浏览器来源；Floatboat 客户端导入 `.fbworkbench` 未实测。
