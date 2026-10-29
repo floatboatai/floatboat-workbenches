@@ -1,7 +1,7 @@
 {
   "name": "local-workbench",
   "private": true,
-  "version": "0.3.1",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "start": "node --enable-source-maps dist/server/index.mjs",
@@ -11,13 +11,21 @@
     "node": ">=22.16.0"
   },
   "dependencies": {
+    "@tiptap/core": "3.32.0",
+    "@tiptap/extension-highlight": "3.32.0",
+    "@tiptap/extension-image": "3.32.0",
+    "@tiptap/extension-list": "3.32.0",
+    "@tiptap/extension-table": "3.32.0",
+    "@tiptap/extension-text-align": "3.32.0",
+    "@tiptap/extensions": "3.32.0",
+    "@tiptap/markdown": "3.32.0",
+    "@tiptap/pm": "3.32.0",
+    "@tiptap/react": "3.32.0",
+    "@tiptap/starter-kit": "3.32.0",
+    "@tiptap/suggestion": "3.32.0",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "@tiptap/react": "3.32.0",
-    "@tiptap/core": "3.32.0",
-    "@tiptap/pm": "3.32.0",
-    "@tiptap/starter-kit": "3.32.0"
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

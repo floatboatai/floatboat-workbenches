@@ -3,7 +3,8 @@ import { test } from "node:test";
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
 import { createStore, StoreError } from "../src/server/store.ts";
-import { seed, validateWriting } from "../src/contracts/domain.ts";
+import { validateWriting } from "../src/contracts/domain.ts";
+import { seed } from "../src/contracts/sample.ts";
 test("项目保存恢复，冲突和删除使用版本号", () => {
   const db = new DatabaseSync(":memory:");
   try {

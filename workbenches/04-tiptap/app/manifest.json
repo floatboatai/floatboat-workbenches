@@ -3,9 +3,9 @@
   "appId": "workbench.132fa046-457e-4340-b34e-6636f164db04",
   "registryName": "tiptap-studio",
   "name": "写作台",
-  "description": "AI 方案写作、SOP 与报告编辑工作台",
-  "version": "0.3.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "description": "方案、报告与 SOP 的写作编辑器：表格、图片、任务清单、目录与 Markdown/HTML 导出",
+  "version": "0.9.0",
+  "changelog": "完整写作编辑器：选区浮条、「/」插入、链接编辑、表格、内嵌图片、任务清单、高亮与对齐、目录导航和字数统计；Markdown 导入导出、带标题样式的 HTML 导出与完整 JSON 备份；写作助手显示连接状态。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

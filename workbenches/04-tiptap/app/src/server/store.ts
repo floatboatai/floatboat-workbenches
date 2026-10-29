@@ -5,6 +5,8 @@ import {
   type Project,
   type ProjectSummary,
 } from "../contracts/project.ts";
+/** 校验器把文稿限制在 1.6 MB；这里只是数据库层的兜底上限。 */
+export const MAX_PAYLOAD = 1_700_000;
 export class StoreError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -33,8 +35,8 @@ export function createStore<T>(
   };
   const serialize = (value: unknown) => {
     const payload = JSON.stringify(validate(value));
-    if (Buffer.byteLength(payload) > 900000)
-      throw new StoreError(413, "项目超过 900 KB，请减少内容后重试。");
+    if (Buffer.byteLength(payload) > MAX_PAYLOAD)
+      throw new StoreError(413, "文稿超过 1.7 MB，请删除部分图片后重试。");
     return payload;
   };
   return {
@@ -45,10 +47,10 @@ export function createStore<T>(
         )
         .all() as unknown as ProjectSummary[],
     get,
-    create(title: unknown, data: unknown) {
+    create(title: unknown, data: unknown, requestedId?: string) {
       const name = titleValue(title),
         payload = serialize(data),
-        id = randomUUID();
+        id = requestedId ?? randomUUID();
       db.prepare(
         "INSERT INTO projects(id,title,payload,revision,updated_at) VALUES(?,?,?,1,?)",
       ).run(id, name, payload, new Date().toISOString());

@@ -1,17 +1,25 @@
 # 写作台工程
 
-@tiptap/{react,core,pm,starter-kit} 四包精确 3.32.0，React 19.2.3 + Node 22，遵循模板严格 TypeScript 与固定 Vite 编译。root/app 两份清单与锁一致，无运行时原生扩展。
+## 依赖
 
-RichEditor 懒加载，useEditor 配置 immediatelyRender:false 与 shouldRerenderOnTransaction:false，useEditorState 只订阅工具栏状态。initial 只随项目、导入、采用草稿更换，输入不会重建编辑器。
+全部 Tiptap 包精确 3.32.0（MIT）：`@tiptap/{react,core,pm,starter-kit}`，0.9.0 新增 `@tiptap/extension-list`（TaskList/TaskItem）、`extension-table`（TableKit）、`extension-image`、`extension-highlight`、`extension-text-align`、`extensions`（Placeholder、CharacterCount）、`suggestion`（`/` 菜单）、`markdown`（MarkdownManager，传递依赖 marked 17.0.6）。React 19.2.3、Node 22。root 与 `app/` 两份清单与锁一致，`--frozen-lockfile` 可用。
 
-contracts/domain 验证节点父子语法、深度、文本总量、标记及 URL。HTML 由 generateHTML 从验证过的 JSON 生成，不直接接收任意 HTML。链接统一 noopener noreferrer。AI 返回 JSON 后再次验证，预览/采用/放弃独立处理，项目切换使旧请求失效。
+## 结构
 
-contracts/domain 验证外部 JSON；server/store 用参数化 SQLite 和 revision 乐观并发，409 保留当前内容。ui/workspace 通过 SDK page.fetch 调 /api/projects，Node/SQL/Host 仅在服务端。测试使用内存数据库，不接触预览数据。数据、凭据、SDK 和生成输出不提交源码。
+- `contracts/schema.ts`：唯一的扩展集合 `documentExtensions({editor})`，编辑器、HTML 导出、Markdown 转换与服务端 AI 解析共用，保证语法一致。图片扩展只解析 `data:image/(png|jpeg|webp|gif)`，粘贴的外部图片不会进入文稿；链接 `isAllowedUri` 与校验器一致。
+- `contracts/domain.ts`：`validateWriting` 是所有外部 JSON 的边界（节点父子语法、属性白名单、链接/图片安全、容量）；`safeHref`、`normalizeLinkInput`、`textStats`、`outline`。示例文稿在 `contracts/sample.ts`。
+- `contracts/markdown.ts`：`MarkdownManager` 无需 DOM，可在浏览器和 Node 使用。导入先把解析结果清理成受支持结构（外部图片→链接文字、不安全链接去除、未知块退化为文字、标题级别收敛），再校验；导出前把强调范围两端紧贴文字的中文标点移出，避免 CommonMark 定界规则导致「**不足：**与」无法读回。
+- `contracts/files.ts`：完整备份格式、JSON 导入识别（备份 / 0.3.0 `{content}` / 裸 doc / 恢复草稿）、HTML 外壳（转义标题、内联样式）、安全文件名。
+- `server/index.ts`：注册 `/api/app`（Host 状态）、文稿与生成接口；自动保存使用写作台适配器（`store.create(title,data,id)`），新建上限与正式保存一致为 1.6 MB 校验 + 1.7 MB 数据库兜底，而不是默认适配器的 900 KB。共享 `server/autosave.ts`、`ui/autosave-client.ts`、`autosave-cache.ts`、`requests.ts` 未改。
+- `server/routes.ts`：`/api/generate` 让模型输出 Markdown，服务端 `fromMarkdown` → 校验后返回；Host 未连接/不可用分别给出可操作的提示。
+- `ui/RichEditor.tsx`：编辑器实例、粘贴/拖入图片、拖入 `.md/.json` 导入、目录跳转与插入接口（`apiRef`）。`EditorChrome` 只在实例就绪后用 `useEditorState` 订阅工具条状态；`setEditable(x,false)` 不发出更新。`scrollMargin/scrollThreshold` 为吸顶页头与工具条让位。
+- `ui/Toolbar.tsx`、`SelectionBubble.tsx`（`@tiptap/react/menus` BubbleMenu）、`slash.ts` + `SlashMenu.tsx`（Suggestion 桥接到 React）、`LinkPopover.tsx`、`images.ts`（解码、缩放、WebP/JPEG 编码、大小目标）、`Outline.tsx`、`AssistantPanel.tsx`、`DocumentMenus.tsx`（Esc/外部点击关闭并归还焦点）、`render.ts`（按需加载的 generateHTML/Markdown，供导出与候选稿预览）。
+- `WritingApp.tsx`：编排；`useDeferredValue` 计算字数和目录，编辑器回调经 ref 保持稳定，RichEditor 不随每次输入重渲染。
 
-验证顺序：pnpm workbench:check → pnpm test → pnpm dev 实际浏览器 → pnpm package。Chrome 1440px/375px 输入并加粗→保存刷新恢复→JSON/HTML 导出，导出的 HTML 包含真实 strong 标记。危险链接、非法节点语法、空项目与数据库冲突测试通过。 真实 Floatboat llm.generateText 成功返回中文草稿并停留在预览区，未自动覆盖正文。另明确注入 HTTP 503 验证失败时要求和正文保留；注入结果不作为真实模型成功证据。
+## 验证顺序
 
-## 自动保存与工作草稿
+`node scripts/workbench.mjs check tiptap` → `test tiptap`（23 项）→ 真实浏览器（Playwright，空数据目录）→ `package tiptap`。见 [ACCEPTANCE.md](ACCEPTANCE.md)。
 
-新增 0003_autosave.sql，旧迁移保持不变。autosave-server 在事务中保存完整工作副本，并仅将通过业务验证的内容写入 projects；documentId/mutationId 支持丢失响应后的幂等重试。客户端串行提交、防抖、IndexedDB 回退，documentKey/loadEpoch 仅在文档切换时更新。保存返回时不覆盖期间继续输入的内容。草稿状态与正式内容状态明确区分。
+## 迁移
 
-未完成业务输入由结构受限的恢复器处理；正文或设计器初始快照不依赖自动保存生成的项目 ID。
+无新迁移：文稿仍存于 `projects.payload`，0.3.0 的文稿是新校验器的子集，直接可读。

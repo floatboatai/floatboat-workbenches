@@ -5,7 +5,7 @@ import { createStore, StoreError } from "./store";
 export function registerRoutes<T>(
   app: WorkbenchServer,
   validate: (value: unknown) => T,
-  instructions: string,
+  generation: { instructions: string; parse: (text: string) => T },
 ) {
   const store = createStore(app.database, validate);
   const fail = (error: unknown) =>
@@ -14,7 +14,9 @@ export function registerRoutes<T>(
         error: {
           message:
             error instanceof WorkbenchHostError
-              ? "模型服务暂不可用，请打开 Floatboat 并检查登录和模型设置。"
+              ? error.code === "HOST_NOT_CONNECTED"
+                ? "Floatboat 未连接，写作助手暂不可用。启动并登录 Floatboat 后点「重新检测」；正文编辑与导出不受影响。"
+                : "模型服务暂不可用，请在 Floatboat 中检查登录和模型设置后重试。"
               : error instanceof Error
                 ? error.message
                 : "操作失败，请重试。",
@@ -72,27 +74,24 @@ export function registerRoutes<T>(
         body.prompt.length > 12000
       )
         throw new Error("请输入 1–12000 个字符的要求。");
+      if (
+        body.context !== undefined &&
+        (typeof body.context !== "string" || body.context.length > 40000)
+      )
+        throw new Error("参考正文过长，请取消勾选「参考当前正文」或缩短文稿。");
+      const prompt = body.context
+        ? `当前文稿（Markdown）：\n<<<\n${body.context}\n>>>\n\n写作要求：${body.prompt}`
+        : body.prompt;
       const result = await app.host.llm.generateText(
-        {
-          prompt: body.prompt,
-          system:
-            instructions +
-            " 只返回一个完整 JSON 对象，不要附加 Markdown 围栏或解释文字。",
-          maxOutputTokens: 6000,
-        },
+        { prompt, system: generation.instructions, maxOutputTokens: 6000 },
         { timeoutMs: 90000 },
       );
       const text = result.text
         .trim()
-        .replace(/^```(?:json)?\s*/, "")
-        .replace(/\s*```$/, "");
-      let value: unknown;
-      try {
-        value = JSON.parse(text);
-      } catch {
-        throw new Error("模型返回的内容不是完整 JSON，请调整要求重试。");
-      }
-      return validate(value);
+        .replace(/^```(?:markdown|md)?\s*\n/i, "")
+        .replace(/\n```\s*$/, "");
+      if (!text.trim()) throw new Error("模型没有返回内容，请调整要求重试。");
+      return generation.parse(text);
     } catch (error) {
       return fail(error);
     }
