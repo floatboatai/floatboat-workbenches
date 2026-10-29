@@ -1,15 +1,21 @@
-import { registerAutosaveRoutes } from "./autosave";
-// ABOUTME: 组装服务入口，业务路由在对应模块中维护。
-
+// ABOUTME: 组装服务入口：应用信息、媒体库、项目与大纲接口、自动保存（图片引用需已入库才写入正式模型）。
 import { createWorkbenchServer } from "../../sdk/runtime.mjs";
+import { registerAutosaveRoutes } from "./autosave";
+import { registerAppRoute } from "./app-route";
 import { registerRoutes } from "./routes";
-import { validateDeck } from "../contracts/domain";
+import { createMediaStore, registerMediaRoutes } from "./media";
+import { mediaIds, validateDeck } from "../contracts/domain";
 
 const app = await createWorkbenchServer(import.meta.url);
-registerRoutes(
-  app,
-  validateDeck,
-  '生成中文演示文稿大纲，返回 {"theme":"ember","slides":[{"id":"slide_1","title":"简短标题","kicker":"SECTION / 01","body":"要点一\\n要点二","notes":"演讲备注"}]}。theme仅ember/ink/paper。3至8页，各页id唯一且仅字母数字下划线，title最多80字，kicker最多60字，body最多7行，每行最多35汉字或70英文字符，notes最多4000字。内容务必简短，便于直接展示。',
-);
-registerAutosaveRoutes(app, validateDeck);
+const media = createMediaStore(app.database);
+media.seedDemo();
+registerAppRoute(app);
+registerMediaRoutes(app, media);
+registerRoutes(app);
+registerAutosaveRoutes(app, validateDeck, undefined, {
+  verify: async (deck) => {
+    const missing = mediaIds(deck).filter((id) => !media.has(id));
+    if (missing.length) throw new Error(`有 ${missing.length} 张图片不在本文稿的媒体库中，请重新插入图片。`);
+  },
+});
 await app.listen();
