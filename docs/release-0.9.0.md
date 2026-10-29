@@ -48,6 +48,34 @@
 
 已知的共性问题：两项实现者独立报告共享 `autosave-client.ts` 在成功保存后切换文档可能误弹“本机缓存尚未修复”确认。该问题在蓝图中统一修复后同步到所有应用，结果另行记录。
 
-## 第2波 · 知名库核心能力补齐（进行中）
+### 共享自动保存修复
 
-PptxGenJS、Tiptap、React Flow、pdfme、CircuitJS、Ray Optics、Oasis Editor、Vega-Lite。
+根因：成功保存后 `edited` 标记要等下一次渲染后的本机缓存修复才清除；用户在防抖保存前或恢复的待同步结果重放后立即切换文档时，`leave()` 先完成保存再检查标记，于是误报“本机缓存尚未修复”。现在保存回执与 IndexedDB 写入都确认后立即视为已同步；缓存写入失败、更新的编辑、冲突与未知回执仍然提示。蓝图新增 7 项回归测试；55 个应用替换为新客户端，Oasis 的定制副本手工应用同一修改。全部 56 项升一个补丁版本后重新打包。
+
+## 第2波 · 知名库核心能力补齐
+
+| 工作台 | 之前 | 现在 | 测试 |
+| --- | --- | --- | --- |
+| pdfme | 只注册文本与矩形；不能用现有 PDF 作底；不能按数据行批量生成；填写为仿制 HTML | 26 种原生字段（表格、图片、条码、日期、复选、选择、SVG…）；PDF 底图（40 MB/100 页）；原生 Form/Viewer；CSV（含 GBK）/JSON 批量合并 PDF 或 ZIP；报价单、面单、证书示例 | 55 |
+| Tiptap | 6 个按钮，链接已启用却无入口；无表格、图片、任务、Markdown | 选区工具条与 / 插入菜单、链接、表格（合并/列宽）、图片（压缩为 WebP 存入文稿）、任务清单、对齐、目录与字数；Markdown/HTML/JSON 导入导出 | 23 |
+| PptxGenJS | 单一版式，无图片/表格/图表 | 10 种母版版式、富文本、图片、表格、原生图表与数据表、形状；舞台拖放、吸附、撤销；品牌主题与 16:9/16:10/4:3；修正 PptxGenJS 生成的多余 `a:pPr` | 20 |
+| React Flow | 4 种操作的直线链，把一句话转大写 | 本地数据流水线：20 种确定性节点、类型端口、分支与合并、节点内预览、正则超时保护；调色板拖放、框选、撤销、自动布局；5 个模板 | 25 |
+| Vega-Lite | 必须顶层 mark，拒绝 layer/concat/facet/repeat；仅内嵌数据 | 完整 v6 语法与官方 schema 校验；CSV/TSV/JSON 数据窗（20 MiB）与字段芯片；CodeMirror 补全与悬停说明；13 个示例；PNG/SVG/项目包 | 20 |
+| Ray Optics | 关闭实时光路；只有 12 类对象 | 拖动即实时追迹（按质量设上限）；上游 5.5.0 全部 42 类对象；四种视图与波长色彩；19 个示例 | 14 |
+| CircuitJS | 162 种元件放行 17 种；无示例库；编辑即暂停 | 141 种可搜索元件（仅排除读取本地文件或无法交付的 3 种并写明原因）；366 个官方示例；速度、单步与参数滑块；编辑时持续仿真；首屏 555 闪光电路 | 16 |
+
+合并后在主线重新安装依赖并逐项运行 `check` 与 `test`，全部通过。CircuitJS 保留 0.8.1 已通过的结构；其余结构审查仍为待定。Oasis Editor 仍在进行。
+
+| 工作台 | 改版前 | 0.9.0 |
+| --- | --- | --- |
+| pdfme | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/pdfme.png" alt="pdfme 改版前" width="360"> | <img src="screenshots/pdfme.png" alt="pdfme 0.9.0" width="360"> |
+| Tiptap | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/tiptap.png" alt="Tiptap 改版前" width="360"> | <img src="screenshots/tiptap.png" alt="Tiptap 0.9.0" width="360"> |
+| PptxGenJS | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/pptxgenjs.png" alt="PptxGenJS 改版前" width="360"> | <img src="screenshots/pptxgenjs.png" alt="PptxGenJS 0.9.0" width="360"> |
+| React Flow | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/react-flow.png" alt="React Flow 改版前" width="360"> | <img src="screenshots/react-flow.png" alt="React Flow 0.9.0" width="360"> |
+| Vega-Lite | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/vega-lite.png" alt="Vega-Lite 改版前" width="360"> | <img src="screenshots/vega-lite.png" alt="Vega-Lite 0.9.0" width="360"> |
+| Ray Optics | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/ray-optics.png" alt="Ray Optics 改版前" width="360"> | <img src="screenshots/ray-optics.png" alt="Ray Optics 0.9.0" width="360"> |
+| CircuitJS | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/circuitjs.png" alt="CircuitJS 改版前" width="360"> | <img src="screenshots/circuitjs.png" alt="CircuitJS 0.9.0" width="360"> |
+
+## 发布通道
+
+CI 的上传接口只暂存回执，不进入商店审核。后端 PR [AOE-HQ/aoe-backend#414](https://github.com/AOE-HQ/aoe-backend/pull/414) 新增 `POST /api/workbenches/publish`；部署后设置 `FLOATBOAT_PUBLISH_ENABLED=true`，CI 会把每个上传提交为待审核版本，说明见[自动打包与官方上传](ci-packages.md#提交商店审核)。

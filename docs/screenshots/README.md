@@ -2,20 +2,20 @@
 
 真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-29。
 
-0.9.0 第1波更新8项；其余保留历史采集版本。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
+0.9.0 第1波更新8项、第2波更新7项；其余保留历史采集版本。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
 | [excalidraw.png](excalidraw.png) | 0.2.0 | 1440 × 1000 | 64.9 KiB | `4ee8c44f0fe192d16a56462fe6086b73cd9e906dd78c4685ef0eada1bf196c18` |
 | [markmap.png](markmap.png) | 0.2.0 | 1440 × 980 | 86.5 KiB | `e5e79cb158e5e6a6e853dbe49a3e4949843fad49c040095e18b0d79902a84d0a` |
-| [pdfme.png](pdfme.png) | 0.2.0 | 1440 × 1000 | 94.9 KiB | `08679b3551b1c68737c6985d6686c368b2e80e6045e5d92a67324b8181e9f8a3` |
-| [tiptap.png](tiptap.png) | 0.2.0 | 1440 × 1000 | 61.7 KiB | `4ba0e88e9f69b8ebb6ca4c9d912ecedf77461a7de871edd3d747104d4f605ac2` |
-| [pptxgenjs.png](pptxgenjs.png) | 0.2.0 | 1440 × 1000 | 102.4 KiB | `a889f17df1faf4f813cfe58dd49f184bd57296a149ea3ffc865c6882f9f92898` |
-| [react-flow.png](react-flow.png) | 0.2.0 | 1440 × 980 | 95.8 KiB | `a910a45124e15062cc74269060f01115f3ed61bf1c2146304724fc74e8efaf47` |
+| [pdfme.png](pdfme.png) | 0.9.0 | 1440 × 900 | 207.0 KiB | `ce4c2bdd836cfc067726bee7bdd2ecf11a5269a8511b1b6815ec92c899652e8c` |
+| [tiptap.png](tiptap.png) | 0.9.0 | 1440 × 900 | 125.3 KiB | `52b202e514ef6f131b5cee7a99c1311313e120b69f99bcb53b05580774477a1c` |
+| [pptxgenjs.png](pptxgenjs.png) | 0.9.0 | 1440 × 900 | 168.6 KiB | `0cfb11c1b89f0a2c960fbe63aa09fafd2dbd06d317d55f3835e9224eb28275b0` |
+| [react-flow.png](react-flow.png) | 0.9.0 | 1440 × 900 | 214.0 KiB | `470cae805d71b62f4205f3bc613a313fc51a8dd4bc80ad158722e44499e788ae` |
 | [surveyjs.png](surveyjs.png) | 0.2.0 | 1440 × 980 | 76.8 KiB | `9a4365a2e989deef5ae61fa8eff84a5eb29a669e7cc20246eb2065002e1fa109` |
 | [mermaid.png](mermaid.png) | 0.9.0 | 1440 × 900 | 132.4 KiB | `3773907a83943e2db2981a900369df9cb916c23fc13f4f23943a327d134beab3` |
 | [swagger-ui.png](swagger-ui.png) | 0.9.0 | 1440 × 900 | 153.8 KiB | `f0b0a68eea874b4b180c70ea6581a392e6e2491a00b87bedd87b8cc0c1b2caea` |
-| [vega-lite.png](vega-lite.png) | 0.2.0 | 1440 × 1000 | 90.3 KiB | `f801114306626c20bfadefa3b35376f586b19e7d289e36fe507e592d99c5f166` |
+| [vega-lite.png](vega-lite.png) | 0.9.0 | 1440 × 900 | 186.6 KiB | `a1859e442f5310e640743ba997553ab7c7ff58e5044f5627cbd5a3f29c9437db` |
 | [observable-plot.png](observable-plot.png) | 0.2.0 | 1440 × 1000 | 66.3 KiB | `b35af99e6d7d5ecc01777c8984c9042f9fdc7cef880f95af4aa6e5c325443b74` |
 | [blocknote.png](blocknote.png) | 0.3.0 | 1440 × 1182 | 151.4 KiB | `ce920003409834892a9013263a5eac492ac5df74a04bb99a30e50912c81b4a7e` |
 | [mdxeditor.png](mdxeditor.png) | 0.3.0 | 1440 × 1592 | 189.0 KiB | `148c4f8fedd0213839bf8cac17c6e52aabb4c864d99af60bb19eb10383bf7d62` |
@@ -56,11 +56,11 @@
 | [wavesurfer-js.png](wavesurfer-js.png) | 0.6.0 | 1440 × 1283 | 109.5 KiB | `7a45335e7282f92e8268d9d8490b3b1bebc3409b7d628aa325c49ed7aeb87d9e` |
 | [react-email.png](react-email.png) | 0.6.0 | 1440 × 1364 | 184.8 KiB | `e81cf86316d05d9a30743b7d19e420cb575bc883393fd0c7bcf226201b9c94e8` |
 | [bruno.png](bruno.png) | 0.9.0 | 1440 × 900 | 191.9 KiB | `8a15070f2739a9bc7254f99a4d21c321e9e5268548a30d908f2575b2ba7cc07a` |
-| [ray-optics.png](ray-optics.png) | 0.7.0 | 1440 × 1144 | 189.2 KiB | `21241c612929679ee5557c5d4d8345a05164733b4cdb45f1bb0e638b529c1d7c` |
+| [ray-optics.png](ray-optics.png) | 0.9.0 | 1440 × 900 | 184.9 KiB | `1f32661263f7fff0b6abe6f632dd288b37fc4e94e7719375cb4491f3c82cd8ac` |
 | [invoice-builder.png](invoice-builder.png) | 0.7.0 | 1440 × 1050 | 117.9 KiB | `64edaf214cdfb14730442e43d2c55335da906b1b630dfe45c849f187f9b7bbc2` |
 | [mesh2motion.png](mesh2motion.png) | 0.7.0 | 1440 × 1041 | 188.8 KiB | `5d7d47bcba4b11bc2149d7407a0de3189a703195d1e5007b833085b8cec5b125` |
 | [oasis-editor.png](oasis-editor.png) | 0.8.1 | 1440 × 1000 | 127.1 KiB | `99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6` |
-| [circuitjs.png](circuitjs.png) | 0.8.1 | 1440 × 1000 | 66.5 KiB | `f67fe6093c863fb35d161d6b53ed80a62ec3f8ae4758e7d0afca7a4ca17c7cf0` |
+| [circuitjs.png](circuitjs.png) | 0.9.0 | 1440 × 900 | 103.2 KiB | `6126c3bdf62496c8bb43a4f4228cc3da6063fe77073eff05f76192cd476f613e` |
 | [gltf-transform.png](gltf-transform.png) | 0.9.0 | 1440 × 900 | 143.7 KiB | `e1f5b5a1a8520c4204e8acc28e4f420043e4941dd329a27feeaf9a3f9fdd5aed` |
 
 共56张，合计 8.04 MiB。

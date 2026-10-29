@@ -127,8 +127,8 @@
     "url": "https://github.com/pdfme/pdfme",
     "category": "PDF 与表单",
     "kind": "编辑器组件",
-    "workbench": "报价单、证书、标签与合同模板批量生成工作台",
-    "core_features": "WYSIWYG PDF 模板设计器、Form/Viewer、JSON 模板和浏览器/Node PDF 生成。",
+    "workbench": "PDF 模板设计、底图套打与批量生成",
+    "core_features": "26 种原生字段（表格/图片/条码/日期等）、PDF 底图、原生 Form/Viewer、CSV/JSON 批量合并 PDF 或 ZIP、报价单/面单/证书示例",
     "integration": "DOM 容器挂载独立 UI bundle，模板 JSON 存 SQLite；表格数据映射输入并批量生成 PDF。",
     "effort": "中",
     "priority": "A",
@@ -146,37 +146,37 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 9,
+      "tests": 55,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "pending",
-      "screenshot": "README.md#工作台实景",
+      "productLayout": "restructured",
+      "screenshot": "docs/screenshots/pdfme.png",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
-      "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "acceptance": "workbenches/03-pdfme/ACCEPTANCE.md",
+      "firstOpen": "usable without external services"
     },
     "id": 3,
     "slug": "pdfme",
     "directory": "workbenches/03-pdfme",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/pdfme.png",
-          "caption": "pdfme 工作台实景"
+          "caption": "pdfme · 模板菜单、DTP 页面轨与原生设计器"
         }
       ]
     }
@@ -187,8 +187,8 @@
     "url": "https://github.com/ueberdosis/tiptap",
     "category": "文档与知识",
     "kind": "编辑器组件",
-    "workbench": "AI 方案写作、SOP 与报告编辑工作台",
-    "core_features": "基于 ProseMirror 的无头富文本编辑器；扩展机制、React 绑定、JSON/HTML 读写。",
+    "workbench": "富文本写作：表格、图片、任务清单与 Markdown 往返",
+    "core_features": "选区工具条与 / 插入菜单、链接、表格、图片、任务清单、对齐、目录与字数、Markdown/HTML/JSON 导入导出、写作助手",
     "integration": "嵌入 @tiptap/react 与开源扩展，文档 JSON 存 SQLite；由 Floatboat Agent 提供选区改写和结构化修改。",
     "effort": "中",
     "priority": "A",
@@ -206,38 +206,37 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 7,
+      "tests": 23,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "pending",
-      "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-retested",
+      "productLayout": "restructured",
+      "screenshot": "docs/screenshots/tiptap.png",
+      "hostLlm": "passed (one real call)",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
-      "priorHostLlm": "passed in earlier batch",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
-      "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "acceptance": "workbenches/04-tiptap/app/ACCEPTANCE.md",
+      "firstOpen": "usable without external services"
     },
     "id": 4,
     "slug": "tiptap",
     "directory": "workbenches/04-tiptap",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/tiptap.png",
-          "caption": "Tiptap 工作台实景"
+          "caption": "Tiptap · 窄正文稿纸、章节目录与按需写作助手"
         }
       ]
     }
@@ -248,8 +247,8 @@
     "url": "https://github.com/gitbrent/PptxGenJS",
     "category": "演示与汇报",
     "kind": "基础引擎",
-    "workbench": "周报、销售方案与经营数据 PPTX 生成工作台",
-    "core_features": "JavaScript 生成 OOXML PowerPoint；支持文字、图片、表格、图表、模板与浏览器/Node 输出。",
+    "workbench": "母版版式、原生图表与表格的 PPTX 演示编辑器",
+    "core_features": "10 种母版版式、富文本、图片、表格、原生图表与数据表、形状、舞台拖放吸附与撤销、品牌主题与多比例、PPTX 与项目导出",
     "integration": "Node 服务生成 PPTX；前端编辑提纲与结构化幻灯片数据，Agent 填充内容，用户下载可继续编辑的 PPTX。",
     "effort": "中",
     "priority": "A",
@@ -267,38 +266,37 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 7,
+      "tests": 20,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "pending",
-      "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-retested",
+      "productLayout": "restructured",
+      "screenshot": "docs/screenshots/pptxgenjs.png",
+      "hostLlm": "passed (retry after host error)",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
-      "priorHostLlm": "passed in earlier batch",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
-      "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "acceptance": "workbenches/05-pptxgenjs/app/ACCEPTANCE.md",
+      "firstOpen": "usable without external services"
     },
     "id": 5,
     "slug": "pptxgenjs",
     "directory": "workbenches/05-pptxgenjs",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/pptxgenjs.png",
-          "caption": "PptxGenJS 工作台实景"
+          "caption": "PptxGenJS · 缩略图轨、演示舞台与上下文检查器"
         }
       ]
     }
@@ -308,8 +306,8 @@
     "repo": "xyflow/xyflow",
     "category": "流程与节点编辑",
     "kind": "编辑器组件",
-    "workbench": "可视化业务流程工作台：节点配置、执行记录、运行状态展示",
-    "core_features": "React 节点编辑 UI，自定义节点与边、拖拽连接、缩放及节点状态管理。",
+    "workbench": "本地数据流水线 IDE：类型端口、分支合并与节点内结果",
+    "core_features": "20 种确定性节点（CSV/JSON/正则/模板/筛选/分组/关联…）、DAG 执行与节点内预览、调色板拖放、撤销/框选/自动布局、模板库与 JSON 导入导出",
     "integration": "使用 @xyflow/react 与发行 CSS；节点/边 JSON 存 SQLite，由服务器将获准节点映射到 Floatboat Workflow/Agent 调用。",
     "effort": "中",
     "priority": "A",
@@ -328,38 +326,37 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 7,
+      "tests": 25,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "pending",
-      "screenshot": "README.md#工作台实景",
+      "productLayout": "restructured",
+      "screenshot": "docs/screenshots/react-flow.png",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
-      "priorHostLlm": "passed in earlier batch",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
-      "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "acceptance": "workbenches/06-react-flow/app/ACCEPTANCE.md",
+      "firstOpen": "usable without external services"
     },
     "id": 6,
     "slug": "react-flow",
     "directory": "workbenches/06-react-flow",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/react-flow.png",
-          "caption": "React Flow 工作台实景"
+          "caption": "React Flow · 节点画布、节点调色板与输出检查器"
         }
       ]
     }
@@ -548,8 +545,8 @@
     "url": "https://github.com/vega/vega-lite",
     "category": "图表与报告",
     "kind": "基础引擎",
-    "workbench": "AI图表制作：输入数据和意图，生成可编辑图表规格",
-    "core_features": "声明式可视化语法，将规格编译为Vega图表",
+    "workbench": "Vega-Lite 完整语法图表实验台与项目数据",
+    "core_features": "完整 v6 语法与官方 schema 校验、CSV/TSV/JSON 数据窗与字段芯片、CodeMirror 规格编辑、13 个示例、PNG/SVG/项目包导出",
     "integration": "集成发布包及Vega Embed，Agent生成受校验的JSON规格，保存数据与图表配置",
     "effort": "低",
     "priority": "A",
@@ -565,27 +562,26 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 4,
+      "tests": 20,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
-      "screenshot": "README.md#工作台实景",
+      "productLayout": "restructured",
+      "screenshot": "docs/screenshots/vega-lite.png",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
-      "priorHostLlm": "passed in earlier batch",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
-      "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "acceptance": "workbenches/10-vega-lite/app/ACCEPTANCE.md",
+      "firstOpen": "usable without external services"
     },
     "group": "数据开发",
     "mode": "引擎封装",
@@ -593,12 +589,12 @@
     "slug": "vega-lite",
     "directory": "workbenches/10-vega-lite",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/vega-lite.png",
-          "caption": "Vega-Lite 工作台实景"
+          "caption": "Vega-Lite · 图表主区、规格检查器与数据窗"
         }
       ]
     }
@@ -3578,8 +3574,8 @@
     "repo": "ricktu288/ray-optics",
     "category": "光学与教学",
     "kind": "原生工具/组件",
-    "workbench": "光路实验、参数对照与场景交付",
-    "core_features": "原生光路编辑、CPU模拟、探测器与PNG/场景/工程导出",
+    "workbench": "实时光路实验：完整器材、四种视图与示例画廊",
+    "core_features": "拖动即实时追迹、上游 5.5.0 全部 42 类对象、光线/像/观察者视图与波长色彩、19 个示例、场景 JSON 往返",
     "integration": "固定上游原生核心，适配官方模板与完整工作稿持久化",
     "effort": "中–高",
     "priority": "A",
@@ -3597,36 +3593,37 @@
     "slug": "ray-optics",
     "directory": "workbenches/73-ray-optics",
     "status": "local-verified",
-    "version": "0.7.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/ray-optics.png",
-          "caption": "Ray Optics Simulation · 光路主屏、器材架与实验读数"
+          "caption": "Ray Optics Simulation · 光路主屏、器材架与实验读数条"
         }
       ]
     },
     "verification": {
       "build": "passed",
-      "tests": 11,
+      "tests": 14,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "pending",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/ray-optics.png",
       "hostImport": "unverified",
       "hostLlm": "not-used",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.7.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/73-ray-optics/ACCEPTANCE.md",
       "upstream": "Ray Optics5.5.0 commitdaf76772原生Scene/Simulator/Editor",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "firstOpen": "usable without external services"
     }
   },
   {
@@ -3802,8 +3799,8 @@
     "repo": "pfalstad/circuitjs1",
     "category": "电子工程",
     "kind": "原生工具/组件",
-    "workbench": "电路实验、示波器和实验记录",
-    "core_features": "基础RLC电路编辑、原生求解与示波器、参数草稿、原生电路与读数导出",
+    "workbench": "电路实验：141 种元件、官方示例库与实时仪表",
+    "core_features": "可搜索元件库（晶体管/555/逻辑/数字芯片…）、366 个官方示例、速度/单步/参数滑块、编辑时持续仿真、原生电路与读数导出",
     "integration": "固定原生核心，适配官方模板和完整工作副本",
     "effort": "中–高",
     "priority": "A",
@@ -3821,37 +3818,37 @@
     "slug": "circuitjs",
     "directory": "workbenches/77-circuitjs",
     "status": "local-verified",
-    "version": "0.8.2",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/circuitjs.png",
           "caption": "CircuitJS1 · 电路与示波器、纵向元件架与底部仪表"
         }
-      ],
-      "fullDescription": "CircuitJS 电路工作台集成原生 TypeScript 电路求解、编辑与示波器。应用整体按 GPL-2.0-or-later 提供，完整对应源代码、上游版本和重建说明随包交付。首版限定基础 RLC、电压源、开关等经过验收的类型；恢复项目不会自动运行。官方上传仅暂存交付包与介绍，不选择许可证；当前商店发布接口只接受 MIT，本 GPL 应用不能据此宣称已公开上架。"
+      ]
     },
     "verification": {
       "build": "passed",
-      "tests": 6,
+      "tests": 16,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/circuitjs.png",
       "hostImport": "unverified",
       "hostLlm": "not-used",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.8.1.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/77-circuitjs/ACCEPTANCE.md",
       "upstream": "pfalstad/circuitjs1 · e952e788a4135a693bfd4cee7883f9b3314e3e76 · GPL-2.0-or-later",
       "structuralLayout": {
         "status": "passed",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "real screenshots and task flow"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.8.1 structure kept"
+      },
+      "firstOpen": "usable without external services"
     }
   },
   {
