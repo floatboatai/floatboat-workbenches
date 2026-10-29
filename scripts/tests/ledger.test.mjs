@@ -130,6 +130,10 @@ test("store columns are written only with a store export", () => {
       ["G2", ""],
     ],
   );
+  assert.equal(
+    plan.writes[0].cells[0][0].cell_styles.background_color,
+    "#FDECEA",
+  );
   assert.deepEqual(storeColumns(row("p", { status: "规划中" }), states), {
     store: "未开发",
     storeVersion: "",

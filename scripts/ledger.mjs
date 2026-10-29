@@ -34,6 +34,25 @@ const REPO_KEYS = [
 ];
 // Written only when a store export is supplied; testers and operators own the rest.
 const STORE_KEYS = ["store", "storeVersion"];
+// Store status fill colours, kept in step with the skill's legend.
+const STORE_FILL = {
+  已上架: "#E8F5E9",
+  已下架: "#FDECEA",
+  未上架: "#FFF4E5",
+  "未上架（非 MIT 许可）": "#FFF4E5",
+  未开发: "#F2F3F5",
+};
+const ledgerCell = (key, value, base = {}) =>
+  key === "store" && STORE_FILL[value]
+    ? {
+        ...base,
+        value,
+        cell_styles: {
+          ...base.cell_styles,
+          background_color: STORE_FILL[value],
+        },
+      }
+    : { ...base, value };
 const ROW_STYLE = {
   cell_styles: {
     vertical_alignment: "top",
@@ -147,7 +166,7 @@ export function planLedger(grid, rows, { sheet, states } = {}) {
       lastRow += 1;
       const cells = Array.from({ length: width }, () => ({ ...ROW_STYLE }));
       for (const key of owned)
-        cells[column[key]] = { ...ROW_STYLE, value: values[key] };
+        cells[column[key]] = ledgerCell(key, values[key], ROW_STYLE);
       writes.push({
         sheet_name: sheet,
         range: `A${lastRow}:${columnName(width - 1)}${lastRow}`,
@@ -162,7 +181,7 @@ export function planLedger(grid, rows, { sheet, states } = {}) {
       writes.push({
         sheet_name: sheet,
         range: `${columnName(column[key])}${index + 1}`,
-        cells: [[{ value: values[key] }]],
+        cells: [[ledgerCell(key, values[key])]],
       });
       changes.push({
         slug: row.slug,
