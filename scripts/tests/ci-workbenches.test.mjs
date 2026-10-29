@@ -12,6 +12,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   packageBundle,
+  planWorkbenches,
   repository,
   sha256,
   verifiedProjects,
@@ -19,6 +20,7 @@ import {
 import {
   readUploadBundle,
   publishEndpoint,
+  releaseFilter,
   submitForReview,
   uploadBundle,
   uploadEndpoint,
@@ -157,7 +159,10 @@ test("license and scope notes survive packaging and multipart upload verbatim", 
     fetchImpl: async (_url, options) => {
       const presentation = JSON.parse(options.body.get("presentation"));
       assert.equal(presentation.fullDescription, description);
-      assert.equal(presentation.package.sha256, bundle.presentation.package.sha256);
+      assert.equal(
+        presentation.package.sha256,
+        bundle.presentation.package.sha256,
+      );
       return Response.json({
         code: 0,
         data: {
@@ -394,11 +399,20 @@ test("review submission sends only the receipt identity and confirms it", async 
     fetchImpl: async (url, options) => {
       assert.equal(url, "https://example.com/api/workbenches/publish");
       assert.equal(options.redirect, "error");
-      assert.equal(options.headers.Authorization, "Bearer official-fixture-key");
-      assert.deepEqual(JSON.parse(options.body), { objectId: receipt.objectId });
+      assert.equal(
+        options.headers.Authorization,
+        "Bearer official-fixture-key",
+      );
+      assert.deepEqual(JSON.parse(options.body), {
+        objectId: receipt.objectId,
+      });
       return Response.json({
         code: 0,
-        data: { registryName: "example-studio", version: "1.2.3", status: "submitted" },
+        data: {
+          registryName: "example-studio",
+          version: "1.2.3",
+          status: "submitted",
+        },
       });
     },
   });
@@ -408,14 +422,22 @@ test("review submission sends only the receipt identity and confirms it", async 
       url: "https://example.com/p",
       apiKey: "k",
       fetchImpl: async () =>
-        Response.json({ code: 0, data: { registryName: "other", version: "1.2.3" } }),
+        Response.json({
+          code: 0,
+          data: { registryName: "other", version: "1.2.3" },
+        }),
     }),
     /identity/,
   );
 });
 test("non-MIT packages are skipped, other refusals fail without retry", async () => {
-  const refuse = (errorCode, status = 400) => async () =>
-    Response.json({ code: -1, message: "secret detail", errorCode }, { status });
+  const refuse =
+    (errorCode, status = 400) =>
+    async () =>
+      Response.json(
+        { code: -1, message: "secret detail", errorCode },
+        { status },
+      );
   assert.deepEqual(
     await submitForReview(receipt, {
       url: "https://example.com/p",
@@ -452,10 +474,104 @@ test("review submission retries transient failures", async () => {
       if (calls === 2) return new Response("busy", { status: 503 });
       return Response.json({
         code: 0,
-        data: { registryName: "example-studio", version: "1.2.3", status: "submitted" },
+        data: {
+          registryName: "example-studio",
+          version: "1.2.3",
+          status: "submitted",
+        },
       });
     },
   });
   assert.equal(calls, 3);
   assert.equal(outcome.status, "submitted");
+});
+
+const project = (slug, version, extra = {}) => ({
+  slug,
+  directory: `workbenches/0${slug.length}-${slug}`,
+  status: "local-verified",
+  version,
+  presentation: { screenshots: [{ path: `docs/screenshots/${slug}.png` }] },
+  ...extra,
+});
+const slugs = (plan) => plan.include.map((item) => item.slug);
+
+test("plan without a base builds and releases every verified project", () => {
+  const plan = planWorkbenches([project("a", "1.0.0"), project("b", "2.0.0")]);
+  assert.equal(plan.full, true);
+  assert.deepEqual(slugs(plan), ["a", "b"]);
+  assert.deepEqual(plan.releases, ["a", "b"]);
+});
+
+test("plan releases only new versions and builds only changed projects", () => {
+  const before = [
+    project("a", "1.0.0"),
+    project("b", "2.0.0"),
+    project("c", "3.0.0"),
+  ];
+  const now = [
+    project("a", "1.0.1"),
+    project("b", "2.0.0"),
+    project("c", "3.0.0"),
+  ];
+  const plan = planWorkbenches(now, {
+    baseCatalog: before,
+    changedFiles: [
+      "workbenches/01-a/app/manifest.json",
+      "docs/screenshots/b.png",
+      "README.md",
+    ],
+  });
+  assert.deepEqual(slugs(plan), ["a", "b"]);
+  assert.deepEqual(plan.releases, ["a"]);
+});
+
+test("plan treats a newly verified project as a release", () => {
+  const plan = planWorkbenches([project("a", "1.0.0"), project("n", "0.1.0")], {
+    baseCatalog: [project("a", "1.0.0"), { slug: "n", status: "planned" }],
+    changedFiles: [],
+  });
+  assert.deepEqual(slugs(plan), ["n"]);
+  assert.deepEqual(plan.releases, ["n"]);
+});
+
+test("catalog entry edits rebuild without releasing an unchanged version", () => {
+  const plan = planWorkbenches([project("a", "1.0.0", { notes: "new" })], {
+    baseCatalog: [project("a", "1.0.0")],
+    changedFiles: ["catalog.json"],
+  });
+  assert.deepEqual(slugs(plan), ["a"]);
+  assert.deepEqual(plan.releases, []);
+});
+
+test("shared tooling rebuilds everything but releases nothing new", () => {
+  const all = [project("a", "1.0.0"), project("b", "2.0.0")];
+  for (const file of [
+    "scripts/blueprints/autosave-client.ts",
+    "scripts/workbench.mjs",
+    ".github/workflows/workbenches.yml",
+  ]) {
+    const plan = planWorkbenches(all, {
+      baseCatalog: all,
+      changedFiles: [file],
+    });
+    assert.deepEqual(slugs(plan), ["a", "b"], file);
+    assert.deepEqual(plan.releases, [], file);
+  }
+  const docs = planWorkbenches(all, {
+    baseCatalog: all,
+    changedFiles: ["docs/ci-packages.md", "scripts/upload-workbenches.mjs"],
+  });
+  assert.deepEqual(slugs(docs), []);
+});
+
+test("upload release filter selects artifact directories by slug", () => {
+  assert.equal(releaseFilter(undefined), null);
+  assert.deepEqual(
+    [...releaseFilter('["comfyui","oasis-editor"]')],
+    ["workbench-comfyui", "workbench-oasis-editor"],
+  );
+  assert.deepEqual([...releaseFilter("[]")], []);
+  assert.throws(() => releaseFilter('["../x"]'), /JSON array of slugs/);
+  assert.throws(() => releaseFilter("comfyui"), /JSON array of slugs/);
 });

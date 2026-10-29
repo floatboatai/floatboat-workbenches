@@ -4,6 +4,15 @@ GitHub Actions 的 [Workbench packages](../.github/workflows/workbenches.yml) �
 
 每个工作台独立执行 `prepare → check → test → package`。`prepare` 获取 `template.lock.json` 固定的官方工具链，依赖安装使用项目锁文件。工作流固定 Node 22.22.2、pnpm 10.22.0 和 Actions 的提交 SHA，最多并行 4 个项目。
 
+## 只处理有变化的工作台
+
+推送 `main` 时，CI 以本工作流上一次成功运行的提交为基准（PR 以目标分支为基准），由 `node scripts/ci-workbenches.mjs plan --base <sha>` 选出：
+
+- **构建**：工作台目录、介绍图或 `catalog.json` 中该项有变化的工作台；共享工具（`scripts/workbench.mjs`、`template.mjs`、`process.mjs`、`ci-workbenches.mjs`、`scripts/blueprints/`、本工作流、根 `package.json`）变化时全部重建。只改文档时不构建。
+- **上传与提交审核**：只限版本号变化或新转为 `local-verified` 的工作台。商店同一版本只收一次，版本未变的包即使重新构建也不再上传。需要更新商店介绍图或说明时，同样要提升补丁版本。
+
+基准取“上一次成功运行”而不是上一个提交，因此被新推送取消或失败的运行，其改动会并入下一次运行。标签推送、找不到基准提交，或手动运行时选择 `scope: all`，会构建并重新提交全部工作台；后端对同一版本的重复提交是幂等的。每次运行的摘要会列出基准、构建项和发布项。
+
 ## 下载产物
 
 进入一次成功的 Actions 运行，在 Artifacts 中下载对应的 `workbench-<slug>`。每份产物保留 30 天，包含：

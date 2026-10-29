@@ -1,3 +1,4 @@
+import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
@@ -146,9 +147,96 @@ export async function packageBundle(
   return presentation;
 }
 
+// Tooling that shapes every build or package; a change rebuilds all verified projects.
+const sharedPaths = [
+  /^scripts\/(?:workbench|template|process|ci-workbenches)\.mjs$/u,
+  /^scripts\/blueprints\//u,
+  /^\.github\/workflows\/workbenches\.yml$/u,
+  /^package\.json$/u,
+];
+
+/**
+ * Chooses what to build and what to send to the store. Without a base catalog every
+ * verified project is built and released. Otherwise a project is built when its
+ * directory, introduction images, catalog entry or shared tooling changed, and
+ * released only when its version is new: the store accepts each version once, so
+ * an unchanged version never needs another upload.
+ */
+export function planWorkbenches(
+  projects,
+  { baseCatalog, changedFiles = [] } = {},
+) {
+  const full = !Array.isArray(baseCatalog);
+  const shared = changedFiles.some((file) =>
+    sharedPaths.some((path) => path.test(file)),
+  );
+  const before = new Map(
+    (full ? [] : baseCatalog).map((item) => [item.slug, item]),
+  );
+  const include = [];
+  const releases = [];
+  for (const project of projects) {
+    const base = before.get(project.slug);
+    const release =
+      full ||
+      base?.status !== "local-verified" ||
+      base.version !== project.version;
+    const images = new Set(
+      (project.presentation?.screenshots ?? []).map((item) => item.path),
+    );
+    if (
+      release ||
+      shared ||
+      JSON.stringify(base) !== JSON.stringify(project) ||
+      changedFiles.some(
+        (file) => file.startsWith(`${project.directory}/`) || images.has(file),
+      )
+    )
+      include.push({ slug: project.slug, directory: project.directory });
+    if (release) releases.push(project.slug);
+  }
+  return { full, include, releases };
+}
+
+function git(root, args) {
+  return new Promise((accept, reject) =>
+    execFile(
+      "git",
+      args,
+      { cwd: root, maxBuffer: 64 * 1024 * 1024 },
+      (error, stdout) => (error ? reject(error) : accept(stdout)),
+    ),
+  );
+}
+
+/** Plans against a base commit; an unreachable base falls back to a full build and release. */
+export async function planSince(root, base) {
+  const projects = await verifiedProjects(root);
+  if (!base) return planWorkbenches(projects);
+  if (!/^[a-f0-9]{40}$/u.test(base))
+    throw new Error("Base must be a full commit SHA.");
+  try {
+    const changedFiles = (
+      await git(root, ["diff", "--name-only", "--no-renames", base, "HEAD"])
+    )
+      .split("\n")
+      .filter(Boolean);
+    const baseCatalog = JSON.parse(
+      await git(root, ["show", `${base}:catalog.json`]),
+    );
+    return planWorkbenches(projects, { baseCatalog, changedFiles });
+  } catch {
+    console.error("Base commit is unavailable; planning a full build.");
+    return planWorkbenches(projects);
+  }
+}
+
 async function main() {
   const [command, slug, output] = process.argv.slice(2);
-  if (command === "matrix") {
+  if (command === "plan") {
+    const base = slug === "--base" ? output : undefined;
+    console.log(JSON.stringify(await planSince(repository, base)));
+  } else if (command === "matrix") {
     const projects = await verifiedProjects();
     console.log(
       JSON.stringify({
@@ -159,7 +247,7 @@ async function main() {
     await packageBundle(repository, slug, output);
   } else
     throw new Error(
-      "Usage: node scripts/ci-workbenches.mjs <matrix|package SLUG ABSOLUTE_DIRECTORY>",
+      "Usage: node scripts/ci-workbenches.mjs <plan [--base SHA]|matrix|package SLUG ABSOLUTE_DIRECTORY>",
     );
 }
 if (

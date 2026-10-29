@@ -6,6 +6,12 @@ on:
     branches: [main]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      scope:
+        description: "changed: only workbenches changed since the last successful run; all: rebuild and resubmit every verified workbench"
+        type: choice
+        options: [changed, all]
+        default: changed
 
 permissions:
   contents: read
@@ -18,8 +24,13 @@ jobs:
   catalog:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
     outputs:
       matrix: ${{ steps.catalog.outputs.matrix }}
+      count: ${{ steps.catalog.outputs.count }}
+      releases: ${{ steps.catalog.outputs.releases }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -29,14 +40,47 @@ jobs:
           node-version: "22.22.2"
       - name: Test repository tooling
         run: node --test scripts/tests/*.test.mjs
-      - name: Select locally verified workbenches
-        id: catalog
+      # Main compares with the last successful run, so a cancelled or failed run's
+      # changes are carried forward instead of skipped. Tags and scope=all build everything.
+      - name: Choose comparison base
+        id: base
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCOPE: ${{ inputs.scope }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          matrix="$(node scripts/ci-workbenches.mjs matrix)"
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          base=""
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            base="$PR_BASE"
+          elif [ "$GITHUB_REF" = refs/heads/main ] && [ "$SCOPE" != all ]; then
+            base="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/workbenches.yml/runs?branch=main&status=success&per_page=20" \
+              --jq '[.workflow_runs[] | select(.event != "pull_request")][0].head_sha // ""')" || base=""
+          fi
+          if [ -n "$base" ] && ! git fetch --quiet --no-tags --depth=1 origin "$base"; then
+            base=""
+          fi
+          echo "sha=$base" >> "$GITHUB_OUTPUT"
+      - name: Select changed workbenches and new versions
+        id: catalog
+        env:
+          BASE: ${{ steps.base.outputs.sha }}
+        run: |
+          node scripts/ci-workbenches.mjs plan ${BASE:+--base "$BASE"} > "$RUNNER_TEMP/plan.json"
+          {
+            echo "matrix=$(jq -c '{include}' "$RUNNER_TEMP/plan.json")"
+            echo "count=$(jq '.include | length' "$RUNNER_TEMP/plan.json")"
+            echo "releases=$(jq -c '.releases' "$RUNNER_TEMP/plan.json")"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Workbench plan"
+            echo "Base: ${BASE:-none (full build)}"
+            echo "Build: $(jq -r '[.include[].slug] | join(", ") | if . == "" then "none" else . end' "$RUNNER_TEMP/plan.json")"
+            echo "Release: $(jq -r '.releases | join(", ") | if . == "" then "none" else . end' "$RUNNER_TEMP/plan.json")"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   package:
     needs: catalog
+    if: needs.catalog.outputs.count != '0'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -78,6 +122,7 @@ jobs:
     needs: [catalog, package]
     if: >-
       vars.FLOATBOAT_UPLOAD_ENABLED == 'true' &&
+      needs.catalog.outputs.releases != '[]' &&
       github.event_name != 'pull_request' &&
       (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-24.04
@@ -98,4 +143,5 @@ jobs:
           FLOATBOAT_UPLOAD_URL: ${{ secrets.FLOATBOAT_UPLOAD_URL }}
           FLOATBOAT_UPLOAD_API_KEY: ${{ secrets.FLOATBOAT_UPLOAD_API_KEY }}
           FLOATBOAT_PUBLISH_ENABLED: ${{ vars.FLOATBOAT_PUBLISH_ENABLED }}
+          FLOATBOAT_RELEASE_SLUGS: ${{ needs.catalog.outputs.releases }}
         run: node scripts/upload-workbenches.mjs "$RUNNER_TEMP/workbench-artifacts"
