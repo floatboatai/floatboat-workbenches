@@ -196,7 +196,7 @@ export function useWorkbenchState<T>(
       ...previous.filter((item) => !known.has(item.id) && !hidden.has(item.id)),
     ];
   }
-  async function cache() {
+  async function cache(): Promise<LocalCopy<T> | undefined> {
     const copy = cacheValue(),
       generation = epoch.current;
     await writeDraftCache(storageKey, copy.documentId, copy);
@@ -207,6 +207,7 @@ export function useWorkbenchState<T>(
     } catch {
       /* The IndexedDB active pointer remains available in another same-origin tab. */
     }
+    return copy;
   }
   const refresh = useCallback(async () => {
     const [projects, drafts, local] = await Promise.allSettled([
@@ -658,7 +659,24 @@ export function useWorkbenchState<T>(
           message: changed ? "有新更改，等待自动保存…" : receipt.message,
           savedAt: receipt.savedAt,
         });
-        await cache().catch(() => {});
+        const written = await cache().catch(() => undefined);
+        // The acknowledged copy and its receipt are now cached together, so no
+        // repair remains. leave() can call persist() directly and must not wait
+        // for the repair effect. A failed write or a newer edit stays pending.
+        if (
+          written &&
+          written.snapshot === workRef.current &&
+          written.acknowledged === ack.current &&
+          written.acknowledgedState === acknowledgedState.current &&
+          fingerprint(written.snapshot) === ack.current &&
+          !pending.current &&
+          !conflicted.current
+        ) {
+          edited.current = false;
+          cacheRepairPending.current = false;
+          cacheFailures.current = 0;
+          blocked.current = null;
+        }
         return receipt;
       } catch (e) {
         if (generation !== epoch.current) return null;
