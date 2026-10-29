@@ -1,76 +1,80 @@
 {
-  "version": "0.5.0",
-  "verifiedAt": "2026-10-28",
+  "version": "0.9.0",
+  "verifiedAt": "2026-10-29",
   "timezone": "America/New_York",
-  "applicationTests": 13,
-  "serviceTests": 8,
-  "browserChecks": 23,
+  "applicationTests": 55,
+  "testBreakdown": {
+    "pythonParity": 23,
+    "engineAndHostRequests": 19,
+    "courseGenerationRecovery": 10,
+    "importRecovery": 3
+  },
   "upstreamCommit": "a31d82624c27d75f4e771d4fcb78dce16470b383",
+  "runtime": "TypeScript port in the workbench server; Python originals kept under reference/ for parity fixtures only",
   "upstreamModulesUnmodified": true,
-  "actualHostGeneration": true,
+  "externalServiceRequired": false,
   "requestedModel": "gemini-3.8-flash",
-  "actualModelFlows": 2,
-  "primaryChecks": [
-    "real DeepTutor objective grading",
-    "upstream review schedule persists on refresh",
-    "wrong-answer queue is derived from actual grading",
-    "unfinished subjective answer restores without invented grade",
-    "lost review response replays one fixed operation",
-    "real gemini-3.8-flash generation normalized by upstream and restored before adoption",
-    "explicit generated-bank adoption resets review state with confirmation",
-    "invalid bank editor draft restores",
-    "native question bank exported and reread by DeepTutor parser",
-    "portable course import creates new course and retains draft",
-    "375px layout and keyboard task controls",
-    "real desktop screenshot and no page errors"
-  ],
-  "recoveryChecks": [
-    "typing during delayed save retained",
-    "lost save acknowledgement retried",
-    "cross-window conflict and explicit server reload",
-    "lost generation response restores the same durable operation without replay",
-    "late generation query isolated from a new course",
-    "actual generated question graded and scheduled by upstream"
-  ],
-  "actualServiceDisconnected": true,
+  "actualHostCalls": {
+    "tutorExplanation": true,
+    "tutorFollowUp": true,
+    "generationWithOptions": {
+      "count": 4,
+      "kind": "true_false",
+      "difficulty": "理解"
+    },
+    "runs": 2
+  },
+  "browserChecks": {
+    "desktop1440WithHost": 27,
+    "desktop1440WithoutHostCalls": 22,
+    "phone375AndHostUnavailable": 15,
+    "checks": [
+      "first open: objective grading, self-assessment, scheduling and bank import without any external process",
+      "wrong answer shows learner answer, reference answer and stored explanation",
+      "real Host tutor explanation and follow-up persist across reload and export",
+      "rating schedules next review; mistakes/due filters derived from checks and reviews",
+      "pause typing -> autosave -> reload restores notes and selected question",
+      "typing during a delayed save keeps newer text",
+      "lost save receipt after server commit retried without duplicate course",
+      "GB18030 Chinese-header CSV bank normalized and appended preserving history",
+      "invalid bank rows listed by row number, nothing imported",
+      "unfinished bank JSON restores as draft",
+      "real Host generation with count/type/difficulty reviewed and appended",
+      "exported course file validated (questions, events, notes, tutoring)",
+      "course import creates a new course",
+      "new course empty workbook offers import and generation",
+      "375px practice-first page switch, no horizontal overflow, full-screen dialogs, Escape and focus return",
+      "Host unavailable: status card with start instructions and re-check next to blocked actions",
+      "tutor failure shows error and retry",
+      "no console or page errors besides the deliberately induced connection reset"
+    ]
+  },
   "hostImport": "unverified",
+  "structuralReview": "restructured per design-principles (file bar + course shelf + facing pages); final structural sign-off left to integrator",
   "screenshot": {
     "path": "../../docs/screenshots/deeptutor.png",
     "dimensions": [
       1440,
-      1551
+      900
     ],
-    "sha256": "bb937f5a98f7188afa384a77b6114e362b167c28cad7538d8fa85d91e31b587b"
+    "sha256": "359a289a06965c0dd2358cc514c3be731c81195bc3573cff89c8d65212ecc568"
   },
   "package": {
-    "name": "deeptutor-studio-0.5.0-recovery.fbworkbench",
-    "sha256": "d5a4cf5ac74b746e89ed473b02a281066f5b5c7762edd267a532b3a574a95e17",
-    "crc": true,
-    "sourceResourcesMatch": true
+    "name": "deeptutor-studio-0.9.0.fbworkbench",
+    "files": 64,
+    "sha256": "145dea097fc6fad18bfa7265363daa93afc2876ee88138f2c7c6ec8e710142cc",
+    "notices": [
+      "deeptutor-LICENSE.txt",
+      "cpython-PSF-LICENSE.txt"
+    ]
   },
-  "recoveryImportAndNavigation": {
-    "checks": [
-      "navigation locks all fields while old save completes and preserves old input",
-      "real recovery download imports as new project retaining incomplete extra",
-      "old pending operations preserved as history without replay",
-      "imported working draft survives another refresh"
-    ],
-    "errors": []
-  },
-  "integratedPackage": {
-    "directory": "workbenches/65-deeptutor",
+  "previous": {
     "version": "0.5.0",
-    "appId": "workbench.640daeae-f7a4-4d3d-a490-9bbb89d4f2ef",
-    "filename": "65-deeptutor-0.5.0.fbworkbench",
-    "bytes": 67398,
-    "sha256": "abafbdad41ddb5b4e33591b190c4d722a203617a5a6f99fa0548f41555e79288",
-    "crc": "passed",
-    "sourceFilesMatched": 39,
-    "assetFilesMatched": 2,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-deeptutor/deeptutor-studio-0.5.0.fbworkbench",
-    "introductionFile": "workbench-deeptutor/presentation.json",
-    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
+    "verifiedAt": "2026-10-28",
+    "applicationTests": 13,
+    "serviceTests": 8,
+    "browserChecks": 23,
+    "actualModelFlows": 2,
+    "hostImport": "unverified"
   }
 }

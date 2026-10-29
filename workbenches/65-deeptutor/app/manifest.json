@@ -3,9 +3,9 @@
   "appId": "workbench.640daeae-f7a4-4d3d-a490-9bbb89d4f2ef",
   "registryName": "deeptutor-studio",
   "name": "课程练习册 · DeepTutor",
-  "description": "讲义、题库、答题核对与错题复习",
-  "version": "0.5.0",
-  "changelog": "接入DeepTutor题库解析、客观判题与复习调度；Host生成题库、完整草稿自动保存与恢复。",
+  "description": "讲义对页练习：离线判题、错题讲解、出题与间隔复习",
+  "version": "0.9.0",
+  "changelog": "判题、复习排程与题库导入移植进工作台服务，无需外部Python进程；答错后显示解析并可请Floatboat导师讲解与追问；出题可设题数、题型与难度并追加到练习册；对页练习册结构与12题示例讲义。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

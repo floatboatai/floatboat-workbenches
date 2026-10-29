@@ -1,0 +1,1428 @@
+{
+ "source": "HKUDS/DeepTutor a31d82624c27d75f4e771d4fcb78dce16470b383 deeptutor/services/practice",
+ "python": "3.12.13",
+ "banks": [
+  {
+   "name": "json-basic",
+   "filename": "questions.json",
+   "text": "[{\"question\": \"哪个类型可以去重？\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}]",
+   "result": {
+    "questions": [
+     {
+      "question": "哪个类型可以去重？",
+      "question_type": "single_choice",
+      "options": {
+       "A": "list",
+       "B": "set"
+      },
+      "correct_answer": "B",
+      "explanation": "集合元素唯一",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "集合"
+      ],
+      "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "json-bom",
+   "filename": "questions.json",
+   "text": "﻿[{\"question\": \"\\u54ea\\u4e2a\\u7c7b\\u578b\\u53ef\\u4ee5\\u53bb\\u91cd\\uff1f\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"B\", \"explanation\": \"\\u96c6\\u5408\\u5143\\u7d20\\u552f\\u4e00\", \"tags\": [\"\\u96c6\\u5408\"]}]",
+   "result": {
+    "questions": [
+     {
+      "question": "哪个类型可以去重？",
+      "question_type": "single_choice",
+      "options": {
+       "A": "list",
+       "B": "set"
+      },
+      "correct_answer": "B",
+      "explanation": "集合元素唯一",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "集合"
+      ],
+      "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "json-mixed-types",
+   "filename": "questions.json",
+   "text": "[{\"question\": \"哪个类型可以去重？\", \"question_type\": \"多选题\", \"options\": [\"append\", \"sort\", \"sorted\", \"len\"], \"correct_answer\": \"ab\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"题目\": \"set 会保留重复元素。\", \"题型\": \"判断\", \"答案\": \"错\", \"解析\": \"set 元素唯一\", \"标签\": \"集合;Python\"}, {\"question\": \"len([1, 2, 3]) 的结果是 ___\", \"type\": \"fill_blank\", \"answer\": \" 3 \", \"difficulty\": 1}, {\"question\": \"解释 return 与 print 的区别\", \"answer\": \"return 交还结果\", \"tags\": \"函数，返回值，函数\"}, {\"question\": \"哪个是不可变序列？\", \"options\": \"{\\\"a\\\": \\\"list\\\", \\\"b\\\": \\\"tuple\\\"}\", \"answer\": \"tuple\"}, {\"question\": \"Pick\", \"A\": \"one\", \"B\": \"two\", \"选项c\": \"three\", \"answer\": \"c\"}, {\"question\": \"Pick many\", \"type\": \"MULTI_CHOICE\", \"options\": {\"A\": \"x\", \"B\": \"y\", \"C\": \"z\"}, \"answer\": \"C; a\"}, {\"question\": \"Float answer\", \"answer\": 2.0, \"difficulty\": 1e+20}, {\"question\": \"Bool answer\", \"answer\": true, \"tags\": [1, null, \"\", \"x\", \"x\"]}, {\"question\": \"  spaced　\", \"answer\": \" ok \", \"explanation\": null}]",
+   "result": {
+    "questions": [
+     {
+      "question": "哪个类型可以去重？",
+      "question_type": "multi_choice",
+      "options": {
+       "A": "append",
+       "B": "sort",
+       "C": "sorted",
+       "D": "len"
+      },
+      "correct_answer": "A,B",
+      "explanation": "集合元素唯一",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "集合"
+      ],
+      "question_id": "import:b3a5bbaffcf9104a12954dc1a731fcb73c64ab99ec3d781dcc378b41a66a60b7"
+     },
+     {
+      "question": "set 会保留重复元素。",
+      "question_type": "true_false",
+      "options": {
+       "T": "True",
+       "F": "False"
+      },
+      "correct_answer": "F",
+      "explanation": "set 元素唯一",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "集合",
+       "Python"
+      ],
+      "question_id": "import:0b097fb975134de2aed6ee605e19a40f2a03214f56ea643788bb2f7175462429"
+     },
+     {
+      "question": "len([1, 2, 3]) 的结果是 ___",
+      "question_type": "fill_blank",
+      "options": {},
+      "correct_answer": "3",
+      "explanation": "",
+      "difficulty": "1",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:640324c6c559fb747d65c513e00561724d18abd63e1769d471102c8dd8190ede"
+     },
+     {
+      "question": "解释 return 与 print 的区别",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "return 交还结果",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "函数",
+       "返回值"
+      ],
+      "question_id": "import:fac5964653bddff77474c826a146fde7057c6ef6f57f202ece95c1d47acb6ec4"
+     },
+     {
+      "question": "哪个是不可变序列？",
+      "question_type": "single_choice",
+      "options": {
+       "A": "list",
+       "B": "tuple"
+      },
+      "correct_answer": "B",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:493cbe7fba5ea9a3e130e9b85876f8ae5597c13431783e1a4da34be704e24288"
+     },
+     {
+      "question": "Pick",
+      "question_type": "single_choice",
+      "options": {
+       "A": "one",
+       "B": "two",
+       "C": "three"
+      },
+      "correct_answer": "C",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:0d8a332d2737fb0f59fb9f4b7fb598623c87fb436eef181c033f343ddf49f221"
+     },
+     {
+      "question": "Pick many",
+      "question_type": "multi_choice",
+      "options": {
+       "A": "x",
+       "B": "y",
+       "C": "z"
+      },
+      "correct_answer": "A,C",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:d859547fbfcbb5b8366bf58f9b583110733cf60732ad0034118bb06bb85dcf88"
+     },
+     {
+      "question": "Float answer",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "2.0",
+      "explanation": "",
+      "difficulty": "1e+20",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:07aba3cbd80a663c47f21d20e6a34cd1977fc8c2eff4c72cbbc9e55d91d97892"
+     },
+     {
+      "question": "Bool answer",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "True",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "1",
+       "x"
+      ],
+      "question_id": "import:6f36eb9d42a18f4ad17fa024a29233c51f666e321cec62ef9295cd0b64bf36b4"
+     },
+     {
+      "question": "spaced",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "ok",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:13d5a3a587d8f7b4fdbf641ffb975db63d8a4ed5f8f0073630d420f6353f7a99"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "json-row-errors",
+   "filename": "questions.json",
+   "text": "[{\"question\": \"哪个类型可以去重？\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"question\": \"missing answer\"}, {\"question\": \"哪个类型可以去重？\", \"question_type\": \"unknown\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"question\": \"哪个类型可以去重？\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"only\"}, \"correct_answer\": \"B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"question\": \"哪个类型可以去重？\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"Z\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"question\": \"哪个类型可以去重？\", \"question_type\": \"true_false\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"maybe\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"question\": \"哪个类型可以去重？\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"A\", \"B\": \"B\", \"C\": \"C\", \"D\": \"D\", \"E\": \"E\", \"F\": \"F\", \"G\": \"G\", \"H\": \"H\", \"I\": \"I\", \"J\": \"J\", \"K\": \"K\"}, \"correct_answer\": \"B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"question\": \"哪个类型可以去重？\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"0\", \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\", \"17\", \"18\", \"19\", \"20\"]}, {\"question\": \"哪个类型可以去重？\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"A,B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}, {\"question\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\", \"question_type\": \"single_choice\", \"options\": {\"A\": \"list\", \"B\": \"set\"}, \"correct_answer\": \"B\", \"explanation\": \"集合元素唯一\", \"tags\": [\"集合\"]}]",
+   "result": {
+    "questions": [
+     {
+      "question": "哪个类型可以去重？",
+      "question_type": "single_choice",
+      "options": {
+       "A": "list",
+       "B": "set"
+      },
+      "correct_answer": "B",
+      "explanation": "集合元素唯一",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "集合"
+      ],
+      "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+     }
+    ],
+    "errors": [
+     {
+      "row": 2,
+      "message": "Question and correct answer are required"
+     },
+     {
+      "row": 3,
+      "message": "Unknown question type"
+     },
+     {
+      "row": 4,
+      "message": "Choice questions need at least two options"
+     },
+     {
+      "row": 5,
+      "message": "The answer must name existing option keys (multi-choice: A,C)"
+     },
+     {
+      "row": 6,
+      "message": "A true/false answer must be true or false"
+     },
+     {
+      "row": 7,
+      "message": "Options must contain at most 10 named choices"
+     },
+     {
+      "row": 8,
+      "message": "Use at most 20 tags, each up to 100 characters"
+     },
+     {
+      "row": 9,
+      "message": "The answer must name existing option keys (multi-choice: A,C)"
+     },
+     {
+      "row": 10,
+      "message": "A cell exceeds 20,000 characters"
+     }
+    ]
+   }
+  },
+  {
+   "name": "json-not-array",
+   "filename": "questions.json",
+   "text": "{\"question\": \"x\"}",
+   "error": "JSON must contain an array of question objects"
+  },
+  {
+   "name": "json-empty",
+   "filename": "questions.json",
+   "text": "[]",
+   "error": "The file contains no questions"
+  },
+  {
+   "name": "csv-chinese",
+   "filename": "questions.csv",
+   "text": "题目,题型,A,B,答案\n哪一个正确,单选,一,二,B\n",
+   "result": {
+    "questions": [
+     {
+      "question": "哪一个正确",
+      "question_type": "single_choice",
+      "options": {
+       "A": "一",
+       "B": "二"
+      },
+      "correct_answer": "B",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:1cb7309b1f89c7db0c31d83df4cf3d006f290e213f69761e715fdf161c2004f5"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "csv-quoted",
+   "filename": "questions.csv",
+   "text": "question,options,answer,explanation\r\n\"Which, with comma?\",\"[\"\"yes\"\",\"\"no\"\"]\",A,\"line one\r\nline two\"\r\n\"Tuple \"\"immutable\"\"?\",,true,\r\n",
+   "result": {
+    "questions": [
+     {
+      "question": "Which, with comma?",
+      "question_type": "single_choice",
+      "options": {
+       "A": "yes",
+       "B": "no"
+      },
+      "correct_answer": "A",
+      "explanation": "line one\r\nline two",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:c53db62aa078717a0be812297d93756f43617234d6d134d71740e432ade58007"
+     },
+     {
+      "question": "Tuple \"immutable\"?",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "true",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:91a22cc2748c44ca09aaee3d88b8665e56377575ce9705c8855833e03cc55a33"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "csv-semicolon",
+   "filename": "questions.csv",
+   "text": "question;type;a;b;c;answer\nWhich keeps order?;单选;set;list;dict;B\nWhich are mutable?;多选;list;tuple;dict;a,c\n",
+   "result": {
+    "questions": [
+     {
+      "question": "Which keeps order?",
+      "question_type": "single_choice",
+      "options": {
+       "A": "set",
+       "B": "list",
+       "C": "dict"
+      },
+      "correct_answer": "B",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:2d85666cdc9da9700c44a1471656cde5b320a66723a1400d2acb3ea753a81177"
+     },
+     {
+      "question": "Which are mutable?",
+      "question_type": "multi_choice",
+      "options": {
+       "A": "list",
+       "B": "tuple",
+       "C": "dict"
+      },
+      "correct_answer": "A,C",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:858af75aa1542f9defe700006444efaaddeae79ac21a56da3d8672af5e5ad6e5"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "tsv-basic",
+   "filename": "questions.tsv",
+   "text": "question\ttype\tanswer\ttags\nExplain recursion\tshort_answer\tA function calling itself\trecursion, functions\n\n\nIs 0 falsy?\ttrue_false\tyes\t\n",
+   "result": {
+    "questions": [
+     {
+      "question": "Explain recursion",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "A function calling itself",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [
+       "recursion",
+       "functions"
+      ],
+      "question_id": "import:1cd77fe5142d45bff31f415aa14c73c2fa15853a99d809942663a4916a5a2a10"
+     }
+    ],
+    "errors": [
+     {
+      "row": 5,
+      "message": "A true/false answer must be true or false"
+     }
+    ]
+   }
+  },
+  {
+   "name": "csv-dup-header",
+   "filename": "questions.csv",
+   "text": "question,Question,answer\nx,y,z\n",
+   "error": "Column names must be unique"
+  },
+  {
+   "name": "csv-single-column",
+   "filename": "questions.csv",
+   "text": "question\nhello\n",
+   "result": {
+    "questions": [],
+    "errors": [
+     {
+      "row": 2,
+      "message": "Question and correct answer are required"
+     }
+    ]
+   }
+  },
+  {
+   "name": "csv-ragged",
+   "filename": "questions.csv",
+   "text": "question,answer,a,b\nshort row,A\nlong row,A,one,two,three,four\n",
+   "result": {
+    "questions": [
+     {
+      "question": "short row",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "A",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:33178fdbabe7b93f9f293aacb1f9894de49d4c5bf72e47597453c0d85249607c"
+     },
+     {
+      "question": "long row",
+      "question_type": "single_choice",
+      "options": {
+       "A": "one",
+       "B": "two"
+      },
+      "correct_answer": "A",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:3ed764a985ed86c23a51834a56dcbfef9590b7a4b5cb3f733280a9822aa4ec87"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "csv-unclosed-quote",
+   "filename": "questions.csv",
+   "text": "question,answer\n\"never closed,A\n",
+   "result": {
+    "questions": [],
+    "errors": [
+     {
+      "row": 2,
+      "message": "Question and correct answer are required"
+     }
+    ]
+   }
+  },
+  {
+   "name": "csv-lone-cr",
+   "filename": "questions.csv",
+   "text": "question,answer\rQ1,A1\rQ2,A2",
+   "result": {
+    "questions": [
+     {
+      "question": "Q1",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "A1",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:236c1048b4d3334e9412c7d6d0de6e67ce40aaa46829cb5bceba302a3dd34a3f"
+     },
+     {
+      "question": "Q2",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "A2",
+      "explanation": "",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:c636b2afb22a40f68ada8170253598474ba341908035a7d6ee4ad0b1920dc38f"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "csv-space-after-comma",
+   "filename": "questions.csv",
+   "text": "question, answer, explanation\n\"Q1\", \"A1\", \"E1\"\n\"Q2\", \"A2\", \"E2\"\n",
+   "result": {
+    "questions": [
+     {
+      "question": "Q1",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "A1",
+      "explanation": "E1",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:236c1048b4d3334e9412c7d6d0de6e67ce40aaa46829cb5bceba302a3dd34a3f"
+     },
+     {
+      "question": "Q2",
+      "question_type": "short_answer",
+      "options": {},
+      "correct_answer": "A2",
+      "explanation": "E2",
+      "difficulty": "",
+      "user_answer": "",
+      "tags": [],
+      "question_id": "import:c636b2afb22a40f68ada8170253598474ba341908035a7d6ee4ad0b1920dc38f"
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "csv-header-only",
+   "filename": "questions.csv",
+   "text": "question,answer\n",
+   "error": "The file contains no questions"
+  },
+  {
+   "name": "unsupported",
+   "filename": "questions.txt",
+   "text": "question,answer\n",
+   "error": "Supported formats: .xlsx, .csv, .tsv and .json"
+  }
+ ],
+ "checks": [
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "B",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "b",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": " set ",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "B. set",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "B) set",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "A",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "A,B",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "single_choice",
+    "options": {
+     "A": "list",
+     "B": "set"
+    },
+    "correct_answer": "B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:0cfa5ddabdbc3367760434d82d77f3ecc7765b0c16d9ae0d410b4ffe27330df8"
+   },
+   "answer": "SET",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "A,B",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "B,A",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "ab",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "a b",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "A",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "A,B,C",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "A；B",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "append",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "multi_choice",
+    "options": {
+     "A": "append",
+     "B": "sort",
+     "C": "sorted"
+    },
+    "correct_answer": "A,B",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:17fe17ddfd5f3314066c33e7123a2c8b27598911e93e229f10a0ea2e543ab08c"
+   },
+   "answer": "BA",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "true_false",
+    "options": {
+     "T": "True",
+     "F": "False"
+    },
+    "correct_answer": "T",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:4b49bfff538ef733f571e67327a04d63c7b8861744275b9c9d03fa16a265c0ce"
+   },
+   "answer": "T",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "true_false",
+    "options": {
+     "T": "True",
+     "F": "False"
+    },
+    "correct_answer": "T",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:4b49bfff538ef733f571e67327a04d63c7b8861744275b9c9d03fa16a265c0ce"
+   },
+   "answer": "t",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "true_false",
+    "options": {
+     "T": "True",
+     "F": "False"
+    },
+    "correct_answer": "T",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:4b49bfff538ef733f571e67327a04d63c7b8861744275b9c9d03fa16a265c0ce"
+   },
+   "answer": "True",
+   "result": true
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "true_false",
+    "options": {
+     "T": "True",
+     "F": "False"
+    },
+    "correct_answer": "T",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:4b49bfff538ef733f571e67327a04d63c7b8861744275b9c9d03fa16a265c0ce"
+   },
+   "answer": "F",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "true_false",
+    "options": {
+     "T": "True",
+     "F": "False"
+    },
+    "correct_answer": "T",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:4b49bfff538ef733f571e67327a04d63c7b8861744275b9c9d03fa16a265c0ce"
+   },
+   "answer": "false",
+   "result": false
+  },
+  {
+   "entry": {
+    "question": "哪个类型可以去重？",
+    "question_type": "short_answer",
+    "options": {},
+    "correct_answer": "说明集合性质",
+    "explanation": "集合元素唯一",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [
+     "集合"
+    ],
+    "question_id": "import:6e2059e75262b873739e788bd7c6aabd0d426933521d74a26bdcfa4ccc483a84"
+   },
+   "answer": "我的解释",
+   "result": null
+  },
+  {
+   "entry": {
+    "question": "len([1,2]) = ___",
+    "question_type": "fill_blank",
+    "options": {},
+    "correct_answer": "2",
+    "explanation": "",
+    "difficulty": "",
+    "user_answer": "",
+    "tags": [],
+    "question_id": "import:5dae7104acfe84d89f1a2eb46d9fe0f96b2966978627d86b203ae799e20dff10"
+   },
+   "answer": "2",
+   "result": null
+  },
+  {
+   "entry": {
+    "question_type": "single_choice",
+    "options_json": "{\"A\": \"x\", \"B\": \"y\"}",
+    "correct_answer": "B"
+   },
+   "answer": "y",
+   "result": true
+  },
+  {
+   "entry": {
+    "question_type": "single_choice",
+    "options": {
+     "A": "x"
+    },
+    "correct_answer": "Z"
+   },
+   "answer": "Z",
+   "result": null
+  }
+ ],
+ "schedules": [
+  {
+   "state": {},
+   "rating": "good",
+   "now": 1793156400.0,
+   "result": {
+    "interval_days": 3.0,
+    "ease": 2.5,
+    "streak": 1,
+    "lapses": 0,
+    "due_at": 1793415600.0,
+    "last_review_at": 1793156400.0,
+    "review_count": 1,
+    "version": 1
+   }
+  },
+  {
+   "state": {
+    "interval_days": 3.0,
+    "ease": 2.5,
+    "streak": 1,
+    "lapses": 0,
+    "due_at": 1793415600.0,
+    "last_review_at": 1793156400.0,
+    "review_count": 1,
+    "version": 1
+   },
+   "rating": "good",
+   "now": 1793415600.0,
+   "result": {
+    "interval_days": 7.5,
+    "ease": 2.5,
+    "streak": 2,
+    "lapses": 0,
+    "due_at": 1794063600.0,
+    "last_review_at": 1793415600.0,
+    "review_count": 2,
+    "version": 2
+   }
+  },
+  {
+   "state": {
+    "interval_days": 7.5,
+    "ease": 2.5,
+    "streak": 2,
+    "lapses": 0,
+    "due_at": 1794063600.0,
+    "last_review_at": 1793415600.0,
+    "review_count": 2,
+    "version": 2
+   },
+   "rating": "hard",
+   "now": 1794063600.0,
+   "result": {
+    "interval_days": 9.0,
+    "ease": 2.35,
+    "streak": 0,
+    "lapses": 0,
+    "due_at": 1794841200.0,
+    "last_review_at": 1794063600.0,
+    "review_count": 3,
+    "version": 3
+   }
+  },
+  {
+   "state": {
+    "interval_days": 9.0,
+    "ease": 2.35,
+    "streak": 0,
+    "lapses": 0,
+    "due_at": 1794841200.0,
+    "last_review_at": 1794063600.0,
+    "review_count": 3,
+    "version": 3
+   },
+   "rating": "again",
+   "now": 1794841200.0,
+   "result": {
+    "interval_days": 0.007,
+    "ease": 2.15,
+    "streak": 0,
+    "lapses": 1,
+    "due_at": 1794841804.8,
+    "last_review_at": 1794841200.0,
+    "review_count": 4,
+    "version": 4
+   }
+  },
+  {
+   "state": {
+    "interval_days": 0.007,
+    "ease": 2.15,
+    "streak": 0,
+    "lapses": 1,
+    "due_at": 1794841804.8,
+    "last_review_at": 1794841200.0,
+    "review_count": 4,
+    "version": 4
+   },
+   "rating": "good",
+   "now": 1794841804.8,
+   "result": {
+    "interval_days": 3.0,
+    "ease": 2.15,
+    "streak": 1,
+    "lapses": 1,
+    "due_at": 1795101004.8,
+    "last_review_at": 1794841804.8,
+    "review_count": 5,
+    "version": 5
+   }
+  },
+  {
+   "state": {
+    "interval_days": 3.0,
+    "ease": 2.15,
+    "streak": 1,
+    "lapses": 1,
+    "due_at": 1795101004.8,
+    "last_review_at": 1794841804.8,
+    "review_count": 5,
+    "version": 5
+   },
+   "rating": "easy",
+   "now": 1795101004.8,
+   "result": {
+    "interval_days": 8.385,
+    "ease": 2.3,
+    "streak": 2,
+    "lapses": 1,
+    "due_at": 1795825468.8,
+    "last_review_at": 1795101004.8,
+    "review_count": 6,
+    "version": 6
+   }
+  },
+  {
+   "state": {
+    "interval_days": 8.385,
+    "ease": 2.3,
+    "streak": 2,
+    "lapses": 1,
+    "due_at": 1795825468.8,
+    "last_review_at": 1795101004.8,
+    "review_count": 6,
+    "version": 6
+   },
+   "rating": "easy",
+   "now": 1795825468.8,
+   "result": {
+    "interval_days": 25.071,
+    "ease": 2.4499999999999997,
+    "streak": 3,
+    "lapses": 1,
+    "due_at": 1797991603.2,
+    "last_review_at": 1795825468.8,
+    "review_count": 7,
+    "version": 7
+   }
+  },
+  {
+   "state": {
+    "interval_days": 25.071,
+    "ease": 2.4499999999999997,
+    "streak": 3,
+    "lapses": 1,
+    "due_at": 1797991603.2,
+    "last_review_at": 1795825468.8,
+    "review_count": 7,
+    "version": 7
+   },
+   "rating": "easy",
+   "now": 1797991603.2,
+   "result": {
+    "interval_days": 79.851,
+    "ease": 2.5999999999999996,
+    "streak": 4,
+    "lapses": 1,
+    "due_at": 1804890729.6000001,
+    "last_review_at": 1797991603.2,
+    "review_count": 8,
+    "version": 8
+   }
+  },
+  {
+   "state": {
+    "interval_days": 79.851,
+    "ease": 2.5999999999999996,
+    "streak": 4,
+    "lapses": 1,
+    "due_at": 1804890729.6000001,
+    "last_review_at": 1797991603.2,
+    "review_count": 8,
+    "version": 8
+   },
+   "rating": "easy",
+   "now": 1804890729.6000001,
+   "result": {
+    "interval_days": 269.896,
+    "ease": 2.7499999999999996,
+    "streak": 5,
+    "lapses": 1,
+    "due_at": 1828209744.0000002,
+    "last_review_at": 1804890729.6000001,
+    "review_count": 9,
+    "version": 9
+   }
+  },
+  {
+   "state": {
+    "interval_days": 269.896,
+    "ease": 2.7499999999999996,
+    "streak": 5,
+    "lapses": 1,
+    "due_at": 1828209744.0000002,
+    "last_review_at": 1804890729.6000001,
+    "review_count": 9,
+    "version": 9
+   },
+   "rating": "easy",
+   "now": 1828209744.0000002,
+   "result": {
+    "interval_days": 365.0,
+    "ease": 2.8999999999999995,
+    "streak": 6,
+    "lapses": 1,
+    "due_at": 1859745744.0000002,
+    "last_review_at": 1828209744.0000002,
+    "review_count": 10,
+    "version": 10
+   }
+  },
+  {
+   "state": {
+    "interval_days": 1.0625,
+    "ease": 2.5,
+    "review_count": 3
+   },
+   "rating": "hard",
+   "now": 1793156400,
+   "result": {
+    "interval_days": 1.275,
+    "ease": 2.35,
+    "streak": 0,
+    "lapses": 0,
+    "due_at": 1793266560.0,
+    "last_review_at": 1793156400,
+    "review_count": 4,
+    "version": 1
+   }
+  },
+  {
+   "state": {
+    "interval_days": 7.05,
+    "ease": 2.35,
+    "review_count": 2,
+    "version": 2
+   },
+   "rating": "good",
+   "now": 1793156400,
+   "result": {
+    "interval_days": 16.567,
+    "ease": 2.35,
+    "streak": 1,
+    "lapses": 0,
+    "due_at": 1794587788.8,
+    "last_review_at": 1793156400,
+    "review_count": 3,
+    "version": 3
+   }
+  },
+  {
+   "state": {
+    "interval_days": 300,
+    "ease": 3.0,
+    "review_count": 9
+   },
+   "rating": "easy",
+   "now": 1793156400,
+   "result": {
+    "interval_days": 365.0,
+    "ease": 3.0,
+    "streak": 1,
+    "lapses": 0,
+    "due_at": 1824692400.0,
+    "last_review_at": 1793156400,
+    "review_count": 10,
+    "version": 1
+   }
+  },
+  {
+   "state": {},
+   "rating": "easy",
+   "now": 1793156400,
+   "result": {
+    "interval_days": 3.9,
+    "ease": 2.65,
+    "streak": 1,
+    "lapses": 0,
+    "due_at": 1793493360.0,
+    "last_review_at": 1793156400,
+    "review_count": 1,
+    "version": 1
+   }
+  },
+  {
+   "state": {
+    "ease": 1.3
+   },
+   "rating": "again",
+   "now": 1793156400,
+   "result": {
+    "interval_days": 0.007,
+    "ease": 1.3,
+    "streak": 0,
+    "lapses": 1,
+    "due_at": 1793157004.8,
+    "last_review_at": 1793156400,
+    "review_count": 1,
+    "version": 1
+   }
+  }
+ ],
+ "dayBounds": [
+  {
+   "timezone": "America/New_York",
+   "now": 1793548800,
+   "result": [
+    1793505600.0,
+    1793595600.0
+   ]
+  },
+  {
+   "timezone": "Asia/Shanghai",
+   "now": 1793156400,
+   "result": [
+    1793116800.0,
+    1793203200.0
+   ]
+  },
+  {
+   "timezone": "Europe/Berlin",
+   "now": 1792886400,
+   "result": [
+    1792879200.0,
+    1792969200.0
+   ]
+  }
+ ]
+}

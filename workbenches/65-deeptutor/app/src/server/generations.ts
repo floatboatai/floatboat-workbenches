@@ -1,16 +1,22 @@
 import type { DatabaseSync } from "node:sqlite";
 import { boundedText, isRecord } from "../contracts/project.ts";
+import { idValue, questionsValue, type Question } from "../contracts/tutor.ts";
 import {
   generationValue,
-  idValue,
-  questionsValue,
-  type Question,
+  generationOptionsValue,
   type Generation,
-} from "../contracts/tutor.ts";
+  type GenerationOptions,
+} from "../contracts/generation.ts";
+export interface GenerationInput {
+  lesson: string;
+  goal: string;
+  options: GenerationOptions;
+  avoid: string[];
+}
 import { StoreError } from "./store.ts";
 export function createGenerations(
   db: DatabaseSync,
-  generate: (lesson: string, goal: string, id: string) => Promise<Question[]>,
+  generate: (input: GenerationInput, id: string) => Promise<Question[]>,
 ) {
   db.prepare(
     "UPDATE tutor_generations SET status='interrupted',error='生成进程中断，已保留输入。请先核对记录，再显式建立新任务。' WHERE status='running'",
@@ -38,7 +44,14 @@ export function createGenerations(
       lesson = boundedText(raw.lesson, 40000),
       goal = boundedText(raw.goal, 2000);
     if (!lesson.trim()) throw new Error("请先填写课程讲义");
-    const input = JSON.stringify({ lesson, goal }),
+    if (raw.avoid !== undefined && (!Array.isArray(raw.avoid) || raw.avoid.length > 60))
+      throw new Error("已有题目列表无效");
+    const avoid = (raw.avoid ?? []).map((x: unknown) => boundedText(x, 400));
+    // Older clients sent only lesson+goal; keep their stored input byte-identical.
+    const options =
+        raw.options === undefined ? undefined : generationOptionsValue(raw.options),
+      record = options ? { lesson, goal, options, avoid } : { lesson, goal };
+    const input = JSON.stringify(record),
       existing = db
         .prepare("SELECT input FROM tutor_generations WHERE id=?")
         .get(id);
@@ -53,7 +66,12 @@ export function createGenerations(
     ).run(id, input, now, now);
     const task = (async () => {
       try {
-        const result = questionsValue(await generate(lesson, goal, id));
+        const result = questionsValue(
+          await generate(
+            { lesson, goal, options: generationOptionsValue(options, { count: 3, kind: "mixed", difficulty: "mixed" }), avoid },
+            id,
+          ),
+        );
         db.prepare(
           "UPDATE tutor_generations SET status='completed',questions=?,updated_at=? WHERE id=? AND status='running'",
         ).run(JSON.stringify(result), new Date().toISOString(), id);

@@ -1,5 +1,4 @@
 import { useNavigation } from "./navigation.ts";
-import { restoreDraftData } from "../contracts/tutor.ts";
 import { decodeProjectImport } from "../contracts/import-project.ts";
 import { useEffect, useRef, useState } from "react";
 import { useProjects, request, download } from "./workspace.tsx";
@@ -7,16 +6,42 @@ import { isRecord } from "../contracts/project.ts";
 import {
   seed,
   projectValue,
+  restoreDraftData,
   questionsValue,
   questionValue,
   reviewValue,
   applyReview,
   courseWithQuestions,
-  generationValue,
+  courseAppendingQuestions,
   idValue,
-  type Generation,
+  type Course,
   type Question,
 } from "../contracts/tutor.ts";
+import {
+  generationValue,
+  generationOptionsValue,
+  defaultGenerationOptions,
+  type Generation,
+  type GenerationOptions,
+} from "../contracts/generation.ts";
+import { useTutoring } from "./useTutoring.ts";
+import { decodeBankFile, BANK_DRAFT_LIMIT } from "./bank-file.ts";
+
+export type Filter = "all" | "mistakes" | "due";
+export type QuestionState = "new" | "answered" | "correct" | "wrong" | "self" | "due" | "planned";
+export const blankCourse: Course = {
+  lesson: "# 新课程\n\n把讲义粘贴到这里，或在右侧导入题库。",
+  goal: "",
+  notes: "",
+  questions: [],
+  selected: "",
+  answers: {},
+  checks: {},
+  schedules: {},
+  events: [],
+  tutoring: {},
+};
+
 export function useTutorDesk() {
   const base = useProjects(seed, projectValue, "Python · 函数与集合", {
     storageKey: "deeptutor-course-v1",
@@ -26,11 +51,17 @@ export function useTutorDesk() {
   const p = {
     ...base,
     busy: base.busy || navigation.transitioning,
-    fresh: () => navigation.run(() => base.fresh()),
+    fresh: () =>
+      navigation.run(async () => {
+        const ok = await base.fresh();
+        if (ok) {
+          base.setData(structuredClone(blankCourse));
+          base.setTitle("新课程");
+        }
+        return ok;
+      }),
     open: (...args: Parameters<typeof base.open>) =>
       navigation.run(() => base.open(...args)),
-    replace: (...args: Parameters<typeof base.replace>) =>
-      navigation.run(() => base.replace(...args)),
     setData: (value: Parameters<typeof base.setData>[0]) => {
       if (!navigation.active.current) base.setData(value);
     },
@@ -45,24 +76,19 @@ export function useTutorDesk() {
   };
 
   const [generationError, setGenerationError] = useState("");
-  const [bankOpen, setBankOpen] = useState(false),
-    [lessonEdit, setLessonEdit] = useState(false),
+  const [bankErrors, setBankErrors] = useState<{ row: number; message: string }[]>([]);
+  const [lessonEdit, setLessonEdit] = useState(false),
     [busy, setBusy] = useState(false),
-    [status, setStatus] = useState({
-      practice: false,
-      model: false,
-      message: "正在检查练习服务…",
-    }),
-    [filter, setFilter] = useState("all"),
+    [model, setModel] = useState({ available: false, checked: false }),
+    [filter, setFilter] = useState<Filter>("all"),
     [clock, setClock] = useState(Date.now());
   useEffect(() => {
     setGenerationError("");
+    setBankErrors([]);
   }, [p.documentKey]);
   const epoch = useRef(p.documentKey);
   epoch.current = p.documentKey;
-  const operation = useRef(false),
-    file = useRef<HTMLInputElement>(null),
-    bankFile = useRef<HTMLInputElement>(null);
+  const operation = useRef(false);
   const mutable = !p.loading && !p.busy;
   const question =
     p.data.questions.find((q) => q.question_id === p.data.selected) ??
@@ -92,42 +118,49 @@ export function useTutorDesk() {
   try {
     if (p.draft.generation) generation = generationValue(p.draft.generation);
   } catch {}
+  let generationOptions: GenerationOptions = defaultGenerationOptions;
+  try {
+    generationOptions = generationOptionsValue(p.draft.generationOptions);
+  } catch {}
   const generationId =
     typeof p.draft.generationId === "string" ? p.draft.generationId : "";
   const pendingReview = isRecord(p.draft.pendingReview)
     ? p.draft.pendingReview
     : null;
-  const shown = p.data.questions.filter(
-    (q) =>
-      filter === "all" ||
-      (filter === "mistakes"
-        ? p.data.checks[q.question_id]?.correct === false
-        : !!p.data.schedules[q.question_id] &&
-          p.data.schedules[q.question_id].due_at <= clock / 1000),
-  );
+  const now = clock / 1000;
+  function stateOf(q: Question): QuestionState {
+    const plan = p.data.schedules[q.question_id],
+      c = p.data.checks[q.question_id],
+      last = [...p.data.events].reverse().find((e) => e.questionId === q.question_id);
+    if (plan && plan.due_at <= now) return "due";
+    if (c?.correct === false || last?.rating === "again") return "wrong";
+    if (plan) return "planned";
+    if (c?.correct === true) return "correct";
+    if (c) return "self";
+    return p.data.answers[q.question_id] ? "answered" : "new";
+  }
+  const states = new Map(p.data.questions.map((q) => [q.question_id, stateOf(q)]));
+  const shown = p.data.questions.filter((q) => {
+    const s = states.get(q.question_id);
+    return filter === "all" || (filter === "mistakes" ? s === "wrong" : s === "due");
+  });
   useEffect(() => {
     const timer = setInterval(() => setClock(Date.now()), 60000);
     return () => clearInterval(timer);
   }, []);
-  async function checkStatus() {
-    const results = await Promise.allSettled([
-      request("/api/practice/status"),
-      request("/api/model-status"),
-    ]);
-    const a = results[0].status === "fulfilled" ? results[0].value : null,
-      b = results[1].status === "fulfilled" ? results[1].value : null;
-    setStatus({
-      practice: isRecord(a) && a.available === true,
-      model: isRecord(b) && b.available === true,
-      message:
-        isRecord(a) && typeof a.message === "string"
-          ? a.message
-          : "练习服务未连接",
-    });
+  async function checkModel() {
+    try {
+      const r = await request("/api/model-status");
+      setModel({ available: isRecord(r) && r.available === true, checked: true });
+    } catch {
+      setModel({ available: false, checked: true });
+    }
   }
   useEffect(() => {
-    void checkStatus();
+    void checkModel();
   }, []);
+  const tutoring = useTutoring({ p, question, answer, check: currentCheck, epoch });
+
   async function pollGeneration(id = generationId, key = epoch.current) {
     if (!id) return;
     try {
@@ -144,7 +177,8 @@ export function useTutorDesk() {
     }
   }
   useEffect(() => {
-    if (!generationId || (generation && generation.status !== "running"))
+    // While the submit request is in flight the task may not exist yet.
+    if (!generationId || (!generation && busy) || (generation && generation.status !== "running"))
       return;
     const key = epoch.current;
     void pollGeneration(generationId, key);
@@ -152,11 +186,13 @@ export function useTutorDesk() {
       void pollGeneration(generationId, key);
     }, 2000);
     return () => clearInterval(timer);
-  }, [generationId, p.documentKey, generation?.status]);
+  }, [generationId, p.documentKey, generation?.status, !generation && busy]);
+
   async function normalizeBank(text = rawBank, format = bankFormat) {
     if (operation.current) return;
     operation.current = true;
     setBusy(true);
+    setBankErrors([]);
     const key = epoch.current;
     p.setError("");
     try {
@@ -164,10 +200,24 @@ export function useTutorDesk() {
         method: "POST",
         body: JSON.stringify({ text, format }),
       });
-      if (!isRecord(raw)) throw new Error("题库解析响应无效");
+      if (!isRecord(raw) || !Array.isArray(raw.errors)) throw new Error("题库解析响应无效");
+      if (epoch.current !== key) return;
+      if (raw.errors.length) {
+        setBankErrors(
+          raw.errors.filter(isRecord).map((e) => ({
+            row: Number(e.row),
+            message: String(e.message),
+          })),
+        );
+        p.setDraft((d) => {
+          const n = { ...d };
+          delete n.bankCandidate;
+          return n;
+        });
+        return;
+      }
       const q = questionsValue(raw.questions);
-      if (epoch.current === key)
-        p.setDraft((d) => ({ ...d, bankCandidate: q }));
+      p.setDraft((d) => ({ ...d, bankCandidate: q }));
     } catch (e) {
       if (epoch.current === key) p.report(e);
     } finally {
@@ -175,28 +225,52 @@ export function useTutorDesk() {
       setBusy(false);
     }
   }
-  function adoptQuestions(q: Question[], kind: "bank" | "generated") {
-    if (!mutable || busy) return;
+  function adoptQuestions(
+    q: Question[],
+    kind: "bank" | "generated",
+    mode: "append" | "replace",
+  ) {
+    if (!mutable || busy) return false;
     if (
+      mode === "replace" &&
       (p.data.events.length || Object.keys(p.data.answers).length) &&
       !confirm(
-        "采用新题库会清空本课程的旧答案和复习计划。请先导出需要保留的课程。继续？",
+        "替换整套题会清空本课程的旧答案、讲解和复习计划。请先导出需要保留的课程。继续？",
       )
     )
-      return;
-    p.setData((d) => courseWithQuestions(d, q));
+      return false;
+    let added = q.length;
+    try {
+      const next =
+        mode === "append"
+          ? courseAppendingQuestions(p.data, q)
+          : courseWithQuestions(p.data, q);
+      added = next.questions.length - (mode === "append" ? p.data.questions.length : 0);
+      p.setData(() => next);
+    } catch (e) {
+      p.report(e);
+      return false;
+    }
     p.setDraft((d) => {
       const n = { ...d };
-      delete n.bankCandidate;
+      if (kind === "bank") delete n.bankCandidate;
       if (kind === "generated") {
         delete n.generation;
         delete n.generationId;
         delete n.pendingGeneration;
       }
-      delete n.pendingReview;
+      if (mode === "replace") delete n.pendingReview;
       return n;
     });
-    p.setNotice("新题库已采用，可以开始练习。");
+    p.setNotice(
+      mode === "append"
+        ? added
+          ? `已追加${added}道题${added < q.length ? `（${q.length - added}道与现有题目重复，已跳过）` : ""}，原有作答与复习保留。`
+          : "这些题目都已在练习册中，没有新增。"
+        : "新题库已采用，可以开始练习。",
+    );
+    setFilter("all");
+    return true;
   }
   async function checkAnswer() {
     if (!question || operation.current || !answer.trim()) return;
@@ -285,6 +359,12 @@ export function useTutorDesk() {
     }
     await sendReview(command);
   }
+  function setGenerationOptions(next: Partial<GenerationOptions>) {
+    p.setDraft((d) => ({
+      ...d,
+      generationOptions: { ...generationOptions, ...next },
+    }));
+  }
   async function submitGeneration(command?: Record<string, unknown>) {
     if (operation.current) return;
     setGenerationError("");
@@ -296,6 +376,8 @@ export function useTutorDesk() {
         id: crypto.randomUUID(),
         lesson: p.data.lesson,
         goal: p.data.goal,
+        options: generationOptions,
+        avoid: p.data.questions.slice(0, 60).map((q) => q.question.slice(0, 400)),
       };
       idValue(payload.id);
       if (
@@ -333,6 +415,15 @@ export function useTutorDesk() {
       setBusy(false);
     }
   }
+  function dismissGeneration() {
+    p.setDraft((x) => {
+      const n = { ...x };
+      delete n.generation;
+      delete n.generationId;
+      delete n.pendingGeneration;
+      return n;
+    });
+  }
   function exportCourse() {
     download(
       new Blob(
@@ -351,7 +442,7 @@ export function useTutorDesk() {
         ],
         { type: "application/json" },
       ),
-      "learning-course.project.json",
+      `${p.title.replace(/[\\/:*?"<>|]+/g, "-") || "course"}.course.json`,
     );
   }
   function exportBank() {
@@ -373,12 +464,12 @@ export function useTutorDesk() {
     );
   }
   async function importCourse(f: File) {
-    await navigation.run(async () => {
+    return navigation.run(async () => {
       try {
         if (f.size > 8 * 1024 * 1024) throw new Error("课程恢复文件超过8MB");
         const imported = decodeProjectImport(JSON.parse(await f.text()));
         if (!imported)
-          throw new Error("请导入完整课程或恢复工作稿；普通题库请用题库入口。");
+          throw new Error("请导入完整课程或恢复工作稿；题库请在“题库”中导入。");
         const ok = await base.replace(
           imported.data,
           imported.title,
@@ -387,8 +478,8 @@ export function useTutorDesk() {
         if (ok)
           base.setNotice(
             imported.archived
-              ? "课程已导入为新项目；旧生成与复习请求已保留为导入记录，不会执行。"
-              : "课程已导入为新项目，未完成编辑已保留。",
+              ? "课程已导入为新课程；旧生成与复习请求已保留为导入记录，不会执行。"
+              : "课程已导入为新课程，未完成编辑已保留。",
           );
         return ok;
       } catch (e) {
@@ -399,14 +490,22 @@ export function useTutorDesk() {
   }
   async function readBank(f: File) {
     try {
-      if (f.size > 350000) throw new Error("题库文件超过350KB");
-      const kind = f.name.split(".").pop()?.toLowerCase();
-      if (!kind || !["json", "csv", "tsv"].includes(kind))
-        throw new Error("选择JSON、CSV或TSV题库");
-      const text = await f.text();
-      p.setDraft((d) => ({ ...d, bankText: text, bankFormat: kind }));
-      setBankOpen(true);
-      await normalizeBank(text, kind);
+      const { text, format, encoding } = await decodeBankFile(f);
+      setBankErrors([]);
+      if (text.length <= BANK_DRAFT_LIMIT)
+        p.setDraft((d) => {
+          const n: Record<string, unknown> = { ...d, bankText: text, bankFormat: format };
+          delete n.bankTextOmitted;
+          return n;
+        });
+      else
+        p.setDraft((d) => {
+          const n: Record<string, unknown> = { ...d, bankFormat: format, bankTextOmitted: f.name.slice(0, 200) };
+          delete n.bankText;
+          return n;
+        });
+      if (encoding === "gb18030") p.setNotice("已按GB18030编码读取题库。");
+      await normalizeBank(text, format);
     } catch (e) {
       p.report(e);
     }
@@ -414,18 +513,15 @@ export function useTutorDesk() {
   return {
     p,
     generationError,
-    bankOpen,
-    setBankOpen,
+    bankErrors,
     lessonEdit,
     setLessonEdit,
     busy,
-    status,
-    checkStatus,
+    model,
+    checkModel,
     filter,
     setFilter,
     clock,
-    file,
-    bankFile,
     mutable,
     question,
     answer,
@@ -435,14 +531,19 @@ export function useTutorDesk() {
     bank,
     generation,
     generationId,
+    generationOptions,
+    setGenerationOptions,
     pendingReview,
     shown,
+    states,
+    tutoring,
     normalizeBank,
     adoptQuestions,
     checkAnswer,
     sendReview,
     review,
     submitGeneration,
+    dismissGeneration,
     pollGeneration,
     exportCourse,
     exportBank,
@@ -450,3 +551,4 @@ export function useTutorDesk() {
     readBank,
   };
 }
+export type Desk = ReturnType<typeof useTutorDesk>;

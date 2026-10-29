@@ -1,5 +1,5 @@
 import { boundedText, isRecord } from "./project.ts";
-import { example } from "./example.ts";
+import { example, lessonExample } from "./example.ts";
 export type Question = {
   question_id: string;
   question: string;
@@ -31,6 +31,14 @@ export type Review = {
   at: number;
   state: Schedule;
 };
+export type TutorTurn = {
+  role: "tutor" | "learner";
+  text: string;
+  at: number;
+};
+/** A tutoring thread about one checked answer (Host model explanation + follow-ups). */
+export type Tutoring = { answer: string; turns: TutorTurn[] };
+export const TUTOR_TURNS = 12;
 export type Course = {
   lesson: string;
   goal: string;
@@ -41,6 +49,7 @@ export type Course = {
   checks: Record<string, Check>;
   schedules: Record<string, Schedule>;
   events: Review[];
+  tutoring: Record<string, Tutoring>;
 };
 export function questionValue(v: unknown): Question {
   if (
@@ -96,13 +105,17 @@ export function questionValue(v: unknown): Question {
     user_answer: boundedText(v.user_answer, 5000),
   };
 }
+/** Upstream DeepTutor imports at most 500 rows; a course must fit a 900 KB project. */
+export const QUESTION_LIMIT = 500;
+export const BANK_BYTES = 700000;
+export const EVENT_LIMIT = 2000;
 export function questionsValue(v: unknown): Question[] {
   if (
     !Array.isArray(v) ||
-    v.length > 100 ||
-    new TextEncoder().encode(JSON.stringify(v)).length > 350000
+    v.length > QUESTION_LIMIT ||
+    new TextEncoder().encode(JSON.stringify(v)).length > BANK_BYTES
   )
-    throw new Error("每份课程最多100题、350KB");
+    throw new Error(`每份课程最多${QUESTION_LIMIT}题、规范化题库700KB`);
   const q = v.map(questionValue);
   if (new Set(q.map((x) => x.question_id)).size !== q.length)
     throw new Error("题目编号重复");
@@ -166,9 +179,10 @@ function decodeProject(v: unknown, working: boolean): Course {
     !isRecord(v.checks) ||
     !isRecord(v.schedules) ||
     !Array.isArray(v.events) ||
-    v.events.length > 500 ||
+    v.events.length > EVENT_LIMIT ||
+    (v.tutoring !== undefined && !isRecord(v.tutoring)) ||
     new TextEncoder().encode(JSON.stringify(v)).length >
-      (working ? 1600000 : 750000)
+      (working ? 1900000 : 900000)
   )
     throw new Error("课程格式或容量无效");
   const questions = questionsValue(v.questions),
@@ -192,6 +206,11 @@ function decodeProject(v: unknown, working: boolean): Course {
     if (!ids.has(id)) throw new Error("复习计划引用未知题目");
     schedules[id] = scheduleValue(s);
   }
+  const tutoring: Record<string, Tutoring> = {};
+  for (const [id, t] of Object.entries(isRecord(v.tutoring) ? v.tutoring : {})) {
+    if (!ids.has(id)) throw new Error("讲解记录引用未知题目");
+    tutoring[id] = tutoringValue(t);
+  }
   const events = v.events.map(reviewValue);
   if (
     events.some((e) => !ids.has(e.questionId)) ||
@@ -208,6 +227,27 @@ function decodeProject(v: unknown, working: boolean): Course {
     checks,
     schedules,
     events,
+    tutoring,
+  };
+}
+export function tutoringValue(v: unknown): Tutoring {
+  if (
+    !isRecord(v) ||
+    !Array.isArray(v.turns) ||
+    v.turns.length > TUTOR_TURNS
+  )
+    throw new Error("讲解记录无效");
+  return {
+    answer: boundedText(v.answer, 5000),
+    turns: v.turns.map((t) => {
+      if (!isRecord(t) || (t.role !== "tutor" && t.role !== "learner"))
+        throw new Error("讲解记录无效");
+      return {
+        role: t.role,
+        text: boundedText(t.text, 8000),
+        at: num(t.at),
+      };
+    }),
   };
 }
 export function applyReview(course: Course, event: Review): Course {
@@ -218,8 +258,8 @@ export function applyReview(course: Course, event: Review): Course {
     (previous?.version ?? 0) + 1 !== event.state.version
   )
     throw new Error("复习状态已改变，请核对当前计划。");
-  if (course.events.length >= 500)
-    throw new Error("已达到500次复习记录，请导出后新建课程。");
+  if (course.events.length >= EVENT_LIMIT)
+    throw new Error(`已达到${EVENT_LIMIT}次复习记录，请导出后新建课程。`);
   return {
     ...course,
     schedules: { ...course.schedules, [event.questionId]: event.state },
@@ -228,9 +268,8 @@ export function applyReview(course: Course, event: Review): Course {
 }
 const questions = questionsValue(example);
 export const seed: Course = {
-  lesson:
-    "# Python：函数与集合\n\n函数把可复用的计算封装起来。参数是输入，return把结果交还给调用者；print只显示内容。\n\nlist有顺序且允许重复，set保存唯一元素，tuple不可变。list.append与list.sort原地修改；sorted返回新的排序列表，len读取长度。\n\n练习目标：识别集合的用途，解释返回值，并判断哪些操作改变原对象。",
-  goal: "理解函数返回值与可变集合，能举例说明。",
+  lesson: lessonExample,
+  goal: "理解函数返回值、默认参数与可变集合，能举例说明哪些操作会改变原对象。",
   notes: "",
   questions,
   selected: questions[0].question_id,
@@ -238,6 +277,7 @@ export const seed: Course = {
   checks: {},
   schedules: {},
   events: [],
+  tutoring: {},
 };
 export function courseWithQuestions(
   base: Course,
@@ -255,48 +295,21 @@ export function courseWithQuestions(
     checks: {},
     schedules: {},
     events: [],
+    tutoring: {},
   };
 }
-export function parseGenerated(text: string, finish: string) {
-  if (finish !== "STOP" || text.length > 100000)
-    throw new Error("模型输出未完整结束，请调整讲义后另建生成任务。");
-  const t = text.trim(),
-    f = /^```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n```$/i.exec(t);
-  let value: unknown;
-  try {
-    value = JSON.parse(f ? f[1] : t);
-  } catch {
-    throw new Error("模型未返回完整题库JSON，输入已保留。");
-  }
-  if (!Array.isArray(value) || value.length < 1 || value.length > 8)
-    throw new Error("模型题库需要1–8题。");
-  return value;
-}
-export type Generation = {
-  id: string;
-  status: "running" | "completed" | "failed" | "interrupted";
-  lesson: string;
-  goal: string;
-  questions: Question[];
-  error: string;
-  createdAt: string;
-};
-export function generationValue(v: unknown): Generation {
-  if (
-    !isRecord(v) ||
-    !["running", "completed", "failed", "interrupted"].includes(
-      String(v.status),
-    )
-  )
-    throw new Error("生成记录无效");
+/** Append adopted questions to an existing course, keeping practice history. */
+export function courseAppendingQuestions(
+  base: Course,
+  added: Question[],
+): Course {
+  const known = new Set(base.questions.map((q) => q.question_id));
+  const fresh = added.filter((q) => !known.has(q.question_id));
+  const questions = questionsValue([...base.questions, ...fresh]);
   return {
-    id: idValue(v.id),
-    status: v.status as Generation["status"],
-    lesson: boundedText(v.lesson, 40000),
-    goal: boundedText(v.goal, 2000),
-    questions: questionsValue(v.questions),
-    error: boundedText(v.error, 1000),
-    createdAt: boundedText(v.createdAt, 50),
+    ...base,
+    questions,
+    selected: fresh[0]?.question_id ?? base.selected,
   };
 }
 

@@ -10,10 +10,10 @@ import {
   questionValue,
   questionsValue,
   applyReview,
-  parseGenerated,
   scheduleValue,
   type Review,
 } from "../src/contracts/tutor.ts";
+import { parseGenerated } from "../src/contracts/generation.ts";
 import { createGenerations } from "../src/server/generations.ts";
 import { createStore } from "../src/server/store.ts";
 const op = "00000000-0000-4000-8000-000000000001";

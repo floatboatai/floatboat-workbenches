@@ -1,32 +1,40 @@
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { WorkbenchHostError } from "../../sdk/host.mjs";
-import { parseGenerated } from "../contracts/tutor.ts";
+import { parseGenerated } from "../contracts/generation.ts";
 import { createGenerations } from "./generations.ts";
-import { normalizeBank } from "./practice.ts";
+import { strictBank } from "./practice.ts";
 import { StoreError } from "./store.ts";
+import {
+  MODEL,
+  generationPrompt,
+  tutorPrompt,
+  tutorRequestValue,
+} from "./prompts.ts";
+
+function hostFailure(e: unknown, what: string): never {
+  if (e instanceof WorkbenchHostError) {
+    const code = /^[A-Z0-9_]{1,80}$/.test(e.code) ? e.code : "HOST_ERROR";
+    throw new Error(
+      code === "HOST_NOT_CONNECTED"
+        ? `${what}需要Floatboat客户端：请启动并登录Floatboat，然后点“重新检查”。输入已保留。`
+        : `模型请求未完成（${code}）。输入已保留，请检查Floatboat连接和模型设置。`,
+    );
+  }
+  throw e;
+}
+
 export function registerGeneration(app: WorkbenchServer) {
-  const tasks = createGenerations(app.database, async (lesson, goal, id) => {
+  const tasks = createGenerations(app.database, async (input, id) => {
     try {
-      const r = await app.host.llm.generateText(
-        {
-          model: "gemini-3.8-flash",
-          system:
-            '你是课程练习题编辑。仅根据讲义生成3道题，不添加讲义外事实。仅返回JSON数组，每项字段为question(题干)、question_type(single_choice或short_answer)、options(选项对象如{"A":"...","B":"..."}，简答为空对象)、correct_answer(单选为选项字母，简答为参考答案)、explanation(依据讲义的解释)、difficulty(基础/理解/应用)、tags(字符串数组)、user_answer(空字符串)。问题不重复，正确答案必须在选项中。',
-          prompt: `学习目标：${goal}\n\n讲义：\n${lesson}`,
-          maxOutputTokens: 6000,
-        },
-        { requestId: id, timeoutMs: 90000 },
-      );
-      const raw = parseGenerated(r.text, r.finishReason);
-      return await normalizeBank(JSON.stringify(raw), "json");
+      const options = generationPrompt(input);
+      const r = await app.host.llm.generateText(options, {
+        requestId: id,
+        timeoutMs: 150000,
+      });
+      const raw = parseGenerated(r.text, r.finishReason, input.options.count);
+      return strictBank(raw);
     } catch (e) {
-      if (e instanceof WorkbenchHostError) {
-        const code = /^[A-Z0-9_]{1,80}$/.test(e.code) ? e.code : "HOST_ERROR";
-        throw new Error(
-          `模型请求未完成（${code}）。输入与任务已保留，请检查Floatboat连接和模型设置。`,
-        );
-      }
-      throw e;
+      hostFailure(e, "出题");
     }
   });
   const fail = (e: unknown) =>
@@ -41,10 +49,10 @@ export function registerGeneration(app: WorkbenchServer) {
         available: r.capabilities.some(
           (x) => x.operation === "generateText" && x.status === "available",
         ),
-        model: "gemini-3.8-flash",
+        model: MODEL,
       };
     } catch {
-      return { available: false, model: "gemini-3.8-flash" };
+      return { available: false, model: MODEL };
     }
   });
   app.route("POST", "/api/generations", ({ body }) => {
@@ -57,6 +65,29 @@ export function registerGeneration(app: WorkbenchServer) {
   app.route("GET", "/api/generations/:id", ({ params }) => {
     try {
       return tasks.view(params.id);
+    } catch (e) {
+      return fail(e);
+    }
+  });
+  app.route("POST", "/api/tutor", async ({ body }) => {
+    try {
+      const request = tutorRequestValue(body);
+      try {
+        const r = await app.host.llm.generateText(tutorPrompt(request), {
+          requestId: request.id,
+          timeoutMs: 90000,
+        });
+        if (r.finishReason !== "STOP" || !r.text.trim())
+          throw new Error("导师回答没有完整结束，请重试。");
+        return {
+          id: request.id,
+          text: r.text.trim().slice(0, 8000),
+          model: r.model || MODEL,
+          at: Date.now() / 1000,
+        };
+      } catch (e) {
+        hostFailure(e, "导师讲解");
+      }
     } catch (e) {
       return fail(e);
     }

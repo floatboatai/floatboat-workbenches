@@ -76,11 +76,12 @@ test("working-copy restore preserves long unfinished answers beyond the formal m
     questions,
     selected: questions[0].question_id,
     answers: Object.fromEntries(
-      questions.map((q) => [q.question_id, "测".repeat(2600)]),
+      questions.map((q) => [q.question_id, "测".repeat(3200)]),
     ),
     checks: {},
     schedules: {},
     events: [],
+    tutoring: {},
   };
   assert.throws(() => projectValue(data));
   assert.deepEqual(restoreDraftData(data), data);
