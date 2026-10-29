@@ -2,12 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
-import type { AssetDocument } from "../contracts/asset";
+import type { AssetDocument, FileRef } from "../contracts/asset";
 import { loadGlb, dispose } from "./preview";
 import { readBytes } from "./files";
 type Vec = [number, number, number];
+export interface Pose {
+  translation?: [number, number, number];
+  quaternion?: [number, number, number, number];
+  scale?: [number, number, number];
+}
 interface Props {
   document: AssetDocument;
+  model: FileRef | null;
+  /** Live TRS overrides by node index (only applied while previewing the original). */
+  poses: Record<number, Pose>;
   resourceVersion: number;
   playing: boolean;
   disabled: boolean;
@@ -25,9 +33,26 @@ interface World {
   helper: T.Box3Helper;
   mixer: T.AnimationMixer | null;
   model: GLTF | null;
+  nodes: Map<number, { object: T.Object3D; t: T.Vector3; r: T.Quaternion; s: T.Vector3 }>;
+  posed: Set<number>;
   frame: number;
   paint: () => void;
   fit: () => void;
+}
+/** Applies live TRS edits; nodes whose edit was removed return to their loaded pose. */
+function applyPoses(w: World, poses: Record<number, Pose>) {
+  for (const index of new Set([...w.posed, ...Object.keys(poses).map(Number)])) {
+    const n = w.nodes.get(index),
+      p = poses[index];
+    if (!n) continue;
+    n.object.position.copy(n.t);
+    n.object.quaternion.copy(n.r);
+    n.object.scale.copy(n.s);
+    if (p?.translation) n.object.position.fromArray(p.translation);
+    if (p?.quaternion) n.object.quaternion.fromArray(p.quaternion);
+    if (p?.scale) n.object.scale.fromArray(p.scale);
+  }
+  w.posed = new Set(Object.keys(poses).map(Number));
 }
 export function Viewport(props: Props) {
   const host = useRef<HTMLDivElement>(null),
@@ -37,7 +62,7 @@ export function Viewport(props: Props) {
   const [error, setError] = useState(""),
     [loading, setLoading] = useState(false);
   const d = props.document,
-    source = d.view === "result" ? d.result : d.source;
+    source = props.model;
   useEffect(() => {
     if (!host.current) return;
     let renderer: T.WebGLRenderer;
@@ -85,6 +110,8 @@ export function Viewport(props: Props) {
       helper,
       mixer: null,
       model: null,
+      nodes: new Map(),
+      posed: new Set(),
       frame: 0,
       paint: () => {},
       fit: () => {},
@@ -184,6 +211,8 @@ export function Viewport(props: Props) {
     if (w.model) w.mixer?.uncacheRoot(w.model.scene);
     w.mixer = null;
     w.model = null;
+    w.nodes.clear();
+    w.posed.clear();
     dispose(w.root);
     w.root.clear();
     w.helper.visible = false;
@@ -199,6 +228,24 @@ export function Viewport(props: Props) {
         }
         w.model = g;
         w.root.add(g.scene);
+        g.scene.traverse((o) => {
+          const index = g.parser.associations.get(o)?.nodes;
+          if (typeof index === "number" && !w.nodes.has(index))
+            w.nodes.set(index, {
+              object: o,
+              t: o.position.clone(),
+              r: o.quaternion.clone(),
+              s: o.scale.clone(),
+            });
+        });
+        applyPoses(w, latest.current.poses);
+        // Depth range follows the model so thin parts do not z-fight at a 1e-3…1e8 range.
+        const size = new T.Box3().setFromObject(g.scene).getSize(new T.Vector3()).length();
+        if (Number.isFinite(size) && size > 0) {
+          w.camera.near = size / 2000;
+          w.camera.far = size * 200;
+          w.camera.updateProjectionMatrix();
+        }
         w.mixer = g.animations.length ? new T.AnimationMixer(g.scene) : null;
         const clip = g.animations[Number(latest.current.document.clip) || 0];
         if (w.mixer && clip) {
@@ -256,11 +303,19 @@ export function Viewport(props: Props) {
   }, [props.fit]);
   useEffect(() => {
     const w = world.current;
+    if (!w) return;
+    applyPoses(w, props.poses);
+    w.paint();
+  }, [props.poses]);
+  useEffect(() => {
+    const w = world.current;
     if (!w?.model) return;
-    const box = new T.Box3();
+    const box = new T.Box3(),
+      original = source?.id === d.source?.id;
     w.model.scene.updateMatrixWorld(true);
     w.model.scene.traverse((o) => {
       const association = w.model?.parser.associations.get(o);
+      if (!original) return;
       if (d.tab === "nodes" && association?.nodes === d.selected)
         box.expandByObject(o);
       if (d.tab === "materials" && o instanceof T.Mesh) {
@@ -277,7 +332,7 @@ export function Viewport(props: Props) {
     w.helper.box.copy(box);
     w.helper.visible = !box.isEmpty();
     w.paint();
-  }, [d.tab, d.selected, source?.id, loading]);
+  }, [d.tab, d.selected, source?.id, loading, props.poses]);
   return (
     <div
       className="viewport"

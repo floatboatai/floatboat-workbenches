@@ -1,18 +1,31 @@
 import { randomUUID } from "node:crypto";
-import { readFile, writeFile, rename, unlink } from "node:fs/promises";
+import { readFile, writeFile, rename, unlink, stat } from "node:fs/promises";
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
-import { fileRef, MAX_FILE, type FileRef } from "../contracts/asset.ts";
-import { isRecord } from "../contracts/project.ts";
-import { hash, inspect, readDocument } from "./native.ts";
-export function resourceStore(app: WorkbenchServer) {
-  const read = async (id: string) => {
+import {
+  documentRefs,
+  fileRef,
+  MAX_IMAGE,
+  type AssetDocument,
+  type FileRef,
+  type ImageRef,
+} from "../contracts/asset.ts";
+import { hash, readDocument } from "./model.ts";
+import { imageInfo } from "./images.ts";
+
+/**
+ * Content-addressed files under the manifest's writable `models/` directory.
+ * Models and replacement images share the store; each is validated on entry.
+ */
+export function resourceStore(app: Pick<WorkbenchServer, "resources">) {
+  const verified = new Set<string>();
+  const path = (id: string, intent: "read" | "write" = "read") => {
     if (!/^[a-f0-9]{64}$/.test(id)) throw Error("资源编号无效。");
-    return readFile(await app.resources.path("models", id));
+    return app.resources.path("models", id, intent);
   };
-  const save = async (bytes: Uint8Array, name: string) => {
-    await readDocument(bytes);
+  const read = async (id: string) => new Uint8Array(await readFile(await path(id)));
+  const put = async (bytes: Uint8Array) => {
     const id = hash(bytes),
-      target = await app.resources.path("models", id, "write"),
+      target = await path(id, "write"),
       temp = await app.resources.path(
         "models",
         id + "." + randomUUID() + ".tmp",
@@ -24,40 +37,72 @@ export function resourceStore(app: WorkbenchServer) {
     } finally {
       await unlink(temp).catch(() => {});
     }
-    return fileRef({ id, name, bytes: bytes.length });
+    verified.add(id);
+    return id;
+  };
+  const exists = async (ref: FileRef) => {
+    try {
+      const s = await stat(await path(ref.id));
+      if (s.size !== ref.bytes) return false;
+      if (!verified.has(ref.id)) {
+        if (hash(await read(ref.id)) !== ref.id) return false;
+        verified.add(ref.id);
+      }
+      return true;
+    } catch {
+      return false;
+    }
   };
   return {
     read,
-    save,
-    async put(raw: unknown) {
-      if (
-        !isRecord(raw) ||
-        typeof raw.name !== "string" ||
-        raw.name.length > 160 ||
-        typeof raw.base64 !== "string" ||
-        raw.base64.length > Math.ceil(MAX_FILE / 3) * 4 ||
-        !/^[A-Za-z0-9+/]+={0,2}$/.test(raw.base64)
-      )
-        throw Error("上传格式无效，模型限1.4MB。");
-      const bytes = Buffer.from(raw.base64, "base64");
-      if (bytes.toString("base64") !== raw.base64)
-        throw Error("资源编码无效。");
-      return {
-        ref: await save(bytes, raw.name),
-        inspection: await inspect(bytes),
-      };
+    exists,
+    /** Saves an already-validated model produced by the engine. */
+    async save(bytes: Uint8Array, name: string) {
+      const id = await put(bytes);
+      return fileRef({ id, name, bytes: bytes.length });
     },
-    async verify(ref: FileRef | null) {
-      if (!ref) return;
-      let bytes: Buffer;
-      try {
-        bytes = await read(ref.id);
-      } catch {
-        throw Error("模型资源缺失，请补齐同一文件或导入完整工程。");
-      }
-      if (bytes.length !== ref.bytes || hash(bytes) !== ref.id)
-        throw Error("资源校验不匹配。");
+    /** Saves a model received from the browser after parsing it. */
+    async saveModel(bytes: Uint8Array, name: string) {
       await readDocument(bytes);
+      const id = await put(bytes);
+      return fileRef({ id, name, bytes: bytes.length });
+    },
+    async saveImage(bytes: Uint8Array, name: string): Promise<ImageRef> {
+      if (bytes.length > MAX_IMAGE) throw Error("贴图超过 32 MB。");
+      const info = imageInfo(bytes),
+        id = await put(bytes);
+      return { id, name: name.slice(0, 160), bytes: bytes.length, ...info };
+    },
+    async missing(ids: unknown) {
+      if (!Array.isArray(ids) || ids.length > 200) throw Error("资源列表无效。");
+      const out: string[] = [];
+      for (const id of ids) {
+        if (typeof id !== "string" || !/^[a-f0-9]{64}$/.test(id))
+          throw Error("资源编号无效。");
+        try {
+          await stat(await path(id));
+        } catch {
+          out.push(id);
+        }
+      }
+      return out;
+    },
+    /** Formal saves require every referenced model and image to be present and intact. */
+    async verifyDocument(d: AssetDocument) {
+      for (const { ref } of documentRefs(d))
+        if (!(await exists(ref)))
+          throw Error(
+            `资源 ${ref.name} 缺失或校验不匹配，请补齐同一文件或导入完整工程。`,
+          );
+    },
+    images: async (d: Pick<AssetDocument, "edits">) => {
+      const map = new Map<string, Uint8Array>();
+      for (const ref of Object.values(d.edits.textures)) {
+        if (!(await exists(ref)))
+          throw Error(`替换贴图 ${ref.name} 缺失，请重新选择。`);
+        map.set(ref.id, await read(ref.id));
+      }
+      return map;
     },
   };
 }

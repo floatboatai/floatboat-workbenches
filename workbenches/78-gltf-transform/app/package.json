@@ -1,7 +1,7 @@
 {
   "name": "local-workbench",
   "private": true,
-  "version": "0.8.1",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "start": "node --enable-source-maps dist/server/index.mjs",
@@ -12,16 +12,29 @@
   },
   "dependencies": {
     "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/extensions": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
+    "draco3dgltf": "1.5.7",
+    "fflate": "0.8.2",
+    "jpeg-js": "0.4.4",
     "lucide-react": "0.562.0",
+    "meshoptimizer": "1.2.0",
+    "pngjs": "7.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "three": "0.185.0"
   },
   "devDependencies": {
     "@types/node": "22.20.2",
+    "@types/pngjs": "6.0.5",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
     "@types/three": "0.185.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "pnpm": {
+    "overrides": {
+      "ndarray-pixels>sharp": "npm:lodash.noop@3.0.1"
+    }
+  }
 }

@@ -1,15 +1,23 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+} from "react";
 import {
   FolderOpen,
   Upload,
   Box,
-  Layers,
   Scan,
-  Play,
-  Pause,
   Palette,
-  Boxes,
-  Package,
+  ListTree,
+  Image as ImageIcon,
+  Film,
+  FileChartColumn,
+  WandSparkles,
   MessageSquare,
   X,
   PanelRightOpen,
@@ -17,30 +25,86 @@ import {
 import { useWorkbenchState } from "./autosave-client";
 import { RenderBoundary } from "./workspace";
 import { AssetLibrary } from "./AssetLibrary";
-import { Inspector } from "./Inspector";
+import { Inspector, type InspectorMode } from "./Inspector";
+import { Pipeline } from "./Pipeline";
+import { AnimationBar, MaterialShelf, NodePalette, StageStrip } from "./overlays";
 import { request, download } from "./requests";
 import {
   seed,
   restoreAsset,
   validateAsset,
   recipeKey,
-  importAsset,
-  MAX_FILE,
-  MAX_PROJECT,
-  byteSize,
+  validStages,
+  stagesValue,
+  documentRefs,
+  nodeTransform,
+  decimal,
   type AssetDocument,
+  type Compression,
+  type FileRef,
   type MaterialEdit,
   type NodeEdit,
+  type Tab,
 } from "../contracts/asset";
 import { isRecord } from "../contracts/project";
+import {
+  PASS_BY_KIND,
+  passValue,
+  formatBytes,
+  type PassKind,
+  type PassOptions,
+} from "../contracts/pipeline";
 import type { Inspection } from "../contracts/inspection";
-import { upload, response, readBytes, sha256 } from "./files";
-import { base64, unbase64 } from "./preview";
-import { Viewport } from "./Viewport";
-const kb = (v: number) =>
-  v >= 1000000
-    ? (v / 1000000).toFixed(2) + " MB"
-    : (v / 1000).toFixed(1) + " KB";
+import { eulerToQuat } from "../contracts/transform";
+import {
+  exportModel,
+  fromBytes,
+  fromFile,
+  importModel,
+  readBytes,
+  response,
+  sha256,
+  uploadResource,
+  type Loaded,
+} from "./files";
+import { packProject, restoreResources, unpackProject, zipHasProject } from "./project-files";
+import { Viewport, type Pose } from "./Viewport";
+
+const TOOLS: { key: Tab; label: string; Icon: typeof Palette }[] = [
+  { key: "optimize", label: "优化", Icon: WandSparkles },
+  { key: "materials", label: "材质", Icon: Palette },
+  { key: "nodes", label: "节点", Icon: ListTree },
+  { key: "textures", label: "贴图", Icon: ImageIcon },
+  { key: "animations", label: "动画", Icon: Film },
+  { key: "resources", label: "报告", Icon: FileChartColumn },
+];
+const MODEL_ACCEPT =
+  ".glb,.gltf,.bin,.zip,.png,.jpg,.jpeg,.webp,.ktx2,.avif,model/gltf-binary,model/gltf+json";
+const randomId = () =>
+  Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
+/** Initial three-quarter view framing the model's bounds. */
+function framing(bounds: Inspection["bounds"]) {
+  if (!bounds) return { camera: seed.camera, target: seed.target };
+  const c = bounds.min.map((v, i) => (v + bounds.max[i]) / 2),
+    size = Math.hypot(...bounds.max.map((v, i) => v - bounds.min[i])) || 1,
+    dir = [1, 0.62, 1.3],
+    len = Math.hypot(...dir),
+    camera = c.map((v, i) => v + (dir[i] / len) * size * 1.6);
+  const clamp = (v: number) => Math.max(-1e7, Math.min(1e7, v));
+  return {
+    camera: camera.map(clamp) as [number, number, number],
+    target: c.map(clamp) as [number, number, number],
+  };
+}
+/** Adopts the newest stages when they complete the current recipe. */
+function settle(d: AssetDocument): AssetDocument {
+  const n = validStages(d);
+  if (n !== d.passes.length + 1) return d;
+  return { ...d, result: d.stages[n - 1].ref, appliedKey: recipeKey(d) };
+}
+
 export function App() {
   const p = useWorkbenchState(seed, validateAsset, "未命名资产", {
       storageKey: "gltf-transform-v1",
@@ -49,81 +113,116 @@ export function App() {
     d = p.data;
   const [library, setLibrary] = useState(false),
     [inspectorOpen, setInspectorOpen] = useState(true),
-    [inspectorMode, setInspectorMode] = useState<"object" | "notes">("object");
+    [inspectorMode, setInspectorMode] = useState<InspectorMode>("object");
   const inspectorTrigger = useRef<HTMLElement | null>(null),
     libraryTrigger = useRef<HTMLButtonElement>(null),
     inspectorToggle = useRef<HTMLButtonElement>(null);
-  const [inspection, setInspection] = useState<Inspection | null>(null),
-    [sourceInfo, setSourceInfo] = useState<Inspection | null>(null),
+  const [infos, setInfos] = useState<Record<string, Inspection>>({}),
     [pending, setPending] = useState(""),
+    [running, setRunning] = useState<PassKind | "pipeline" | null>(null),
+    [progress, setProgress] = useState(""),
     [resourceVersion, setResourceVersion] = useState(0),
     [fit, setFit] = useState(0),
     [playing, setPlaying] = useState(false),
     [liveTime, setLiveTime] = useState(0),
-    [loaded, setLoaded] = useState({ meshes: 0, textures: 0 }),
-    [missing, setMissing] = useState("");
+    [missing, setMissing] = useState(""),
+    [dragging, setDragging] = useState(false);
   const file = useRef<HTMLInputElement>(null),
     projectFile = useRef<HTMLInputElement>(null),
     attach = useRef<HTMLInputElement>(null),
+    textureFile = useRef<HTMLInputElement>(null),
+    textureTarget = useRef(-1),
     epoch = useRef(0),
     transitioning = useRef(false),
     latest = useRef({ p, d });
   latest.current = { p, d };
-  const selectedRef = d.view === "result" ? d.result : d.source,
-    currentKey = recipeKey(d),
-    stale = Boolean(d.result && d.appliedKey !== currentKey),
-    locked = p.loading || p.busy || pending === "切换工程";
+
+  const valid = validStages(d),
+    changes =
+      Object.keys(d.edits.nodes).length +
+      Object.keys(d.edits.materials).length +
+      Object.keys(d.edits.textures).length +
+      (d.edits.rootExtras !== null ? 1 : 0),
+    hasRecipe = changes > 0 || d.passes.length > 0,
+    legacyReady =
+      !d.stages.length &&
+      !d.passes.length &&
+      Boolean(d.result) &&
+      d.appliedKey === recipeKey(d),
+    ready = !hasRecipe || valid === d.passes.length + 1 || legacyReady,
+    stale = Boolean(d.source) && !ready,
+    finalRef: FileRef | null = !d.source
+      ? null
+      : !hasRecipe
+        ? d.source
+        : legacyReady
+          ? d.result
+          : ready
+            ? d.stages[d.passes.length].ref
+            : null;
+  const viewIndex =
+    d.view === "source" ? -2 : d.stage < 0 ? d.passes.length : d.stage;
+  const viewStage = viewIndex >= 0 && viewIndex < valid ? d.stages[viewIndex] : null;
+  const viewRef: FileRef | null =
+    !d.source || viewIndex === -2
+      ? d.source
+      : (viewStage?.ref ??
+        (legacyReady ? d.result : (d.stages[Math.min(valid, d.passes.length + 1) - 1]?.ref ?? d.source)));
+  const viewLabel =
+    viewRef?.id === d.source?.id
+      ? "原件"
+      : viewStage
+        ? viewIndex === 0
+          ? "修订"
+          : `第 ${viewIndex} 步`
+        : "结果";
+  const sourceInfo = d.source ? (infos[d.source.id] ?? null) : null,
+    viewInfo = viewRef ? (infos[viewRef.id] ?? null) : null,
+    locked = p.loading || p.busy || pending === "切换工程",
+    busy = locked || Boolean(pending);
+
   useEffect(() => {
-    document.title = "glTF · 资产检查台";
+    document.title = "glTF · 模型优化台";
   }, []);
+  // Document changes are guarded by documentKey checks; operations started after a
+  // transition must not be cancelled by this effect running late.
   useEffect(() => {
-    epoch.current++;
     setPlaying(false);
     setLibrary(false);
-    setInspectorOpen(Boolean(d.source || d.notes));
-    setInspectorMode(d.source || !d.notes ? "object" : "notes");
-    setPending("");
+    setInspectorOpen(Boolean(latest.current.d.source || latest.current.d.notes));
+    setInspectorMode(
+      latest.current.d.source || !latest.current.d.notes ? "object" : "notes",
+    );
     setMissing("");
-    setSourceInfo(null);
-    setInspection(null);
   }, [p.documentKey]);
+  // Inspections are cached by content hash; refs are immutable.
   useEffect(() => {
     let cancelled = false;
-    setInspection(null);
     setMissing("");
-    if (!selectedRef) return;
-    void request("/api/inspect/" + selectedRef.id)
-      .then((v) => {
-        if (!cancelled) setInspection(v as Inspection);
-      })
-      .catch((e) => {
-        if (!cancelled)
-          setMissing(e instanceof Error ? e.message : "模型资源缺失。");
-      });
+    for (const ref of [d.source, viewRef]) {
+      if (!ref || infos[ref.id]) continue;
+      void request("/api/inspect/" + ref.id)
+        .then((v) => {
+          if (!cancelled)
+            setInfos((old) => ({ ...old, [ref.id]: v as Inspection }));
+        })
+        .catch((e) => {
+          if (!cancelled)
+            setMissing(e instanceof Error ? e.message : "模型资源缺失。");
+        });
+    }
     return () => {
       cancelled = true;
     };
-  }, [selectedRef?.id, p.documentKey, resourceVersion]);
-  useEffect(() => {
-    let cancelled = false;
-    setSourceInfo(null);
-    if (!d.source) return;
-    void request("/api/inspect/" + d.source.id)
-      .then((v) => {
-        if (!cancelled) setSourceInfo(v as Inspection);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [d.source?.id, p.documentKey, resourceVersion]);
-  function update(patch: Partial<AssetDocument>) {
+  }, [d.source?.id, viewRef?.id, resourceVersion]);
+
+  const update = useCallback((patch: Partial<AssetDocument>) => {
     if (transitioning.current || latest.current.p.loading) return;
-    p.setData((old) => ({ ...old, ...patch }));
-  }
-  function nodePatch(patch: NodeEdit) {
+    latest.current.p.setData((old) => ({ ...old, ...patch }));
+  }, []);
+  const editNode = useCallback((patch: NodeEdit) => {
     if (transitioning.current || latest.current.p.loading) return;
-    p.setData((old) => ({
+    latest.current.p.setData((old) => ({
       ...old,
       edits: {
         ...old.edits,
@@ -133,10 +232,10 @@ export function App() {
         },
       },
     }));
-  }
-  function materialPatch(patch: MaterialEdit) {
+  }, []);
+  const editMaterial = useCallback((patch: MaterialEdit) => {
     if (transitioning.current || latest.current.p.loading) return;
-    p.setData((old) => ({
+    latest.current.p.setData((old) => ({
       ...old,
       edits: {
         ...old.edits,
@@ -146,7 +245,8 @@ export function App() {
         },
       },
     }));
-  }
+  }, []);
+
   async function transition(action: () => Promise<unknown>) {
     if (transitioning.current) return false;
     transitioning.current = true;
@@ -161,89 +261,203 @@ export function App() {
       return false;
     } finally {
       setPending("");
+      setProgress("");
+      setRunning(null);
       transitioning.current = false;
     }
   }
-  async function loadModel(f?: File) {
+  const showProgress = (label: string) => (sent: number, total: number) =>
+    setProgress(`${label} ${formatBytes(sent)} / ${formatBytes(total)}`);
+
+  async function openModel(files?: File[]) {
     const token = ++epoch.current,
       key = p.documentKey;
     setPending("导入资产");
     p.setError("");
     try {
-      if (f && f.size > MAX_FILE)
-        throw Error("模型限1.4MB，请在上游工具精简后导入。");
-      const loaded = f
-        ? await upload(new Uint8Array(await f.arrayBuffer()), f.name)
-        : response(await request("/api/sample", { method: "POST" }));
-      if (token !== epoch.current || latest.current.p.documentKey !== key)
-        return;
-      await transition(() =>
+      let loaded: Loaded;
+      if (files) {
+        const total = files.reduce((s, f) => s + f.size, 0);
+        if (total > 64 * 1024 * 1024)
+          throw Error(`所选文件合计 ${formatBytes(total)}，超过 64 MB 导入上限。`);
+        loaded = await importModel(files.map(fromFile), showProgress("上传"));
+        setProgress("服务端解析、解码与校验…");
+      } else loaded = response(await request("/api/sample", { method: "POST" }));
+      if (token !== epoch.current || latest.current.p.documentKey !== key) return;
+      setInfos((old) => ({ ...old, [loaded.ref.id]: loaded.inspection }));
+      const title = files
+        ? loaded.ref.name.replace(/\.glb$/i, "")
+        : "海上风机 T-07 · 交付优化";
+      const done = await transition(() =>
         p.replace(
-          { ...structuredClone(seed), source: loaded.ref },
-          f?.name.replace(/\.glb$/i, "") ?? "陶土与瓷 · 材质研究",
+          { ...structuredClone(seed), source: loaded.ref, ...framing(loaded.inspection.bounds) },
+          title,
         ),
       );
-      p.setNotice("原件已保存；修订将生成独立结果。");
+      if (done) {
+        p.setNotice(
+          [
+            files ? `已导入 ${formatBytes(loaded.ref.bytes)} 规范 GLB` : "样例已载入：选择左侧优化步骤运行",
+            ...loaded.notes,
+          ].join("；"),
+        );
+      }
     } catch (e) {
       if (token === epoch.current) p.report(e);
     } finally {
-      if (token === epoch.current) setPending("");
+      if (token === epoch.current) {
+        setPending("");
+        setProgress("");
+      }
     }
   }
-  async function generate() {
+  async function openFiles(list: File[]) {
+    if (!list.length) return;
+    if (list.length === 1 && /\.json$/i.test(list[0].name))
+      return importProject(list[0]);
+    if (list.length === 1 && /\.zip$/i.test(list[0].name)) {
+      const head = new Uint8Array(await list[0].arrayBuffer());
+      if (zipHasProject(head)) return importProject(list[0]);
+    }
+    return openModel(list);
+  }
+
+  /** Runs (or resumes) the pipeline on the server, reusing still-valid stages. */
+  async function process(
+    next: AssetDocument,
+    label: PassKind | "pipeline",
+    added?: string,
+  ) {
+    if (!next.source) return;
     const token = ++epoch.current,
-      key = p.documentKey,
-      input = structuredClone(d),
-      revision = recipeKey(input);
-    if (!input.source) return;
-    setPending("生成修订");
+      key = p.documentKey;
+    setPending("处理");
+    setRunning(label);
     p.setError("");
     try {
-      validateAsset(input);
-      const out = response(
-        await request("/api/process", {
-          method: "POST",
-          body: JSON.stringify({ source: input.source, edits: input.edits }),
+      validateAsset(next);
+      const out = await request("/api/process", {
+        method: "POST",
+        body: JSON.stringify({
+          source: next.source,
+          edits: next.edits,
+          passes: next.passes,
+          stages: next.stages.slice(0, validStages(next)),
+        }),
+      });
+      if (!isRecord(out)) throw Error("处理响应无效。");
+      const stages = stagesValue(out.stages);
+      if (token !== epoch.current || latest.current.p.documentKey !== key) return;
+      const current = latest.current.d;
+      p.setData((old) =>
+        settle({
+          ...old,
+          stages,
+          view: old.passes.length || Object.keys(old.edits.nodes).length ? "result" : old.view,
+          stage: -1,
         }),
       );
-      if (token !== epoch.current || latest.current.p.documentKey !== key)
-        return;
-      if (recipeKey(latest.current.d) !== revision) {
-        p.setNotice("处理期间配方已更新。旧结果未应用，请再次生成。");
-        return;
-      }
-      p.setData((old) => ({
-        ...old,
-        result: out.ref,
-        appliedKey: revision,
-        view: "result",
-      }));
-      setInspection(out.inspection);
-      p.setNotice("修订已更新，可切换对照或导出 GLB。");
+      if (recipeKey(current) !== recipeKey(next))
+        p.setNotice("处理期间配方已更新；有效阶段已保留，请再次应用。");
+      else if (label !== "pipeline") {
+        const last = stages[stages.length - 1],
+          prev = stages[stages.length - 2];
+        p.setNotice(
+          `${PASS_BY_KIND[label].label}完成：${prev ? formatBytes(prev.report.bytes) + " → " : ""}${formatBytes(last.report.bytes)} · ${last.report.drawCalls} 绘制调用${last.note ? "；" + last.note : ""}`,
+        );
+      } else p.setNotice("结果已更新，可在右上阶段条逐步对照。");
     } catch (e) {
-      if (token === epoch.current) p.report(e);
+      if (token === epoch.current) {
+        p.report(e);
+        // A failed one-click pass is not kept as a broken step.
+        if (added && latest.current.p.documentKey === key)
+          p.setData((old) => ({
+            ...old,
+            passes: old.passes.filter((s) => s.id !== added),
+          }));
+      }
     } finally {
-      if (token === epoch.current) setPending("");
+      if (token === epoch.current) {
+        setPending("");
+        setRunning(null);
+      }
     }
   }
+  function draftOptions(kind: PassKind): PassOptions {
+    const draft = d.passDrafts[kind] ?? {},
+      options: PassOptions = {};
+    for (const o of PASS_BY_KIND[kind].options) {
+      const raw = draft[o.key];
+      if (raw === undefined) continue;
+      options[o.key] =
+        o.type === "number" && typeof raw === "string"
+          ? decimal(raw, PASS_BY_KIND[kind].label + o.label)
+          : raw;
+    }
+    return options;
+  }
+  function runPass(kind: PassKind) {
+    if (!d.source || busy) return;
+    try {
+      const step = passValue({ id: randomId(), kind, options: draftOptions(kind) });
+      const next = { ...d, passes: [...d.passes, step] };
+      p.setData((old) => ({ ...old, passes: [...old.passes, step] }));
+      void process(next, kind, step.id);
+    } catch (e) {
+      p.report(e);
+    }
+  }
+  function undo() {
+    if (!d.passes.length || busy) return;
+    const next = settle({ ...d, passes: d.passes.slice(0, -1), stage: -1 });
+    p.setData((old) =>
+      settle({ ...old, passes: old.passes.slice(0, -1), stage: -1 }),
+    );
+    p.setNotice(`已撤销${PASS_BY_KIND[d.passes[d.passes.length - 1].kind].label}。`);
+    if (validStages(next) !== next.passes.length + 1 && (next.passes.length || changes))
+      void process(next, "pipeline");
+  }
+  function removeStep(index: number) {
+    if (busy) return;
+    const passes = d.passes.filter((_, i) => i !== index),
+      next = settle({ ...d, passes, stage: -1 });
+    p.setData((old) =>
+      settle({ ...old, passes: old.passes.filter((_, i) => i !== index), stage: -1 }),
+    );
+    if (validStages(next) !== passes.length + 1 && (passes.length || changes))
+      void process(next, "pipeline");
+  }
+  function preview(stage: number) {
+    if (stage === -2) update({ view: "source" });
+    else update({ view: "result", stage: stage === d.passes.length ? -1 : stage });
+  }
+  const setDraft = useCallback(
+    (kind: PassKind, key: string, value: string | boolean) =>
+      update({
+        passDrafts: {
+          ...latest.current.d.passDrafts,
+          [kind]: { ...latest.current.d.passDrafts[kind], [key]: value },
+        },
+      }),
+    [update],
+  );
+
   async function exportResult() {
     const token = epoch.current,
       key = p.documentKey,
-      snapshot = structuredClone(d);
-    if (!snapshot.result || snapshot.appliedKey !== recipeKey(snapshot)) return;
+      ref = finalRef,
+      compression = d.compression;
+    if (!ref || stale) return;
     setPending("导出结果");
     try {
-      const bytes = await readBytes(snapshot.result);
-      if (
-        token !== epoch.current ||
-        latest.current.p.documentKey !== key ||
-        recipeKey(latest.current.d) !== recipeKey(snapshot)
-      )
-        return;
+      const bytes = await exportModel(ref, compression);
+      if (token !== epoch.current || latest.current.p.documentKey !== key) return;
+      const base = (p.title || ref.name.replace(/\.glb$/i, "")).replace(/[\\/:*?"<>|]+/g, "-");
       download(
         new Blob([bytes.slice().buffer], { type: "model/gltf-binary" }),
-        snapshot.result.name,
+        base + (compression === "none" ? "" : "-" + compression) + ".glb",
       );
+      p.setNotice(`已导出 ${formatBytes(bytes.length)}${compression === "none" ? "" : "（" + compression + " 压缩，已回读校验）"}。`);
     } catch (e) {
       if (token === epoch.current) p.report(e);
     } finally {
@@ -260,37 +474,17 @@ export function App() {
       };
     setPending("导出工程");
     try {
-      const refs = [snapshot.data.source, snapshot.data.result].filter(
-          (x) => x !== null,
-        ),
-        unique = refs.filter(
-          (r, i) => refs.findIndex((x) => x.id === r.id) === i,
-        ),
-        resources = await Promise.all(
-          unique.map(async (ref) => ({
-            id: ref.id,
-            name: ref.name,
-            base64: base64(await readBytes(ref)),
-          })),
-        );
-      if (token !== epoch.current || latest.current.p.documentKey !== key)
-        return;
-      const value = {
-        format: "floatboat-gltf-project",
-        version: 1,
-        ...snapshot,
-        resources,
-      };
-      if (byteSize(value) > MAX_PROJECT) throw Error("完整工程超出12MiB预算。");
-      download(
-        new Blob([JSON.stringify(value)], { type: "application/json" }),
-        (snapshot.title || "asset") + ".gltf-project.json",
-      );
-      p.setNotice("完整工程包含原件、结果与当前工作稿。");
+      const packed = await packProject(snapshot, setProgress);
+      if (token !== epoch.current || latest.current.p.documentKey !== key) return;
+      download(packed.blob, (snapshot.title || "asset") + ".gltf-project.zip");
+      p.setNotice(`完整工程包含 ${packed.count} 个资源与当前工作稿。`);
     } catch (e) {
       if (token === epoch.current) p.report(e);
     } finally {
-      if (token === epoch.current) setPending("");
+      if (token === epoch.current) {
+        setPending("");
+        setProgress("");
+      }
     }
   }
   async function importProject(f: File) {
@@ -299,81 +493,85 @@ export function App() {
     setPending("导入工程");
     p.setError("");
     try {
-      if (f.size > MAX_PROJECT) throw Error("工程文件超过12MiB。");
-      const raw: unknown = JSON.parse(await f.text()),
-        value = importAsset(raw);
-      if (value.resources.length > 2) throw Error("完整工程最多两个独立模型。");
-      const refs = [value.data.source, value.data.result].filter(
-        (x) => x !== null,
-      );
-      for (const r of value.resources) {
-        if (
-          !isRecord(r) ||
-          typeof r.id !== "string" ||
-          typeof r.base64 !== "string" ||
-          r.base64.length > Math.ceil(MAX_FILE / 3) * 4 ||
-          !/^[A-Za-z0-9+/]+={0,2}$/.test(r.base64)
-        )
-          throw Error("工程资源结构无效。");
-        const ref = refs.find((ref) => ref.id === r.id);
-        if (!ref) throw Error("工程包含未引用资源。");
-        const bytes = unbase64(r.base64);
-        if (
-          base64(bytes) !== r.base64 ||
-          bytes.length !== ref.bytes ||
-          (await sha256(bytes)) !== ref.id
-        )
-          throw Error("工程资源hash不匹配。");
-        await upload(bytes, ref.name);
-      }
-      if (token !== epoch.current || latest.current.p.documentKey !== key)
-        return;
-      await transition(() => p.replace(value.data, value.title, value.extra));
+      const { value, entries } = await unpackProject(f),
+        { restored, unresolved } = await restoreResources(value.data, entries, setProgress);
+      if (token !== epoch.current || latest.current.p.documentKey !== key) return;
+      const done = await transition(() => p.replace(value.data, value.title, value.extra));
+      if (!done) return;
       setResourceVersion((v) => v + 1);
-      p.setNotice("工程工作稿已恢复；缺失资源可用相同文件补齐。");
+      p.setNotice(
+        unresolved
+          ? `工作稿已恢复为新文档；${unresolved} 个资源缺失，可用同一文件补齐。`
+          : `工程已恢复为新文档${restored ? `，上传了 ${restored} 个资源` : ""}。`,
+      );
     } catch (e) {
       if (token === epoch.current) p.report(e);
     } finally {
-      if (token === epoch.current) setPending("");
+      if (token === epoch.current) {
+        setPending("");
+        setProgress("");
+      }
     }
   }
-  async function reattach(f: File) {
+  async function reattach(list: File[]) {
     const key = p.documentKey,
-      token = epoch.current;
+      token = epoch.current,
+      refs = documentRefs(d);
     setPending("补齐资源");
     try {
-      if (f.size > MAX_FILE) throw Error("资源超过1.4MB。");
-      const bytes = new Uint8Array(await f.arrayBuffer()),
-        hash = await sha256(bytes);
-      if (
-        ![d.source, d.result].some(
-          (r) => r?.id === hash && r.bytes === bytes.length,
-        )
-      )
-        throw Error("文件与原件或结果的SHA-256不匹配。");
-      await upload(bytes, f.name);
-      if (token !== epoch.current || latest.current.p.documentKey !== key)
-        return;
+      let matched = 0;
+      for (const f of list) {
+        const bytes = new Uint8Array(await f.arrayBuffer()),
+          hash = await sha256(bytes),
+          hit = refs.find((r) => r.ref.id === hash && r.ref.bytes === bytes.length);
+        if (!hit) continue;
+        if (hit.kind === "image") await uploadResource(fromBytes(f.name, bytes), "image");
+        else await uploadResource(fromBytes(f.name, bytes), "model");
+        matched++;
+      }
+      if (!matched) throw Error("所选文件与工程引用的 SHA-256 都不匹配。");
+      if (token !== epoch.current || latest.current.p.documentKey !== key) return;
+      setInfos({});
       setResourceVersion((v) => v + 1);
       await p.save();
-      p.setNotice("匹配资源已补齐，预览已重新读取。");
+      p.setNotice(`已补齐 ${matched} 个资源，预览已重新读取。`);
     } catch (e) {
       if (token === epoch.current) p.report(e);
     } finally {
       if (token === epoch.current) setPending("");
     }
   }
-  const changed =
-    Object.keys(d.edits.nodes).length +
-    Object.keys(d.edits.materials).length +
-    (d.edits.rootExtras !== null ? 1 : 0);
-  const onFile =
-    (fn: (f: File) => Promise<void>) => (e: ChangeEvent<HTMLInputElement>) => {
-      const f = e.target.files?.[0];
+  async function replaceTexture(f: File) {
+    const index = textureTarget.current,
+      key = p.documentKey,
+      token = epoch.current;
+    if (index < 0) return;
+    setPending("上传贴图");
+    try {
+      const ref = await uploadResource(fromFile(f), "image", showProgress("上传贴图"));
+      if (token !== epoch.current || latest.current.p.documentKey !== key) return;
+      p.setData((old) => ({
+        ...old,
+        edits: { ...old.edits, textures: { ...old.edits.textures, [index]: ref } },
+      }));
+      p.setNotice(`贴图 ${index + 1} 将替换为 ${ref.name}（${ref.width}×${ref.height}），应用修订后生效。`);
+    } catch (e) {
+      if (token === epoch.current) p.report(e);
+    } finally {
+      if (token === epoch.current) {
+        setPending("");
+        setProgress("");
+      }
+    }
+  }
+
+  const onFiles =
+    (fn: (f: File[]) => Promise<void> | void) => (e: ChangeEvent<HTMLInputElement>) => {
+      const list = Array.from(e.target.files ?? []);
       e.target.value = "";
-      if (f) void fn(f);
+      if (list.length) void fn(list);
     };
-  function showInspector(mode: "object" | "notes", trigger: HTMLElement) {
+  function showInspector(mode: InspectorMode, trigger: HTMLElement) {
     inspectorTrigger.current = trigger;
     setInspectorMode(mode);
     setInspectorOpen(true);
@@ -387,21 +585,85 @@ export function App() {
     });
   }
   useEffect(() => {
-    const escape = (event: KeyboardEvent) => {
+    const key = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !library && inspectorOpen) {
         event.preventDefault();
         hideInspector();
       }
+      const target = event.target as HTMLElement | null;
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        !event.shiftKey &&
+        event.key.toLowerCase() === "z" &&
+        !library &&
+        !target?.closest("input,textarea,select,[contenteditable]")
+      ) {
+        event.preventDefault();
+        undo();
+      }
     };
-    window.addEventListener("keydown", escape);
-    return () => window.removeEventListener("keydown", escape);
-  }, [library, inspectorOpen]);
-  const actionDisabled = locked || Boolean(pending),
-    notesMode = inspectorMode === "notes";
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  });
+  const poses = useMemo(() => {
+    const out: Record<number, Pose> = {};
+    for (const [k, e] of Object.entries(d.edits.nodes)) {
+      try {
+        const t = nodeTransform(e);
+        if (!t.translation && !t.rotation && !t.scale) continue;
+        out[Number(k)] = {
+          translation: t.translation,
+          quaternion: t.rotation ? eulerToQuat(t.rotation) : undefined,
+          scale: t.scale,
+        };
+      } catch {
+        /* unfinished input keeps the previous pose */
+      }
+    }
+    return out;
+  }, [d.edits.nodes]);
+  const livePoses = viewRef?.id === d.source?.id ? poses : NO_POSES;
+  const clipInfo = viewInfo?.animations[Number(d.clip) || 0];
+  const notesMode = inspectorMode === "notes";
+  const report = viewStage?.report ?? viewInfo?.report ?? null;
+  const edited = Boolean(d.stages[0] && d.source && d.stages[0].ref.id !== d.source.id);
+
+  const pipeline = (
+    <Pipeline
+      document={d}
+      sourceReport={sourceInfo?.report ?? null}
+      viewReport={report}
+      viewLabel={viewLabel}
+      valid={valid}
+      running={running}
+      disabled={busy}
+      onDraft={setDraft}
+      onRun={runPass}
+      onUndo={undo}
+      onRemove={removeStep}
+      onPreview={preview}
+    />
+  );
   return (
     <RenderBoundary>
-      <main className={"model-room " + (!d.source ? "is-empty" : "")}>
-        <h1 className="sr-only">模型检查</h1>
+      <main
+        className={"model-room " + (!d.source ? "is-empty" : "")}
+        onDragOver={(e: DragEvent) => {
+          if (e.dataTransfer.types.includes("Files") && !busy) {
+            e.preventDefault();
+            setDragging(true);
+          }
+        }}
+        onDragLeave={(e) => {
+          if (e.currentTarget === e.target) setDragging(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          if (!busy) void openFiles(Array.from(e.dataTransfer.files));
+        }}
+      >
+        <h1 className="sr-only">模型优化</h1>
         <a className="skip-link" href="#model-space">
           跳到模型视图
         </a>
@@ -409,6 +671,8 @@ export function App() {
           <Viewport
             key={p.documentKey}
             document={d}
+            model={viewRef}
+            poses={livePoses}
             resourceVersion={resourceVersion}
             playing={playing}
             disabled={locked || library}
@@ -417,9 +681,14 @@ export function App() {
               p.setData((old) => ({ ...old, camera, target }))
             }
             onTime={setLiveTime}
-            onReady={(meshes, textures) => setLoaded({ meshes, textures })}
+            onReady={() => {}}
           />
         </div>
+        {dragging ? (
+          <div className="drop-hint" aria-hidden="true">
+            松开以导入 GLB / glTF / ZIP 或工程
+          </div>
+        ) : null}
         <div className="asset-corner">
           <button
             className="library-trigger"
@@ -450,43 +719,24 @@ export function App() {
                 disabled={locked}
               />
             </label>
-            <div
-              className={"save-status " + p.autoState.phase}
-              role="status"
-              data-testid="save-status"
-            >
+            <div className={"save-status " + p.autoState.phase} role="status" data-testid="save-status">
               <i />
-              {p.autoState.message}
+              {progress || p.autoState.message}
             </div>
           </div>
         </div>
         {d.source ? (
           <>
-            <fieldset
-              className="view-controls"
-              disabled={locked}
-              aria-label="模型视图"
-            >
-              <div className="view-switch">
-                <button
-                  aria-pressed={d.view === "source"}
-                  onClick={() => update({ view: "source" })}
-                >
-                  原件
-                </button>
-                <button
-                  disabled={!d.result}
-                  aria-pressed={d.view === "result"}
-                  onClick={() => update({ view: "result" })}
-                >
-                  修订{stale ? <i aria-label="待更新" /> : null}
-                </button>
-              </div>
-              <button
-                className="icon-button"
-                onClick={() => setFit((v) => v + 1)}
-                aria-label="适配模型视图"
-              >
+            <fieldset className="view-controls" disabled={locked} aria-label="模型视图">
+              <StageStrip
+                document={d}
+                valid={valid}
+                viewIndex={viewIndex}
+                edited={edited || Boolean(changes)}
+                sourceBytes={sourceInfo?.report.bytes}
+                onPreview={preview}
+              />
+              <button className="icon-button" onClick={() => setFit((v) => v + 1)} aria-label="适配模型视图">
                 <Scan size={19} />
               </button>
               {!inspectorOpen ? (
@@ -500,18 +750,8 @@ export function App() {
                 </button>
               ) : null}
             </fieldset>
-            <fieldset
-              className="context-rail"
-              disabled={locked}
-              aria-label="模型上下文工具"
-            >
-              {(
-                [
-                  { key: "materials", label: "材质", Icon: Palette },
-                  { key: "nodes", label: "节点", Icon: Boxes },
-                  { key: "resources", label: "资源", Icon: Package },
-                ] as const
-              ).map(({ key, label, Icon }) => (
+            <fieldset className="context-rail" disabled={locked} aria-label="模型上下文工具">
+              {TOOLS.map(({ key, label, Icon }) => (
                 <button
                   key={key}
                   aria-pressed={!notesMode && d.tab === key && inspectorOpen}
@@ -519,12 +759,13 @@ export function App() {
                   onClick={(e) => {
                     update({
                       tab: key,
-                      selected: d.tab === key ? d.selected : 0,
+                      selected:
+                        d.tab === key || (key !== "materials" && key !== "nodes") ? d.selected : 0,
                     });
                     showInspector("object", e.currentTarget);
                   }}
                 >
-                  <Icon size={20} />
+                  <Icon size={19} />
                   <span>{label}</span>
                 </button>
               ))}
@@ -534,195 +775,84 @@ export function App() {
                 aria-label="检查备注"
                 onClick={(e) => showInspector("notes", e.currentTarget)}
               >
-                <MessageSquare size={20} />
+                <MessageSquare size={19} />
                 <span>备注</span>
               </button>
             </fieldset>
             {d.tab === "nodes" && inspectorOpen && !notesMode ? (
-              <fieldset
-                className="node-palette"
-                disabled={locked}
-                aria-label="节点目录"
-              >
-                <div className="palette-label">
-                  节点 <span>{sourceInfo?.nodes.length ?? 0}</span>
-                  <button
-                    className="icon-button"
-                    aria-label="关闭节点目录"
-                    onClick={hideInspector}
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-                {sourceInfo?.nodes.map((row) => (
-                  <button
-                    key={row.index}
-                    aria-pressed={d.selected === row.index}
-                    onClick={(e) => {
-                      update({ selected: row.index });
-                      showInspector("object", e.currentTarget);
-                    }}
-                  >
-                    <Box size={16} />
-                    <span>
-                      {(d.edits.nodes[row.index]?.name ?? row.name) ||
-                        `节点 ${row.index + 1}`}
-                      <small>
-                        {row.mesh || "分组"} · {row.children} 子项
-                      </small>
-                    </span>
-                  </button>
-                ))}
-              </fieldset>
+              <NodePalette
+                document={d}
+                source={sourceInfo}
+                locked={locked}
+                onSelect={(index) => update({ selected: index })}
+                onClose={hideInspector}
+              />
             ) : null}
             {d.tab === "materials" && sourceInfo ? (
-              <fieldset
-                className={
-                  "material-shelf " + (inspectorOpen ? "with-inspector" : "")
-                }
-                disabled={locked}
-                aria-label="模型材质"
-              >
-                <div className="palette-label">
-                  材质 <span>{sourceInfo.materials.length}</span>
-                </div>
-                <div className="material-strip">
-                  {sourceInfo.materials.map((row) => (
-                    <button
-                      key={row.index}
-                      aria-pressed={d.selected === row.index && !notesMode}
-                      onClick={(e) => {
-                        update({ selected: row.index });
-                        showInspector("object", e.currentTarget);
-                      }}
-                    >
-                      <span
-                        className="swatch"
-                        style={{ background: row.color }}
-                      />
-                      <span>
-                        {(d.edits.materials[row.index]?.name ?? row.name) ||
-                          `材质 ${row.index + 1}`}
-                      </span>
-                      {d.edits.materials[row.index] ? (
-                        <i className="change-dot" />
-                      ) : null}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
+              <MaterialShelf
+                document={d}
+                source={sourceInfo}
+                locked={locked}
+                withInspector={inspectorOpen}
+                notesMode={notesMode}
+                onSelect={(index, trigger) => {
+                  update({ selected: index });
+                  showInspector("object", trigger);
+                }}
+              />
             ) : null}
-            <div
-              className={
-                "asset-readout " + (inspectorOpen ? "with-inspector" : "")
-              }
-            >
+            <div className={"asset-readout " + (inspectorOpen ? "with-inspector" : "")}>
+              <span>{viewLabel}</span>
               <span>
-                {loaded.meshes
-                  ? `${loaded.meshes} 网格 · ${loaded.textures} 图像`
+                {report
+                  ? `${report.drawCalls.toLocaleString()} 绘制 · ${report.triangles.toLocaleString()} 面 · ${report.textures} 贴图 · ${formatBytes(report.bytes)}`
                   : "读取模型…"}
               </span>
-              <span>
-                {inspection
-                  ? `${inspection.instancedVertices.toLocaleString()} 顶点 · ${kb(inspection.bytes)}`
-                  : ""}
-              </span>
-              <span className="source-name">{selectedRef?.name}</span>
+              <span className="source-name">{viewRef?.name}</span>
             </div>
-            {inspection?.animations.length ? (
-              <div
-                className={
-                  "animation-controls " +
-                  (inspectorOpen ? "with-inspector" : "")
-                }
-              >
-                <select
-                  aria-label="检查动画"
-                  value={d.clip || "0"}
-                  onChange={(e) => {
-                    setPlaying(false);
-                    update({ clip: e.target.value, time: 0 });
-                  }}
-                  disabled={locked}
-                >
-                  {inspection.animations.map((clip, i) => (
-                    <option key={i} value={i}>
-                      {clip.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  className="icon-button"
-                  disabled={locked}
-                  aria-label={playing ? "暂停动画" : "播放动画"}
-                  onClick={() => {
-                    if (playing)
-                      update({
-                        time:
-                          liveTime %
-                          (inspection.animations[Number(d.clip) || 0]
-                            ?.duration || 1),
-                      });
-                    setPlaying((v) => !v);
-                  }}
-                >
-                  {playing ? <Pause size={15} /> : <Play size={15} />}
-                </button>
-                <input
-                  aria-label="动画位置"
-                  type="range"
-                  min="0"
-                  max={
-                    inspection.animations[Number(d.clip) || 0]?.duration || 1
-                  }
-                  step="0.01"
-                  value={
-                    playing
-                      ? liveTime %
-                        (inspection.animations[Number(d.clip) || 0]?.duration ||
-                          1)
-                      : d.time
-                  }
-                  onChange={(e) => {
-                    setPlaying(false);
-                    update({ time: Number(e.target.value) });
-                  }}
-                  disabled={locked}
-                />
-              </div>
+            {viewInfo?.animations.length ? (
+              <AnimationBar
+                document={d}
+                view={viewInfo}
+                playing={playing}
+                liveTime={liveTime}
+                locked={locked}
+                withInspector={inspectorOpen}
+                onClip={(clip) => {
+                  setPlaying(false);
+                  update({ clip, time: 0 });
+                }}
+                onToggle={() => {
+                  if (playing) update({ time: liveTime % (clipInfo?.duration || 1) });
+                  setPlaying((v) => !v);
+                }}
+                onSeek={(time) => {
+                  setPlaying(false);
+                  update({ time });
+                }}
+              />
             ) : null}
           </>
         ) : (
           <section className="open-asset">
             <Box size={30} />
             <h1>打开模型</h1>
-            <p>检查形状、材质与交付文件。</p>
-            <button
-              className="primary"
-              disabled={actionDisabled}
-              onClick={() => file.current?.click()}
-            >
+            <p>看清绘制调用、面数与贴图显存，逐步优化后导出。</p>
+            <button className="primary" disabled={busy} onClick={() => file.current?.click()}>
               <Upload size={18} />
-              选择 GLB 文件
+              {pending === "导入资产" ? progress || "正在导入…" : "选择模型文件"}
             </button>
             <div>
-              <button
-                className="text-button"
-                disabled={actionDisabled}
-                onClick={() => void loadModel()}
-              >
-                载入材质样例
+              <button className="text-button" disabled={busy} onClick={() => void openModel()}>
+                载入风机样例
               </button>
               <span>·</span>
-              <button
-                className="text-button"
-                disabled={actionDisabled}
-                onClick={() => projectFile.current?.click()}
-              >
+              <button className="text-button" disabled={busy} onClick={() => projectFile.current?.click()}>
                 导入工程或恢复稿
               </button>
             </div>
-            <small>GLB 2.0 · 最大 1.4 MB · 内嵌 PNG / JPEG</small>
+            <small>GLB · glTF + .bin + 贴图（可多选）· ZIP · 拖入画布 · 合计 ≤ 64 MB</small>
+            <small>支持 KHR 材质扩展、纹理变换、量化、GPU 实例；Draco / Meshopt 导入时解码</small>
           </section>
         )}
         {d.source || notesMode ? (
@@ -731,56 +861,67 @@ export function App() {
             mode={inspectorMode}
             document={d}
             source={sourceInfo}
-            result={inspection}
+            view={viewInfo}
+            viewLabel={viewLabel}
+            sourceReport={sourceInfo?.report ?? null}
+            pipeline={pipeline}
             locked={locked}
             pending={pending}
             stale={stale}
-            changes={changed}
+            changes={changes}
+            playing={playing}
             onClose={hideInspector}
-            onMaterial={materialPatch}
-            onNode={nodePatch}
+            onMaterial={editMaterial}
+            onNode={editNode}
+            onResetNode={() =>
+              p.setData((old) => {
+                const nodes = { ...old.edits.nodes };
+                delete nodes[old.selected];
+                return { ...old, edits: { ...old.edits, nodes } };
+              })
+            }
             onNotes={(v) => update({ notes: v })}
             onRootExtras={(v) => {
               if (!transitioning.current)
-                p.setData((old) => ({
-                  ...old,
-                  edits: { ...old.edits, rootExtras: v },
-                }));
+                p.setData((old) => ({ ...old, edits: { ...old.edits, rootExtras: v } }));
+            }}
+            onReplaceTexture={(index) => {
+              textureTarget.current = index;
+              textureFile.current?.click();
+            }}
+            onRevertTexture={(index) =>
+              p.setData((old) => {
+                const textures = { ...old.edits.textures };
+                delete textures[index];
+                return { ...old, edits: { ...old.edits, textures } };
+              })
+            }
+            onClip={(index, play) => {
+              if (String(index) !== String(Number(d.clip) || 0)) update({ clip: String(index), time: 0 });
+              else if (!play) update({ time: liveTime % (clipInfo?.duration || 1) });
+              setPlaying(play);
             }}
             onReset={() => {
-              if (confirm("清除全部修订配方？原件和检查备注将保留。"))
-                update({ edits: structuredClone(seed.edits) });
+              if (confirm("清除全部修订配方？优化步骤、原件和检查备注将保留。"))
+                p.setData((old) => settle({ ...old, edits: structuredClone(seed.edits) }));
             }}
-            onGenerate={() => void generate()}
+            onApply={() => void process(d, "pipeline")}
+            onCompression={(c: Compression) => update({ compression: c })}
             onExport={() => void exportResult()}
             onProject={() => void exportProject()}
             onRecovery={() => p.exportDraft()}
           />
         ) : null}
         {p.error || p.notice || missing || p.autoState.phase === "conflict" ? (
-          <div
-            className={
-              "room-feedback " +
-              (inspectorOpen && d.source ? "with-inspector" : "")
-            }
-          >
+          <div className={"room-feedback " + (inspectorOpen && d.source ? "with-inspector" : "")}>
             <div
-              className={
-                p.error || missing
-                  ? "feedback-message error"
-                  : "feedback-message"
-              }
+              className={p.error || missing ? "feedback-message error" : "feedback-message"}
               role={p.error || missing ? "alert" : "status"}
             >
-              <span>
-                {p.error || missing || p.notice || p.autoState.message}
-              </span>
+              <span>{p.error || missing || p.notice || p.autoState.message}</span>
               {missing ? (
-                <button
-                  disabled={Boolean(pending)}
-                  onClick={() => attach.current?.click()}
-                >
-                  补齐模型文件
+                <button disabled={Boolean(pending)} onClick={() => attach.current?.click()}>
+                  补齐资源文件
                 </button>
               ) : null}
               {!missing ? (
@@ -830,8 +971,7 @@ export function App() {
           onRecovery={() => p.exportDraft()}
           onNotes={() => {
             setLibrary(false);
-            if (libraryTrigger.current)
-              showInspector("notes", libraryTrigger.current);
+            if (libraryTrigger.current) showInspector("notes", libraryTrigger.current);
           }}
           onRepair={() => {
             setLibrary(false);
@@ -841,31 +981,12 @@ export function App() {
           saveMessage={p.autoState.message}
           error={p.error}
         />
-        <input
-          hidden
-          ref={file}
-          aria-label="导入 GLB 文件"
-          type="file"
-          accept=".glb"
-          onChange={onFile(loadModel)}
-        />
-        <input
-          hidden
-          ref={projectFile}
-          aria-label="导入工程文件"
-          type="file"
-          accept=".json"
-          onChange={onFile(importProject)}
-        />
-        <input
-          hidden
-          ref={attach}
-          aria-label="补齐资源文件"
-          type="file"
-          accept=".glb"
-          onChange={onFile(reattach)}
-        />
+        <input hidden ref={file} aria-label="导入模型文件" type="file" multiple accept={MODEL_ACCEPT} onChange={onFiles(openFiles)} />
+        <input hidden ref={projectFile} aria-label="导入工程文件" type="file" accept=".zip,.json" onChange={onFiles((l) => importProject(l[0]))} />
+        <input hidden ref={attach} aria-label="补齐资源文件" type="file" multiple accept=".glb,.png,.jpg,.jpeg,.webp" onChange={onFiles(reattach)} />
+        <input hidden ref={textureFile} aria-label="替换贴图文件" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" onChange={onFiles((l) => replaceTexture(l[0]))} />
       </main>
     </RenderBoundary>
   );
 }
+const NO_POSES: Record<number, Pose> = {};

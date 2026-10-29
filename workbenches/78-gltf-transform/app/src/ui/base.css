@@ -318,9 +318,9 @@ fieldset {
 .inspector {
   position: absolute;
   right: 23px;
-  top: 88px;
-  width: 304px;
-  max-height: calc(100% - 116px);
+  top: 76px;
+  width: 372px;
+  max-height: calc(100% - 100px);
   border: 1px solid #d4d6c9;
   background: #faf9f5f2;
   border-radius: 12px;
@@ -557,7 +557,7 @@ fieldset {
   max-width: 850px;
 }
 .material-shelf.with-inspector {
-  right: 360px;
+  right: 420px;
   max-width: none;
 }
 .palette-label {
@@ -637,7 +637,7 @@ fieldset {
   pointer-events: none;
 }
 .asset-readout.with-inspector {
-  right: 360px;
+  right: 420px;
 }
 .source-name {
   margin-left: auto;
@@ -713,7 +713,7 @@ fieldset {
   accent-color: #63754e;
 }
 .animation-controls.with-inspector {
-  right: 360px;
+  right: 420px;
 }
 .open-asset {
   position: absolute;
@@ -773,7 +773,7 @@ fieldset {
   z-index: 7;
 }
 .room-feedback.with-inspector {
-  right: 360px;
+  right: 420px;
 }
 .feedback-message {
   display: flex;

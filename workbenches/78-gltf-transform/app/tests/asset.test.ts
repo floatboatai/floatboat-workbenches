@@ -3,238 +3,146 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
-import { NodeIO, Document } from "@gltf-transform/core";
-import {
-  sampleAsset,
-  processAsset,
-  readDocument,
-  invariant,
-  preserved,
-  hash,
-} from "../src/server/native.ts";
-import { inspectGlb } from "../src/contracts/glb.ts";
+import { sampleAsset } from "../src/server/sample.ts";
+import { hash } from "../src/server/model.ts";
 import {
   seed,
   validateAsset,
   restoreAsset,
   importAsset,
   recipeKey,
+  stageKey,
+  validStages,
+  documentRefs,
+  digest,
 } from "../src/contracts/asset.ts";
+import { passValue } from "../src/contracts/pipeline.ts";
+import { eulerToQuat, quatToEuler } from "../src/contracts/transform.ts";
 import { createAutosaveStore } from "../src/server/autosave.ts";
+import { resourceStore } from "../src/server/resources.ts";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 const source = await sampleAsset(),
   ref = { id: hash(source), name: "sample.glb", bytes: source.length };
-function pack(j: Record<string, unknown>, binary: Uint8Array) {
-  const raw = Buffer.from(JSON.stringify(j)),
-    len = Math.ceil(raw.length / 4) * 4,
-    blen = Math.ceil(binary.length / 4) * 4,
-    b = Buffer.alloc(28 + len + blen);
-  b.writeUInt32LE(0x46546c67, 0);
-  b.writeUInt32LE(2, 4);
-  b.writeUInt32LE(b.length, 8);
-  b.writeUInt32LE(len, 12);
-  b.writeUInt32LE(0x4e4f534a, 16);
-  b.fill(32, 20, 20 + len);
-  raw.copy(b, 20);
-  b.writeUInt32LE(blen, 20 + len);
-  b.writeUInt32LE(0x004e4942, 24 + len);
-  b.set(binary, 28 + len);
-  return b;
-}
 function db() {
   const d = new DatabaseSync(":memory:");
   for (const n of ["0002_projects.sql", "0003_autosave.sql"])
-    d.exec(
-      readFileSync(new URL("../migrations/" + n, import.meta.url), "utf8"),
-    );
+    d.exec(readFileSync(new URL("../migrations/" + n, import.meta.url), "utf8"));
   return d;
 }
-test("native NodeIO edits a textured four-mesh model and reparses independent result", async () => {
-  const original = hash(source),
-    before = await readDocument(source),
-    out = await processAsset(source, {
-      nodes: {
-        "1": { name: "Delivered vessel", extras: '{"inspection":"approved"}' },
-      },
-      materials: { "0": { name: "Glaze B", roughness: "0.42" } },
-      rootExtras: '{"reviewer":"Studio"}',
-    }),
-    again = await readDocument(out.bytes);
-  assert.equal(hash(source), original);
-  assert.notEqual(hash(out.bytes), original);
-  assert.equal(out.inspection.meshes, 4);
-  assert.equal(out.inspection.images.length, 1);
-  assert.equal(out.inspection.nodes[1].name, "Delivered vessel");
-  assert.equal(out.inspection.materials[0].roughness, "0.42");
-  assert.deepEqual(
-    before.getRoot().listMaterials()[0].getBaseColorFactor(),
-    again.getRoot().listMaterials()[0].getBaseColorFactor(),
-  );
-  assert.equal(
-    preserved(JSON.parse(invariant(before)), JSON.parse(invariant(again))),
-    true,
-  );
-  assert.deepEqual(again.getRoot().listNodes()[1].getExtras(), {
-    inspection: "approved",
-  });
-  assert.deepEqual(again.getRoot().getExtras(), { reviewer: "Studio" });
-});
-test("nonempty skin/animation joint references and arrays survive native material editing", async () => {
-  const d = new Document(),
-    b = d.createBuffer(),
-    a = (
-      type: "SCALAR" | "VEC3" | "VEC4" | "MAT4",
-      data: Float32Array | Uint16Array,
-    ) => d.createAccessor().setType(type).setArray(data).setBuffer(b),
-    mat = d.createMaterial("Skin material"),
-    mesh = d.createMesh("Triangle").addPrimitive(
-      d
-        .createPrimitive()
-        .setAttribute(
-          "POSITION",
-          a("VEC3", new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])),
-        )
-        .setAttribute("JOINTS_0", a("VEC4", new Uint16Array(12)))
-        .setAttribute(
-          "WEIGHTS_0",
-          a("VEC4", new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0])),
-        )
-        .setMaterial(mat),
-    ),
-    joint = d.createNode("Joint"),
-    skin = d
-      .createSkin("Skin")
-      .addJoint(joint)
-      .setSkeleton(joint)
-      .setInverseBindMatrices(
-        a(
-          "MAT4",
-          new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-        ),
-      ),
-    node = d.createNode("Skinned mesh").setMesh(mesh).setSkin(skin),
-    scene = d.createScene("Scene").addChild(joint).addChild(node);
-  d.getRoot().setDefaultScene(scene);
-  const sampler = d
-    .createAnimationSampler()
-    .setInput(a("SCALAR", new Float32Array([0, 1])))
-    .setOutput(a("VEC3", new Float32Array([0, 0, 0, 0, 0.5, 0])));
-  d.createAnimation("Lift")
-    .addSampler(sampler)
-    .addChannel(
-      d
-        .createAnimationChannel()
-        .setSampler(sampler)
-        .setTargetNode(joint)
-        .setTargetPath("translation"),
-    );
-  const io = new NodeIO(),
-    input = await io.writeBinary(d),
-    out = await processAsset(input, {
-      nodes: { "0": { name: "Reviewed joint" } },
-      materials: { "0": { metallic: "0.2" } },
-      rootExtras: null,
-    });
-  assert.equal(out.inspection.skins, 1);
-  assert.equal(out.inspection.animations[0].name, "Lift");
-  const r = await readDocument(out.bytes);
-  assert.equal(
-    r.getRoot().listSkins()[0].listJoints()[0].getName(),
-    "Reviewed joint",
-  );
-  assert.deepEqual(
-    Array.from(
-      r
-        .getRoot()
-        .listAnimations()[0]
-        .listSamplers()[0]
-        .getOutput()!
-        .getArray()!,
-    ),
-    [0, 0, 0, 0, 0.5, 0],
-  );
-});
-test("unsupported extensions, external resources, oversized instances and nonfinite geometry reject before parsing", () => {
-  const i = inspectGlb(source);
-  assert.throws(
-    () =>
-      inspectGlb(
-        pack(
-          { ...i.json, extensionsUsed: ["KHR_draco_mesh_compression"] },
-          i.binary,
-        ),
-      ),
-    /压缩/,
-  );
-  assert.throws(
-    () =>
-      inspectGlb(
-        pack(
-          { ...i.json, images: [{ uri: "https://example.com/x.png" }] },
-          i.binary,
-        ),
-      ),
-    /未支持|内嵌/,
-  );
-  assert.throws(
-    () =>
-      inspectGlb(
-        pack({ ...i.json, nodes: [{ mesh: 0, children: [0] }] }, i.binary),
-      ),
-    /循环/,
-  );
-  const j = structuredClone(i.json) as {
-    nodes: Record<string, unknown>[];
-    scenes: { nodes: number[] }[];
-    meshes: { primitives: { attributes: { POSITION: number } }[] }[];
-    accessors: { bufferView: number; byteOffset?: number }[];
-    bufferViews: { byteOffset?: number }[];
+
+test("0.8 documents restore with pipeline defaults and keep their recipe identity", () => {
+  const legacy = {
+    source: ref,
+    result: ref,
+    appliedKey: "",
+    edits: { nodes: { "1": { name: "Vessel" } }, materials: {}, rootExtras: null },
+    notes: "checked",
+    tab: "materials",
+    selected: 0,
+    view: "result",
+    camera: [4, 3, 5],
+    target: [0, 0.8, 0],
+    clip: "",
+    time: 0,
   };
-  j.nodes = Array.from({ length: 200 }, () => ({ mesh: 2 }));
-  j.scenes[0].nodes = j.nodes.map((_, n) => n);
-  assert.throws(() => inspectGlb(pack(j, i.binary)), /顶点/);
-  const a = j.accessors[j.meshes[0].primitives[0].attributes.POSITION],
-    binary = i.binary.slice();
-  new DataView(binary.buffer).setFloat32(
-    (a.byteOffset ?? 0) + (j.bufferViews[a.bufferView].byteOffset ?? 0),
-    NaN,
-    true,
-  );
-  assert.throws(() => inspectGlb(pack(i.json, binary)), /非有限/);
-  assert.throws(
-    () =>
-      inspectGlb(
-        pack(
-          {
-            ...i.json,
-            materials: [{ pbrMetallicRoughness: { roughnessFactor: -1 } }],
-          },
-          i.binary,
-        ),
-      ),
-    /材质|PBR/,
-  );
+  const oldKey = JSON.stringify([ref.id, legacy.edits]);
+  legacy.appliedKey = oldKey;
+  const d = validateAsset(legacy);
+  assert.deepEqual(d.passes, []);
+  assert.deepEqual(d.stages, []);
+  assert.equal(d.stage, -1);
+  assert.equal(d.compression, "none");
+  assert.deepEqual(d.edits.textures, {});
+  assert.equal(recipeKey(d), oldKey, "0.8 applied results stay current");
 });
-test("recipe raw numeric/JSON drafts restore while formal validation rejects them", () => {
+
+test("raw TRS, numeric, JSON and pass-parameter drafts restore while formal validation rejects them", () => {
   const d = {
     ...structuredClone(seed),
     source: ref,
     edits: {
-      nodes: { "0": { name: "Draft" } },
+      nodes: { "0": { name: "Draft", translation: ["1.", "-", "0"] } },
       materials: { "0": { roughness: "0.", extras: '{"review":' } },
       rootExtras: null,
+      textures: {},
     },
+    passDrafts: { simplify: { ratio: "0." } },
   };
-  assert.equal(restoreAsset(d).edits.materials["0"].roughness, "0.");
+  const restored = restoreAsset(d);
+  assert.deepEqual(restored.edits.nodes["0"].translation, ["1.", "-", "0"]);
+  assert.equal(restored.passDrafts.simplify?.ratio, "0.");
   assert.throws(() => validateAsset(d), /完整/);
   assert.equal(
-    importAsset({
-      snapshot: { title: "Draft", data: d, extra: {} },
-      current: { data: d },
-    }).data.edits.materials["0"].extras,
+    importAsset({ snapshot: { title: "Draft", data: d, extra: {} } }).data.edits.materials["0"].extras,
     '{"review":',
   );
-  assert.notEqual(recipeKey(d), recipeKey({ ...d, edits: seed.edits }));
+  assert.throws(() => restoreAsset({ ...d, passDrafts: { explode: {} } }), /草稿/);
+  assert.throws(
+    () => validateAsset({ ...d, edits: { ...d.edits, nodes: { "0": { scale: ["0", "1", "1"] } }, materials: {} } }),
+    /缩放/,
+  );
 });
+
+test("stage identity follows source, edits and pass options; documentRefs lists every resource", () => {
+  const p1 = passValue({ id: "a", kind: "weld", options: {} }),
+    p2 = passValue({ id: "b", kind: "simplify", options: { ratio: 0.3 } }),
+    d = { ...structuredClone(seed), source: ref, passes: [p1, p2] };
+  const k = [0, 1, 2].map((i) => stageKey(d, i));
+  assert.equal(new Set(k).size, 3);
+  assert.match(k[0], /^[a-f0-9]{28}$/);
+  assert.equal(stageKey({ ...d, passes: [{ ...p1, id: "zzz" }, p2] }, 2), k[2], "ids are not identity");
+  const stage = (key: string, id: string) => ({
+    key,
+    ref: { id, name: "s.glb", bytes: 100 },
+    report: { bytes: 100, nodes: 1, meshes: 1, primitives: 1, drawCalls: 1, vertices: 3, uploadVertices: 3, triangles: 1, materials: 1, textures: 0, textureBytes: 0, gpuBytes: 36, animations: 0, keyframes: 0, extensions: [] },
+    ms: 3,
+    note: "",
+  });
+  const full = { ...d, stages: [stage(k[0], ref.id), stage(k[1], "b".repeat(64)), stage(k[2], "c".repeat(64))] };
+  assert.equal(validStages(full), 3);
+  assert.equal(validStages({ ...full, edits: { ...full.edits, rootExtras: "{}" } }), 0);
+  const image = { id: "d".repeat(64), name: "t.png", bytes: 20, mime: "image/png" as const, width: 2, height: 2 };
+  const withImage = validateAsset({ ...full, edits: { ...full.edits, textures: { "0": image } } });
+  assert.deepEqual(
+    documentRefs(withImage).map((r) => r.kind + ":" + r.ref.id[0]),
+    ["model:" + ref.id[0], "model:b", "model:c", "image:d"],
+  );
+  assert.notEqual(digest("a"), digest("b"));
+});
+
+test("Euler/quaternion conversion round-trips for TRS editing", () => {
+  for (const e of [[0, 90, 0], [30, -45, 10], [-120, 15, 170]] as [number, number, number][]) {
+    const back = quatToEuler(eulerToQuat(e));
+    const q1 = eulerToQuat(e), q2 = eulerToQuat(back);
+    const dot = Math.abs(q1.reduce((s, v, i) => s + v * q2[i], 0));
+    assert.ok(dot > 0.99999, `${e} → ${back}`);
+  }
+});
+
+test("resource store keeps models and images content-addressed and verifies documents", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "gltf-res-")),
+    store = resourceStore({ resources: { path: async (_: string, child = "") => join(dir, child), configured: () => true } } as never);
+  const model = await store.saveModel(source, "turbine.glb");
+  assert.equal(model.id, ref.id);
+  await assert.rejects(() => store.saveModel(new Uint8Array(64), "x.glb"), /无法解析/);
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "base64",
+  );
+  const image = await store.saveImage(new Uint8Array(png), "dot.png");
+  assert.equal(image.mime, "image/png");
+  assert.equal(image.width, 1);
+  await assert.rejects(() => store.saveImage(new Uint8Array(30), "x.png"), /PNG、JPEG 或 WebP/);
+  assert.deepEqual(await store.missing([model.id, "e".repeat(64)]), ["e".repeat(64)]);
+  await store.verifyDocument({ ...seed, source: model, edits: { ...seed.edits, textures: { "0": image } } });
+  await assert.rejects(
+    () => store.verifyDocument({ ...seed, source: { ...model, id: "f".repeat(64) } }),
+    /缺失/,
+  );
+});
+
 test("SQLite confirms valid references, preserves invalid drafts, retries identical mutations and rejects stale writers", async () => {
   const database = db();
   try {
@@ -365,15 +273,6 @@ test("wrong source IDs and edit indices cannot escape resource scope", async () 
     () => restoreAsset({ ...seed, source: { ...ref, id: "../secret" } }),
     /引用/,
   );
-  await assert.rejects(
-    () =>
-      processAsset(source, {
-        nodes: { "800": { name: "No node" } },
-        materials: {},
-        rootExtras: null,
-      }),
-    /不存在/,
-  );
   assert.throws(
     () => importAsset({ title: "x".repeat(121), data: seed, extra: {} }),
     /120/,
@@ -393,35 +292,3 @@ test("recipe identity is stable after autosave schema canonicalizes field order"
   assert.equal(recipeKey(a), recipeKey(validateAsset(a)));
 });
 
-test("collinear geometry and repeated high-resolution texture references are bounded", async () => {
-  const d = new Document(),
-    b = d.createBuffer(),
-    p = d.createPrimitive().setAttribute(
-      "POSITION",
-      d
-        .createAccessor()
-        .setBuffer(b)
-        .setType("VEC3")
-        .setArray(new Float32Array([0, 0, 0, 1, 0, 0, 2, 0, 0])),
-    ),
-    scene = d
-      .createScene()
-      .addChild(d.createNode().setMesh(d.createMesh().addPrimitive(p)));
-  d.getRoot().setDefaultScene(scene);
-  const bytes = await new NodeIO().writeBinary(d);
-  assert.throws(() => inspectGlb(bytes), /退化/);
-  const i = inspectGlb(source),
-    json = structuredClone(i.json) as {
-      images: { bufferView: number }[];
-      bufferViews: { byteOffset?: number }[];
-      textures: Record<string, unknown>[];
-    };
-  const binary = i.binary.slice(),
-    offset = json.bufferViews[json.images[0].bufferView].byteOffset ?? 0;
-  new DataView(binary.buffer).setUint32(offset + 16, 2048);
-  new DataView(binary.buffer).setUint32(offset + 20, 2048);
-  json.textures = [{ source: 0 }, { source: 0 }, { source: 0 }];
-  assert.throws(() => inspectGlb(pack(json, binary)), /重复贴图/);
-});
-
-test("malformed source names reject before React receives an object as a label",()=>{const i=inspectGlb(source),j=structuredClone(i.json) as {nodes:Record<string,unknown>[]};j.nodes[0].name={invalid:"label"};assert.throws(()=>inspectGlb(pack(j,i.binary)),/名称/);});

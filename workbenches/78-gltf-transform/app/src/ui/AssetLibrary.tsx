@@ -103,7 +103,7 @@ export function AssetLibrary(p: Props) {
         <div className="library-create">
           <button className="primary" onClick={p.onModel}>
             <Upload size={16} />
-            打开 GLB
+            打开模型
           </button>
           <button onClick={p.onProject}>
             <FolderOpen size={16} />
@@ -169,7 +169,7 @@ export function AssetLibrary(p: Props) {
           <div>
             <button onClick={p.onNotes}>检查备注</button>
             <button onClick={p.onRecovery}>下载当前恢复稿</button>
-            <button onClick={p.onRepair}>补齐模型资源</button>
+            <button onClick={p.onRepair}>补齐缺失资源</button>
             <button onClick={p.onRetry}>重试保存</button>
           </div>
         </div>

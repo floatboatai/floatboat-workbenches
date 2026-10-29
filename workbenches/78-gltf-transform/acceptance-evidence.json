@@ -1,129 +1,54 @@
 {
-  "version": "0.8.1",
-  "date": "2026-10-28",
-  "baseCommit": "b2c9079",
-  "templateCommit": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
+  "version": "0.9.0",
+  "date": "2026-10-29",
+  "baseCommit": "7a0e4ee",
   "check": "passed",
   "applicationTests": {
-    "passed": 11,
+    "passed": 22,
     "failed": 0,
-    "scope": "existing tests; native processing and persistence unchanged"
+    "files": ["tests/asset.test.ts", "tests/pipeline.test.ts", "tests/import.test.ts"]
   },
-  "businessMatrix": {
-    "passed": 12,
-    "checks": [
-      "1440px canvas fills model room; no persistent project select/create cluster",
-      "Unfinished material number saves before blur and restores after refresh",
-      "PBR revision exports GLB and complete project with matching resource hashes",
-      "Library and context operations preserve native canvas identity and model resource requests",
-      "Complete and downloaded recovery files import as new documents",
-      "Delayed autosave receipt preserves continued input",
-      "Navigation waits for delayed save and freezes input during delayed open",
-      "Library new/delete actions preserve unrelated assets",
-      "0.8.0 project imports preserve original/result hashes and notes",
-      "Missing resource is repaired using the same content hash",
-      "Offline model-free notes are listed, reopened and synchronized",
-      "375px layout, keyboard camera controls and reduced motion remain usable"
+  "functionalAcceptance": "local-verified",
+  "structuralReview": "passed-with-limitations",
+  "browser": {
+    "engine": "Chrome for Testing (Playwright, GPU)",
+    "dataDirectory": "fresh per flow",
+    "flows": [
+      "sample → prune/dedup/weld/simplify(0.3)/resample → stage previews → keyboard undo → reload restores stages and parameter draft",
+      "export plain GLB (glTF magic, 2 animations, 6 materials) and Draco GLB (KHR_draco_mesh_compression required)",
+      "invalid file, multi-file glTF+bin+textures, missing-texture message, folder ZIP, Draco GLB decode",
+      "22.89 MB GLB via 24 chunk requests, max body 1,398,145 bytes, then server weld",
+      "delayed autosave while typing keeps newer text after reload",
+      "lost autosave response retried automatically; one project (idempotent)",
+      "unfinished TRS '5.' saved as draft and restored",
+      "texture replacement, TRS edit, apply edits stage, clip list playback",
+      "complete-project ZIP export; import creates new document; fresh-service import uploads 4 resources",
+      "375px: no horizontal overflow, pass run below canvas, library Escape restores focus"
     ],
-    "observedIssue": "Offline library refresh initially created unhandled promise rejections after the functional checks passed.",
-    "resolution": "The caller now catches refresh rejection and reports it inside the library; current local rows remain usable.",
-    "resolutionVerifiedBy": "targetedRegression"
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "expectedNetworkErrors": "HTTP 400 for the invalid/missing-resource imports; one connection reset in the lost-response drill"
   },
-  "targetedRegression": {
-    "url": "http://127.0.0.1:65187",
-    "checks": [
-      "Tab/Shift+Tab wrap within library and Escape restores the opener",
-      "offline refresh error stays inside the library while local notes remain listed, clickable, and recoverable",
-      "reconnect and retry saves the recovered local draft without an unhandled rejection",
-      "node overlay closes directly; 375px fit and inspector collapse leave the full model visible"
-    ],
-    "errors": [],
-    "expectedOfflineNetworkErrors": 10,
-    "finalTitle": "陶土与瓷 · 交付检查"
-  },
+  "fixedDuringAcceptance": [
+    "immediate second import silently cancelled by documentKey effect",
+    "inspector delivery clipped at 1440 (fieldset flex sizing)",
+    "701–1100px offsets overriding 375px layout",
+    "depth z-fighting on thin parts"
+  ],
+  "knownIssues": [
+    "shared autosave-client keeps `edited` after successful saves, so switching documents after edits shows a cache-repair confirm (pre-existing, blueprint code)"
+  ],
   "package": {
-    "filename": "gltf-transform-0.8.1-final.fbworkbench",
-    "sha256": "6a1b5e406354a6ab83c22d7a2feea43db7696f5ce2719003fa507762c0f84340",
-    "bytes": 81997,
-    "files": 43,
-    "crc": "passed",
-    "transferHashes": "passed",
-    "sourceByteMatches": 36,
-    "assetByteMatches": 5,
-    "resources": [
-      {
-        "id": "models",
-        "status": "excluded",
-        "bytes": 0,
-        "files": 0
-      },
-      {
-        "id": "notices",
-        "status": "bundled",
-        "bytes": 5490,
-        "files": 5,
-        "directory": "application/workbench-assets/assets/notices",
-        "sha256": "935a7eb5ead533494d9a0f0f078355470950b431f37c7dc50c6250a756151de9"
-      }
-    ],
-    "license": "MIT",
+    "filename": "gltf-transform-studio-0.9.0.fbworkbench",
+    "sha256": "82b7a9f432b432c0c59ec556197625071e6c90b4a999a98501154d36e7931bab",
+    "files": 63,
+    "frozenInstall": "passed (no .node binaries; sharp overridden by lodash.noop)",
     "businessData": "excluded",
     "hostImport": "unverified"
   },
   "visual": {
     "desktop": "../../docs/screenshots/gltf-transform.png",
-    "desktopViewport": [
-      1440,
-      980
-    ],
-    "mobileWidth": 375,
-    "library": "gltf-library.png",
-    "offlineLibrary": "gltf-library-offline.png",
-    "unobstructedCanvas": "gltf-canvas-unobstructed.png",
-    "mobileFit": "gltf-mobile-fit.png"
-  },
-  "unchanged": [
-    "appId",
-    "registryName",
-    "storageKey",
-    "database schema/migrations",
-    "server routes",
-    "contracts and validation",
-    "NodeIO processing",
-    "autosave core",
-    "SDK/tooling/CSP"
-  ],
-  "hostImport": "unverified",
-  "hostModelCalls": "not-used",
-  "integratedPackage": {
-    "directory": "workbenches/78-gltf-transform",
-    "version": "0.8.1",
-    "appId": "workbench.cdaf06c7-7f94-47f3-8c2b-0b77757a6ba4",
-    "filename": "78-gltf-transform-0.8.1.fbworkbench",
-    "bytes": 81997,
-    "sha256": "6a1b5e406354a6ab83c22d7a2feea43db7696f5ce2719003fa507762c0f84340",
-    "crc": "passed",
-    "sourceFilesMatched": 36,
-    "assetFilesMatched": 5,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-gltf-transform/gltf-transform-studio-0.8.1.fbworkbench",
-    "introductionFile": "workbench-gltf-transform/presentation.json",
-    "license": "MIT"
-  },
-  "integratedApplicationTests": 11,
-  "screenshot": {
-    "path": "../../docs/screenshots/gltf-transform.png",
-    "dimensions": [
-      1440,
-      980
-    ],
-    "sha256": "636c8589a5b1ca389d66d26f0437d6e3628d62fb07ac6155edfeb2ea67963241"
-  },
-  "integratedSourcePackage": {
-    "sourceAndResources": "byte-matched with integrated source",
-    "UIComponents": "present in package",
-    "runtime": "local check and targeted Chrome flows passed",
-    "clientImport": "unverified"
+    "desktopViewport": [1440, 900],
+    "mobileWidth": 375
   }
 }

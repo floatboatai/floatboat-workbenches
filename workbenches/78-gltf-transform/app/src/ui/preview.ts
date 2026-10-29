@@ -13,76 +13,76 @@ export function base64(bytes: Uint8Array) {
 export function unbase64(s: string) {
   return Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 }
+export function dataUri(bytes: Uint8Array, mime: string) {
+  return "data:" + mime + ";base64," + base64(bytes);
+}
+interface ParserInternals {
+  json: unknown;
+  plugins: Record<string, { loadTexture?: (i: number) => unknown }>;
+  textureLoader: unknown;
+  getDependency(type: string, index: number): Promise<unknown>;
+  loadTextureImage(i: number, source: number, loader: unknown): Promise<T.Texture | null>;
+  loadImageSource: (source: number, loader: unknown) => Promise<T.Texture>;
+}
+const placeholder = () => {
+  const t = new T.DataTexture(new Uint8Array([168, 168, 160, 255]), 1, 1);
+  t.needsUpdate = true;
+  return t;
+};
+/**
+ * The page CSP allows data: images but not blob:. Embedded PNG/JPEG/WebP/AVIF images
+ * are decoded through data URIs; KTX2 has no transcoder here and previews as grey.
+ */
 export async function loadGlb(bytes: Uint8Array): Promise<GLTF> {
   const loader = new GLTFLoader();
-  loader.register((parser) => ({
-    name: "WORKBENCH_embedded_images",
-    loadTexture: async (index: number) => {
-      const json: unknown = parser.json;
-      if (
-        !isRecord(json) ||
-        !Array.isArray(json.textures) ||
-        !Array.isArray(json.images)
-      )
-        throw Error("贴图数据缺失。");
-      const tex = json.textures[index];
-      if (!isRecord(tex) || typeof tex.source !== "number")
-        throw Error("贴图引用无效。");
-      const source = json.images[tex.source];
-      if (
-        !isRecord(source) ||
-        source.uri !== undefined ||
-        typeof source.bufferView !== "number" ||
-        !["image/png", "image/jpeg"].includes(String(source.mimeType))
-      )
-        throw Error("只支持嵌入PNG/JPEG贴图。");
-      const raw: unknown = await parser.getDependency(
-        "bufferView",
-        source.bufferView,
-      );
-      if (!(raw instanceof ArrayBuffer)) throw Error("贴图缓冲区无效。");
-      const image = new Image();
-      await new Promise<void>((resolve, reject) => {
-        image.onload = () => resolve();
-        image.onerror = () => reject(Error("贴图无法解码。"));
-        image.src =
-          "data:" + source.mimeType + ";base64," + base64(new Uint8Array(raw));
-      });
-      const texture = new T.Texture(image);
-      texture.flipY = false;
-      const sampler =
-        Array.isArray(json.samplers) && typeof tex.sampler === "number"
-          ? json.samplers[tex.sampler]
-          : undefined;
-      const wraps: Record<number, T.Wrapping> = {
-        10497: T.RepeatWrapping,
-        33071: T.ClampToEdgeWrapping,
-        33648: T.MirroredRepeatWrapping,
-      };
-      const mins: Record<number, T.MinificationTextureFilter> = {
-        9728: T.NearestFilter,
-        9729: T.LinearFilter,
-        9984: T.NearestMipmapNearestFilter,
-        9985: T.LinearMipmapNearestFilter,
-        9986: T.NearestMipmapLinearFilter,
-        9987: T.LinearMipmapLinearFilter,
-      };
-      texture.wrapS = isRecord(sampler)
-        ? (wraps[Number(sampler.wrapS)] ?? T.RepeatWrapping)
-        : T.RepeatWrapping;
-      texture.wrapT = isRecord(sampler)
-        ? (wraps[Number(sampler.wrapT)] ?? T.RepeatWrapping)
-        : T.RepeatWrapping;
-      if (isRecord(sampler)) {
-        texture.minFilter =
-          mins[Number(sampler.minFilter)] ?? T.LinearMipmapLinearFilter;
-        texture.magFilter =
-          sampler.magFilter === 9728 ? T.NearestFilter : T.LinearFilter;
-      }
-      texture.needsUpdate = true;
-      return texture;
-    },
-  }));
+  loader.register((raw) => {
+    const parser = raw as unknown as ParserInternals,
+      cache = new Map<number, Promise<T.Texture>>();
+    parser.loadImageSource = (index: number) => {
+      const hit = cache.get(index);
+      if (hit) return hit.then((t) => t.clone());
+      const promise = (async () => {
+        const json = parser.json;
+        const def =
+          isRecord(json) && Array.isArray(json.images) ? json.images[index] : null;
+        if (!isRecord(def) || typeof def.bufferView !== "number")
+          throw Error("贴图需嵌入模型。");
+        const mime = String(def.mimeType ?? "");
+        if (mime === "image/ktx2") return placeholder();
+        const buffer = await parser.getDependency("bufferView", def.bufferView);
+        if (!(buffer instanceof ArrayBuffer)) throw Error("贴图缓冲区无效。");
+        const image = new Image();
+        image.src = dataUri(new Uint8Array(buffer), mime || "image/png");
+        await image.decode();
+        const texture = new T.Texture(image);
+        texture.needsUpdate = true;
+        texture.userData.mimeType = mime;
+        return texture;
+      })();
+      cache.set(index, promise);
+      return promise;
+    };
+    return {
+      name: "WORKBENCH_embedded_images",
+      beforeRoot: async () => {
+        const basis = parser.plugins.KHR_texture_basisu;
+        if (basis)
+          basis.loadTexture = (i: number) => {
+            const json = parser.json,
+              def =
+                isRecord(json) && Array.isArray(json.textures)
+                  ? json.textures[i]
+                  : null,
+              ext =
+                isRecord(def) && isRecord(def.extensions)
+                  ? def.extensions.KHR_texture_basisu
+                  : null;
+            if (!isRecord(ext) || typeof ext.source !== "number") return null;
+            return parser.loadTextureImage(i, ext.source, parser.textureLoader);
+          };
+      },
+    };
+  });
   return loader.parseAsync(bytes.slice().buffer, "");
 }
 export function dispose(root: T.Object3D) {
