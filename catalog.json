@@ -2600,7 +2600,7 @@
       "package": "passed",
       "sharedAutosaveRevert": "passed",
       "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
-      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。",
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。",
       "structuralLayout": {
         "status": "pending",
         "reviewedAt": "2026-10-29",
@@ -2662,7 +2662,7 @@
         "record": "workbenches/56-langextract/ACCEPTANCE.md",
         "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
       },
-      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 56,
     "slug": "langextract",
@@ -2685,45 +2685,46 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "文档结构、文本与表格校对台",
-    "core_features": "DoclingDocument结构树、文本/表格校订、顺序、JSON/Markdown/CSV与HTML连接器",
-    "integration": "官方 docling-serve；代码 MIT，模型单列",
+    "core_features": "本地 PDF/DOCX/HTML/Markdown 转换、原页与结构块框选、文本表格校订、Docling JSON/Markdown/HTML/CSV 导出",
+    "integration": "浏览器 PDF.js 与 Node 文档解析；Docling Serve 可选",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "当前上传仅HTML；无PDF/OCR/DOCX预览或转换；官方Serve live与客户端导入未验证。",
+    "caveat": "本地解析不含 OCR 或官方版面模型；Docling Serve 用本机夹具验证，真实服务、Host 与客户端导入未验证。",
     "sources": [
       "https://github.com/docling-project/docling"
     ],
     "group": "AI 工具",
-    "mode": "独立服务与结果审阅",
-    "checked_at": "2026-10-27",
+    "mode": "原页对照与结构校订",
+    "checked_at": "2026-10-29",
     "verification": {
       "build": "passed",
-      "tests": 23,
+      "tests": 35,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "pending",
+      "productLayout": "passed",
       "package": "passed",
       "screenshot": "docs/screenshots/docling.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.4.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/57-docling/app/ACCEPTANCE.md",
-      "upstream": "真实Docling core HTML转换与原生JSON回读；官方Serve live未验证",
+      "upstream": "DoclingDocument 原生 schema 与 Markdown 导出兼容检查；Serve 为 HTTP 合同夹具",
       "hostLlm": "not-used",
       "structuralLayout": {
-        "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "status": "passed",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/57-docling/app/ACCEPTANCE.md",
+        "basis": "independent desktop/mobile task flows and comparison with adjacent workbench screenshots"
+      },
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 57,
     "slug": "docling",
     "directory": "workbenches/57-docling",
     "status": "local-verified",
-    "version": "0.4.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
@@ -2797,45 +2798,46 @@
     "category": "AI 工作台",
     "kind": "服务适配",
     "workbench": "提示词与模型回归评测台",
-    "core_features": "真实评测结果矩阵、基线、人工复核、限定套件执行器与CSV/JSON导出",
-    "integration": "外部 runner/真实结果导入；MIT",
+    "core_features": "用例×提示版本×provider 评测矩阵、本机回放与脚本、常用断言、运行对比、发布判断、配置和结果导入导出",
+    "integration": "Node 本机评测与可选 Floatboat Host；官方 Promptfoo CLI 可选",
     "effort": "中–高",
     "priority": "A",
     "license": "MIT",
-    "caveat": "限定v3结果与安全JSON套件；执行器独立部署，外部模型与客户端导入未验证。",
+    "caveat": "本机执行器为确定性子集；真实 Host/LLM 与客户端导入未验证；官方执行器仅回显/本机数据验收。",
     "sources": [
       "https://github.com/promptfoo/promptfoo"
     ],
     "group": "AI 工具",
-    "mode": "独立服务与结果审阅",
-    "checked_at": "2026-10-27",
+    "mode": "多版本评测与发布复核",
+    "checked_at": "2026-10-29",
     "verification": {
       "build": "passed",
-      "tests": 11,
+      "tests": 25,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "passed",
       "package": "passed",
       "screenshot": "docs/screenshots/promptfoo.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.4.0.md",
-      "acceptance": "workbenches/59-promptfoo/ACCEPTANCE.md",
-      "upstream": "真实Promptfoo evaluator回显评测；外部模型未验证",
-      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
+      "acceptance": "workbenches/59-promptfoo/app/ACCEPTANCE.md",
+      "upstream": "Promptfoo 官方执行器 216 格确定性结果对照、3 项执行器测试；Host 为 mock",
+      "hostLlm": "mock-verified",
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "passed",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/59-promptfoo/app/ACCEPTANCE.md",
+        "basis": "independent desktop/mobile task flows and comparison with adjacent workbench screenshots"
+      },
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 59,
     "slug": "promptfoo",
     "directory": "workbenches/59-promptfoo",
     "status": "local-verified",
-    "version": "0.4.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
@@ -2885,7 +2887,7 @@
         "record": "workbenches/60-faster-whisper/ACCEPTANCE.md",
         "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
       },
-      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 60,
     "slug": "faster-whisper",
@@ -2941,7 +2943,7 @@
         "record": "workbenches/61-presenton/app/ACCEPTANCE.md",
         "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
       },
-      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "id": 61,
     "slug": "presenton",
@@ -3021,44 +3023,45 @@
     "category": "AI 工作台",
     "kind": "引擎/应用",
     "workbench": "代码与资料知识地图",
-    "core_features": "真实AST抽取、原生图谱、关系路径、布局与审阅笔记",
-    "integration": "独立Python服务，默认8781",
+    "core_features": "多文件与文件夹知识抽取、Louvain 社区、力导向图、原文定位、搜索路径、GraphML/交互 HTML/完整项目导出",
+    "integration": "Node 内置抽取与内容地址库；Python AST/Floatboat Host 可选",
     "effort": "中–高",
     "priority": "A",
     "license": "Apache-2.0",
-    "caveat": "真实graphifyy 0.9.97 AST提取；语义LLM提取未启用；Floatboat客户端导入未验证。",
+    "caveat": "Node 抽取为确定性启发式，复杂语义不保证；Host 仅 mock；大图极限、真实 Python HTTP 到 UI 及客户端导入未验证。",
     "sources": [
       "https://github.com/Graphify-Labs/graphify"
     ],
     "group": "AI 工具",
-    "mode": "引擎封装",
-    "checked_at": "2026-10-28",
+    "mode": "资料抽取与知识地图审阅",
+    "checked_at": "2026-10-29",
     "slug": "graphify",
     "directory": "workbenches/63-graphify",
     "status": "local-verified",
-    "version": "0.5.1",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 12,
+      "tests": 26,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "passed",
       "package": "passed",
       "screenshot": "docs/screenshots/graphify.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
-      "acceptance": "workbenches/63-graphify/ACCEPTANCE.md",
-      "upstream": "真实graphifyy 0.9.97 AST提取；语义LLM提取未启用",
-      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
+      "acceptance": "workbenches/63-graphify/app/ACCEPTANCE.md",
+      "upstream": "Python graphifyy 0.9.97 真实库测试；Node 与独立 Chrome 多文件抽取、社区及导出验证",
+      "hostLlm": "mock-verified",
       "serviceTests": 4,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "passed",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/63-graphify/app/ACCEPTANCE.md",
+        "basis": "independent desktop/mobile task flows and comparison with adjacent workbench screenshots"
+      },
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "presentation": {
       "screenshots": [
@@ -3248,44 +3251,45 @@
     "category": "AI 工作台",
     "kind": "引擎/应用",
     "workbench": "视频脚本、分镜、素材与制作审批",
-    "core_features": "上传原片、入出点、镜头复核、上游组接和MP4交付",
-    "integration": "独立Python/FFmpeg制作服务，默认8797",
+    "core_features": "多轨视频图片音频字幕、移动修剪分割、转场混音、浏览器 MP4/WebM 成片与完整工程导出",
+    "integration": "浏览器本地合成与分块素材库；外部 OpenMontage 渲染可选",
     "effort": "中–高",
     "priority": "A",
     "license": "AGPL-3.0",
-    "caveat": "真实OpenMontage裁切/组接；未启用AI视频生成；Floatboat客户端导入未验证。",
+    "caveat": "长片、大素材、4K 和其他编码器组合未验证；可选 OpenMontage 服务未重测；Host、客户端导入未验证。",
     "sources": [
       "https://github.com/calesthio/OpenMontage"
     ],
     "group": "AI 工具",
-    "mode": "引擎封装",
-    "checked_at": "2026-10-28",
+    "mode": "多轨剪辑与本地成片",
+    "checked_at": "2026-10-29",
     "slug": "openmontage",
     "directory": "workbenches/67-openmontage",
     "status": "local-verified",
-    "version": "0.5.1",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 9,
+      "tests": 25,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "passed",
       "package": "passed",
       "screenshot": "docs/screenshots/openmontage.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
-      "acceptance": "workbenches/67-openmontage/ACCEPTANCE.md",
-      "upstream": "真实OpenMontage裁切/组接；未启用AI视频生成",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
+      "acceptance": "workbenches/67-openmontage/app/ACCEPTANCE.md",
+      "upstream": "独立 Chrome 实际编码并以 ffprobe 核对桌面/375px H.264+AAC 成片；可选服务仅合同测试",
       "hostLlm": "not-used",
       "serviceTests": 4,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "passed",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/67-openmontage/app/ACCEPTANCE.md",
+        "basis": "independent desktop/mobile task flows and comparison with adjacent workbench screenshots"
+      },
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "presentation": {
       "screenshots": [
@@ -3342,7 +3346,7 @@
         "record": "workbenches/68-deerflow/ACCEPTANCE.md",
         "basis": "product flow and screenshots reviewed; formal cross-workbench review pending"
       },
-      "browserScope": "0.9.0 独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "presentation": {
       "screenshots": [
@@ -3361,44 +3365,45 @@
     "category": "AI 工作台",
     "kind": "引擎/应用",
     "workbench": "角色、假设与情景推演实验",
-    "core_features": "已准备模拟的启动/停止、状态核对、原生动作与人工复核",
-    "integration": "需配置官方MiroFish服务，预先准备模拟、模型和Zep",
+    "core_features": "资料与实体图谱、人设编辑、可复现规则推演、事件注入、立场时间线、报告与完整推演文件导出",
+    "integration": "Node 本地规则推演；Floatboat Host 与 MiroFish/OASIS/Zep 服务可选",
     "effort": "中–高",
     "priority": "A",
     "license": "AGPL-3.0",
-    "caveat": "原生动作格式与运行HTTP契约通过；真实OASIS/Zep模拟未验证；Floatboat客户端导入未验证。",
+    "caveat": "本地规则模拟不等于模型预测；保留 900 KB 模型容量限制，PDF 无 OCR；真实 Host/OASIS/Zep 与客户端导入未验证。",
     "sources": [
       "https://github.com/666ghj/MiroFish"
     ],
     "group": "AI 工具",
-    "mode": "引擎封装",
-    "checked_at": "2026-10-28",
+    "mode": "资料、图谱、人设、推演与结果复核",
+    "checked_at": "2026-10-29",
     "slug": "mirofish",
     "directory": "workbenches/69-mirofish",
     "status": "local-verified",
-    "version": "0.5.1",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 14,
+      "tests": 35,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "passed",
       "package": "passed",
       "screenshot": "docs/screenshots/mirofish.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
-      "acceptance": "workbenches/69-mirofish/ACCEPTANCE.md",
-      "upstream": "原生动作格式与运行HTTP契约通过；真实OASIS/Zep模拟未验证",
-      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
+      "acceptance": "workbenches/69-mirofish/app/ACCEPTANCE.md",
+      "upstream": "本地确定性推演、导出回读与 Host mock 验证；真实 OASIS/Zep 未运行",
+      "hostLlm": "mock-verified",
       "serviceTests": 0,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "passed",
+        "reviewedAt": "2026-10-29",
+        "record": "workbenches/69-mirofish/app/ACCEPTANCE.md",
+        "basis": "independent desktop/mobile task flows and comparison with adjacent workbench screenshots"
+      },
+      "browserScope": "独立 Chrome 1440/375 主流程、导出、失败与自动保存验收；具体范围见 acceptance，客户端导入未验证。"
     },
     "presentation": {
       "screenshots": [
