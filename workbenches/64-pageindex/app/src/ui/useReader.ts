@@ -1,33 +1,53 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { PDFDocumentLoadingTask, PDFDocumentProxy } from "pdfjs-dist";
 import { useProjects, request, download } from "./workspace.tsx";
-import { isRecord, boundedText } from "../contracts/project.ts";
+import { isRecord } from "../contracts/project.ts";
+import { parseArchive, reviewMarkdown, safeName, type Archive } from "../contracts/archive.ts";
 import {
   seed,
   readerValue,
   indexValue,
   runValue,
+  activeStructure,
+  MAX_PDF,
+  MAX_NOTES,
+  OUTLINE_SOURCES,
   type DocumentIndex,
   type QuestionRun,
   type Answer,
+  type OutlineSource,
 } from "../contracts/reader.ts";
-import { blobRequest, fromBase64, toBase64, uploadPdf } from "./files.ts";
+import { blobRequest, fromBase64, toBase64, uploadDocument, type Opened } from "./files.ts";
+import { openPdf, pdfError } from "./pdf.ts";
+import { useService } from "./useService.ts";
+export type { ServiceStatus, OutlineJob } from "./useService.ts";
+
+export type PdfState = "none" | "loading" | "ready" | "missing" | "error";
+export type Focus = { page: number; quote: string; key: number } | null;
+
 export function useReader() {
-  const project = useProjects(seed, readerValue, "未命名阅读项目", {
+  const project = useProjects(seed, readerValue, "未命名阅读", {
     storageKey: "pageindex-reader-v1",
   });
   const [index, setIndex] = useState<DocumentIndex | null>(null),
+    [pdf, setPdf] = useState<{ id: string; doc: PDFDocumentProxy } | null>(null),
+    [pdfState, setPdfState] = useState<PdfState>("none"),
+    [pdfMessage, setPdfMessage] = useState(""),
     [runs, setRuns] = useState<QuestionRun[]>([]),
-    [operation, setOperation] = useState("");
-  const [status, setStatus] = useState({
-    parser: false,
-    model: false,
-    parserMessage: "正在检查服务…",
-  });
-  const operationLock = useRef(false);
+    [operation, setOperation] = useState(""),
+    [focus, setFocusState] = useState<Focus>(null),
+    [reload, setReload] = useState(0);
+  const operationLock = useRef(false),
+    handoff = useRef<(Opened & { id: string }) | null>(null),
+    focusKey = useRef(0);
   function begin() {
     if (operationLock.current || project.loading || project.busy) return false;
     operationLock.current = true;
     return true;
+  }
+  function end() {
+    operationLock.current = false;
+    setOperation("");
   }
   const epoch = useRef(project.documentKey);
   epoch.current = project.documentKey;
@@ -40,54 +60,91 @@ export function useReader() {
     ? project.draft.pendingQuestion
     : null;
   const mutable = !project.loading && !project.busy && !operation;
+  const setFocus = useCallback((page: number, quote: string) => {
+    focusKey.current++;
+    setFocusState({ page, quote, key: focusKey.current });
+  }, []);
   async function navigate(action: () => Promise<boolean>) {
     if (!begin()) return false;
-    setOperation("正在切换项目…");
+    setOperation("正在切换阅读…");
     try {
       return await action();
     } finally {
-      operationLock.current = false;
-      setOperation("");
+      end();
     }
   }
-  async function refreshStatus() {
-    try {
-      const raw = await request("/api/status");
-      if (isRecord(raw))
-        setStatus({
-          parser: raw.parser === true,
-          model: raw.model === true,
-          parserMessage:
-            typeof raw.parserMessage === "string"
-              ? raw.parserMessage
-              : "服务状态未知",
-        });
-    } catch {
-      setStatus({
-        parser: false,
-        model: false,
-        parserMessage: "无法读取服务状态",
-      });
-    }
-  }
+  const { status, refreshStatus, job, buildOutline } = useService(
+    sourceId,
+    project.documentKey,
+    async (id, mode) => {
+      const fresh = indexValue(await request(`/api/documents/${id}`));
+      if (project.data.document?.id !== id) return;
+      setIndex(fresh);
+      project.setData((d) => ({ ...d, outline: mode }));
+      project.setNotice("PageIndex章节树已生成，目录已切换到新树。");
+    },
+    project.report,
+  );
+  // Document + original PDF lifecycle, keyed by the working copy and source hash.
   useEffect(() => {
-    void refreshStatus();
-  }, []);
-  useEffect(() => {
-    let live = true;
+    let live = true,
+      task: PDFDocumentLoadingTask | null = null;
     setIndex(null);
-    if (sourceId)
-      void request(`/api/documents/${sourceId}`)
-        .then((raw) => {
-          if (live) setIndex(indexValue(raw));
-        })
-        .catch((e) => {
-          if (live) project.report(e);
-        });
+    setPdf(null);
+    setPdfMessage("");
+    setFocusState(null);
+    if (!sourceId) {
+      setPdfState("none");
+      return;
+    }
+    setPdfState("loading");
+    const given = handoff.current?.id === sourceId ? handoff.current : null;
+    handoff.current = null;
+    void (async () => {
+      try {
+        if (!given) {
+          const known = await request(`/api/documents/${sourceId}/stored`);
+          if (!live) return;
+          if (!isRecord(known) || known.stored !== true || known.original !== true) {
+            if (isRecord(known) && known.stored === true)
+              setIndex(indexValue(await request(`/api/documents/${sourceId}`)));
+            if (live) setPdfState("missing");
+            return;
+          }
+        }
+        const next = given?.index ?? indexValue(await request(`/api/documents/${sourceId}`));
+        if (!live) return;
+        setIndex(next);
+        task =
+          given?.task ??
+          openPdf(
+            new Uint8Array(
+              await (await blobRequest(`/api/documents/${sourceId}/pdf`)).arrayBuffer(),
+            ),
+          );
+        if (!live) {
+          void task.destroy();
+          return;
+        }
+        const doc = await task.promise;
+        if (!live) return;
+        setPdf({ id: sourceId, doc });
+        setPdfState("ready");
+      } catch (e) {
+        if (!live) return;
+        if ((e as { status?: number }).status === 404) setPdfState("missing");
+        else {
+          setPdfState("error");
+          setPdfMessage(pdfError(e).message);
+        }
+      }
+    })();
     return () => {
       live = false;
+      if (task) void task.destroy();
+      else if (given?.task) void given.task.destroy();
     };
-  }, [sourceId, project.documentKey]);
+  }, [sourceId, project.documentKey, reload]);
   useEffect(() => {
     let live = true,
       busy = false;
@@ -107,7 +164,7 @@ export function useReader() {
       }
     };
     void load();
-    const timer = setInterval(() => void load(), 1800);
+    const timer = setInterval(() => void load(), 2500);
     return () => {
       live = false;
       clearInterval(timer);
@@ -122,64 +179,81 @@ export function useReader() {
     window.addEventListener("beforeunload", stop);
     return () => window.removeEventListener("beforeunload", stop);
   }, [operation]);
-  async function replaceDocument(next: DocumentIndex) {
-    if (
-      await project.replace(
-        { ...seed, document: next.source },
-        next.source.name.replace(/\.pdf$/i, "").slice(0, 120),
-      )
-    ) {
-      setIndex(next);
-      project.setNotice("已打开文档，编辑内容会自动保存。");
+  async function replaceDocument(opened: Opened) {
+    const next = opened.index;
+    handoff.current = { ...opened, id: next.source.id };
+    const meta = next.index.doc_title.trim(),
+      generic = meta.length < 4 || /^(untitled|microsoft word|document\d*$|无标题)/i.test(meta);
+    const title = (generic ? next.source.name.replace(/\.pdf$/i, "") : meta).slice(0, 120);
+    if (await project.replace({ ...seed, document: next.source }, title))
+      project.setNotice(
+        next.pages.some((p) => p.text.trim())
+          ? "已打开文档，阅读位置和摘录会自动保存。"
+          : "已打开文档。此PDF没有可提取文字（可能是扫描件），可阅读与按页摘录，但不能检索或提问。",
+      );
+    else {
+      if (opened.task) void opened.task.destroy();
+      handoff.current = null;
     }
   }
   async function loadPdf(selected: File, repair = false) {
-    if (selected.size > 8 * 1024 * 1024) {
-      project.report(new Error("PDF不能超过8MiB。"));
+    if (selected.size > MAX_PDF) {
+      project.report(new Error("PDF不能超过64MiB，请拆分后打开。"));
       return;
     }
     if (!begin()) return;
     const key = epoch.current;
-    setOperation("准备上传…");
+    setOperation("正在读取PDF…");
     try {
-      const doc = await uploadPdf(
+      const opened = await uploadDocument(
         new Uint8Array(await selected.arrayBuffer()),
         selected.name,
         setOperation,
       );
-      if (epoch.current === key) {
-        if (repair) {
-          if (
-            !project.data.document ||
-            doc.source.id !== project.data.document.id ||
-            doc.source.pages !== project.data.document.pages
-          )
-            throw new Error("这不是恢复稿对应的原PDF，请选择原始文件。");
-          setIndex(doc);
-          project.setError("");
-          const saved = await project.save();
-          if (saved) project.setNotice("原PDF已补齐，便笺与工作稿已保留。");
-        } else await replaceDocument(doc);
+      if (epoch.current !== key) {
+        if (opened.task) void opened.task.destroy();
+        return;
       }
+      if (repair) {
+        if (opened.task) void opened.task.destroy();
+        if (
+          !project.data.document ||
+          opened.index.source.id !== project.data.document.id ||
+          opened.index.source.pages !== project.data.document.pages
+        )
+          throw new Error("这不是此阅读档案对应的原PDF，请选择原始文件。");
+        project.setError("");
+        const saved = await project.save();
+        setReload((n) => n + 1);
+        if (saved) project.setNotice("原PDF已补齐，摘录与工作稿已保留。");
+      } else await replaceDocument(opened);
     } catch (e) {
       if (epoch.current === key) project.report(e);
     } finally {
-      operationLock.current = false;
-      setOperation("");
+      end();
     }
   }
-  async function sample() {
+  async function sample(key: "report" | "handbook") {
     if (!begin()) return;
-    const key = epoch.current;
-    setOperation("正在索引示例手册…");
+    const at = epoch.current;
+    setOperation("正在打开示例…");
     try {
-      const doc = indexValue(await request("/api/sample", { method: "POST" }));
-      if (epoch.current === key) await replaceDocument(doc);
+      const page = await blobRequest(`/api/samples/${key}`);
+      const name =
+        key === "report"
+          ? "Riverside Library 2025 Annual Report.pdf"
+          : "Harbor Workshop Handbook.pdf";
+      const opened = await uploadDocument(
+        new Uint8Array(await page.arrayBuffer()),
+        name,
+        setOperation,
+      );
+      if (epoch.current === at) await replaceDocument(opened);
+      else if (opened.task) void opened.task.destroy();
     } catch (e) {
-      if (epoch.current === key) project.report(e);
+      if (epoch.current === at) project.report(e);
     } finally {
-      operationLock.current = false;
-      setOperation("");
+      end();
     }
   }
   async function ask() {
@@ -216,8 +290,7 @@ export function useReader() {
     } catch (e) {
       if (epoch.current === key) project.report(e);
     } finally {
-      operationLock.current = false;
-      setOperation("");
+      end();
     }
   }
   function answers(): Answer[] {
@@ -226,9 +299,21 @@ export function useReader() {
       ...runs.flatMap((r) => (r.result ? [r.result] : [])),
     ].filter((a, i, list) => list.findIndex((x) => x.id === a.id) === i);
   }
+  function addNote(page: number, quote: string) {
+    if (project.data.notes.length >= MAX_NOTES) {
+      project.report(new Error(`每份阅读档案最多${MAX_NOTES}条摘录。`));
+      return null;
+    }
+    const id = crypto.randomUUID();
+    project.setData((d) => ({
+      ...d,
+      notes: [{ id, page, quote: quote.trim().slice(0, 1000), text: "" }, ...d.notes],
+    }));
+    return id;
+  }
   async function exportProject() {
     if (!begin()) return;
-    setOperation("正在准备完整项目…");
+    setOperation("正在准备阅读档案…");
     try {
       let latest = runs;
       if (currentId) {
@@ -240,130 +325,105 @@ export function useReader() {
         ...project.data.archivedAnswers,
         ...latest.flatMap((r) => (r.result ? [r.result] : [])),
       ].filter((a, i, list) => list.findIndex((x) => x.id === a.id) === i);
-      const pdf = sourceId
+      const pdfBytes = sourceId
         ? toBase64(
             new Uint8Array(
-              await (
-                await blobRequest(`/api/documents/${sourceId}/pdf`)
-              ).arrayBuffer(),
+              await (await blobRequest(`/api/documents/${sourceId}/pdf`)).arrayBuffer(),
             ),
           )
         : null;
+      const archive: Archive = {
+        format: "floatboat-pageindex",
+        version: 1,
+        title: project.title,
+        data: { ...project.data, archivedAnswers: all },
+        draft: project.draft,
+        pdf: pdfBytes,
+        outlines: index?.outlines ?? [],
+        runLedger: latest,
+      };
       download(
-        new Blob(
-          [
-            JSON.stringify(
-              {
-                format: "floatboat-pageindex",
-                version: 1,
-                title: project.title,
-                data: { ...project.data, archivedAnswers: all },
-                draft: project.draft,
-                pdf,
-                runLedger: latest,
-              },
-              null,
-              2,
-            ),
-          ],
-          { type: "application/json" },
-        ),
-        "pageindex-project.json",
+        new Blob([JSON.stringify(archive, null, 2)], { type: "application/json" }),
+        `${safeName(project.title)}.pageindex.json`,
       );
     } catch (e) {
       project.report(e);
     } finally {
-      operationLock.current = false;
-      setOperation("");
+      end();
     }
   }
   async function importProject(selected: File) {
     if (!begin()) return;
     const key = epoch.current;
-    setOperation("正在读取完整项目…");
+    setOperation("正在读取阅读档案…");
     try {
-      if (selected.size > 15 * 1024 * 1024)
-        throw new Error("项目文件超过15MiB。");
-      const input: unknown = JSON.parse(await selected.text());
-      if (!isRecord(input)) throw new Error("不是PageIndex项目或恢复草稿。");
-      const recovery =
-        isRecord(input.snapshot) && isRecord(input.snapshot.data);
-      const raw = recovery
-        ? {
-            ...(input.snapshot as Record<string, unknown>),
-            draft: (input.snapshot as Record<string, unknown>).extra,
-          }
-        : input;
-      if (
-        !recovery &&
-        (raw.format !== "floatboat-pageindex" || raw.version !== 1)
-      )
-        throw new Error("不是PageIndex工作台项目。");
-      const data = readerValue(raw.data),
-        title = boundedText(raw.title, 120);
-      if (data.document && !recovery) {
-        if (typeof raw.pdf !== "string") throw new Error("项目没有原PDF。");
-        const doc = await uploadPdf(
-          fromBase64(raw.pdf),
-          data.document.name,
-          setOperation,
-        );
-        if (
-          doc.source.id !== data.document.id ||
-          doc.source.pages !== data.document.pages
-        )
-          throw new Error("项目索引与原PDF不一致。");
+      if (selected.size > 100 * 1024 * 1024) throw new Error("阅读档案文件超过100MiB。");
+      let input: unknown;
+      try {
+        input = JSON.parse(await selected.text());
+      } catch {
+        throw new Error("不是PageIndex阅读档案或恢复草稿（JSON无效）。");
       }
-      const extra = isRecord(raw.draft) ? { ...raw.draft } : {};
-      if (Array.isArray(raw.runLedger) && raw.runLedger.length) {
-        if (raw.runLedger.length > 15)
-          throw new Error("导入任务记录超过容量。");
-        extra.importedRunLedger = raw.runLedger
-          .map(runValue)
-          .map((r) => ({ ...r, result: null }));
+      const parsed = parseArchive(input),
+        source = parsed.data.document;
+      let opened: Opened | null = null;
+      if (source && parsed.pdf) {
+        opened = await uploadDocument(fromBase64(parsed.pdf), source.name, setOperation);
+        if (opened.index.source.id !== source.id || opened.index.source.pages !== source.pages)
+          throw new Error("阅读档案与原PDF不一致。");
+        for (const tree of parsed.outlines)
+          opened = {
+            ...opened,
+            index: indexValue(
+              await request(`/api/documents/${source.id}/outlines/import`, {
+                method: "POST",
+                body: JSON.stringify({ tree }),
+              }),
+            ),
+          };
       }
-      if (extra.pendingQuestion) {
-        extra.importedPendingQuestion = extra.pendingQuestion;
-        delete extra.pendingQuestion;
+      if (epoch.current !== key) {
+        if (opened?.task) void opened.task.destroy();
+        return;
       }
-      if (
-        epoch.current === key &&
-        (await project.replace(data, title, extra)) &&
-        recovery
-      )
+      if (opened) handoff.current = { ...opened, id: opened.index.source.id };
+      if (await project.replace(parsed.data, parsed.title, parsed.extra)) {
         project.setNotice(
-          "已恢复为新副本。恢复稿不包含原PDF；如缺失，请点击补齐原PDF。未确认提问不会重放。",
+          parsed.recovery
+            ? "已恢复为新副本。恢复稿不包含原PDF；如缺失，请补齐原PDF。未确认提问不会重放。"
+            : "已导入为新的阅读档案，历史回答保留为导入记录。",
         );
+      } else if (opened?.task) {
+        void opened.task.destroy();
+        handoff.current = null;
+      }
     } catch (e) {
       if (epoch.current === key) project.report(e);
     } finally {
-      operationLock.current = false;
-      setOperation("");
+      end();
     }
   }
   function exportReview() {
-    const text = [
-      `# ${project.title}`,
-      ...project.data.notes.map(
-        (n) =>
-          `## 第${n.page}页\n\n> ${n.quote.replace(/\n/g, "\n> ")}\n\n${n.text}`,
-      ),
-      ...answers().map(
-        (a) =>
-          `## ${a.question}\n\n${a.answer}\n\n${a.citations.map((c) => `- 第${c.page}页：${c.quote}`).join("\n")}`,
-      ),
-    ].join("\n\n");
+    const structure = index ? activeStructure(index, project.data.outline).structure : [];
     download(
-      new Blob([text], { type: "text/markdown" }),
-      "pageindex-review.md",
+      new Blob([reviewMarkdown(project.title, project.data, answers(), structure, (p) => index?.pages[p - 1]?.text ?? "")], {
+        type: "text/markdown",
+      }),
+      `${safeName(project.title)}-审阅.md`,
     );
   }
   return {
     project,
     index: index?.source.id === sourceId ? index : null,
+    pdf: pdf && pdf.id === sourceId ? pdf.doc : null,
+    pdfState,
+    pdfMessage,
     runs,
     operation,
     status,
+    job,
+    focus,
+    setFocus,
     mutable,
     pending,
     file,
@@ -372,7 +432,9 @@ export function useReader() {
     refreshStatus,
     loadPdf,
     sample,
+    buildOutline,
     ask,
+    addNote,
     answers: answers(),
     exportProject,
     importProject,

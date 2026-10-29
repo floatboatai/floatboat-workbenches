@@ -1,12 +1,21 @@
 # 页间 · PageIndex
 
-PDF章节导航、原页阅读、摘录与报告审阅。真实PageIndex Flash建立章节树，PDFium提取原文并渲染页面；模型回答保留逐字核对的页码引用。
+长报告阅读台：PDF自身书签（或版面标题）生成章节目录，PDF.js在浏览器中渲染原页并提取原文，选中原文即可摘录成带页码的审阅意见；连接Floatboat后可按原页提问，引用逐字核对并标在原页上。PageIndex服务是可选的章节树增强，不是打开文档的前提。
 
 ![页间工作台](../../docs/screenshots/pageindex.png)
 
 ## 使用
 
-从总仓库运行 `pnpm workbench prepare pageindex`，然后启动本项目的独立解析服务：
+从总仓库运行 `pnpm workbench prepare pageindex`，再运行 `pnpm workbench dev pageindex`。不需要任何其他进程：首次打开会自动载入随包示例《Riverside Community Library 2025 Annual Service Report》（11页，带PDF书签）。
+
+- **文档菜单**（顶部“文档 ▾”）：打开PDF、两份示例、最近阅读、导出审阅Markdown / 阅读档案（含原PDF、摘录、回答、章节树）/ 章节索引JSON / 原PDF，导入阅读档案或恢复稿（总是新档案）、导出恢复草稿、重试保存、档案JSON草稿。Escape关闭并把焦点还给按钮。
+- **目录 / 检索**（左栏）：章节来源依次是PDF书签 → 版面标题识别 → 按页分段；全文检索列出页码和上下文，点击跳到原页并标出命中。
+- **原页**（中间）：翻页、页码跳转、缩放（适合宽度/75–200%）、方向键翻页；在文字层选中文字后点“摘录所选”，或用“摘录本页”。摘录（黄）、已核对引用（青）、当前定位（橙）按字符范围标在原页上。
+- **审阅**（右栏）：摘录原文与意见；原页问答需要Floatboat Host（默认请求 `gemini-3.8-flash`），未连接时显示原因并可重新检查。
+
+### 可选：PageIndex章节树
+
+左栏底部“PageIndex 章节树”卡片显示连接状态、确切启动命令并可重新检查。在完整仓库根目录：
 
 ```sh
 cd workbenches/64-pageindex/service
@@ -15,24 +24,21 @@ uv pip sync --python .venv/bin/python requirements.lock
 .venv/bin/python server.py --port 8784
 ```
 
-再从总仓库运行 `pnpm workbench dev pageindex`。默认服务为 `http://127.0.0.1:8784`；可用 `PAGEINDEX_SERVICE_URL` 指定本机HTTP或远程HTTPS服务，地址不进入项目文件。远程服务的部署鉴权由部署者配置；内置服务仅监听回环地址。
-
-打开PDF或示例手册，选择章节、翻页，点击“摘录本页”填写意见。输入和未应用JSON均自动保存。问答需已连接的Floatboat Host，默认显式请求 `gemini-3.8-flash`；模型先选真实章节，再读取这些页并核对引用。模型步骤是工作台适配，未使用PageIndex Cloud检索API。
-
-完整项目导出包含原PDF、便笺、问题、已完成回答、工作稿与运行账本；导入创建新项目，历史回答标为导入记录，未确认模型请求不会被重放。“导出恢复草稿”生成的文件同样可从“导入项目”恢复为新副本，并保留未完成JSON；恢复草稿不附带PDF，目标工作台缺少原件时可用“补齐原PDF”重新选择同一文件。也可单独导出原生PageIndex章节JSON、原PDF和审阅Markdown。原始PDF在当前工作台数据目录，源码包不携带预览数据。
+连接后可“生成 Flash 章节树”（`page_index_flash`，无需模型）。“生成模型章节树”调用 `page_index`（page_index_classic，`if_add_node_summary`、`if_add_doc_description`），需在启动服务前设置 `PAGEINDEX_MODEL`（LiteLLM模型名）与对应服务商密钥，例如 `PAGEINDEX_MODEL=gpt-4.1-mini OPENAI_API_KEY=… .venv/bin/python server.py --port 8784`。生成的树单独保存，可在“章节来源”中切换；问答按所选树选章节，模型树的节点摘要也会提供给章节选择。其他地址用 `PAGEINDEX_SERVICE_URL`（本机HTTP或远程HTTPS）。
 
 ## 边界
 
-- PDF最多8MiB、40页、30万原文字符、250个章节节点；扫描PDF无可读文字时明确失败，不包含OCR。
-- 原生章节索引使用PageIndex 0.2.10的无模型Flash模式，不把确定性索引当模型推理。
-- 一次模型问答最多取4个章节、12页、45000原文字符，引用必须能在原页逐字找到；超限或引用不匹配保留失败记录，不编造回答。
-- 每项目最多60条便笺、15次提问。未确认提交保留操作编号，重启后未完成模型步骤标记中断，不自动重复调用。
-- 图像依赖解析服务；服务断开仍可阅读已存原文、章节与便笺。IndexedDB恢复限定相同浏览器来源。
+- PDF最多64MiB、1000页、原文600万字符、3000个章节节点；每份阅读档案最多200条摘录、50条问答。超限给出明确提示。
+- 扫描件（无文字层）可以阅读、按页摘录，不能检索或提问；不含OCR。
+- 版面标题识别是启发式：依据字号层级、编号和重复页眉过滤；排版不规则的PDF可能只得到按页分段。
+- 一次问答读取所选章节中最相关的至多16页 / 6万字符；引用不在原页时记录失败，不编造回答。未确认提交保留操作编号，不自动重放。
+- PageIndex章节树生成任务状态保存在服务进程内存中；工作台重启后正在生成的任务需重新点击（结果一旦生成即持久保存）。Flash树的质量取决于上游版面统计，可能出现重复或交叠的节点。
+- IndexedDB恢复限定同一浏览器来源。
 
 ## 验证和交付
 
 本目录运行 `pnpm workbench:check`、`pnpm test`、`pnpm package`；Python服务测试为 `cd service && .venv/bin/python -m unittest test_service.py`。实际证据见 [ACCEPTANCE.md](ACCEPTANCE.md)。
 
-导入：Floatboat → 我的 → 工作台 → 导入工作台，选择`.fbworkbench`。解析服务/Python环境单独启动；客户端导入本次未实测。
+导入：Floatboat → 我的 → 工作台 → 导入工作台，选择`.fbworkbench`。阅读、检索、摘录与导出在导入包中无需额外安装；PageIndex服务需从完整仓库单独启动。客户端导入本次未实测。
 
-上游：[VectifyAI/PageIndex](https://github.com/VectifyAI/PageIndex)（MIT；许可随包保留），[PDFium Python](https://github.com/pypdfium2-team/pypdfium2)。示例操作手册为本项目自制普通资料。
+上游：[Mozilla PDF.js](https://github.com/mozilla/pdf.js)（pdfjs-dist 6.4.299，Apache-2.0）、[VectifyAI/PageIndex](https://github.com/VectifyAI/PageIndex)（MIT，仅可选服务）、[pypdfium2](https://github.com/pypdfium2-team/pypdfium2)。第三方清单见 `app/notices/THIRD-PARTY.md`。示例报告与手册为本项目自制普通资料。

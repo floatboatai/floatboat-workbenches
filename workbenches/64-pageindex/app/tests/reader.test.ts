@@ -73,7 +73,7 @@ test("unfinished question and note fields round-trip, and source/capacity bounda
   assert.deepEqual(readerValue(data), data);
   assert.throws(() => readerValue({ ...data, page: 4 }));
   assert.throws(() =>
-    readerValue({ ...data, notes: Array(61).fill(data.notes[0]) }),
+    readerValue({ ...data, notes: Array(201).fill(data.notes[0]) }),
   );
   assert.throws(() =>
     readerValue({ ...data, notes: [data.notes[0], data.notes[0]] }),
@@ -83,7 +83,10 @@ test("model fences are accepted while extra prose, truncation and token-limited 
   assert.deepEqual(parseJson('```json\n{"node_ids":["0002"]}\n```', "STOP"), {
     node_ids: ["0002"],
   });
-  for (const s of ['prefix {"node_ids":[]}', "```json\n{}", "{} trailing"])
+  assert.deepEqual(parseJson('```json\n{"node_ids":["0019"]}\n', "STOP"), {
+    node_ids: ["0019"],
+  });
+  for (const s of ['prefix {"node_ids":[]}', '```json\n{"node_ids":[', "{} trailing", "```json\n{} trailing\n```"])
     assert.throws(() => parseJson(s, "STOP"));
   assert.throws(() => parseJson("{}", "MAX_TOKENS"));
 });
@@ -112,7 +115,7 @@ test("citations must be verbatim original-page evidence within retrieved pages",
   );
   assert.throws(() => answerValue({ ...answer, citations: [] }));
 });
-function setup(fail = false) {
+function setup(fail = false, selection: unknown = { node_ids: ["0002"] }) {
   const db = new DatabaseSync(":memory:");
   db.exec(readFileSync("app/migrations/0002_projects.sql", "utf8"));
   db.exec(readFileSync("app/migrations/0004_reader.sql", "utf8"));
@@ -143,7 +146,7 @@ function setup(fail = false) {
             finishReason: "STOP",
             text: JSON.stringify(
               calls % 2 === 1
-                ? { node_ids: ["0002"] }
+                ? selection
                 : {
                     answer: "Attach inspection photographs.",
                     insufficient: false,
@@ -189,6 +192,27 @@ test("question operation replay is durable and never calls the model twice for t
     );
   } finally {
     x.db.close();
+  }
+});
+test("unknown or excess chapter IDs are ignored; with no usable chapter the question's own terms pick pages", async () => {
+  for (const selection of [{ node_ids: ["nope", "0002", "x", "y", "z"] }, { node_ids: ["missing"] }]) {
+    const x = setup(false, selection),
+      service = createQuestions(x.app, () => doc),
+      input = {
+        id: randomUUID(),
+        projectId: x.project.id,
+        documentId: doc.source.id,
+        question: "What should be attached to the handover record?",
+      };
+    try {
+      service.start(input);
+      await Promise.all(x.work);
+      const run = service.get(input.id);
+      assert.equal(run.status, "completed", run.error);
+      assert.equal(run.result?.citations[0].page, 3);
+    } finally {
+      x.db.close();
+    }
   }
 });
 test("failed and interrupted model tasks remain recorded and cannot silently restart", async () => {

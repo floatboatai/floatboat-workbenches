@@ -4,14 +4,31 @@ import { WorkbenchHostError } from "../../sdk/host.mjs";
 import { isRecord, boundedText } from "../contracts/project.ts";
 import {
   answerValue,
-  flatten,
   parseJson,
   validateCitations,
   operationId,
   runValue,
+  activeStructure,
+  textless,
+  MAX_ANSWERS,
   type DocumentIndex,
+  type IndexNode,
+  type OutlineChoice,
   type QuestionRun,
 } from "../contracts/reader.ts";
+import { rankEvidence } from "../contracts/outline.ts";
+/** Evidence budget for one answer: enough for several dense report pages. */
+export const EVIDENCE = { maxPages: 16, maxChars: 60_000 };
+/** Chapter routing list: shallow levels first, capped so long reports stay within one prompt. */
+export function chapterList(structure: IndexNode[], limit = 400): IndexNode[] {
+  const out: IndexNode[] = [];
+  let level = structure;
+  while (level.length && out.length < limit) {
+    out.push(...level.slice(0, limit - out.length));
+    level = level.flatMap((n) => n.nodes ?? []);
+  }
+  return out;
+}
 export function createQuestions(
   app: WorkbenchServer,
   document: (id: string) => DocumentIndex,
@@ -49,47 +66,51 @@ export function createQuestions(
     );
     return parseJson(r.text, r.finishReason);
   }
-  async function execute(run: QuestionRun) {
+  async function execute(run: QuestionRun, choice: OutlineChoice) {
     try {
       const doc = document(run.documentId),
-        nodes = flatten(doc.index.structure);
+        tree = activeStructure(doc, choice),
+        nodes = chapterList(tree.structure);
       const selection = await model(
         JSON.stringify({
           task: '选择最能回答问题的1到4个章节node_id；不确定或无相关章节返回空数组。返回格式 {"node_ids":["..."]}',
           question: run.question,
+          document: tree.description || doc.index.doc_title || doc.source.name,
           chapters: nodes.map((n) => ({
             id: n.node_id,
             title: n.title,
             pages: [n.start_index, n.end_index],
-            summary: n.summary ?? "",
+            summary: (n.summary ?? "").slice(0, 400),
           })),
         }),
         1500,
       );
-      if (
-        !isRecord(selection) ||
-        !Array.isArray(selection.node_ids) ||
-        selection.node_ids.length > 4 ||
-        selection.node_ids.some(
-          (id) =>
-            typeof id !== "string" || !nodes.some((n) => n.node_id === id),
-        )
-      )
-        throw new Error("模型选择了无效章节，回答未生成。");
-      const ids = selection.node_ids,
-        chosen = nodes.filter((n) => ids.includes(n.node_id));
-      const pages = [
-        ...new Set(
-          chosen.flatMap((n) =>
-            Array.from(
-              { length: n.end_index - n.start_index + 1 },
-              (_, i) => n.start_index + i,
+      if (!isRecord(selection) || !Array.isArray(selection.node_ids))
+        throw new Error("模型没有返回章节选择，回答未生成。");
+      // Unknown IDs are ignored and at most four chapters are read.
+      const ids = selection.node_ids.filter(
+        (id): id is string => typeof id === "string" && nodes.some((n) => n.node_id === id),
+      ).slice(0, 4);
+      const chosen = nodes.filter((n) => ids.includes(n.node_id));
+      const candidates = chosen.length
+        ? [
+            ...new Set(
+              chosen.flatMap((n) =>
+                Array.from(
+                  { length: n.end_index - n.start_index + 1 },
+                  (_, i) => n.start_index + i,
+                ),
+              ),
             ),
-          ),
-        ),
-      ].sort((a, b) => a - b);
-      if (pages.length > 12)
-        throw new Error("相关章节超过12页，请把问题缩小到具体章节后重新提问。");
+          ].sort((a, b) => a - b)
+        : // No usable chapter: fall back to the pages that share the question's terms.
+          doc.pages.map((p) => p.number);
+      // Long chapters narrow to their most relevant pages instead of failing.
+      const pages = rankEvidence(
+        run.question,
+        candidates.map((p) => doc.pages[p - 1]),
+        { ...EVIDENCE, matchOnly: !chosen.length },
+      );
       let raw: unknown = {
         answer: "未找到可支持回答的章节。请调整问题或直接查阅目录。",
         citations: [],
@@ -97,8 +118,6 @@ export function createQuestions(
       };
       if (pages.length) {
         const evidence = pages.map((p) => doc.pages[p - 1]);
-        if (evidence.reduce((n, p) => n + p.text.length, 0) > 45000)
-          throw new Error("相关章节文本过长，请缩小问题范围。");
         raw = await model(
           JSON.stringify({
             task: '只基于原页回答问题，引用必须逐字来自对应页。返回 {"answer":"中文回答","citations":[{"page":1,"quote":"原文逐字引用"}],"insufficient":false}。没有证据时insufficient=true。回答不超过4000字，引用最多6条，每条不超过500字。',
@@ -142,7 +161,7 @@ export function createQuestions(
     list(projectId: string) {
       return db
         .prepare(
-          "SELECT id FROM reader_questions WHERE project_id=? ORDER BY created_at DESC LIMIT 30",
+          "SELECT id FROM reader_questions WHERE project_id=? ORDER BY created_at DESC LIMIT 60",
         )
         .all(operationId(projectId))
         .map((r) => get(String(r.id)));
@@ -188,9 +207,13 @@ export function createQuestions(
           (Array.isArray(data.archivedAnswers)
             ? data.archivedAnswers.length
             : 0) >=
-        15
+        MAX_ANSWERS
       )
-        throw new Error("此项目已保留15条提问，请导出后新建项目。");
+        throw new Error(
+          `此阅读档案已保留${MAX_ANSWERS}条提问，请导出后另建档案。`,
+        );
+      if (textless(doc))
+        throw new Error("此PDF没有可提取文字（可能是扫描件），无法按原文提问。");
       if (
         db
           .prepare(
@@ -202,9 +225,13 @@ export function createQuestions(
       db.prepare(
         "INSERT INTO reader_questions(id,project_id,document_id,question,status,created_at) VALUES(?,?,?,?,'running',?)",
       ).run(id, projectId, doc.source.id, question, new Date().toISOString());
-      const run = get(id);
+      const run = get(id),
+        choice: OutlineChoice =
+          data.outline === "pageindex-flash" || data.outline === "pageindex-classic"
+            ? data.outline
+            : "document";
       void app
-        .trackTask(() => execute(run), "pageindex.question")
+        .trackTask(() => execute(run, choice), "pageindex.question")
         .catch(() => {});
       return run;
     },

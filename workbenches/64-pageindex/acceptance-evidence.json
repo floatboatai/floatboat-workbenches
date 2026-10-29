@@ -1,78 +1,57 @@
 {
-  "verifiedAt": "2026-10-28T03:57:19.892Z",
-  "timezone": "America/New_York",
-  "version": "0.5.0",
+  "verifiedAt": "2026-10-29",
+  "version": "0.9.0",
   "build": "passed",
-  "applicationTests": 9,
+  "applicationTests": 21,
   "serviceTests": 4,
-  "browserChecks": [
-    "real PageIndex sample index and PDFium page image",
-    "note and current page survive reload",
-    "real Gemini 3.8 chapter selection, original-page answer and validated quotations",
-    "unapplied invalid JSON draft restored",
-    "portable export includes original PDF, notes, drafts and answer",
-    "portable import creates a separate project without replaying model calls",
-    "375px navigation and review have no horizontal overflow",
-    "keyboard focus and no pageerror",
-    "CSP-compatible original PDF image decodes successfully",
-    "editing while save acknowledgement is delayed preserves latest content",
-    "save committed then response lost retries same mutation without duplicate project",
-    "stale window conflict cannot overwrite confirmed notes",
-    "invalid JSON draft survives portable import",
-    "375px image and review both remain usable",
-    "no browser pageerror"
-  ],
-  "browserImageDecode": "passed after CSP-compatible data image fix",
-  "engine": {
-    "name": "pageindex",
-    "version": "0.2.10",
-    "mode": "flash, summary=False, optimize=False",
-    "nativeIndex": true,
-    "pdfiumRendering": true
+  "reader": {
+    "engine": "pdfjs-dist 6.4.299 (browser)",
+    "worksWithoutService": true,
+    "outlineSources": ["pdf-outline", "heading-scan", "page-ranges", "pageindex-flash", "pageindex-classic"],
+    "limits": { "bytes": 67108864, "pages": 1000, "textCharacters": 6000000, "nodes": 3000, "notes": 200, "answers": 50 }
+  },
+  "browserChecks": {
+    "noServiceNoHost": [
+      "empty data dir auto-opens bundled report with PDF bookmark tree and inked canvas",
+      "service card shows exact start command; ask disabled with Floatboat explanation; no 'fetch failed'",
+      "chapter navigation, text selection excerpt, note highlight, search jump with focus highlight",
+      "reload restores page and note",
+      "review markdown and portable archive contents validated",
+      "archive import creates a new project",
+      "PDF without bookmarks -> heading-scan tree",
+      "400-page PDF opens, page jump 377, search hit on page 377",
+      "25 MB PDF opens",
+      "invalid file reports a readable error and keeps current document"
+    ],
+    "autosave": [
+      "typing during a 3 s delayed save keeps newer text after reload",
+      "response lost after server commit retries the same mutation without duplicate project",
+      "blank title stays an explicit draft across reload",
+      "unapplied invalid JSON restored; apply shows inline error",
+      "recovery draft import with missing original -> repair with same PDF -> new project, note intact"
+    ],
+    "mobile375": "tabs, no horizontal overflow, page fit 319px, excerpt, menu fits, Escape focus return, arrow-key paging",
+    "consoleErrors": "none except the deliberately aborted connection in the lost-response test"
+  },
+  "pageindexService": {
+    "flash": "real: built and selected in browser, persisted choice",
+    "classic": "unverified live (needs PAGEINDEX_MODEL and provider key); unit-tested config gate and arguments"
   },
   "host": {
     "model": "gemini-3.8-flash",
-    "chapterSelection": "passed",
-    "questionAnswer": "passed",
-    "verbatimPageCitations": "passed",
-    "metadataPersisted": false
+    "questionAnswer": "passed (real calls)",
+    "verbatimPageCitations": "passed, highlighted on original page",
+    "hostImport": "unverified"
   },
-  "hostImport": "unverified",
   "screenshot": {
     "path": "../../docs/screenshots/pageindex.png",
-    "dimensions": [
-      1440,
-      1518
-    ],
-    "sha256": "2dc1c47f5b2419e6b8fefdc236d76efd24f5e5b00a1577b63b7314b63caa7964"
+    "dimensions": [1440, 900]
   },
   "package": {
-    "filename": "pageindex-studio-0.5.0-final.fbworkbench",
-    "sha256": "1d5029f9c94cdb3bf01b4439b4e345be0e614a3b4eaf25cb306e303fe918c1bc",
-    "bytes": 61114,
-    "crc": "passed",
+    "filename": "pageindex-studio-0.9.0.fbworkbench",
+    "files": 242,
+    "sha256": "28964bda324f53f8bafdcab3f8fe8241fd2b9444a69836ab235548b4490c1e23",
     "businessData": "excluded"
   },
-  "recoveryAndNavigation": [
-    "actual recovery snapshot imports as a new project and archived pending question is not replayed",
-    "missing-original recovery UI accepts matching PDF and preserves note and raw JSON through reload",
-    "project transition disables edits while awaiting old document save",
-    "no automatic model calls or runtime errors"
-  ],
-  "integratedPackage": {
-    "directory": "workbenches/64-pageindex",
-    "version": "0.5.0",
-    "appId": "workbench.a24c7c1e-6443-45ab-9036-36ee9faf22ed",
-    "filename": "64-pageindex-0.5.0.fbworkbench",
-    "bytes": 64569,
-    "sha256": "d7bb92496a1decd912a48548c86b1021927a6bd4928d8f7f82a7b3c26a24fe39",
-    "crc": "passed",
-    "sourceFilesMatched": 35,
-    "assetFilesMatched": 3,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-pageindex/pageindex-studio-0.5.0.fbworkbench",
-    "introductionFile": "workbench-pageindex/presentation.json",
-    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
-  }
+  "structuralReview": "restructured (document menu, page-dominant desk); separate from functional acceptance"
 }
