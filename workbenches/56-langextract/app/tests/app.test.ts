@@ -5,8 +5,10 @@ import { readFileSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { seed } from "../src/contracts/samples.ts";
 import {
-  seed,
+  blankReview,
+  MODEL_BYTES,
   validateProject,
   restoreProjectDraft,
   restoreWorkingCopy,
@@ -39,6 +41,7 @@ function database(path = ":memory:") {
     "0002_projects.sql",
     "0003_autosave.sql",
     "0004_langextract_jobs.sql",
+    "0005_host_runs.sql",
   ])
     db.exec(
       readFileSync(new URL("../migrations/" + name, import.meta.url), "utf8"),
@@ -47,14 +50,17 @@ function database(path = ":memory:") {
 }
 test("LangExtract codepoint spans highlight the intended Chinese text after emoji", () => {
   const d = seed.documents[0];
-  for (const e of d.extractions.slice(0, 5))
-    assert.equal(evidenceSpan(d, e)?.quote, e.extraction_text);
-  const e = d.extractions[0];
-  assert.notEqual(
-    d.text.indexOf(e.extraction_text),
-    e.char_interval?.start_pos,
-  );
-  assert.equal(evidenceSpan(d, d.extractions[5]), null);
+  const grounded = d.extractions.filter((e) => e.char_interval);
+  assert.ok(grounded.length >= 14);
+  for (const e of grounded)
+    if (e.alignment_status === "match_exact")
+      assert.equal(evidenceSpan(d, e)?.quote, e.extraction_text);
+  const e = d.extractions[2];
+  assert.equal(e.extraction_text, "林晓");
+  // 🌿 is one Python codepoint but two UTF-16 units before this record.
+  assert.equal(d.text.indexOf(e.extraction_text), e.char_interval!.start_pos! + 1);
+  const unaligned = d.extractions.find((x) => !x.char_interval)!;
+  assert.equal(evidenceSpan(d, unaligned), null);
 });
 test("JSONL roundtrip preserves upstream records and multiple documents", () => {
   const second = {
@@ -70,8 +76,8 @@ test("JSONL roundtrip preserves upstream records and multiple documents", () => 
     ],
   };
   const p = parseImport(rawJsonl(seed) + JSON.stringify(second));
-  assert.equal(p.documents.length, 2);
-  assert.equal(p.documents[1].reviews[0].status, "pending");
+  assert.equal(p.documents.length, seed.documents.length + 1);
+  assert.equal(p.documents.at(-1)!.reviews[0].status, "pending");
   assert.deepEqual(parseImport(rawJsonl(p)).documents, p.documents);
 });
 test("Missing and out-of-range positions stay unresolved, invalid negative intervals fail", () => {
@@ -101,6 +107,7 @@ test("Missing and out-of-range positions stay unresolved, invalid negative inter
 test("Editing source invalidates old evidence without dropping review history or original JSONL", () => {
   const p = clone();
   p.documents[0].reviews[0] = {
+    ...blankReview(),
     status: "corrected",
     correctedText: "林晓（项目经理）",
     note: "已核对",
@@ -119,6 +126,7 @@ test("Editing source invalidates old evidence without dropping review history or
 test("Review CSV preserves quotes/newlines and neutralizes spreadsheet formulas", () => {
   const p = clone();
   p.documents[0].reviews[0] = {
+    ...blankReview(),
     status: "corrected",
     correctedText: '=HYPERLINK("bad")',
     note: 'line1\n"line2"',
@@ -136,7 +144,7 @@ test("Project and import validation reject duplicate IDs and oversized input but
   const empty = clone();
   empty.documents[0].text = "";
   assert.equal(validateProject(empty).documents[0].text, "");
-  assert.throws(() => parseImport("x".repeat(800001)), /长度/);
+  assert.throws(() => parseImport("x".repeat(MODEL_BYTES + 1)), /长度/);
   assert.throws(() => parseImport("{broken"), /无法导入/);
   assert.throws(() => examples({}), /数组/);
 });
@@ -335,11 +343,8 @@ function sizedProject(targetBytes: number) {
     extraction_index: i,
     attributes: {},
   }));
-  doc.reviews = doc.extractions.map(() => ({
-    status: "pending",
-    correctedText: "",
-    note: "",
-  }));
+  project.documents = [doc];
+  doc.reviews = doc.extractions.map(() => blankReview());
   for (let i = doc.extractions.length - 1; i >= 0; i--) {
     for (let j = 0; j < 10; j++) {
       if (jsonBytes(project) >= targetBytes) return project;
@@ -363,7 +368,7 @@ test("A near-limit model saves larger review work as SQLite draft and restores a
   try {
     const store = createAutosaveStore(db, validateProject),
       id = randomUUID();
-    const model = validateProject(sizedProject(799000));
+    const model = validateProject(sizedProject(MODEL_BYTES - 1000));
     const first = await store.commit({
       documentId: id,
       mutationId: randomUUID(),
@@ -383,7 +388,7 @@ test("A near-limit model saves larger review work as SQLite draft and restores a
         importText: "{ unfinished",
       },
     });
-    assert.throws(() => validateProject(snapshot.data), /800KB/);
+    assert.throws(() => validateProject(snapshot.data), /880KB/);
     const request = {
       documentId: id,
       mutationId: randomUUID(),
@@ -421,7 +426,7 @@ test("A near-limit model saves larger review work as SQLite draft and restores a
 test("Working draft limits preserve structure and account for serialized extra and wire overhead", () => {
   const data = sizedProject(DRAFT_DATA_BYTES - 2000);
   assert.equal(jsonBytes(restoreProjectDraft(data)), jsonBytes(data));
-  const extra = { examplesEditor: "中".repeat(195000), importText: "pending" };
+  const extra = { examplesEditor: "中".repeat(140000), importText: "pending" };
   const copy = restoreWorkingCopy({ title: "草稿", data, extra });
   assert.ok(jsonBytes(copy.extra) < DRAFT_EXTRA_BYTES);
   assert.ok(
@@ -436,14 +441,14 @@ test("Working draft limits preserve structure and account for serialized extra a
   );
   const tooLarge = structuredClone(data);
   tooLarge.documents[0].reviews[0].note = "中".repeat(1000);
-  assert.throws(() => restoreProjectDraft(tooLarge), /1.2MB/);
+  assert.throws(() => restoreProjectDraft(tooLarge), /1.35MB/);
   assert.throws(
     () =>
       restoreWorkingCopy({
         ...copy,
-        extra: { ...extra, importText: "x".repeat(20000) },
+        extra: { ...extra, importText: "x".repeat(40000) },
       }),
-    /600KB/,
+    /450KB/,
   );
   assert.throws(
     () =>
@@ -464,7 +469,7 @@ test("Working draft limits preserve structure and account for serialized extra a
 });
 
 test("Portable working copies roundtrip oversized review drafts and unfinished editors without relaxing core JSONL", () => {
-  const data = sizedProject(900000);
+  const data = sizedProject(MODEL_BYTES + 100000);
   const copy = restoreWorkingCopy({
     title: "可恢复资料",
     data,
@@ -483,8 +488,8 @@ test("Portable working copies roundtrip oversized review drafts and unfinished e
     parseWorkingImport(JSON.stringify(data), "旧项目").data,
     data,
   );
-  assert.throws(() => parseImport(JSON.stringify(data)), /长度|800KB/);
-  assert.throws(() => parseWorkingImport(rawJsonl(data)), /长度|800KB/);
+  assert.throws(() => parseImport(JSON.stringify(data)), /长度|880KB/);
+  assert.throws(() => parseWorkingImport(rawJsonl(data)), /长度|880KB/);
   assert.throws(
     () =>
       parseWorkingImport(

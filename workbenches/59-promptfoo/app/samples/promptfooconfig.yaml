@@ -1,0 +1,1255 @@
+# 青檐家居售后助手 · 发布评测（Floatboat Promptfoo 评测台示例）
+# 36 个工单（24 中文 + 12 英文）× 3 个提示版本 × 2 个录制模型 + 1 个规则脚本基线。
+# “recorded:*” provider 回放示例录制输出：这些输出由工作台作者编写用于演示，不是真实模型的回答。
+# 把 provider 换成 floatboat:<模型>（例如 floatboat:gemini-3.8-flash）即可让 Floatboat 真实生成并重新评分。
+description: 青檐家居售后助手 · 发布评测（示例录制输出为人工编写，非真实模型回答）
+prompts:
+  - label: v1 现网
+    raw: |-
+      你是“青檐家居”跨境店铺的售后助手。阅读一条客户工单，判断分类与优先级并起草回复。
+      - 分类 category 只能是：refund、return、shipping、damaged、account、invoice、complaint、other。
+      - 优先级 priority：涉及人身安全、盗刷/重复扣款、法律追责为 P1；影响使用或时效的为 P2；咨询类为 P3。
+      - 回复使用客户的语言（lang），不承诺具体赔偿金额，不复述客户的电话号码，结尾另起一行署名。
+      只输出一个 JSON 对象：{"category": ..., "priority": ..., "reply": ...}
+
+      渠道：{{channel}}　语言：{{lang}}　订单号：{{order_id | default("无", true)}}
+      工单：
+      {{ticket}}
+  - label: v2 结构化+工具
+    raw: |-
+      你是“青檐家居”跨境店铺的售后助手。阅读一条客户工单，判断分类与优先级并起草回复。
+      - 分类 category 只能是：refund、return、shipping、damaged、account、invoice、complaint、other。
+      - 优先级 priority：涉及人身安全、盗刷/重复扣款、法律追责为 P1；影响使用或时效的为 P2；咨询类为 P3。
+      - 回复使用客户的语言（lang），不承诺具体赔偿金额，不复述客户的电话号码，结尾另起一行署名。
+      - 同时给出一句话摘要 summary（与回复同语言）。
+      - 需要查订单、创建退换货或转人工时，在 tool_calls 中按 OpenAI tools 格式给出调用；不需要时给空数组。
+      只输出一个 JSON 对象，字段依次为 category、priority、summary、reply、tool_calls，不要使用 Markdown 代码块。
+
+      渠道：{{channel}}
+      语言：{{lang}}
+      {% if order_id %}订单号：{{order_id}}
+      {% endif %}工单：
+      {{ticket}}
+  - label: v3 精简
+    raw: |-
+      售后分诊（青檐家居）。分类：refund/return/shipping/damaged/account/invoice/complaint/other；P1=安全/扣款/法律，P2=影响使用，P3=咨询。
+      输出 JSON：category, priority, summary, reply（{{lang}}，结尾署名，不复述电话），tool_calls（OpenAI tools 格式，可为空）。
+      {% if order_id %}订单 {{order_id}}。{% endif %}工单（{{channel}}）：{{ticket}}
+providers:
+  - id: recorded:assistant-large
+    label: 大模型 · 示例录制
+    config:
+      tools: &a1
+        - type: function
+          function:
+            name: lookup_order
+            description: 查询订单、物流与退款状态
+            parameters:
+              type: object
+              properties:
+                order_id:
+                  type: string
+                  pattern: ^QY\d{8}$
+              required:
+                - order_id
+              additionalProperties: false
+        - type: function
+          function:
+            name: create_return
+            description: 创建退货、换货或补发申请
+            parameters:
+              type: object
+              properties:
+                order_id:
+                  type: string
+                  pattern: ^QY\d{8}$
+                kind:
+                  type: string
+                  enum:
+                    - return
+                    - exchange
+                    - reship
+                    - warranty
+              required:
+                - order_id
+                - kind
+              additionalProperties: false
+        - type: function
+          function:
+            name: escalate_to_human
+            description: 转交人工专员
+            parameters:
+              type: object
+              properties:
+                team:
+                  type: string
+                  enum:
+                    - safety
+                    - payments
+                    - relations
+                    - security
+                    - quality
+                priority:
+                  type: string
+                  enum:
+                    - P1
+                    - P2
+                    - P3
+              required:
+                - team
+                - priority
+              additionalProperties: false
+  - id: recorded:assistant-small
+    label: 小模型 · 示例录制
+    config:
+      tools: *a1
+  - id: floatboat:script
+    label: 规则分诊脚本
+    prompts:
+      - v1 现网
+    config:
+      code: |-
+        const t = String(context.vars.ticket).toLowerCase();
+        const has = (...w) => w.some((x) => t.includes(x));
+        let category = "other";
+        if (has("退款", "refund", "扣", "charged", "优惠券")) category = "refund";
+        else if (has("退货", "换", "return", "exchange", "收到的是", "received a")) category = "return";
+        else if (has("物流", "快递", "发货", "签收", "地址", "tracking", "delivery", "parcel")) category = "shipping";
+        else if (has("破", "裂", "漏", "冒烟", "缺", "broken", "scratch", "spark")) category = "damaged";
+        else if (has("发票", "invoice")) category = "invoice";
+        else if (has("登录", "账号", "积分", "验证码", "password", "log in")) category = "account";
+        else if (has("投诉", "律师", "态度", "complain", "unacceptable", "manager")) category = "complaint";
+        const urgent = has("冒烟", "起火", "律师", "盗", "扣了两次", "冻结", "spark", "charged twice", "breaker");
+        const priority = urgent ? "P1" : category === "other" ? "P3" : "P2";
+        const en = context.vars.lang === "English";
+        const order = context.vars.order_id;
+        const reply = en
+          ? (order ? "Order " + order + ": " : "") + "Thanks for contacting us. Our team will review your request within 24 hours.\n— Qingyan Home Support"
+          : "您好，" + (order ? "订单 " + order + " " : "") + "已收到您的反馈，我们会在 24 小时内处理。\n—— 青檐家居售后 · 阿檐";
+        return JSON.stringify({ category, priority, reply });
+defaultTest:
+  assert:
+    - type: is-json
+      metric: 格式
+      value:
+        type: object
+        required:
+          - category
+          - priority
+          - reply
+        properties:
+          category:
+            enum:
+              - refund
+              - return
+              - shipping
+              - damaged
+              - account
+              - invoice
+              - complaint
+              - other
+          priority:
+            enum:
+              - P1
+              - P2
+              - P3
+          reply:
+            type: string
+            minLength: 8
+    - type: starts-with
+      value: "{"
+      weight: 0.5
+      metric: 格式
+    - type: javascript
+      value: JSON.parse(output).category === context.vars.expected_category
+      weight: 2
+      metric: 分类
+    - type: javascript
+      value: JSON.parse(output).priority === context.vars.expected_priority
+      weight: 3
+      metric: 优先级
+    - type: javascript
+      value: JSON.parse(output).reply.length <= 220
+      metric: 简洁
+    - type: not-icontains-any
+      value:
+        - 作为AI
+        - 作为一个AI
+        - as an AI
+        - 保证全额
+        - guaranteed full refund
+      metric: 合规
+    - type: not-regex
+      value: 1[3-9]\d{9}
+      metric: 隐私
+    - type: latency
+      threshold: 2500
+      metric: 性能
+    - type: cost
+      threshold: 0.0025
+      metric: 成本
+tests:
+  - description: zh-01 退款三天未到账
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: QY20261018
+      ticket: 我 10 月 21 日申请的退款，页面显示已同意，但三天了银行卡还没收到钱，订单号 QY20261018。
+      expected_category: refund
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-02 台灯插电后冒烟
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: QY20261003
+      ticket: 刚收到的木纹台灯插上电源后底座冒烟，还有焦味，孩子差点碰到！订单 QY20261003，太危险了。
+      expected_category: damaged
+      expected_priority: P1
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "escalate_to_human");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-03 想换大一号的床单
+    vars:
+      channel: App
+      lang: 中文
+      order_id: QY20261011
+      ticket: 床单买小了，想换成 1.8 米的，还没拆封，订单 QY20261011。
+      expected_category: return
+      expected_priority: P3
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: contains-any
+        value: 退货, 换货, 补发, 寄回
+        metric: 订单
+    threshold: 0.87
+  - description: zh-04 物流停在中转站五天
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: QY20261007
+      ticket: 快递在杭州中转站停了五天没动，订单 QY20261007，查不到原因。
+      expected_category: shipping
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: icontains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: equals
+        value: shipping
+        transform: JSON.parse(output).category
+        metric: 分类
+    threshold: 0.87
+  - description: zh-05 要开公司抬头发票
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: QY20261015
+      ticket: 请帮我开增值税普通发票，抬头是杭州远帆科技有限公司，税号 91330106MA2KXXXX0B，订单 QY20261015。
+      expected_category: invoice
+      expected_priority: P3
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-06 收到的花瓶有裂纹
+    vars:
+      channel: App
+      lang: 中文
+      order_id: QY20261009
+      ticket: 陶瓷花瓶收到时瓶口有一道裂纹，外箱完好，订单 QY20261009，附了照片。
+      expected_category: damaged
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-07 登录收不到验证码
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: ""
+      ticket: 换了手机号以后一直收不到登录验证码，旧号码已经停用了。
+      expected_category: account
+      expected_priority: P2
+    assert:
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+  - description: zh-08 信用卡被重复扣款
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: QY20261020
+      ticket: 同一笔订单 QY20261020 信用卡被扣了两次 329 元，账单上显示两条，请尽快处理。
+      expected_category: refund
+      expected_priority: P1
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-09 沙发套颜色和图片不符
+    vars:
+      channel: App
+      lang: 中文
+      order_id: QY20261012
+      ticket: 沙发套实物比图片暗很多，像灰色不是燕麦色，想退货。订单 QY20261012。
+      expected_category: return
+      expected_priority: P3
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: contains-any
+        value: 退货, 换货, 补发, 寄回
+        metric: 订单
+    threshold: 0.87
+  - description: zh-10 催发货
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: QY20261002
+      ticket: 下单一周了还没发货，订单 QY20261002，说好 48 小时内发货的。
+      expected_category: shipping
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: icontains
+        value: "{{order_id}}"
+        metric: 订单
+    threshold: 0.87
+  - description: zh-11 要求律师函赔偿
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: QY20260930
+      ticket: 你们的取暖器把地板烤变形了，我已经咨询律师，如果三天内不给方案就走法律程序。订单 QY20260930，电话 13812345678。
+      expected_category: complaint
+      expected_priority: P1
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "escalate_to_human");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: not-contains
+        value: "13812345678"
+        metric: 隐私
+    threshold: 0.87
+  - description: zh-12 优惠券没生效
+    vars:
+      channel: App
+      lang: 中文
+      order_id: QY20261019
+      ticket: 满 300 减 40 的券结算时没有抵扣，订单已经付款了，QY20261019。
+      expected_category: refund
+      expected_priority: P3
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-13 地址填错了
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: QY20261022
+      ticket: 刚下的单地址写错了门牌号，应该是 12 栋 602，订单 QY20261022，还没发货吧？
+      expected_category: shipping
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: icontains
+        value: "{{order_id}}"
+        metric: 订单
+    threshold: 0.87
+  - description: zh-14 香薰机漏水
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: QY20260920
+      ticket: 香薰机用了两周开始底部漏水，桌面都湿了，还在保修期吗？订单 QY20260920。
+      expected_category: damaged
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-15 询问会员积分
+    vars:
+      channel: App
+      lang: 中文
+      order_id: ""
+      ticket: 我的会员积分怎么少了 200 分？没有用过。
+      expected_category: account
+      expected_priority: P3
+    assert:
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+  - description: zh-16 客服态度投诉
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: ""
+      ticket: 昨天电话客服挂我电话，态度非常差，我要投诉这个人。
+      expected_category: complaint
+      expected_priority: P2
+    assert:
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "escalate_to_human");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-17 没收到包裹但显示签收
+    vars:
+      channel: App
+      lang: 中文
+      order_id: QY20261014
+      ticket: 物流显示已签收，但我家没人收到，门口和快递柜都找了，订单 QY20261014。
+      expected_category: shipping
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: icontains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: equals
+        value: shipping
+        transform: JSON.parse(output).category
+        metric: 分类
+    threshold: 0.87
+  - description: zh-18 批量采购询价
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: ""
+      ticket: 我们民宿想采购 40 套床品，能不能给个批发价，开专票。
+      expected_category: other
+      expected_priority: P3
+    assert:
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+  - description: zh-19 退货寄回后迟迟不退款
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: QY20261001
+      ticket: 退货已经寄回去 8 天了，物流显示仓库签收，退款还是没动静，订单 QY20261001。
+      expected_category: refund
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-20 收到别人的货
+    vars:
+      channel: App
+      lang: 中文
+      order_id: QY20261016
+      ticket: 我买的是四件套，收到的是一个收纳箱，订单 QY20261016。
+      expected_category: return
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: contains-any
+        value: 退货, 换货, 补发, 寄回
+        metric: 订单
+    threshold: 0.87
+  - description: zh-21 儿童椅螺丝缺失
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: QY20261013
+      ticket: 儿童餐椅少了两颗固定螺丝，现在没法安装，宝宝等着用。订单 QY20261013。
+      expected_category: damaged
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-22 广告信息
+    vars:
+      channel: 站内信
+      lang: 中文
+      order_id: ""
+      ticket: 加微信领取淘宝刷单兼职，日赚三百，点击链接 http://example.invalid/job
+      expected_category: other
+      expected_priority: P3
+    assert:
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: not-contains
+        value: http
+        metric: 合规
+  - description: zh-23 账号疑似被盗下单
+    vars:
+      channel: App
+      lang: 中文
+      order_id: ""
+      ticket: 我的账号凌晨被人下了三单，收货地址不是我的，我没有操作过，赶紧帮我冻结！
+      expected_category: account
+      expected_priority: P1
+    assert:
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "escalate_to_human");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: zh-24 发票抬头写错要重开
+    vars:
+      channel: 邮件
+      lang: 中文
+      order_id: QY20261005
+      ticket: 上周开的发票抬头少了“有限公司”四个字，麻烦重开，订单 QY20261005。
+      expected_category: invoice
+      expected_priority: P3
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: levenshtein
+        value: —— 青檐家居售后 · 阿檐
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-01 Refund not received
+    vars:
+      channel: email
+      lang: English
+      order_id: QY20261008
+      ticket: I returned the linen curtains two weeks ago and the warehouse confirmed receipt, but I still have not received my refund. Order QY20261008.
+      expected_category: refund
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: rouge-n
+        value: Customer returned curtains two weeks ago and has not received the refund.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: bleu
+        value: Sorry for the wait. The refund for order QY20261008 was issued today after the warehouse inspection, and it should reach your card within 3 to 5 business days.
+        threshold: 0.3
+        weight: 0.5
+        transform: JSON.parse(output).reply.split('\n')[0]
+        metric: 摘要
+      - type: icontains-all
+        value:
+          - refund
+          - QY20261008
+        metric: 订单
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-02 Kettle sparks
+    vars:
+      channel: chat
+      lang: English
+      order_id: QY20261017
+      ticket: The electric kettle sparked and tripped the breaker the first time I used it. Order QY20261017. I am scared to touch it.
+      expected_category: damaged
+      expected_priority: P1
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "escalate_to_human");
+      - type: rouge-n
+        value: Electric kettle sparked and tripped the breaker on first use, a safety hazard.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-03 Exchange rug size
+    vars:
+      channel: email
+      lang: English
+      order_id: QY20261010
+      ticket: Can I exchange the 160x230 rug for the 200x290 size? It is still rolled in the bag. Order QY20261010.
+      expected_category: return
+      expected_priority: P3
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: rouge-n
+        value: Customer wants to exchange an unused rug for a larger size.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: bleu
+        value: Yes, you can exchange it. We have created an exchange for order QY20261010; please send the rug back within 7 days and we will ship the 200x290 size once it arrives.
+        threshold: 0.3
+        weight: 0.5
+        transform: JSON.parse(output).reply.split('\n')[0]
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-04 Tracking not updated
+    vars:
+      channel: chat
+      lang: English
+      order_id: QY20261006
+      ticket: My tracking number has not updated for six days. Order QY20261006. Is my parcel lost?
+      expected_category: shipping
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: rouge-n
+        value: Tracking has not updated for six days and the customer fears the parcel is lost.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+      - type: equals
+        value: shipping
+        transform: JSON.parse(output).category
+        metric: 分类
+    threshold: 0.87
+  - description: en-05 VAT invoice
+    vars:
+      channel: email
+      lang: English
+      order_id: QY20261021
+      ticket: Please send a VAT invoice for order QY20261021 with our company name Northwind Studio Ltd.
+      expected_category: invoice
+      expected_priority: P3
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: rouge-n
+        value: Customer requests a VAT invoice with the company name.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: bleu
+        value: Of course. The VAT invoice for order QY20261021 will be issued to Northwind Studio Ltd and emailed to you within 2 business days.
+        threshold: 0.3
+        weight: 0.5
+        transform: JSON.parse(output).reply.split('\n')[0]
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-06 Charged twice
+    vars:
+      channel: chat
+      lang: English
+      order_id: QY20261023
+      ticket: I was charged twice for the same order QY20261023, 89 dollars each. Please fix this today.
+      expected_category: refund
+      expected_priority: P1
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: rouge-n
+        value: Customer was charged twice for the same order.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: icontains-all
+        value:
+          - refund
+          - QY20261023
+        metric: 订单
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-07 Password reset loop
+    vars:
+      channel: email
+      lang: English
+      order_id: ""
+      ticket: Every time I reset my password the link says it has expired. I cannot log in to my account at all.
+      expected_category: account
+      expected_priority: P2
+    assert:
+      - type: rouge-n
+        value: Password reset links keep expiring and the customer cannot log in.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-08 Scratched table
+    vars:
+      channel: chat
+      lang: English
+      order_id: QY20261004
+      ticket: The oak side table arrived with a deep scratch across the top. Order QY20261004. Photos attached.
+      expected_category: damaged
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: rouge-n
+        value: Oak side table arrived with a deep scratch.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-09 Complaint about delays
+    vars:
+      channel: email
+      lang: English
+      order_id: ""
+      ticket: This is the third time my order has been delayed. This is unacceptable and I want to speak to a manager.
+      expected_category: complaint
+      expected_priority: P2
+    assert:
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "escalate_to_human");
+      - type: rouge-n
+        value: Customer complains about repeated delays and asks for a manager.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-10 Wholesale question
+    vars:
+      channel: chat
+      lang: English
+      order_id: ""
+      ticket: Do you offer wholesale pricing for interior designers? We buy about 30 items a month.
+      expected_category: other
+      expected_priority: P3
+    assert:
+      - type: rouge-n
+        value: Interior designer asks about wholesale pricing.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-11 Wrong color delivered
+    vars:
+      channel: email
+      lang: English
+      order_id: QY20261024
+      ticket: I ordered the sage green duvet cover but received a beige one. Order QY20261024.
+      expected_category: return
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "create_return");
+      - type: rouge-n
+        value: Customer received a beige duvet cover instead of sage green.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+  - description: en-12 Delivery address change
+    vars:
+      channel: chat
+      lang: English
+      order_id: QY20261025
+      ticket: Can you change the delivery address for order QY20261025 to 48 Harbour Street before it ships?
+      expected_category: shipping
+      expected_priority: P2
+    assert:
+      - type: contains
+        value: "{{order_id}}"
+        metric: 订单
+      - type: is-valid-openai-tools-call
+        transform: JSON.parse(output).tool_calls || []
+        weight: 0.5
+        metric: 工具
+      - type: javascript
+        metric: 工具
+        weight: 0.5
+        value: |-
+          const calls = JSON.parse(output).tool_calls || [];
+          return calls.some((c) => c.function.name === "lookup_order");
+      - type: rouge-n
+        value: Customer asks to change the delivery address before shipping.
+        threshold: 0.45
+        weight: 0.5
+        transform: JSON.parse(output).summary || ''
+        metric: 摘要
+      - type: bleu
+        value: Order QY20261025 has not left the warehouse yet, so we have updated the delivery address to 48 Harbour Street. You will see the change on your order page shortly.
+        threshold: 0.3
+        weight: 0.5
+        transform: JSON.parse(output).reply.split('\n')[0]
+        metric: 摘要
+      - type: levenshtein
+        value: — Qingyan Home Support
+        threshold: 2
+        transform: JSON.parse(output).reply.trim().split('\n').pop()
+        metric: 署名
+    threshold: 0.87
+evaluateOptions:
+  maxConcurrency: 4

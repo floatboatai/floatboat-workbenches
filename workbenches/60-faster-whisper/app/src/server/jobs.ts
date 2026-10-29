@@ -1,14 +1,38 @@
 import type { DatabaseSync } from "node:sqlite";
 import {
   jobId,
+  jobInfo,
   jobInput,
   remoteResult,
+  terminal,
   type Job,
   type JobInput,
 } from "../contracts/job.ts";
 import { StoreError } from "./store.ts";
 import { isRecord } from "../contracts/project.ts";
-import { validateSegments } from "../contracts/transcript.ts";
+import { validateSegments } from "../contracts/subtitles.ts";
+import { wireOptions } from "../contracts/options.ts";
+
+/** Key-sorted JSON so option echoes compare independent of the service's dict order. */
+export function canonical(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
+  if (isRecord(value))
+    return `{${Object.keys(value)
+      .sort()
+      .map((k) => `${JSON.stringify(k)}:${canonical(value[k])}`)
+      .join(",")}}`;
+  return JSON.stringify(value ?? null);
+}
+export const SERVICE_PROTOCOL = 2;
+export type ServiceReason = "ok" | "unreachable" | "auth" | "incompatible" | "outdated";
+export interface ServiceHealth {
+  connected: boolean;
+  reason: ServiceReason;
+  model: string;
+  multilingual: boolean;
+  url: string;
+  message: string;
+}
 
 export function configuredService(
   raw = process.env.FASTER_WHISPER_URL ?? "http://127.0.0.1:8768",
@@ -44,7 +68,7 @@ export function createJobs(
         ...init.headers,
       },
     });
-    const limit = 850000,
+    const limit = 8_000_000,
       reader = response.body?.getReader();
     let total = 0;
     const chunks: Uint8Array[] = [];
@@ -92,6 +116,7 @@ export function createJobs(
         row.segments === null
           ? null
           : validateSegments(JSON.parse(String(row.segments))),
+      info: row.info === null || row.info === undefined ? null : jobInfo(JSON.parse(String(row.info))),
     };
   };
   function storeRemote(id: string, value: unknown) {
@@ -100,19 +125,21 @@ export function createJobs(
       !isRecord(value) ||
       value.id !== id ||
       value.audioSha256 !== original.input.source.id ||
-      value.language !== original.input.language
+      value.language !== original.input.language ||
+      canonical(value.options) !== canonical(wireOptions(original.input.options))
     )
       throw new Error("转写服务返回了不匹配的任务。");
-    if (["completed", "failed", "cancelled", "interrupted"].includes(original.status)) return original;
+    if (terminal.includes(original.status)) return original;
     const r = remoteResult(value);
     if (original.status === "running" && r.status === "queued") return original;
     db.prepare(
-      "UPDATE transcription_jobs SET status=?,error=?,model=?,segments=?,updated_at=? WHERE id=?",
+      "UPDATE transcription_jobs SET status=?,error=?,model=?,segments=?,info=?,updated_at=? WHERE id=?",
     ).run(
       r.status,
       r.error,
       r.model,
       r.segments === null ? null : JSON.stringify(r.segments),
+      r.info === null ? null : JSON.stringify(r.info),
       new Date().toISOString(),
       id,
     );
@@ -120,7 +147,7 @@ export function createJobs(
   }
   function unknown(id: string, error: unknown) {
     const current = get(id);
-    if (["completed", "failed", "cancelled", "interrupted"].includes(current.status)) return current;
+    if (terminal.includes(current.status)) return current;
     db.prepare(
       "UPDATE transcription_jobs SET status=?,error=?,updated_at=? WHERE id=?",
     ).run(
@@ -140,7 +167,7 @@ export function createJobs(
       return storeRemote(
         id,
         await remote(
-          `/v1/jobs/${id}?language=${encodeURIComponent(job.input.language)}`,
+          `/v1/jobs/${id}?language=${encodeURIComponent(job.input.language)}&options=${encodeURIComponent(JSON.stringify(wireOptions(job.input.options)))}`,
           {
             method: "PUT",
             body: new Uint8Array(bytes),
@@ -178,27 +205,41 @@ export function createJobs(
         )
         .all()
         .map((row) => ({ ...get(String(row.id)), segments: null })),
-    async health() {
+    async health(): Promise<ServiceHealth> {
+      const url = base.origin;
+      const off = (reason: ServiceReason, message: string, model = ""): ServiceHealth => ({
+        connected: false,
+        reason,
+        model,
+        multilingual: true,
+        url,
+        message,
+      });
+      let r: unknown;
       try {
-        const r = await remote("/health");
-        if (
-          !isRecord(r) ||
-          r.engine !== "faster-whisper" ||
-          typeof r.model !== "string"
-        )
-          throw new Error("wrong engine");
-        return {
-          connected: true,
-          model: r.model.slice(0, 120),
-          message: "转写服务已连接",
-        };
-      } catch {
-        return {
-          connected: false,
-          model: "",
-          message: "转写服务未连接；仍可导入、审校与导出字幕。",
-        };
+        r = await remote("/health");
+      } catch (e) {
+        if (e instanceof StoreError && (e.status === 401 || e.status === 403))
+          return off("auth", "服务拒绝了访问：两端的 FASTER_WHISPER_TOKEN 需要一致。");
+        return off("unreachable", `没有在 ${url} 找到转写服务。可以继续校对与导出；需要新转写时按下方命令启动。`);
       }
+      if (!isRecord(r) || r.engine !== "faster-whisper" || typeof r.model !== "string")
+        return off("incompatible", `${url} 上运行的不是本工作台的 faster-whisper 服务。`);
+      const model = r.model.slice(0, 120);
+      if (r.protocol !== SERVICE_PROTOCOL)
+        return off(
+          "outdated",
+          "服务版本过旧，不支持逐词时间戳、VAD 与翻译参数。请用本项目 service/server.py 重启服务。",
+          model,
+        );
+      return {
+        connected: true,
+        reason: "ok",
+        model,
+        multilingual: r.multilingual !== false,
+        url,
+        message: "转写服务已连接",
+      };
     },
     async create(id: string, projectId: string, input: JobInput) {
       jobId(id);
@@ -238,10 +279,7 @@ export function createJobs(
     },
     async reconcile(id: string) {
       const job = get(id);
-      if (
-        ["completed", "failed", "cancelled", "interrupted"].includes(job.status)
-      )
-        return job;
+      if (terminal.includes(job.status)) return job;
       try {
         return storeRemote(id, await remote(`/v1/jobs/${job.id}`));
       } catch (e) {
@@ -256,10 +294,7 @@ export function createJobs(
     },
     async cancel(id: string) {
       const job = get(id);
-      if (
-        ["completed", "failed", "cancelled", "interrupted"].includes(job.status)
-      )
-        return job;
+      if (terminal.includes(job.status)) return job;
       try {
         return storeRemote(
           id,

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.bceedbaf-e0c0-4bbc-94c8-c219f83db6d6",
   "registryName": "mirofish-studio",
-  "name": "情景复核 · MiroFish",
-  "description": "已准备模拟的运行控制、角色假设、原生动作时间线与复核报告",
-  "version": "0.5.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "name": "群体推演 · MiroFish",
+  "description": "种子资料→实体关系图谱→智能体人设→本地或 MiroFish 推演→舆情时间线→报告",
+  "version": "0.9.0",
+  "changelog": "0.9.0：从“只复核已有结果”改为完整推演台：规则抽取可编辑图谱、规则/模型人设、Node 内可复现的意见动力学推演、事件注入、舆情与立场可视化、报告与数据导出；MiroFish 后端改为可选通道。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,10 +16,19 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [],
+  "capabilities": [
+    "llm"
+  ],
   "contributions": [],
   "dependencies": [],
   "resources": [
+    {
+      "id": "pdfjs-assets",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "pdfjs"
+    },
     {
       "id": "notices",
       "kind": "directory",

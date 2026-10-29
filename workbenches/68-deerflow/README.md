@@ -1,18 +1,20 @@
-# 研究交付 · DeerFlow
+# 深度研究 · DeerFlow
 
-从研究简报向DeerFlow提交后台任务，跟踪运行并把结果整理成可审阅、可交付的研究文件。阅读原始任务与工具结果，逐条核验来源，在独立报告纸上编辑交付稿；自动保存原生快照、人工改稿、未完成输入和JSON草稿。
+一张研究台完成一份带引用的研究：写下问题 → 制定并确认计划 → 执行检索 → 在报告纸面上撰写、核验来源并导出。不连接任何外部服务也能完整走通；DeerFlow 服务是可选的执行通道。
 
-![研究交付工作台](../../docs/screenshots/deerflow.png)
+![深度研究工作台](../../docs/screenshots/deerflow.png)
 
 ## 已实现
 
-- 明确提交研究任务，默认官方`context.model_name=gemini-3.8-flash`；持久命令先于远端调用，固定幂等键，未知回执只读恢复，后台运行状态与结果读取。
+- **问题与计划**：研究问题、范围约束；本地模板一键生成五步计划，或用 Floatboat 模型（可选）起草，建议需明确采用。步骤可增删、排序、改类型（网页检索 / GitHub 项目 / 精读网页 / 人工分析）。修改步骤定义后必须重新确认，未确认的计划不能执行。
+- **本地执行（Node 内置）**：网页直读 + Readability 正文提取，失败时经 Jina 阅读；Exa 免密钥网页搜索；GitHub 仓库搜索与 README 读取（可选 `GITHUB_TOKEN`）。DNS 解析后拒绝内网、逐跳复核重定向、超时与体积上限、系统 HTTP 代理。每步记录发现、错误码与中文说明，可单步重试或停止。
+- **来源与引用**：来源有稳定的引用编号，重跑步骤不改号、不丢备注与核验；报告中的 `[n]` 点击后定位并展开对应来源；引用检查提示不存在的编号和未核验的被引来源。
+- **报告编辑器**：Markdown 编辑 / 分栏 / 预览，标题、加粗、列表、引用块、插入引用；本地底稿按计划与来源汇编；Floatboat 模型草稿（可选）可替换或追加，并标出模型编造的编号。交付要求被引来源全部核验。
+- **导出**：Markdown（正文 + 参考来源 + 延伸阅读）、独立 HTML（表格、引用锚点可点击）、完整项目 JSON、DeerFlow 原生快照。
+- **DeerFlow 通道（可选）**：服务地址可在页面保存或用 `DEERFLOW_URL` 指定，“重新检查”读取部署的模型列表；未连通时就地给出启动方式。按确认计划提交后台研究（持久命令、固定幂等键、未知回执只读核对），服务端加入官方运行事件流（SSE，断线按 Last-Event-ID 续接），页面经 EventSource 实时显示进度、任务清单与最新消息。完成后载入结果：来源并入列表，原生会话可查阅，可采用最新答复为报告。也可只读读取已有会话或导入原生 JSON（≤8MB，大会话自动压缩）。
+- **示例**：一份已完成的原创研究“单机多进程 Node 服务是否应为 SQLite 开启 WAL”，7 步已确认计划、7 项已核验来源（SQLite 官方文档与 better-sqlite3 文档的意译要点）、带配置表与风险清单的报告。
+- 自动保存完整工作稿（含未完成网址、模型建议、项目 JSON 草稿），冲突保护，导入总是新建研究。
 
-- 官方REST ThreadStateResponse及DeerFlowClient检查点历史导入；原生字段完整保留，消息、todos、artifacts与来源证据可查阅。
-- 报告采用最新完整答复、Markdown编辑/预览、来源逐项复核、交付门禁及Markdown下载。编辑已交付报告自动回到复核状态。
-- 明确配置Gateway后只读同步已有会话，持久同步记录，主动载入快照保留人工报告。无上游服务时使用文件导入路径。
-- IndexedDB工作稿与SQLite规范项目、冲突保护、幂等保存、完整项目和恢复稿导入新副本。未完成URL与未应用JSON不会丢失。
+开发与打包：`pnpm workbench:check`、`pnpm test`、`pnpm package`。配置见 [SETUP](app/SETUP.md)，验收见 [ACCEPTANCE](ACCEPTANCE.md)，官方格式验证见 [verification](verification/README.md)。
 
-这是研究交付与原生会话审阅工作台。实际官方序列化器与LangChain消息构造已验证；默认示例、HTTP契约样例均不是实际模型研究结果。研究提交接口已通过官方请求模型和HTTP契约样例验证，尚未连接真实部署执行推理；不下载上游产物原件。完整DeerFlow部署与Floatboat客户端导入待验证。
-
-开发与打包：`pnpm workbench:check`、`pnpm test`、`pnpm package`。上游配置与限制见[SETUP](app/SETUP.md)，验收证据见[ACCEPTANCE](ACCEPTANCE.md)，官方格式验证见[verification](verification/README.md)。
+真实 Floatboat Host 模型、真实 DeerFlow 部署与外网检索均未在验收中调用；验收使用 mock Host、本机检索夹具和 DeerFlow Gateway 合同夹具。

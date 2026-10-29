@@ -1,7 +1,7 @@
 {
   "name": "floatboat-graphify",
   "private": true,
-  "version": "0.5.1",
+  "version": "0.9.0",
   "type": "module",
   "packageManager": "pnpm@10.22.0",
   "engines": {
@@ -22,11 +22,15 @@
     "workbench:catalog": "node tooling/catalog.mjs"
   },
   "dependencies": {
+    "d3-force": "3.0.0",
+    "d3-quadtree": "3.0.1",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@types/d3-force": "3.0.10",
+    "@types/d3-quadtree": "3.0.6",
     "@types/node": "22.20.2",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",

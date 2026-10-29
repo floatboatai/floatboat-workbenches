@@ -4,6 +4,7 @@ import {
   audioSource,
   CHUNK_BYTES,
   MAX_AUDIO_BYTES,
+  sniffAudio,
   type AudioSource,
 } from "../contracts/transcript.ts";
 type Resolver = (relative: string, write?: boolean) => Promise<string>;
@@ -13,19 +14,7 @@ export const audioId = (id: string) => {
 };
 export const digest = (bytes: Uint8Array) =>
   createHash("sha256").update(bytes).digest("hex");
-export function detectMime(bytes: Uint8Array): string {
-  const b = Buffer.from(bytes),
-    start = b.subarray(0, 12).toString("latin1");
-  if (start.startsWith("RIFF") && start.slice(8) === "WAVE") return "audio/wav";
-  if (start.startsWith("fLaC")) return "audio/flac";
-  if (start.startsWith("OggS")) return "audio/ogg";
-  if (start.slice(4, 8) === "ftyp") return "audio/mp4";
-  if (b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3)
-    return "audio/webm";
-  if (start.startsWith("ID3") || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0))
-    return "audio/mpeg";
-  throw new Error("文件不是支持的音频容器。");
-}
+export const detectMime = (bytes: Uint8Array): string => sniffAudio(bytes);
 export function createAudioFiles(path: Resolver) {
   const read = async (id: string) =>
     readFile(await path(`${audioId(id)}.audio`));
@@ -80,6 +69,21 @@ export function createAudioFiles(path: Resolver) {
         ),
       );
       return source;
+    },
+    /** Content-addressed write used for the bundled sample; existing identical originals are kept. */
+    async ensure(bytes: Uint8Array) {
+      const id = digest(bytes),
+        target = await path(`${id}.audio`, true);
+      const existing = await stat(target).catch(() => null);
+      if (existing?.size === bytes.length) return id;
+      const temp = await path(`${id}.${randomUUID()}.tmp`, true);
+      try {
+        await writeFile(temp, bytes, { flag: "wx" });
+        await rename(temp, target);
+      } finally {
+        await unlink(temp).catch(() => {});
+      }
+      return id;
     },
     async verify(source: AudioSource | null) {
       if (!source) return;

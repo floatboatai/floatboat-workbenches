@@ -3,15 +3,20 @@ import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
-import { createResearchRuns } from "../src/server/research-runs.ts";
+import { createResearchRuns as create } from "../src/server/research-runs.ts";
 import { GatewayError, gateway } from "../src/server/research-gateway.ts";
 import { createStore } from "../src/server/store.ts";
-import { researchValue, seed, threadValue } from "../src/contracts/research.ts";
+import { researchValue, threadValue } from "../src/contracts/research.ts";
+import { sampleResearch } from "../src/contracts/sample.ts";
 import { runPayload, DEFAULT_MODEL } from "../src/contracts/run.ts";
 import { createServer } from "node:http";
+const NATIVE = readFileSync(new URL("../src/contracts/native-sample.json", import.meta.url), "utf8");
+const seed = { ...sampleResearch, stage: "reviewing" as const, native: NATIVE };
+const createResearchRuns = (db: DatabaseSync, ...rest: [Parameters<typeof create>[1]?, Parameters<typeof create>[2]?, Parameters<typeof create>[3]?]) =>
+  create(db, rest[0], rest[1], rest[2], { follow: false });
 function database() {
   const db = new DatabaseSync(":memory:");
-  for (const f of ["0002_projects.sql", "0005_research_runs.sql", "0006_research_active.sql"])
+  for (const f of ["0002_projects.sql", "0005_research_runs.sql", "0006_research_active.sql", "0007_research_desk.sql"])
     db.exec(
       readFileSync(new URL("../migrations/" + f, import.meta.url), "utf8"),
     );

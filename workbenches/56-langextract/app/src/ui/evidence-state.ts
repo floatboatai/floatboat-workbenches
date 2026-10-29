@@ -1,6 +1,6 @@
 import { useRef, type SetStateAction } from "react";
+import { seed, sampleTitle } from "../contracts/samples";
 import {
-  seed,
   validateProject,
   restoreProjectDraft,
   restoreWorkingCopy,
@@ -11,7 +11,7 @@ import { useProjects } from "./workspace";
 
 /** Keep the whole edited snapshot below the recovery and wire budgets. */
 export function useEvidenceProjects() {
-  const project = useProjects(seed, validateProject, "青禾展览 · 采购访谈", {
+  const project = useProjects(seed, validateProject, sampleTitle, {
     storageKey: "langextract-evidence-v1",
     restoreDraftData: restoreProjectDraft,
   });

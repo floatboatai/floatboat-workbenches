@@ -18,6 +18,15 @@ function database() {
     );
   return db;
 }
+const unfinished = {
+  ...structuredClone(example),
+  slides: example.slides.map((s, i) => (i === 4 ? { ...s, title: "", chart: s.chart && { ...s.chart, series: s.chart.series.map((x) => ({ ...x, values: x.values.map(() => "12a") })) } } : s)),
+};
+test("draft decoding keeps unfinished values the formal model rejects", () => {
+  assert.throws(() => validateDeck(unfinished), /标题/);
+  assert.deepEqual(restoreDeck(unfinished), unfinished);
+  assert.deepEqual(validateDeck(blank), blank);
+});
 test("autosave: unfinished slides and raw JSON restore without overwriting last valid model; lost receipt is idempotent", async () => {
   const db = database();
   try {
@@ -44,12 +53,12 @@ test("autosave: unfinished slides and raw JSON restore without overwriting last 
       draftRevision: 1,
       projectId: first.project.id,
       projectRevision: first.project.revision,
-      snapshot: { ...cmd.snapshot, data: blank },
+      snapshot: { ...cmd.snapshot, data: unfinished },
     });
     assert.equal(pending.phase, "draft");
     const stored = drafts.get(cmd.documentId);
     assert.ok(stored);
-    assert.deepEqual(restoreDeck(stored.snapshot.data), blank);
+    assert.deepEqual(restoreDeck(stored.snapshot.data), unfinished);
     assert.equal(stored.snapshot.extra.importText, "{broken");
     assert.deepEqual(
       createStore(db, validateDeck).get(first.project.id).data,
@@ -79,16 +88,16 @@ test("autosave: independent import project and stale revision conflict preserve 
   }
 });
 
-test("容量边界：700 KB 正式模型上限后仍能保存并恢复有界完整草稿", async () => {
+test("容量边界：900 KB 正式模型上限后仍能保存并恢复有界完整草稿", async () => {
   const db = database();
   try {
     const drafts = createAutosaveStore(db, validateDeck);
     const large = {
       ...structuredClone(example),
-      slides: Array.from({ length: 35 }, (_, i) => ({
-        ...example.slides[0],
+      slides: Array.from({ length: 60 }, (_, i) => ({
+        ...example.slides[2],
         id: `large-${i}`,
-        markdown: "中".repeat(8000),
+        bullets: Array.from({ length: 14 }, () => "中".repeat(600)),
       })),
     };
     const cmd = {
@@ -103,6 +112,7 @@ test("容量边界：700 KB 正式模型上限后仍能保存并恢复有界完�
         extra: { importText: "{unfinished" },
       },
     };
+    assert.ok(Buffer.byteLength(JSON.stringify(large)) > 900_000);
     const receipt = await drafts.commit(cmd);
     assert.equal(receipt.phase, "draft");
     const raw = drafts.get(cmd.documentId);

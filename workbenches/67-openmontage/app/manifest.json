@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "appId": "workbench.289e934c-fb6d-4354-a757-3f8d81327fd8",
   "registryName": "openmontage-studio",
-  "name": "镜头制作 · OpenMontage",
-  "description": "分镜审阅、本地视频素材裁切与拼接交付",
-  "version": "0.5.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "name": "剪辑台 · OpenMontage",
+  "description": "多轨时间线剪辑：视频、图片、音频与字幕，浏览器内预览并导出成片，OpenMontage 服务可选",
+  "version": "0.9.0",
+  "changelog": "重做为多轨剪辑台：视频/图片/音频/文字轨，修剪、分割、移动、吸附、撤销；淡入淡出与交叉溶解；标题、字幕（SRT/VTT 导入导出）与音量；自带原创示例素材；浏览器内用 WebCodecs 导出 MP4/WebM，无需外部服务；OpenMontage 服务改为可选高级渲染并给出状态与启动方式；素材上限提高到单个 2 GB，支持常见视频、图片和音频格式；影片菜单管理新建、打开、导入与导出。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -26,6 +26,13 @@
       "role": "asset",
       "location": "project",
       "path": "notices"
+    },
+    {
+      "id": "samples",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "samples"
     },
     {
       "id": "media",

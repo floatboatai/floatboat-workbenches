@@ -1,285 +1,264 @@
+// ABOUTME: 研究项目模型：问题、可编辑计划、带引用编号的来源、报告与交付状态；含旧版数据升级。
 import { isRecord, boundedText } from "./project.ts";
-import sample from "./native-sample.json" with { type: "json" };
+import { nativeValue, nativeLinks, safeUrl, compactNative, NATIVE_STORED_MAX } from "./native.ts";
+export { safeUrl, threadValue, nativeValue, lastReport } from "./native.ts";
+
+export const STEP_KINDS = ["web-search", "github", "read", "analyze"] as const;
+export type StepKind = (typeof STEP_KINDS)[number];
+export const STEP_STATUSES = ["todo", "running", "done", "failed"] as const;
+export type StepStatus = (typeof STEP_STATUSES)[number];
+export const STAGES = ["draft", "reviewing", "ready"] as const;
+export const MAX_STEPS = 12,
+  MAX_SOURCES = 150,
+  SOURCE_TEXT_MAX = 6000;
+
+export type Step = {
+  id: string;
+  title: string;
+  kind: StepKind;
+  query: string;
+  urls: string;
+  findings: string;
+  status: StepStatus;
+  error: string;
+  ranAt: string;
+};
 export type Source = {
   id: string;
+  cite: number;
   url: string;
   title: string;
   excerpt: string;
+  text: string;
   note: string;
   checked: boolean;
   origin: string;
+  stepId: string;
+  fetchedAt: string;
 };
+export type Plan = { steps: Step[]; confirmed: boolean; confirmedAt: string; origin: string };
 export type Research = {
-  native: string;
-  brief: string;
-  report: string;
+  version: 2;
+  question: string;
+  scope: string;
+  plan: Plan;
   sources: Source[];
-  stage: "draft" | "reviewing" | "ready";
+  report: string;
+  stage: (typeof STAGES)[number];
+  native: string;
   threadId: string;
 };
-export type NativeView = {
-  messages: {
-    id: string;
-    role: string;
-    text: string;
-    name: string;
-    hidden: boolean;
-    toolCalls: number;
-  }[];
-  todos: { content: string; status: string }[];
-  artifacts: string[];
-  title: string;
-  checkpoint: string;
-  sample: boolean;
+
+export const kindLabels: Record<StepKind, string> = {
+  "web-search": "网页检索",
+  github: "GitHub 项目",
+  read: "精读网页",
+  analyze: "人工分析",
 };
-export function safeUrl(v: string) {
+export const originLabels: Record<string, string> = {
+  web: "网页",
+  github: "GitHub",
+  deerflow: "DeerFlow",
+  manual: "手动添加",
+};
+
+const text = (v: unknown, max: number, fallback = "") => (v === undefined ? fallback : boundedText(v, max));
+function stepValue(v: unknown): Step {
+  if (!isRecord(v)) throw new Error("计划步骤无效。");
+  const kind = STEP_KINDS.includes(v.kind as StepKind) ? (v.kind as StepKind) : null;
+  const status = STEP_STATUSES.includes(v.status as StepStatus) ? (v.status as StepStatus) : null;
+  if (!kind || !status) throw new Error("计划步骤类型或状态无效。");
+  const step = {
+    id: boundedText(v.id, 100),
+    title: boundedText(v.title, 200),
+    kind,
+    query: text(v.query, 500),
+    urls: text(v.urls, 20000),
+    findings: text(v.findings, 20000),
+    status,
+    error: text(v.error, 600),
+    ranAt: text(v.ranAt, 40),
+  };
+  if (!step.id) throw new Error("计划步骤缺少编号。");
+  return step;
+}
+function sourceValue(v: unknown, working: boolean): Source {
+  if (!isRecord(v) || typeof v.checked !== "boolean") throw new Error("来源记录无效。");
+  const cite = v.cite;
+  if (typeof cite !== "number" || !Number.isInteger(cite) || cite < 1 || cite > 9999) throw new Error("来源引用编号无效。");
+  const out: Source = {
+    id: boundedText(v.id, 100),
+    cite,
+    url: boundedText(v.url, 3000),
+    title: boundedText(v.title, 300),
+    excerpt: text(v.excerpt, 3000),
+    text: text(v.text, SOURCE_TEXT_MAX),
+    note: text(v.note, 5000),
+    checked: v.checked,
+    origin: text(v.origin, 40, "manual"),
+    stepId: text(v.stepId, 100),
+    fetchedAt: text(v.fetchedAt, 40),
+  };
+  if (!out.id || (!working && (!safeUrl(out.url) || !out.title.trim())))
+    throw new Error("请补全来源名称和HTTP(S)地址。");
+  return out;
+}
+/** Version-1 projects (brief + native session + report) become a confirmed plan with numbered sources. */
+function upgrade(v: Record<string, unknown>): Record<string, unknown> {
+  const native = typeof v.native === "string" ? v.native : "";
+  const brief = typeof v.brief === "string" ? v.brief : "";
+  let todos: { content: string; status: string }[] = [];
   try {
-    const u = new URL(v);
-    return ["http:", "https:"].includes(u.protocol) &&
-      !u.username &&
-      !u.password
-      ? u.href
-      : "";
+    if (native) todos = nativeValue(native).view.todos;
   } catch {
-    return "";
+    todos = [];
   }
-}
-export function threadValue(v: unknown) {
-  const s = boundedText(v, 64);
-  if (!/^[A-Za-z0-9_-]{1,64}$/.test(s))
-    throw new Error("请输入有效的DeerFlow会话编号。");
-  return s;
-}
-export function nativeValue(text: string): {
-  raw: Record<string, unknown>;
-  view: NativeView;
-} {
-  if (text.length > 650000)
-    throw new Error("原生会话最多650KB，请按阶段拆分。");
-  const raw: unknown = JSON.parse(text);
-  if (!isRecord(raw)) throw new Error("原生会话应为JSON对象。");
-  let state: Record<string, unknown> = raw;
-  if (Array.isArray(raw.checkpoints)) {
-    if (raw.checkpoints.length > 100) throw new Error("最多100个检查点。");
-    const last = raw.checkpoints.at(-1);
-    if (last !== undefined && !isRecord(last))
-      throw new Error("检查点格式无效。");
-    state = isRecord(last) ? last : { values: { messages: [] } };
-  }
-  const values = isRecord(state.values)
-    ? state.values
-    : Array.isArray(state.messages)
-      ? state
-      : null;
-  if (!values)
-    throw new Error("需要ThreadStateResponse或DeerFlowClient检查点历史。");
-  const messages = values.messages ?? [];
-  if (!Array.isArray(messages) || messages.length > 300)
-    throw new Error("会话最多300条消息。");
-  const decoded = messages.map((m, i) => {
-    if (!isRecord(m)) throw new Error("原生消息格式无效。");
-    let text = "";
-    if (typeof m.content === "string") text = m.content;
-    else if (Array.isArray(m.content)) {
-      for (const block of m.content)
-        if (isRecord(block) && typeof block.text === "string")
-          text += block.text + "\n";
-    } else if (m.content !== undefined && m.content !== null)
-      throw new Error("消息内容格式无效。");
-    if (text.length > 150000) throw new Error("单条消息过长，请拆分会话。");
-    return {
-      id: typeof m.id === "string" ? m.id : String(i),
-      role:
-        typeof m.type === "string"
-          ? m.type
-          : typeof m.role === "string"
-            ? m.role
-            : "unknown",
-      text,
-      name: typeof m.name === "string" ? m.name : "",
-      toolCalls: Array.isArray(m.tool_calls) ? m.tool_calls.length : 0,
-      hidden:
-        isRecord(m.additional_kwargs) &&
-        m.additional_kwargs.hide_from_ui === true,
-    };
-  });
-  const todos = values.todos ?? [];
-  if (!Array.isArray(todos) || todos.length > 100)
-    throw new Error("研究任务格式或数量无效。");
-  const tasks = todos.map((t) => {
-    if (
-      !isRecord(t) ||
-      typeof t.content !== "string" ||
-      typeof t.status !== "string"
-    )
-      throw new Error("任务条目需要content和status。");
-    return {
-      content: boundedText(t.content, 5000),
-      status: boundedText(t.status, 100),
-    };
-  });
-  const artifacts = values.artifacts ?? [];
-  if (
-    !Array.isArray(artifacts) ||
-    artifacts.length > 100 ||
-    !artifacts.every((x) => typeof x === "string" && x.length < 2000)
-  )
-    throw new Error("产物清单格式无效。");
+  const sources = Array.isArray(v.sources) ? v.sources : [];
   return {
-    raw,
-    view: {
-      messages: decoded,
-      todos: tasks,
-      artifacts: artifacts as string[],
-      title: typeof values.title === "string" ? values.title : "研究会话",
-      checkpoint:
-        typeof state.checkpoint_id === "string"
-          ? state.checkpoint_id
-          : isRecord(state.checkpoint) &&
-              typeof state.checkpoint.checkpoint_id === "string"
-            ? state.checkpoint.checkpoint_id
-            : "",
-      sample: isRecord(raw.metadata) && raw.metadata.sample === true,
+    version: 2,
+    question: brief.split("\n").find((l) => l.trim())?.trim().slice(0, 500) ?? "",
+    scope: brief,
+    plan: {
+      steps: todos.slice(0, MAX_STEPS).map((t, i) => ({
+        id: "legacy-" + (i + 1),
+        title: t.content.slice(0, 200),
+        kind: "analyze",
+        query: "",
+        urls: "",
+        findings: "",
+        status: t.status === "completed" ? "done" : "todo",
+        error: "",
+        ranAt: "",
+      })),
+      confirmed: todos.length > 0,
+      confirmedAt: "",
+      origin: "deerflow",
     },
-  };
-}
-export function extractSources(native: string): Source[] {
-  const { raw, view } = nativeValue(native),
-    found = new Map<string, Source>();
-  function add(url: string, title = "", excerpt = "", origin = "会话链接") {
-    url = safeUrl(url);
-    if (!url || found.has(url) || found.size >= 100) return;
-    found.set(url, {
-      id: "source-" + (found.size + 1),
-      url,
-      title: title.slice(0, 200) || new URL(url).hostname,
-      excerpt: excerpt.slice(0, 3000),
-      note: "",
-      checked: false,
-      origin,
-    });
-  }
-  function walk(v: unknown, depth = 0) {
-    if (depth > 12) return;
-    if (Array.isArray(v)) {
-      for (const x of v.slice(0, 300)) walk(x, depth + 1);
-    } else if (isRecord(v)) {
-      if (typeof v.url === "string")
-        add(
-          v.url,
-          typeof v.title === "string" ? v.title : "",
-          typeof v.content === "string"
-            ? v.content
-            : typeof v.snippet === "string"
-              ? v.snippet
-              : "",
-          "工具结果",
-        );
-      for (const x of Object.values(v)) walk(x, depth + 1);
-    }
-  }
-  for (const m of view.messages.filter((m) => !m.hidden)) {
-    if (m.role === "tool")
-      try {
-        walk(JSON.parse(m.text));
-      } catch {}
-    for (const match of m.text.matchAll(
-      /\[([^\]]{1,200})\]\((https?:\/\/[^\s)]+)\)/g,
-    ))
-      add(match[2], match[1], "", m.role === "tool" ? "工具结果" : "报告链接");
-  }
-  return [...found.values()];
-}
-function decode(value: unknown, working = false): Research {
-  if (
-    !isRecord(value) ||
-    !Array.isArray(value.sources) ||
-    value.sources.length > 100 ||
-    !["draft", "reviewing", "ready"].includes(String(value.stage))
-  )
-    throw new Error("研究项目格式无效。");
-  const native = boundedText(value.native, 650000);
-  nativeValue(native);
-  const sources = value.sources.map((s) => {
-    if (!isRecord(s) || typeof s.checked !== "boolean")
-      throw new Error("来源记录无效。");
-    const out = {
-      id: boundedText(s.id, 100),
-      url: boundedText(s.url, 3000),
-      title: boundedText(s.title, 200),
-      excerpt: boundedText(s.excerpt, 3000),
-      note: boundedText(s.note, 5000),
-      checked: s.checked,
-      origin: boundedText(s.origin, 100),
-    };
-    if (!out.id || (!working && (!safeUrl(out.url) || !out.title.trim())))
-      throw new Error("请补全来源名称和HTTP(S)地址。");
-    return out;
-  });
-  if (new Set(sources.map((s) => s.id)).size !== sources.length)
-    throw new Error("来源编号重复。");
-  const result: Research = {
+    sources: sources.map((s, i) =>
+      isRecord(s) ? { ...s, cite: i + 1, text: "", stepId: "", fetchedAt: "", origin: s.origin === "手动添加" ? "manual" : "deerflow" } : s,
+    ),
+    report: v.report,
+    stage: v.stage,
     native,
-    brief: boundedText(value.brief, 30000),
-    report: boundedText(value.report, 150000),
-    sources,
-    stage: value.stage as Research["stage"],
-    threadId: boundedText(value.threadId, 100),
+    threadId: v.threadId ?? "",
   };
-  if (
-    !working &&
-    new TextEncoder().encode(JSON.stringify(result)).length > 850000
-  )
-    throw new Error("研究项目超过850KB，草稿仍可导出。");
-  if (
-    result.stage === "ready" &&
-    (!result.report.trim() ||
-      !result.sources.length ||
-      result.sources.some((s) => !s.checked))
-  )
-    throw new Error("可交付状态需要完整报告和已核验来源。");
+}
+function decode(input: unknown, working: boolean): Research {
+  if (!isRecord(input)) throw new Error("研究项目格式无效。");
+  const value = input.version === 2 ? input : upgrade(input);
+  if (!isRecord(value.plan) || !Array.isArray(value.plan.steps) || !Array.isArray(value.sources))
+    throw new Error("研究项目格式无效。");
+  if (value.plan.steps.length > MAX_STEPS) throw new Error(`计划最多${MAX_STEPS}步。`);
+  if (value.sources.length > MAX_SOURCES) throw new Error(`来源最多${MAX_SOURCES}项，请移除不相关的来源。`);
+  if (!STAGES.includes(value.stage as Research["stage"])) throw new Error("交付状态无效。");
+  const native = text(value.native, NATIVE_STORED_MAX);
+  if (native) nativeValue(native);
+  const steps = value.plan.steps.map(stepValue);
+  if (new Set(steps.map((s) => s.id)).size !== steps.length) throw new Error("计划步骤编号重复。");
+  const sources = value.sources.map((s) => sourceValue(s, working));
+  if (new Set(sources.map((s) => s.id)).size !== sources.length) throw new Error("来源编号重复。");
+  if (new Set(sources.map((s) => s.cite)).size !== sources.length) throw new Error("来源引用编号重复。");
+  if (typeof value.plan.confirmed !== "boolean") throw new Error("计划确认状态无效。");
+  const result: Research = {
+    version: 2,
+    question: boundedText(value.question, 2000),
+    scope: text(value.scope, 30000),
+    plan: {
+      steps,
+      confirmed: value.plan.confirmed,
+      confirmedAt: text(value.plan.confirmedAt, 40),
+      origin: text(value.plan.origin, 40, "manual"),
+    },
+    sources,
+    report: boundedText(value.report, 200000),
+    stage: value.stage as Research["stage"],
+    native,
+    threadId: text(value.threadId, 100),
+  };
+  if (!working && new TextEncoder().encode(JSON.stringify(result)).length > 850000)
+    throw new Error("研究项目超过850KB，请移除部分来源正文；草稿仍会保留。");
+  if (!working && result.stage === "ready") assertDeliverable(result);
   return result;
 }
 export const researchValue = (v: unknown) => decode(v, false),
   restoreResearch = (v: unknown) => decode(v, true);
-export function fromNative(text: string, threadId = ""): Research {
-  const { view } = nativeValue(text);
+
+/** Citation numbers used in text: [3], [1, 4], [2，5]; links like [x](url) are ignored. */
+export function citationsIn(report: string): number[] {
+  const out = new Set<number>();
+  for (const m of report.matchAll(/\[(\d{1,4}(?:\s*[,，]\s*\d{1,4})*)\](?!\()/g))
+    for (const n of m[1].split(/[,，]/)) out.add(Number(n.trim()));
+  return [...out].sort((a, b) => a - b);
+}
+export function reportProblems(data: Research) {
+  const cited = citationsIn(data.report),
+    byCite = new Map(data.sources.map((s) => [s.cite, s]));
   return {
-    native: text,
-    brief:
-      view.messages.find((m) => ["human", "user"].includes(m.role) && !m.hidden)
-        ?.text ?? "",
-    report: "",
-    sources: extractSources(text),
-    stage: "draft",
-    threadId,
+    cited,
+    dangling: cited.filter((n) => !byCite.has(n)),
+    uncheckedCited: cited.filter((n) => byCite.has(n) && !byCite.get(n)!.checked),
+    uncited: data.sources.filter((s) => !cited.includes(s.cite)).map((s) => s.cite),
   };
 }
-export function lastReport(native: string) {
-  const latest = nativeValue(native)
-    .view.messages.filter(
-      (m) => !m.hidden && ["ai", "assistant"].includes(m.role),
-    )
-    .at(-1);
-  return latest && latest.toolCalls === 0 ? latest.text : "";
+function assertDeliverable(data: Research) {
+  if (!data.report.trim()) throw new Error("请先撰写报告正文。");
+  const p = reportProblems(data);
+  if (!p.cited.length) throw new Error("报告还没有引用任何来源，请用［编号］标注依据。");
+  if (p.dangling.length) throw new Error(`报告引用了不存在的来源：${p.dangling.map((n) => `[${n}]`).join("、")}。`);
+  if (p.uncheckedCited.length)
+    throw new Error(`请先核验被引用的来源：${p.uncheckedCited.map((n) => `[${n}]`).join("、")}。`);
 }
 export function assertReady(data: Research) {
-  researchValue(data);
-  if (!data.report.trim()) throw new Error("请先整理交付报告。");
-  if (!data.sources.length || data.sources.some((s) => !s.checked))
-    throw new Error("请逐项核验至少一项来源，再标记可交付。");
+  researchValue({ ...data, stage: "reviewing" });
+  assertDeliverable(data);
 }
-export function exportReport(data: Research, title: string) {
-  researchValue(data);
-  return (
-    `# ${title}\n\n${data.report}\n\n---\n\n## 来源复核\n\n` +
-    data.sources
-      .map(
-        (s) =>
-          `- [${s.title.replace(/[\[\]]/g, "")}](${safeUrl(s.url)}) · ${s.checked ? "人工已核验" : "待核验"}${s.note ? "\n  " + s.note : ""}`,
-      )
-      .join("\n") +
-    "\n"
-  );
+export const nextCite = (sources: Source[]) => sources.reduce((m, s) => Math.max(m, s.cite), 0) + 1;
+
+/** New project working copy from a question. */
+export function emptyResearch(question = ""): Research {
+  return {
+    version: 2,
+    question,
+    scope: "",
+    plan: { steps: [], confirmed: false, confirmedAt: "", origin: "manual" },
+    sources: [],
+    report: "",
+    stage: "draft",
+    native: "",
+    threadId: "",
+  };
 }
-export const seed = fromNative(JSON.stringify(sample, null, 2));
+
+/** Merge links found in a DeerFlow session into the source list, keeping notes and numbers. */
+export function mergeNativeSources(data: Research, native: string): Source[] {
+  const links = nativeLinks(native);
+  const sources = [...data.sources];
+  let cite = nextCite(sources);
+  for (const link of links) {
+    if (sources.some((s) => s.url === link.url)) continue;
+    if (sources.length >= MAX_SOURCES)
+      throw new Error(`合并后来源超过${MAX_SOURCES}项，请先移除不相关的来源；原快照与报告均已保留。`);
+    sources.push({
+      id: crypto.randomUUID(),
+      cite: cite++,
+      url: link.url,
+      title: link.title,
+      excerpt: link.excerpt,
+      text: "",
+      note: "",
+      checked: false,
+      origin: "deerflow",
+      stepId: "",
+      fetchedAt: new Date().toISOString(),
+    });
+  }
+  return sources;
+}
+export function fromNative(input: string, threadId = ""): Research {
+  const native = compactNative(input);
+  const { view } = nativeValue(native);
+  const brief = view.messages.find((m) => ["human", "user"].includes(m.role) && !m.hidden)?.text ?? "";
+  const base = upgrade({ native, brief, report: "", sources: [], stage: "draft", threadId });
+  const data = decode(base, true);
+  return { ...data, sources: mergeNativeSources(data, native) };
+}

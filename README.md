@@ -39,22 +39,22 @@
 | [SeqViz](workbenches/52-seqviz/) | 序列导入、注释审阅、环形/线性视图与导出 | 序列审阅与注释轨道 |
 | [farmOS-map](workbenches/53-farmos-map/) | 地块绘制、边界调整、备注与 GeoJSON 导出 | 地图与地块记录 |
 | [Mirador](workbenches/54-mirador/) | 本地图像、双页对照、逐页复核与报告导出 | 双图光台与复核账本 |
-| [OpenSheetMusicDisplay](workbenches/55-opensheetmusicdisplay/) | MusicXML/MXL 导入、谱面校审、批注及原件/SVG 导出 | 乐谱纸张与边注 |
-| [LangExtract](workbenches/56-langextract/) | 原文、JSONL证据定位、字段复核、人工修订与CSV/JSONL/项目导出 | 原文纸张与证据账本 |
-| [Docling](workbenches/57-docling/) | DoclingDocument结构树、文本/表格校订、顺序、JSON/Markdown/CSV与HTML连接器 | 结构轨、校样纸张与表格检查器 |
+| [OpenSheetMusicDisplay](workbenches/55-opensheetmusicdisplay/) | MusicXML/MXL 原件库、光标与回放、移调与声部切换、谱面批注联动、PDF/PNG/SVG 导出 | 乐谱库、原生谱面与联动批注账本 |
+| [LangExtract](workbenches/56-langextract/) | 多文档原文标注、类别与示例配方、区间对齐、审阅统计、JSONL/CSV/可视化 HTML 导出 | 原文纸张与证据账本、档案菜单 |
+| [Docling](workbenches/57-docling/) | 本地 PDF/DOCX/HTML/Markdown 转换、原页与结构块框选、文本表格校订、Docling JSON/Markdown/HTML/CSV 导出 | 原页、结构导航与校订检查器 |
 | [LangGraph.js](workbenches/58-langgraph/) | Gemini 3.8资料整理、真实StateGraph、人工复核、SQLite检查点与交付导出 | 三站复核流程与运行账本 |
-| [Promptfoo](workbenches/59-promptfoo/) | 真实评测结果矩阵、基线、人工复核、限定套件执行器与CSV/JSON导出 | 用例×版本矩阵与结果对照 |
-| [faster-whisper](workbenches/60-faster-whisper/) | 音频保存/回听、真实CPU转写、字幕时间编辑与SRT/VTT/完整项目导出 | 暗色波形、字幕行与任务队列 |
-| [Presenton](workbenches/61-presenton/) | 资料、大纲、页序、备注、审阅、便携稿与异步制作服务连接器 | 逐页缩略轨、演示舞台与资料简报 |
+| [Promptfoo](workbenches/59-promptfoo/) | 用例×提示版本×provider 评测矩阵、本机回放与脚本、常用断言、运行对比、发布判断、配置和结果导入导出 | 评测矩阵、基线差异与断言详情 |
+| [faster-whisper](workbenches/60-faster-whisper/) | 示例音频与逐词转写、波形入出点、拆分合并、查找替换、说话人标注、SRT/VTT/TXT/JSON 导出 | 波形时间轴、字幕表与上下文检查器 |
+| [Presenton](workbenches/61-presenton/) | 资料导入、大纲编辑、本地幻灯片生成、11 种版式与 5 套主题、原生图表 PPTX 与 PDF 导出 | 资料—大纲—成稿步骤、缩略轨与幻灯片舞台 |
 | [Penpot](workbenches/44-penpot/) | 颜色、字体、组件样本与交付说明，原生Penpot归档及CSS导出 | 设计资产样本册与色彩、字体分页 |
 | [HyperFrames](workbenches/62-hyperframes/) | 镜头文字与构图、时间线、HyperFrames HTML和真实MP4渲染 | 暗色动效舞台、镜头轨与输出队列 |
-| [Graphify](workbenches/63-graphify/) | 真实AST抽取、原生图谱、关系路径、布局与审阅笔记 | 知识地图、符号目录与关系检查器 |
+| [Graphify](workbenches/63-graphify/) | 多文件与文件夹知识抽取、Louvain 社区、力导向图、原文定位、搜索路径、GraphML/交互 HTML/完整项目导出 | 中央知识地图、社区资料轨与原文检查器 |
 | [PageIndex](workbenches/64-pageindex/) | 浏览器 PDF.js 阅读（无需服务）、章节树、字符级摘录/引用高亮、检索与 Host 原页问答 | 章节目录、PDF 原页与审阅问答 |
 | [DeepTutor](workbenches/65-deeptutor/) | 离线判题/排程/题库导入、错题解析与 Host 导师、可控出题与间隔复习 | 对页练习本与题号状态条 |
 | [Agent-Reach](workbenches/66-agent-reach/) | 内置 GitHub/网页/搜索/V2EX 采集、首开示例调研、原文摘录高亮、可选 Host 概括与报告 | 来源目录、原文阅读与摘录夹 |
-| [OpenMontage](workbenches/67-openmontage/) | 上传原片、入出点、镜头复核、上游组接和MP4交付 | 分镜制作单、原片预览与成片架 |
-| [DeerFlow](workbenches/68-deerflow/) | 研究提交、原生线程运行查询、来源复核和报告交付 | 研究进度、交付纸张与来源证据页 |
-| [MiroFish](workbenches/69-mirofish/) | 已准备模拟的启动/停止、状态核对、原生动作与人工复核 | 角色目录、轮次时间线与动作复核 |
+| [OpenMontage](workbenches/67-openmontage/) | 多轨视频图片音频字幕、移动修剪分割、转场混音、浏览器 MP4/WebM 成片与完整工程导出 | 影片菜单、监视器、多轨时间线与检查器 |
+| [DeerFlow](workbenches/68-deerflow/) | 问题与可确认计划、本地检索、引用联动、来源核验、报告编辑、Markdown/HTML 导出及可选 SSE 研究服务 | 计划、执行、报告阶段与来源证据栏 |
+| [MiroFish](workbenches/69-mirofish/) | 资料与实体图谱、人设编辑、可复现规则推演、事件注入、立场时间线、报告与完整推演文件导出 | 六阶段推演工作区、立场图表与结果时间线 |
 | [GEOInflow](workbenches/70-geoinflow/) | 日志与内容清单、原生UA/引荐分类、覆盖分析和审阅导出 | 宽幅访问账本、范围筛选与逐页调查 |
 | [OpenPencil](workbenches/71-openpencil/) | 图层与属性、原生SceneGraph、FIG/SVG及完整项目导出 | 全幅组件画板、图层与属性工具 |
 | [FigCraft](workbenches/72-figcraft/) | 无需引擎的近似校样、文案/图层/填色/交付状态写回、SVG/PNG/交付说明导出；原生 PNG/PDF 可选 | 画板胶片、校样舞台与审阅检查器 |
@@ -87,6 +87,8 @@ X选题补充：[9个项目与转化优先级](docs/research/x-project-shortlist
 行业补充调研：[28 个小众行业候选](docs/research/niche-industry-candidates.md)。Maker.js、SeqViz、farmOS-map、Mirador 与 OpenSheetMusicDisplay 已实现；其余候选仍处于研究或计划阶段。第12–17项的独立服务接入条件见各自目录。
 
 AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbench-candidates.md)。覆盖文档抽取、知识图谱、Agent、评测、字幕、配音、课件和视觉生成，另含 3 个通用组件；已列明接口、独立服务、模型许可和维护边界。该次首批完成6项；后续转化状态以当前清单为准，正式模型/外部服务范围以各项目说明为准。
+
+第3波10项已完成本地功能验收与打包，纳入本地整合分支。第4–6波30项待开展。详细范围、验证与限制见[第三波记录](docs/release-0.9.0.md#第3波--本地工作流与可选服务)。
 
 ## 工作台实景
 

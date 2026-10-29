@@ -1,37 +1,32 @@
-# DeerFlow研究交付工作台
+# 深度研究工作台配置
 
-可直接导入DeerFlow的原生会话JSON，整理报告、复核来源、保存草稿及导出交付稿。默认普通示例不包含真实模型研究结果。
+## 不需要任何配置即可使用
 
-## 连接已有DeerFlow
+本地检索在工作台的 Node 服务内运行，只在用户点击执行时访问公网：
 
-在服务端启动环境设置`DEERFLOW_URL`，值为已有DeerFlow Gateway的根地址。远程地址须HTTPS；本机localhost/127.0.0.1可HTTP。若上游启用访问令牌，设置服务端`DEERFLOW_TOKEN`，请求使用Bearer授权。令牌不进入浏览器、项目或导出文件。
+- 网页直读（Readability 提取正文），失败时经 `r.jina.ai` 阅读；
+- 网页搜索经 Exa 公共 MCP 端点（免密钥，有限额）；
+- GitHub 公开 API（未登录每小时 60 次；可在服务端设置 `GITHUB_TOKEN` 提高限额）。
 
-填写已有会话编号，点击“同步已有会话”。调用官方`GET /api/threads/{thread_id}/state`，同步记录进入本地持久账本，完成后主动“载入会话快照”。载入保留人工报告，来源重新核验。此入口只读，不启动研究、运行工具或调用模型；Floatboat Host文本模型不能替代DeerFlow运行时。
+本机、内网、链路本地地址和带登录信息的网址一律拒绝；系统 `HTTPS_PROXY`/`HTTP_PROXY`（http 代理）与 `NO_PROXY` 会被使用。
 
-未配置上游时可以完整使用原生JSON导入/导出及人工审阅。产物区仅保存上游返回的原始文件路径；文件原件须从DeerFlow导出。任务进度显示原生todos，不等同人工交付状态。
+## 可选：Floatboat 模型
 
-## 发起研究任务
+启动 Floatboat 桌面端后，“用 Floatboat 模型起草”可生成计划建议与报告草稿。未连接时按钮旁显示状态，点“重新检查”即可。模型只依据所给来源写作，草稿中不存在的引用编号会被标出。
 
-“发起研究”填写明确简报、范围和交付形式，点击“提交研究任务”。默认模型`gemini-3.8-flash`通过官方`context.model_name`传入；它必须出现在上游配置的模型白名单。可填写部署实际支持的模型名称；不会偷偷改用其他模型。需要已部署的Gateway、有效模型凭据、研究工具/沙箱配置和具备`threads:write`、`runs:create`、`runs:read`、`threads:read`相应权限的授权。
+## 可选：DeerFlow 服务
 
-每次研究创建独立线程，调用官方`POST /api/threads`和`POST /api/threads/{id}/runs`。后者立即返回后台运行记录，页面离开不取消。使用`multitask_strategy=reject`、`on_disconnect=continue`；无需保持SSE连接。研究记录显示pending/running/success/error/timeout/interrupted真实状态，定期查询也可手动查询。
+1. `git clone https://github.com/bytedance/deer-flow.git && cd deer-flow`
+2. `make setup`：选择模型与搜索工具，生成 `config.yaml` 与 `.env`
+3. `make docker-init && make docker-start`，默认地址 `http://localhost:2026`
+4. 在“执行研究 → DeerFlow 服务”填写地址并“保存并检查”；或在工作台服务端设置 `DEERFLOW_URL`（优先于页面设置）。远程地址须 HTTPS。启用访问令牌时设置服务端 `DEERFLOW_TOKEN`，令牌不进入浏览器、项目或导出文件。
 
-研究命令、固定操作ID、选定模型、简报和线程ID先写SQLite，再产生上游副作用；运行请求携带同一`Idempotency-Key`，metadata保存操作ID。响应丢失或服务重启后只通过GET运行列表/详情匹配该ID恢复，绝不自动重新POST。暂时找不到记录不当作未执行；回执未知时当前项目禁止新任务，请继续只读刷新或去上游核对。没有自动恢复中断、取消、重放命令；这些操作需要在上游处理。
+提交使用官方 `POST /api/threads`、`POST /api/threads/{id}/runs`（`stream_mode: ["values","updates"]`、`on_disconnect: continue`、`Idempotency-Key`），进度来自 `GET /api/threads/{id}/runs/{run_id}/stream`（只读观察，断线携带 `Last-Event-ID` 续接；`gap` 时改读完整状态），结果读取 `GET /api/threads/{id}/state`。模型名称须在部署白名单中，会消耗 DeerFlow 侧配额。取消、人工确认与恢复中断请在 DeerFlow 处理。
 
-成功后读取原生会话状态，再明确点击“载入研究结果”。载入保留人工报告；“采用最新答复”才会把上游答复复制到报告，已有稿件须确认替换。任务记录可下载，包含提交简报/模型/状态和已读取快照，不包含令牌。未读取完整快照时保留成功运行记录，查询状态可重试读取结果，不重新运行。
+## 离线验收夹具
 
-本地完整项目恢复包含工作稿与历史操作ID；SQL任务账本单独保存在工作台数据目录。导入为新项目不会关联或执行旧任务，也不把历史操作ID当作待执行命令。
+`RESEARCH_FIXTURE_ORIGIN=http://127.0.0.1:<port>` 把 GitHub/Exa/Jina 端点指向本机夹具，并只放行该回环来源；仅用于验收，生产环境不要设置。
 
-## 文件与恢复
+## 容量
 
-支持REST ThreadStateResponse及DeerFlowClient.get_thread的检查点历史JSON。原文单独保存，未知字段保留；本地报告和证据记录可独立修改。原生快照导出可用于同工作台重新导入，不声称DeerFlow服务提供快照上传API。
-
-“完整项目”以及“导出恢复稿”包含`{snapshot:{title,data,extra}}`，能导入为新副本，保留不完整来源网址、未应用JSON及其他草稿。导入不重放同步操作；旧同步编号仅保留记录。原生快照不包含独立人工报告，完整项目包含全部工作稿。
-
-原生消息最多300条、任务/产物各100项、来源100项；原生JSON650000字符，网络响应800KB，规范研究项目850KB UTF-8。超限会明确拒绝并保留现有项目；请按研究阶段拆分。自动保存区分规范保存与未完成草稿，两窗口冲突不覆盖先提交版本。
-
-## 验证边界
-
-已验证实际官方序列化器、LangChain消息对象与格式往返；上游HTTP与同步账本通过明确标记的契约样例服务测试。尚未连接带真实研究会话的DeerFlow部署，没有执行模型推理、联网研究、上游产物下载或Floatboat客户端导入验收。
-
-DeerFlow官方源码遵循MIT，许可原文与来源提交记录在notices/。
+单项目 850KB；来源最多 150 项，每项保存正文前 6000 字；计划最多 12 步；原生会话导入 ≤8MB，超过 450KB 的会话保留最新检查点并截短长内容（标记 `floatboat_compacted`）。

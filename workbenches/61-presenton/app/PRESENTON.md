@@ -1,4 +1,4 @@
-# Connect a real Presenton service
+# Connect a real Presenton service (optional)
 
 The connector targets the self-hosted REST API inspected at upstream commit `93b9dcf947f70ae107b779b51dd3c491e736748a`. It is bundled in this workbench's Node server; no separate adapter process or npm installation is needed. A Presenton server with configured model/image providers must run independently. The Electron desktop application's private HTTP servers are not an external REST API.
 
@@ -31,7 +31,7 @@ pnpm dev
 
 `PRESENTON_URL` must be an origin with no path/query/userinfo; HTTPS is required except for explicit localhost/loopback. It must address both REST routes and `/app_data/exports/`. `PRESENTON_API_KEY` is sent as Bearer server-side. No environment values are returned to the page. Restart preview after changing environment configuration. For a packaged Host installation, these variables must be available to its Node server process; inherited environment configuration and client import were not verified in this session. Keys are never exported with the package.
 
-In **制作**, use **检查连接** (validates required OpenAPI route, not model quality). Then select settings and submit. The ledger stores the input and local operation before the external request. Follow the task, download the actual original, or read its slides into a new review document. Generation is not confirmed until a real upstream task completes.
+On the **大纲** step, open the **Presenton** status chip next to **生成幻灯片** and use **重新检查** (validates the required OpenAPI route, not model quality). When reachable, the drawer shows settings and **交给 Presenton 生成**; the request carries the brief and the outline (one Markdown block per outline item, with speaker notes). Local generation and PPTX/PDF export never need this service. The ledger stores the input and local operation before the external request. Follow the task, download the actual original, or read its slides into a new review document. Generation is not confirmed until a real upstream task completes.
 
 If submission becomes unknown, inspect the original service and associate its existing `task-…` ID. The workbench does not automatically repeat the POST. A new manual generation warns about unresolved operations. “停止跟踪” only stops local polling; it does not cancel Presenton or model billing. A source-origin change blocks access to earlier jobs until the original service configuration is restored.
 

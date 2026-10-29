@@ -1,416 +1,436 @@
-import { MeasureIndex } from "./MeasureIndex";
-import { reviewReport } from "../contracts/report";
-import { AnnotationBook } from "./AnnotationBook";
-import { lazy, Suspense, useMemo, useRef, useState } from "react";
-import { seed } from "../contracts/seed";
-import { inspectScore } from "../contracts/musicxml";
+// ABOUTME: 乐谱审校台：宽幅谱面（光标、回放、批注标记）与右侧批注账本，文件生命周期在乐谱库菜单中。
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useWorkbenchState } from "./autosave-client";
+import { download, Notice, RenderBoundary } from "./workspace";
+import { FileMenu } from "./FileMenu";
+import { Ledger, locationLabel, type LedgerFilter, type NumberedAnnotation } from "./Ledger";
+import { ScoreToolbar, type ExportKind } from "./ScoreToolbar";
+import { formatBytes, loadMusicXml, loadOriginal, MissingSourceError, uploadSource } from "./sources";
 import {
-  validateScore,
+  ANNOTATION_KINDS,
+  defaultView,
+  MAX_ANNOTATIONS,
+  newProject,
+  orderAnnotations,
   restoreScoreDraft,
-  originalBytes,
+  validateScore,
+  type Annotation,
+  type Beat,
+  type Focus,
   type ScoreProject,
+  type ViewSettings,
 } from "../contracts/domain";
-import {
-  download,
-  Notice,
-  ProjectPicker,
-  RenderBoundary,
-  useProjects,
-} from "./workspace";
-const ScoreView = lazy(() =>
-  import("../score/ScoreView").then((module) => ({
-    default: module.ScoreView,
-  })),
-);
+import { reviewReport } from "../contracts/report";
+import { sampleProject, seedProject, type Sample } from "../contracts/samples";
+import type { ScoreHandle, RenderState } from "../score/ScoreView";
+import type { Hit, OverlayModel } from "../score/engine";
+
+const ScoreView = lazy(() => import("../score/ScoreView").then((module) => ({ default: module.ScoreView })));
+const SEED = seedProject();
+const SEED_TITLE = "小步舞曲 G 大调 · 排练前校对";
+
+interface LoadedScore {
+  id: string;
+  xml?: string;
+  error?: string;
+  missing?: boolean;
+}
+
 export function App() {
-  const p = useProjects<ScoreProject>(seed, validateScore, "晨间练习 · 审校", {storageKey: "opensheetmusicdisplay", restoreDraftData: restoreScoreDraft});
-  const [importing, setImporting] = useState(false),
-    [svg, setSvg] = useState(""),
-    [allNotes, setAllNotes] = useState(false),
-    [exporting, setExporting] = useState(false);
-  const upload = useRef<HTMLInputElement>(null),
-    notes = useRef<HTMLElement>(null);
-  const info = useMemo(
-    () => inspectScore(p.data.source.xml),
-    [p.data.source.xml],
-  );
-  const part =
-      info.parts.find((item) => item.id === p.data.focus.partId) ??
-      info.parts[0],
-    measureIndex = Math.min(
-      p.data.focus.measureIndex,
-      part.measures.length - 1,
-    ),
-    locationNotes = p.data.annotations.filter(
-      (note) => note.partId === part.id && note.measureIndex === measureIndex,
+  const p = useWorkbenchState<ScoreProject>(SEED, validateScore, SEED_TITLE, { storageKey: "opensheetmusicdisplay", restoreDraftData: restoreScoreDraft });
+  const { data } = p;
+  const { index } = data;
+  const [score, setScore] = useState<LoadedScore>({ id: "" });
+  const [reload, setReload] = useState(0);
+  const [render, setRender] = useState<RenderState>({ phase: "loading", message: "正在读取乐谱原件…", pages: 0 });
+  const [playhead, setPlayhead] = useState<{ measureIndex: number; beat: Beat } | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<LedgerFilter>("all");
+  const [working, setWorking] = useState("");
+  const [exporting, setExporting] = useState("");
+  const upload = useRef<HTMLInputElement>(null);
+  const view = useRef<ScoreHandle>(null);
+  const list = useRef<HTMLOListElement>(null);
+  const paper = useRef<HTMLDivElement>(null);
+
+  const locked = p.busy || p.loading || !!working;
+  const fileBase = (p.title.trim() || index.title).replace(/[\\/:*?"<>|]/g, "_").slice(0, 80) || "乐谱审校";
+
+  // 原件：按内容标识读取 MusicXML 文本。
+  useEffect(() => {
+    let active = true;
+    const id = data.source.id;
+    setScore({ id });
+    setRender({ phase: "loading", message: "正在读取乐谱原件…", pages: 0 });
+    loadMusicXml(id).then(
+      (xml) => active && setScore({ id, xml }),
+      (error: unknown) =>
+        active && setScore({ id, error: error instanceof Error ? error.message : "读取乐谱原件失败。", missing: error instanceof MissingSourceError }),
     );
-  const locked = p.busy || p.loading || importing || exporting;
-  const fileBase = p.title.replace(/[\\/:*?"<>|]/g, "_") || "乐谱审校";
-  async function importFile(file: File) {
-    if (file.size > 200000) {
-      p.setError("原文件不能超过 200 KB，请导出短谱或分段审阅。");
+    return () => {
+      active = false;
+    };
+  }, [data.source.id, reload]);
+  useEffect(() => {
+    setSelectedId(null);
+    setPlayhead(null);
+  }, [p.documentKey]);
+
+  const numbered = useMemo<NumberedAnnotation[]>(() => orderAnnotations(data).map((note, i) => ({ ...note, number: i + 1 })), [data.annotations, data.index]); // eslint-disable-line react-hooks/exhaustive-deps
+  const overlay = useMemo<OverlayModel>(
+    () => ({
+      focus: data.focus,
+      selectedId,
+      markers: numbered.map((note) => ({
+        id: note.id,
+        number: note.number,
+        partId: note.partId,
+        measureIndex: note.measureIndex,
+        beat: note.beat,
+        resolved: note.resolved,
+        label: `批注 ${note.number}（${ANNOTATION_KINDS[note.kind]}${note.resolved ? "，已核对" : ""}）${locationLabel(index, note.partId, note.measureIndex, note.beat)}：${note.text.slice(0, 80) || "空白"}`,
+      })),
+    }),
+    [data.focus, numbered, selectedId, index],
+  );
+
+  const setView = useCallback((patch: Partial<ViewSettings>) => p.setData((value) => ({ ...value, view: { ...value.view, ...patch } })), [p.setData]); // eslint-disable-line react-hooks/exhaustive-deps
+  const setFocus = useCallback(
+    (focus: Focus) => p.setData((value) => (JSON.stringify(value.focus) === JSON.stringify(focus) ? value : { ...value, focus })),
+    [p.setData], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const visiblePart = (partId: string) =>
+    data.view.hiddenParts.includes(partId) ? (index.parts.find((part) => !data.view.hiddenParts.includes(part.id))?.id ?? partId) : partId;
+
+  const onPick = useCallback(
+    (hit: Hit) => {
+      setSelectedId(null);
+      setFocus({ partId: hit.partId, measureIndex: hit.measureIndex, beat: hit.nearNote ? hit.beat : null });
+    },
+    [setFocus],
+  );
+  const select = useCallback(
+    (id: string) => {
+      const note = data.annotations.find((item) => item.id === id);
+      if (!note) return;
+      setSelectedId(id);
+      setFocus({ partId: note.partId, measureIndex: note.measureIndex, beat: note.beat });
+      requestAnimationFrame(() => view.current?.revealFocus());
+    },
+    [data.annotations, setFocus],
+  );
+  const onMarker = useCallback(
+    (id: string) => {
+      if (filter !== "all" && !numbered.find((note) => note.id === id && (filter === "open" ? !note.resolved : note.measureIndex === data.focus.measureIndex)))
+        setFilter("all");
+      select(id);
+      requestAnimationFrame(() => list.current?.querySelector(`[data-entry="${id}"]`)?.scrollIntoView({ block: "nearest" }));
+    },
+    [filter, numbered, data.focus.measureIndex, select],
+  );
+  const onCursor = useCallback(
+    (position: { measureIndex: number; beat: Beat }) => setFocus({ partId: visiblePart(data.focus.partId), ...position }),
+    [setFocus, data.focus.partId, data.view.hiddenParts], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  function addNote() {
+    if (data.annotations.length >= MAX_ANNOTATIONS) {
+      p.setError(`最多 ${MAX_ANNOTATIONS} 条批注，请先整理已核对的记录。`);
       return;
     }
-    setImporting(true);
+    const note: Annotation = {
+      id: crypto.randomUUID(),
+      partId: data.focus.partId,
+      measureIndex: data.focus.measureIndex,
+      beat: data.focus.beat,
+      kind: "other",
+      text: "",
+      resolved: false,
+      createdAt: new Date().toISOString(),
+    };
+    p.setData((value) => ({ ...value, annotations: [...value.annotations, note] }));
+    setSelectedId(note.id);
+    setTimeout(() => document.getElementById(`note-${note.id}`)?.focus(), 0);
+  }
+  const updateNote = useCallback(
+    (id: string, patch: Partial<Pick<Annotation, "text" | "resolved" | "kind">>) =>
+      p.setData((value) => ({ ...value, annotations: value.annotations.map((note) => (note.id === id ? { ...note, ...patch } : note)) })),
+    [p.setData], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const removeNote = useCallback(
+    (id: string) => {
+      p.setData((value) => ({ ...value, annotations: value.annotations.filter((note) => note.id !== id) }));
+      setSelectedId((current) => (current === id ? null : current));
+    },
+    [p.setData], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  async function importFile(file: File) {
+    setWorking("正在读取文件…");
     p.setError("");
     try {
-      const [{ importScore }, { trialRender }] = await Promise.all([
-        import("../contracts/archive"),
-        import("../score/engine"),
-      ]);
-      const source = await importScore(
-        new Uint8Array(await file.arrayBuffer()),
-        file.name,
-      );
-      await trialRender(source.xml);
-      const next = validateScore({
-        source,
-        partId: "",
-        layout: "page",
-        zoom: 0.85,
-        annotations: [],
-        focus: {
-          partId: inspectScore(source.xml).parts[0].id,
-          measureIndex: 0,
-        },
-      });
-      if (await p.replace(next, inspectScore(source.xml).title.slice(0, 120))) {
-        setSvg("");
-        setAllNotes(false);
+      const { source, index: imported } = await uploadSource(file, setWorking);
+      if (score.missing && source.id === data.source.id) {
+        setReload((value) => value + 1);
+        p.setNotice("已找回原件，审校与批注保持不变。");
+        void p.save();
+        return;
+      }
+      setWorking("正在试排前几小节…");
+      const xml = await loadMusicXml(source.id);
+      const { renderOffscreen } = await import("../score/engine");
+      await renderOffscreen(xml, defaultView(), (container) => {
+        if (!container.querySelector("svg path")) throw new Error("乐谱没有可显示的音符。");
+      }, 8);
+      const title = imported.title === "未命名乐谱" ? file.name.replace(/\.[^.]+$/, "") : imported.title;
+      if (await p.replace(newProject(source, imported), `${title} · 审校`.slice(0, 120))) {
+        setFilter("all");
+        p.setNotice(
+          `已导入 ${file.name}（${formatBytes(source.size)}，${imported.parts.length} 个声部、${imported.measures.length} 小节、${imported.notes.toLocaleString("zh-CN")} 个音符）${imported.warnings.length ? "；" + imported.warnings.join("，") : ""}。`,
+        );
       }
     } catch (error) {
       p.report(error);
     } finally {
-      setImporting(false);
+      setWorking("");
     }
   }
-  function addNote() {
-    if (p.data.annotations.length >= 100) {
-      p.setError("最多支持 100 条批注，请整理后继续。");
-      return;
-    }
-    p.setData((data) => ({
-      ...data,
-      annotations: [
-        ...data.annotations,
-        {
-          id: crypto.randomUUID(),
-          partId: part.id,
-          measureIndex,
-          text: "",
-          resolved: false,
-        },
-      ],
-    }));
-    setAllNotes(false);
-    setTimeout(() => {
-      const fields = notes.current?.querySelectorAll("textarea");
-      fields?.[fields.length - 1]?.focus();
-    }, 0);
+  async function openSample(sample: Sample) {
+    const project = sampleProject(sample);
+    if (await p.replace(project, `${project.index.title} · 审校`)) setFilter("all");
   }
-  function updateNote(
-    id: string,
-    patch: { text?: string; resolved?: boolean },
-  ) {
-    p.setData((data) => ({
-      ...data,
-      annotations: data.annotations.map((note) =>
-        note.id === id ? { ...note, ...patch } : note,
-      ),
-    }));
-  }
-  function removeNote(id: string) {
-    if (!confirm("删除这条批注？")) return;
-    p.setData((data) => ({
-      ...data,
-      annotations: data.annotations.filter((note) => note.id !== id),
-    }));
-  }
-  async function exportReport() {
-    setExporting(true);
+
+  async function exportFile(kind: ExportKind) {
+    setExporting("正在导出…");
     p.setError("");
     try {
-      const report = await reviewReport(p.data, p.title);
-      download(
-        new Blob([JSON.stringify(report, null, 2)], {
-          type: "application/json",
-        }),
-        fileBase + "-review.json",
-      );
+      if (kind === "json") {
+        download(new Blob([JSON.stringify(reviewReport(data, p.title), null, 2)], { type: "application/json" }), `${fileBase}-批注.json`);
+      } else if (kind === "original") {
+        download(await loadOriginal(data.source.id), data.source.fileName);
+      } else if (kind === "musicxml") {
+        download(new Blob([await loadMusicXml(data.source.id)], { type: "application/vnd.recordare.musicxml+xml" }), `${fileBase}.musicxml`);
+      } else {
+        const handle = view.current;
+        if (!handle) throw new Error("请等待乐谱渲染完成。");
+        const engine = await import("../score/engine");
+        const exporter = await import("../score/exporter");
+        if (kind === "svg") download(new Blob([engine.stackSvg(handle.snapshot())], { type: "image/svg+xml" }), `${fileBase}.svg`);
+        else if (kind === "png") {
+          const pages = handle.snapshot();
+          const page = Math.min(handle.currentPage(), pages.length - 1);
+          download(await exporter.pagePng(pages[page]), `${fileBase}${pages.length > 1 ? `-第${page + 1}页` : ""}.png`);
+        } else {
+          const report = reviewReport(data, p.title);
+          let pages;
+          if (data.view.layout === "page" || data.view.layout === "landscape") pages = handle.snapshot();
+          else {
+            setExporting("正在按 A4 分页排版…");
+            const xml = await loadMusicXml(data.source.id);
+            pages = await engine.renderOffscreen(xml, { ...data.view, layout: "page" }, (container, instance) => {
+              engine.drawOverlay(container, instance, { ...overlay, selectedId: null });
+              return engine.snapshotPages(container);
+            });
+          }
+          download(await exporter.scorePdf(pages, report, setExporting), `${fileBase}-校样.pdf`);
+        }
+      }
     } catch (error) {
-      p.report(error);
+      p.report(error instanceof Error && /批注不能为空/.test(error.message) ? new Error("有空白批注：请填写内容或删除后再导出。") : error);
     } finally {
-      setExporting(false);
+      setExporting("");
     }
   }
-  function selectLocation(partId: string, measureIndex: number) {
-    p.setData((data) => ({ ...data, focus: { partId, measureIndex } }));
-    setAllNotes(false);
+
+  function fitWidth() {
+    const page = paper.current?.querySelector("svg");
+    const width = paper.current?.clientWidth;
+    if (!page || !width) return;
+    const base = page.getBoundingClientRect().width / data.view.zoom;
+    setView({ zoom: Math.round(Math.min(3, Math.max(0.3, (width - 40) / base)) * 20) / 20 });
   }
-  async function newScore() {
-    if (await p.fresh()) {
-      setAllNotes(false);
+
+  function paperKeys(event: React.KeyboardEvent<HTMLDivElement>) {
+    if ((event.target as Element).closest("input, textarea, select, button, .fb-mark")) return;
+    const handle = view.current;
+    if (!handle) return;
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      if (event.shiftKey) handle.stepMeasure(direction);
+      else handle.step(direction);
+    } else if (event.key === " ") {
+      event.preventDefault();
+      void handle.togglePlay();
+    } else if (event.key === "n" || event.key === "N") {
+      event.preventDefault();
+      addNote();
     }
   }
+  useEffect(() => {
+    const save = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void p.save();
+      }
+    };
+    window.addEventListener("keydown", save);
+    return () => window.removeEventListener("keydown", save);
+  }, [p.save]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const phase = p.autoState.phase;
+  const credits = [index.composer, index.arranger].filter(Boolean).join(" · ");
   return (
     <main className="score-app">
-      <a className="skip" href="#score-content">
-        跳到乐谱与批注
+      <a className="skip" href="#paper">
+        跳到谱面
       </a>
       <header className="masthead">
-        <div className="brand">
-          <span aria-hidden="true">𝄞</span>
-          <div>
-            <h1>谱校</h1>
-          </div>
+        <div className="brand" aria-hidden="true">
+          <span>𝄞</span>
+          <b>谱校</b>
         </div>
-        <section className="document-heading">
-          <div>
-            <label htmlFor="project-title">审校项目</label>
-            <input
-              id="project-title"
-              name="projectTitle"
-              autoComplete="off"
-              value={p.title}
-              maxLength={120}
-              disabled={locked}
-              onChange={(event) => p.setTitle(event.target.value)}
-            />
-            <p>
-              {info.composer || "未注明作者"} <span aria-hidden="true">/</span>{" "}
-              {info.parts.length} 个声部 · 最长 {info.measureCount} 小节
-            </p>
-          </div>
-          <div className="save-area">
-            <span role="status" data-autosave-phase={p.autoState.phase}>
-              {importing ? "正在检查并试排…" : p.autoState.message}
+        <FileMenu
+          items={p.items}
+          currentId={p.current?.id}
+          locked={locked}
+          conflict={phase === "conflict" && !!p.current}
+          onImport={() => upload.current?.click()}
+          onSample={(sample) => void openSample(sample)}
+          onOpen={(id) => void p.open(id)}
+          onOpenServer={() => p.current && void p.open(p.current.id)}
+          onExportDraft={p.exportDraft}
+          onDelete={() => void p.remove()}
+        />
+        <div className="document">
+          <label className="sr-only" htmlFor="review-title">
+            审校名称
+          </label>
+          <input id="review-title" name="reviewTitle" autoComplete="off" maxLength={120} value={p.title} disabled={p.loading} onChange={(event) => p.setTitle(event.target.value)} />
+          <p className="meta">
+            <span translate="no">{index.title}</span>
+            {index.subtitle ? <span translate="no"> · {index.subtitle}</span> : null}
+            {credits ? <span translate="no"> · {credits}</span> : null}
+            <span>
+              {" "}
+              · {index.parts.length} 声部 · {index.measures.length} 小节 · {data.source.kind === "mxl" ? "MXL" : "MusicXML"} {formatBytes(data.source.size)}
             </span>
-            <button
-              className="primary"
-              disabled={locked}
-              onClick={() => void p.save()}
-            >
-              立即保存
-            </button>
-          </div>
-        </section>{" "}
-        <details className="project-actions">
-          <summary>稿件</summary>
-          <div className="project-menu">
-            <button onClick={p.exportDraft}>导出恢复草稿</button>
-            {p.autoState.phase === "conflict" && p.current ? <button onClick={() => void p.open(p.current!.id)}>打开服务器版本</button> : null}
-            <ProjectPicker
-              items={p.items}
-              id={p.current?.id}
-              disabled={locked}
-              onOpen={(id) => void p.open(id)}
-            />
-            <button disabled={locked} onClick={() => void newScore()}>
-              新建审校
-            </button>
-            <button
-              disabled={locked || !p.current}
-              onClick={() => void p.remove()}
-            >
-              删除项目
-            </button>
-          </div>
-        </details>
-      </header>
-
-      <p className="mobile-save-status" role="status" data-autosave-phase={p.autoState.phase}>{p.autoState.message}</p>
-      <Notice error={p.error} notice={p.notice} />
-      <section className="file-toolbar" aria-label="乐谱文件操作">
-        <div>
-          <button disabled={locked} onClick={() => upload.current?.click()}>
-            {importing ? "正在导入…" : "导入乐谱"}
-          </button>
-          <span className="source-name" title={p.data.source.fileName}>
-            {p.data.source.fileName}
-          </span>
-          <small>UTF-8 MusicXML / MXL · 原文件 ≤200 KB</small>
+          </p>
         </div>
-        <div>
-          <button
-            disabled={locked || !svg}
-            onClick={() =>
-              download(
-                new Blob([svg], { type: "image/svg+xml" }),
-                fileBase + ".svg",
-              )
-            }
-          >
-            导出 SVG
-          </button>
-          <button
-            disabled={locked}
-            onClick={() =>
-              download(
-                new Blob([new Uint8Array(originalBytes(p.data.source))], {
-                  type:
-                    p.data.source.kind === "mxl"
-                      ? "application/vnd.recordare.musicxml"
-                      : "application/vnd.recordare.musicxml+xml",
-                }),
-                p.data.source.fileName,
-              )
-            }
-          >
-            导出原文件
-          </button>
-          {p.data.source.kind === "mxl" ? (
-            <button
-              disabled={locked}
-              onClick={() =>
-                download(
-                  new Blob([p.data.source.xml], {
-                    type: "application/vnd.recordare.musicxml+xml",
-                  }),
-                  fileBase + ".musicxml",
-                )
-              }
-            >
-              展开 MusicXML
+        <div className="save-state">
+          <span role="status" data-autosave-phase={phase}>
+            {working || p.autoState.message}
+          </span>
+          {phase === "offline" || phase === "conflict" ? (
+            <button type="button" className="quiet" onClick={() => void p.save()}>
+              重试保存
             </button>
           ) : null}
-          <button disabled={locked} onClick={() => void exportReport()}>
-            批注报告
-          </button>
         </div>
-      </section>
-      <section className="view-toolbar" aria-label="显示设置">
-        <label>
-          显示声部{" "}
-          <select
-            name="displayPart"
-            aria-label="显示声部"
-            value={p.data.partId}
-            disabled={locked}
-            onChange={(event) => {
-              setSvg("");
-              p.setData((data) => ({ ...data, partId: event.target.value }));
-            }}
-          >
-            <option value="">全谱</option>
-            {info.parts.map((part) => (
-              <option key={part.id} value={part.id}>
-                {part.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          版式{" "}
-          <select
-            aria-label="乐谱版式"
-            name="scoreLayout"
-            value={p.data.layout}
-            disabled={locked}
-            onChange={(event) => {
-              setSvg("");
-              p.setData((data) => ({
-                ...data,
-                layout: event.target.value as ScoreProject["layout"],
-              }));
-            }}
-          >
-            <option value="page">A4 分页</option>
-            <option value="continuous">连续长页</option>
-          </select>
-        </label>
-        <label>
-          比例{" "}
-          <select
-            aria-label="乐谱比例"
-            name="scoreZoom"
-            value={p.data.zoom}
-            disabled={locked}
-            onChange={(event) => {
-              setSvg("");
-              p.setData((data) => ({
-                ...data,
-                zoom: Number(event.target.value),
-              }));
-            }}
-          >
-            {[0.7, 0.85, 1, 1.15, 1.3].map((value) => (
-              <option key={value} value={value}>
-                {Math.round(value * 100)}%
-              </option>
-            ))}
-          </select>
-        </label>
-        <a className="mobile-notes-link" href="#review-notes">
-          小节批注 ↗
-        </a>
-        <p>校样 · 原谱与批注分离</p>
-      </section>
-      <div id="score-content" className="reading-layout" tabIndex={-1}>
-        <section className="paper-desk" aria-label="乐谱审阅区">
-          <div className="paper-caption">
-            <span>{info.title}</span>
-            <span>可横向滚动查看完整纸面</span>
+      </header>
+      <Notice
+        error={p.error}
+        notice={p.notice}
+        onDismiss={() => {
+          p.setError("");
+          p.setNotice("");
+        }}
+      />
+      <div className="desk">
+        <section className="paper-desk" aria-label="谱面">
+          <ScoreToolbar
+            view={data.view}
+            parts={index.parts}
+            ready={render.phase === "ready" && !!score.xml}
+            playing={!!playhead}
+            canPlay={typeof window.AudioContext === "function"}
+            exporting={exporting}
+            mxl={data.source.kind === "mxl"}
+            onView={setView}
+            onStep={(direction) => view.current?.step(direction)}
+            onMeasure={(direction) => view.current?.stepMeasure(direction)}
+            onPlay={() => void view.current?.togglePlay()}
+            onFit={fitWidth}
+            onExport={(kind) => void exportFile(kind)}
+          />
+          <div id="paper" className="paper-scroll" ref={paper} tabIndex={0} aria-label="谱面：点击定位，方向键移动光标，空格回放" onKeyDown={paperKeys}>
+            {score.error ? (
+              <div className="paper-state error" role="alert">
+                <p>{score.error}</p>
+                {score.missing ? (
+                  <>
+                    <small>选择原文件 {data.source.fileName} 即可找回；批注与设置保持不变。</small>
+                    <button type="button" className="primary" onClick={() => upload.current?.click()}>
+                      选择原文件…
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" onClick={() => setReload((value) => value + 1)}>
+                    重新读取
+                  </button>
+                )}
+              </div>
+            ) : render.phase !== "ready" || !score.xml ? (
+              <p className={`paper-state ${render.phase === "error" ? "error" : ""}`} role={render.phase === "error" ? "alert" : "status"}>
+                {score.xml ? render.message : "正在读取乐谱原件…"}
+              </p>
+            ) : null}
+            {score.xml && score.id === data.source.id ? (
+              <RenderBoundary>
+                <Suspense fallback={null}>
+                  <ScoreView
+                    key={p.documentKey + score.id}
+                    ref={view}
+                    xml={score.xml}
+                    view={data.view}
+                    overlay={overlay}
+                    onPick={onPick}
+                    onMarker={onMarker}
+                    onCursor={onCursor}
+                    onPlayhead={setPlayhead}
+                    onRender={setRender}
+                  />
+                </Suspense>
+              </RenderBoundary>
+            ) : null}
           </div>
-          <div
-            className="paper-scroll"
-            tabIndex={0}
-            aria-label="乐谱横向滚动区域"
-          >
-            <RenderBoundary>
-              <Suspense
-                fallback={
-                  <p className="render-state" role="status">
-                    正在准备乐谱引擎…
-                  </p>
-                }
-              >
-                <ScoreView
-                  xml={p.data.source.xml}
-                  partId={p.data.partId}
-                  layout={p.data.layout}
-                  zoom={p.data.zoom}
-                  onOutput={setSvg}
-                />
-              </Suspense>
-            </RenderBoundary>
-          </div>
+          <footer className="paper-foot">
+            <span>
+              {render.pages ? `${render.pages} 页 · ` : ""}
+              {index.notes.toLocaleString("zh-CN")} 个音符
+              {data.view.transpose ? ` · 已移调 ${data.view.transpose > 0 ? "+" : ""}${data.view.transpose}` : ""}
+            </span>
+            {index.rights ? <span translate="no">{index.rights}</span> : null}
+          </footer>
         </section>
-        <aside className="review-sidebar">
-          <MeasureIndex
-            parts={info.parts}
-            part={part}
-            measureIndex={measureIndex}
-            annotations={p.data.annotations}
-            allNotes={allNotes}
-            locked={locked}
-            onSelect={selectLocation}
-            onToggleAll={() => setAllNotes(!allNotes)}
-          />
-          <AnnotationBook
-            notesRef={notes}
-            allNotes={allNotes}
-            part={part}
-            measureIndex={measureIndex}
-            annotations={allNotes ? p.data.annotations : locationNotes}
-            parts={info.parts}
-            locked={locked}
-            addNote={addNote}
-            updateNote={updateNote}
-            removeNote={removeNote}
-            onSelect={selectLocation}
-          />
-        </aside>
+        <Ledger
+          index={index}
+          annotations={numbered}
+          focus={data.focus}
+          playhead={playhead}
+          selectedId={selectedId}
+          filter={filter}
+          locked={locked}
+          listRef={list}
+          onFocus={(focus) => {
+            setSelectedId(null);
+            setFocus(focus);
+            requestAnimationFrame(() => view.current?.revealFocus());
+          }}
+          onAdd={addNote}
+          onSelect={select}
+          onUpdate={updateNote}
+          onRemove={removeNote}
+          onFilter={setFilter}
+        />
       </div>
-      <footer className="app-footer">
-        原件与批注保存在当前工作空间 · 示例旋律为本项目原创
-      </footer>
       <input
         type="file"
         ref={upload}
         className="sr-only"
+        tabIndex={-1}
         aria-label="选择乐谱文件"
-        accept=".musicxml,.xml,.mxl"
-        disabled={locked}
+        accept=".musicxml,.xml,.mxl,application/vnd.recordare.musicxml,application/vnd.recordare.musicxml+xml"
         onChange={(event) => {
           const file = event.target.files?.[0];
           event.target.value = "";

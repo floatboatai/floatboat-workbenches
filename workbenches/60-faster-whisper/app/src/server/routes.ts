@@ -1,17 +1,34 @@
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { isRecord } from "../contracts/project.ts";
 import { validateTranscript } from "../contracts/transcript.ts";
+import { sampleTranscript } from "../contracts/sample.ts";
+import { SAMPLE_AUDIO_BASE64 } from "./sample-audio.ts";
 import { jobId, jobInput } from "../contracts/job.ts";
 import { createStore, StoreError } from "./store.ts";
 import { registerAutosaveRoutes } from "./autosave.ts";
 import { createAudioFiles, detectMime } from "./files.ts";
 import { createJobs } from "./jobs.ts";
-export function registerRoutes(app: WorkbenchServer) {
+export async function registerRoutes(app: WorkbenchServer) {
   const store = createStore(app.database, validateTranscript),
-    files = createAudioFiles((p, w) =>
+    base = createAudioFiles((p, w) =>
       app.resources.path("audio-originals", p, w ? "write" : "read"),
-    ),
-    jobs = createJobs(app.database, files.read);
+    );
+  const sampleBytes = Buffer.from(SAMPLE_AUDIO_BASE64, "base64"),
+    sampleId = await base.ensure(sampleBytes);
+  if (sampleId !== sampleTranscript.source?.id) throw new Error("示例音频与示例字幕不一致。");
+  // The bundled sample is rewritten on demand if the data directory was cleaned while running.
+  const files = {
+    ...base,
+    read: async (id: string) => {
+      if (id === sampleId) await base.ensure(sampleBytes);
+      return base.read(id);
+    },
+    verify: async (source: Parameters<typeof base.verify>[0]) => {
+      if (source?.id === sampleId) await base.ensure(sampleBytes);
+      return base.verify(source);
+    },
+  };
+  const jobs = createJobs(app.database, files.read);
   registerAutosaveRoutes(app, validateTranscript, undefined, {
     verify: (data) => files.verify(data.source),
   });

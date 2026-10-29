@@ -68,7 +68,7 @@ test("durable lifecycle contract: persist before POST, duplicate operation never
     assert.equal(calls, 1);
     assert.deepEqual(await jobs.submit(cmd), first);
     assert.equal(calls, 1);
-    cmd.deck.slides[0].title = "Changed";
+    cmd.deck.outline[0].title = "Changed";
     await assert.rejects(() => jobs.submit(cmd), /不同/);
     assert.match(JSON.stringify(jobs.snapshot(id)), /树荫/);
     const completed = await jobs.refresh(id);

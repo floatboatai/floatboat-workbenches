@@ -1,88 +1,342 @@
 {
-  "at": "2026-10-28T04:01:34.312Z",
-  "actualOfficialTools": true,
-  "uploadAndPlayback": true,
-  "saveReload": true,
-  "incompleteTimeRecovery": true,
-  "rawJsonRecovery": true,
-  "approval": true,
-  "actualMp4Download": true,
-  "taskReload": true,
-  "portableIncludesTwoOriginals": true,
-  "importCreatesNewWithoutReplay": true,
-  "mobileNoOverflow": true,
-  "pageErrors": [],
-  "delayedEdit": true,
-  "lostReceipt": true,
-  "invalidDurationRestore": true,
-  "optimisticConflict": true,
-  "pendingAndRaceRegression": {
-    "at": "2026-10-28T04:06:30.819Z",
-    "postResponseLostAndListUnavailable": true,
-    "pendingReload": true,
-    "originalOperationAndSnapshotRetried": true,
-    "onlyOneServerJob": true,
-    "navigationAndImportGuard": true,
-    "staleListCannotRevertCompleted": true,
+  "at": "2026-10-29T12:04:51.439591+00:00",
+  "version": "0.9.0",
+  "status": "local-verified",
+  "runtime": {
+    "node": "22.23.4",
+    "pnpm": "10.22.0",
+    "chrome": "149.0.7827.55",
+    "browser": "isolated headless Chrome for Testing; desktop 1440x900 and touch-emulated 375x812",
+    "server": "isolated database with hostConnection null; no Host discovery"
+  },
+  "checks": {
+    "prepare": "passed",
+    "workbenchCheck": "passed",
+    "applicationTests": {
+      "passed": 25,
+      "failed": 0
+    },
+    "serviceTests": {
+      "passed": 4,
+      "failed": 0
+    },
+    "package": "passed",
+    "diffCheck": "passed",
+    "warnings": [
+      "App.tsx and autosave-client.ts large module advisories"
+    ]
+  },
+  "hostLlm": "not-called",
+  "realHost": "unverified",
+  "hostImport": "unverified",
+  "upstreamServiceExecution": "not-repeated; contract/storage and offline UX only",
+  "desktop": {
+    "at": "2026-10-29T11:41:10.462Z",
+    "base": "http://127.0.0.1:60540/",
+    "firstOpen": {
+      "clips": 13,
+      "assets": 6,
+      "litSamples": 912,
+      "fetchFailed": false,
+      "title": "海边的一天 · 粗剪"
+    },
+    "serviceOffline": {
+      "state": "未连接 OpenMontage 服务（http://127.0.0.1:1）。浏览器导出不受影响。重新检查",
+      "command": "cd workbenches/67-openmontage/service && pnpm setup && pnpm start",
+      "reason": "「夜色灯塔.jpg」不是20MB以内的MP4视频，OpenMontage服务暂不接收。",
+      "recheck": true
+    },
+    "dragTrimSplitUndo": {
+      "moved": "浪花近景.mp4，起点 00:07:07，时长 6.00 秒",
+      "trimmed": "夜色灯塔.jpg，起点 00:18:06，时长 4.81 秒",
+      "undone": [
+        "海上日出.mp4，起点 00:00:00，时长 7.00 秒",
+        "浪花近景.mp4，起点 00:06:00，时长 6.00 秒",
+        "黄昏港城.mp4，起点 00:11:06，时长 7.00 秒",
+        "夜色灯塔.jpg，起点 00:18:06，时长 6.00 秒"
+      ],
+      "splitCount": 5,
+      "afterUndo": 4
+    },
+    "importRealFiles": {
+      "assets": [
+        "big-1080p.mp430.0 秒 · 1920×1080 · 29.2 MB",
+        "clip.webm8.0 秒 · 1280×720 · 896 KB",
+        "voice.mp310.0 秒 · 157 KB",
+        "chime.wav3.0 秒 · 258 KB",
+        "card.png静帧 · 1600×900 · 71 KB"
+      ],
+      "notices": [
+        "broken.mp4：文件中没有可用的画面或声音。知道了"
+      ],
+      "subtitleClips": 6
+    },
+    "browserExport": {
+      "seconds": 12.007,
+      "shelf": [
+        "海边的一天 · 粗剪 · 2026-10-29 04.41.mp410/29/2026, 4:41:27 AM · 1280×720 · 58.2 秒 · 72.1 MB · 本机导出回看下载放入素材库"
+      ],
+      "href": "/api/media/c7fea5716b7e06db2a3f678e4253707a109d604aa6be9a3a0429b6180a621ed3?download=%E6%B5%B7%E8%BE%B9%E7%9A%84%E4%B8%80%E5%A4%A9%20%C2%B7%20%E7%B2%97%E5%89%AA%20%C2%B7%202026-10-29%2004.41.mp4",
+      "suggested": "海边的一天 · 粗剪 · 2026-10-29 04.41.mp4",
+      "head": "ftyp",
+      "savedAs": "/Users/zhangqinzhong/IdeaProjects/floatboat/archive/2026-10-29-workbench-depth/openmontage/accept-export.mp4"
+    },
+    "exportCancel": {
+      "notice": "已取消导出。知道了",
+      "outputs": 1
+    },
+    "projectRoundTrip": {
+      "bytes": 107640915,
+      "head": "FBMONTAGE2\n",
+      "before": 1,
+      "after": 2,
+      "notice": "已导入为新的影片。知道了",
+      "clips": 17
+    },
+    "autosaveDelayed": {
+      "held": 2,
+      "afterReload": "海边的一天 · 二剪 AB",
+      "state": "已自动保存"
+    },
+    "autosaveLostReceipt": {
+      "mutationIds": [
+        "367fe804-a986-48ce-95f0-2a788fa997a4",
+        "367fe804-a986-48ce-95f0-2a788fa997a4"
+      ],
+      "sameMutation": true,
+      "before": [
+        3,
+        4
+      ],
+      "projects": [
+        "海边的一天 · 二剪 ABC r4",
+        "海边的一天 · 粗剪 r4"
+      ],
+      "state": "已自动保存"
+    },
+    "invalidDraftRestore": {
+      "error": "JSON 语法错误：Bad control character in string literal in JSON at position 300 (line 13 column 8)",
+      "draftState": "草稿已自动保存，待完善输入。 名称需要 1–120 个字符。",
+      "restored": true,
+      "titleEmpty": true,
+      "finalState": "已自动保存"
+    },
+    "menuKeyboard": {
+      "focused": "menuitem",
+      "back": "menu-button",
+      "open": false
+    },
+    "screenshot": {
+      "path": "/Users/zhangqinzhong/IdeaProjects/floatboat/floatboat-workbenches-openmontage/docs/screenshots/openmontage.png"
+    },
+    "mobile": {
+      "overflow": 0,
+      "libraryVisible": true,
+      "inspector": "片段",
+      "menuVisible": true,
+      "dialog": true,
+      "dialogOverflow": 0
+    },
+    "blockedRequests": [],
+    "failures": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_RESET @ http://127.0.0.1:60540/api/autosave"
+    ],
     "pageErrors": []
   },
-  "concurrentProduction": {
-    "sameOperationConcurrent": true,
-    "oneCreatedAt": true,
-    "actualOfficialTools": true,
-    "state": "completed",
-    "at": "2026-10-28T04:15:26.491Z"
+  "regressions": {
+    "at": "2026-10-29T11:52:21.741Z",
+    "browser": "149.0.7827.55",
+    "checks": {
+      "navigationDuringSave": {
+        "editLockedDuringSwitch": true,
+        "immediateNewTitlePersisted": true
+      },
+      "numericDraftRestore": {
+        "invalid": "6e",
+        "modelBefore": 7,
+        "restoredAfterReload": true,
+        "recoveryCreatesNew": true,
+        "applied": 6.5
+      },
+      "optimisticConflict": {
+        "reloadKeepsConflict": true,
+        "serverNotOverwritten": true,
+        "localRecoveryExport": true,
+        "serverRevision": 4
+      },
+      "mobileEmptyAndRealInputs": {
+        "blankStarted": true,
+        "assets": [
+          "clip.webm",
+          "chime.wav",
+          "card.png"
+        ],
+        "clips": 6,
+        "playbackTime": "00:00:22",
+        "reload": true,
+        "overflow": 0
+      },
+      "mobileRealExport": {
+        "filename": "mobile-export.mp4",
+        "bytes": 12072812,
+        "playable": true,
+        "width": 854,
+        "height": 480,
+        "dialogOverflow": 0
+      },
+      "mobileProjectAndRecovery": {
+        "portableNewId": true,
+        "sameTimelineAndOutputs": true,
+        "recoveryNewId": true,
+        "recentFilmReopen": true,
+        "menuFocusReturn": true
+      },
+      "missingMediaDraft": {
+        "state": "草稿已自动保存，待完善输入。 素材文件缺失，请重新导入该素材或导入含素材的工程。",
+        "invalidModelNotCommitted": true,
+        "draftSurvivesReload": true,
+        "restoredOriginalMedia": true
+      }
+    },
+    "pageErrors": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:60540/api/media/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff#t=1",
+      "Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:60540/api/media/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:60540/api/media/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff#t=1",
+      "Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:60540/api/media/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    ],
+    "blockedRequests": [],
+    "passed": true
   },
-  "version": "0.5.0",
-  "applicationTests": 9,
-  "serviceTests": 4,
-  "upstreamCommit": "e01dbf433f46eeb91d39bf905e194162921019a3",
-  "actualRender": {
-    "codec": "h264",
-    "width": 1280,
-    "height": 720,
-    "fps": 24,
-    "duration": 4
+  "finalUi": {
+    "at": "2026-10-29T12:00:42.975Z",
+    "errors": [],
+    "externalRequests": [],
+    "restartPreservedProjects": 26,
+    "sampleMatchesSource": true,
+    "mobileShelfSingleColumn": "293px",
+    "overflow": 0,
+    "passed": true
   },
-  "hostLlm": "not-used",
-  "hostImport": "unverified",
+  "renderVerification": {
+    "desktop": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1280,
+          "height": 720,
+          "r_frame_rate": "30/1",
+          "duration": "58.200000"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0",
+          "duration": "58.282667"
+        }
+      ],
+      "format": {
+        "duration": "58.282667",
+        "size": "75561025"
+      }
+    },
+    "mobile": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 854,
+          "height": 480,
+          "r_frame_rate": "30/1",
+          "duration": "12.033333"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "48000",
+          "channels": 2,
+          "r_frame_rate": "0/0",
+          "duration": "12.074667"
+        }
+      ],
+      "format": {
+        "duration": "12.074667",
+        "size": "12072812"
+      }
+    },
+    "desktopAudioDb": {
+      "mean": -23.2,
+      "max": -11.2
+    },
+    "frameContactSheet": "export-final-grid.png",
+    "files": {
+      "accept-export.mp4": "c7fea5716b7e06db2a3f678e4253707a109d604aa6be9a3a0429b6180a621ed3",
+      "mobile-export.mp4": "b3452e8a617ee1db7ef920c2de6c247c248df76dc05b8dbad152ca4fec6da26a"
+    }
+  },
+  "structure": {
+    "status": "passed",
+    "comparisonScreenshots": [
+      "hyperframes.png",
+      "faster-whisper.png"
+    ],
+    "details": "app/DESIGN.md"
+  },
+  "pollutionCheck": {
+    "sampleMatchesSource": true,
+    "sourceOsmdTermsFound": false,
+    "screenshotAndExportFramesReviewed": true,
+    "sharedBrowserUsed": false
+  },
   "screenshot": {
     "path": "../../docs/screenshots/openmontage.png",
     "dimensions": [
       1440,
-      1100
+      900
     ],
-    "sha256": "5a11fac21433b61856c62cdb9707fe5e08be448d4d83669376aa534489050bbe"
+    "sha256": "0b6a061503e92f755c0a965df7afd2d9a3c58d82d3d931cb5f000e10579a3ca5"
   },
-  "recoveryImportRegression": {
-    "at": "2026-10-28T04:36:28.014Z",
-    "cacheSnapshotReimport": true,
-    "newProject": true,
-    "completeEditAndUnappliedDraft": true
-  },
-  "navigationTransitionLocksEditing": true,
   "package": {
-    "name": "openmontage-studio-0.5.0-final.fbworkbench",
-    "sha256": "d77e2564d7c8b371245f61c873820ddae0096ee88d38bba32ee8c0ba21ce3903",
-    "files": 40,
-    "crcValid": true,
-    "licenseIncluded": true,
-    "businessDataExcluded": true
-  },
-  "integratedPackage": {
-    "directory": "workbenches/67-openmontage",
-    "version": "0.5.0",
-    "appId": "workbench.289e934c-fb6d-4354-a757-3f8d81327fd8",
-    "filename": "67-openmontage-0.5.0.fbworkbench",
-    "bytes": 66696,
-    "sha256": "135cda916b875437deb1ac7ec9d53b1e34b8defba6b68db4c9bd70a711aa599b",
+    "at": "2026-10-29T12:03:49.912021+00:00",
+    "filename": "openmontage-studio-0.9.0.fbworkbench",
+    "bytes": 2762775,
+    "sha256": "b32553321af3cf5424a78f8569cd47bd26733afbb3aaa9f8243f3aa3d5fa7a92",
     "crc": "passed",
-    "sourceFilesMatched": 37,
-    "assetFilesMatched": 2,
+    "transferHashesVerified": 71,
+    "sourceFilesMatched": 61,
+    "assetFilesMatched": 9,
+    "manifest": "Only normal resource paths/defaults differ",
+    "documents": {
+      "REQUIREMENTS.md": "ccbafa12cddc67e68ebce1b8a5a3689f9397ea8b4a33f5f9a27bdcfad8b5b341",
+      "DESIGN.md": "8f95d8f4f6b06522cf05981ed9ae5fe6709b30c59fd8313c1d9db60449642f2f",
+      "ENGINEERING.md": "92c3c41a252a28ea1b5b5661cd16255b45f5c9ce505acbff75028f81cd9f308f"
+    },
     "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-openmontage/openmontage-studio-0.5.0.fbworkbench",
-    "introductionFile": "workbench-openmontage/presentation.json",
-    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
+    "nodeModulesAndGeneratedFiles": "excluded",
+    "licensesIncluded": [
+      "OpenMontage-LICENSE.txt",
+      "mediabunny-LICENSE.txt"
+    ],
+    "hostImport": "unverified"
+  },
+  "evidenceDirectory": "archive/2026-10-29-workbench-depth/openmontage",
+  "sharedToolingFinding": "Run check/test sequentially: concurrent SDK generation can race with ENOENT unlink. Shared files unchanged.",
+  "scope": {
+    "onlyProjectAndScreenshot": true,
+    "feishu": "unchanged by explicit instruction",
+    "pushed": false,
+    "sharedCatalogReadmeWiki": "unchanged"
   }
 }

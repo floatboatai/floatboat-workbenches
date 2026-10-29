@@ -78,6 +78,31 @@
 | Oasis Editor | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/oasis-editor.png" alt="Oasis Editor 改版前" width="360"> | <img src="screenshots/oasis-editor.png" alt="Oasis Editor 0.9.0" width="360"> |
 | CircuitJS | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/circuitjs.png" alt="CircuitJS 改版前" width="360"> | <img src="screenshots/circuitjs.png" alt="CircuitJS 0.9.0" width="360"> |
 
+## 第3波 · 本地工作流与可选服务
+
+第3波10项已完成本地功能验收与打包，纳入本地整合分支。第4–6波的30项尚未开展。本地验收与商店上架、客户端导入分别记录。
+
+| 工作台 | 0.9.0 能力 | 应用测试 | 验收记录 |
+| --- | --- | ---: | --- |
+| OpenSheetMusicDisplay | MusicXML/MXL 原件库、光标与回放、移调与声部切换、谱面批注联动、PDF/PNG/SVG 导出 | 17 | [验收](../workbenches/55-opensheetmusicdisplay/app/ACCEPTANCE.md) |
+| LangExtract | 多文档原文标注、类别与示例配方、区间对齐、审阅统计、JSONL/CSV/可视化 HTML 导出 | 34 | [验收](../workbenches/56-langextract/ACCEPTANCE.md) |
+| Docling | 本地 PDF/DOCX/HTML/Markdown 转换、原页与结构块框选、文本表格校订、Docling JSON/Markdown/HTML/CSV 导出 | 35 | [验收](../workbenches/57-docling/app/ACCEPTANCE.md) |
+| Promptfoo | 用例×提示版本×provider 评测矩阵、本机回放与脚本、常用断言、运行对比、发布判断、配置和结果导入导出 | 25 | [验收](../workbenches/59-promptfoo/app/ACCEPTANCE.md) |
+| faster-whisper | 示例音频与逐词转写、波形入出点、拆分合并、查找替换、说话人标注、SRT/VTT/TXT/JSON 导出 | 30 | [验收](../workbenches/60-faster-whisper/ACCEPTANCE.md) |
+| Presenton | 资料导入、大纲编辑、本地幻灯片生成、11 种版式与 5 套主题、原生图表 PPTX 与 PDF 导出 | 49 | [验收](../workbenches/61-presenton/app/ACCEPTANCE.md) |
+| Graphify | 多文件与文件夹知识抽取、Louvain 社区、力导向图、原文定位、搜索路径、GraphML/交互 HTML/完整项目导出 | 26 | [验收](../workbenches/63-graphify/app/ACCEPTANCE.md) |
+| OpenMontage | 多轨视频图片音频字幕、移动修剪分割、转场混音、浏览器 MP4/WebM 成片与完整工程导出 | 25 | [验收](../workbenches/67-openmontage/app/ACCEPTANCE.md) |
+| DeerFlow | 问题与可确认计划、本地检索、引用联动、来源核验、报告编辑、Markdown/HTML 导出及可选 SSE 研究服务 | 53 | [验收](../workbenches/68-deerflow/ACCEPTANCE.md) |
+| MiroFish | 资料与实体图谱、人设编辑、可复现规则推演、事件注入、立场时间线、报告与完整推演文件导出 | 35 | [验收](../workbenches/69-mirofish/app/ACCEPTANCE.md) |
+
+本轮共 **329 项应用测试**通过，全部已接收项的 check、package 通过。最初五项由整合者独立重跑 check/test；剩余项由接手实现者在各自工作树完成检查与独立浏览器验收。整合按项目逐一比对最终提交，未重复计算解包后重跑或服务测试。
+
+1440/375 浏览器主流程、自动保存和失败处理详见逐项记录。最初五项的浏览器运行来自本日原验收记录，整合者复核最终截图，未将历史运行记为本次重跑；后五项进行了本次独立浏览器验收。Docling、Graphify 另在解包副本运行测试。OpenMontage 实际导出桌面与窄屏成片，以 ffprobe 核对编码、尺寸和音轨。功能验收与结构对照分别记录，部分项目的正式跨工作台结构审查仍为 pending。
+
+安装包逐文件核对源码和最终应用文档。OSMD 清理文件尾部空行后重新打包；DeerFlow 原包携带旧版应用说明，已在最终文档完成后重新打包并更新哈希。manifest 资源路径按模板规则规范化。未推送、未合并 main、未发布商店。
+
+真实 Floatboat Host/LLM 未调用，模型通道仅使用 mock；faster-whisper 的 small 中文 CPU 实测沿用本日原验收记录。外部服务范围以逐项验收为准。共享自动保存的约900KB项目上限仍存在；部分大文件通过独立内容库保存，不能把输入上限等同完整项目可保存容量。
+
 ## 新增 · ComfyUI（#79）
 
 基于 MIT 的 `@comfyorg/litegraph` 0.17.2 节点画布，经 ComfyUI 官方 HTTP/WebSocket API 连接用户自有服务；工作台为 MIT，不含 ComfyUI 或 ComfyUI_frontend 的 GPL 代码与模型权重。

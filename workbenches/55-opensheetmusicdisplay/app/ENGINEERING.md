@@ -1,31 +1,27 @@
-# 乐谱审校工程
+# 乐谱审校工程（0.9.0）
 
-固定 Node 22、React 19.2.3、严格 TypeScript、官方 Vite profile。root/app 精确依赖与锁一致：opensheetmusicdisplay 2.2.1、fast-xml-parser 5.11.2、jszip 3.10.1。覆盖规则移除 OSMD 的 gl 原生可选依赖，仅使用发布的浏览器构建；没有更改 SDK、CSP 或 Vite。
+固定 Node 22、React 19.2.3、严格 TypeScript、官方 Vite profile。root/app 精确依赖与锁一致：opensheetmusicdisplay 2.2.1、fast-xml-parser 5.11.2、jszip 3.10.1、lucide-react 0.562.0。覆盖规则移除 OSMD 的 gl 原生可选依赖。0.9.0 没有新增依赖：PDF 由自带的最小写入器生成，回放用浏览器 Web Audio。
 
-## 模块与数据
+## 模块
 
-- contracts/musicxml 验证 XML 语法、资源声明、深度/规模，读取 score-partwise 声部/小节索引。
-- contracts/archive 在 JSZip 解压前检查 ZIP 中央目录；再用固定版本实际存在的 internalStream 接口做实际输出限额。上游类型缺少该方法，因此仅对已核实的方法作窄类型补充并运行时检查，不关闭类型检查。
-- contracts/domain 验证原文件编码、XML 对应关系、显示参数、审阅位置和批注锚点；archive.verifySource 在 POST/PUT 时重新解压 MXL 核实原件与渲染 XML 一致。
-- 原件 base64 和安全解析后的 XML 保存在项目 payload；限制足够小，不需要临时 blob URL 或外部路径。原件下载解码完整字节，报告记录 SHA-256。
-- server/store 使用参数化 SQL，revision 防止旧窗口覆盖新版本。迁移 0002_projects.sql 保持不变，测试使用内存 SQLite。
-- UI/App 管理工作流程，MeasureIndex 与 AnnotationBook 分离导航和批注；ScoreView memo 避免批注输入重建乐谱。OSMD 动态加载，关闭自动 resize，只在明确设置或文件变化后渲染。每次 load 绑定独立 DOM 容器；异步完成时检查活动状态，卸载清理自己的实例。
-- SVG 导出将所有谱页按真实尺寸串接成独立 SVG，白底、音符路径保留，不依赖工作台 CSS。报告 JSON 与源文件分开导出。
+- `contracts/musicxml.ts`：BOM/声明编码解码；安全检查（接受标准 DOCTYPE，拒绝内部子集/实体/样式表）；fast-xml-parser 解析出声部、谱表数、小节号、拍号延续、著录（work-title / movement-title / creator / credit-words / rights）与警告。8 MB 文件约 0.7 s。
+- `contracts/archive.ts`：MXL 中央目录检查、按真实输出字节计数的流式解压（JSZip `internalStream`，上游类型缺此方法，窄类型补充并运行时检查），`readSource()` 统一入口。
+- `contracts/domain.ts`：模型 `{source: SourceRef, index, view, annotations, focus}` 与逐字段校验；`restoreScoreDraft` 只放宽空白正文。枚举值用 `Object.hasOwn` 防原型键。
+- `contracts/samples.ts` + `score-builder.ts`：记谱串生成标准 MusicXML 并逐小节检查时值；`sha256.ts` 为种子同步生成与服务端一致的原件标识。
+- `contracts/report.ts`（批注 JSON v2）、`contracts/pdf.ts`（每页一张 DCTDecode JPEG 的 PDF 1.4，UTF-16BE 标题）。
+- `server/sources.ts`：`score_sources` / `score_source_parts`（迁移 0004）。768 KB 原始字节一块（base64 后约 1 MB，低于运行时 2 MB 请求上限）；finish 时校验块序、长度与 SHA-256，解析失败 422；MXL 解压结果与索引一并入库；`/api/sources/:id/musicxml` 与 `/original` 以 immutable 缓存返回。内置示例启动时写入。`verify(project)` 在自动保存事务之前核对原件存在且索引一致。
+- `server/legacy.ts`：0.3.x 项目与自动保存草稿（原件 base64 内嵌）启动时迁入原件库并改写结构，项目 revision +1，草稿与回执同步；只处理一次。
+- `score/engine.ts`：OSMD 选项映射（版式、小节号、标题、声部名、光标、关闭自动合并多小节休止以保持小节一一对应）、移调、几何查询（GraphicalMeasure 外框、拍位横坐标、点击命中最近谱表与音符）、光标定位、在每页 SVG 内绘制批注层、页面快照与拼接、屏幕外渲染。
+- `score/ScoreView.tsx`：持有 OSMD 实例；原件变化时新建，显示设置变化时同实例重排，批注/位置变化只重绘批注层。`score/playback.ts`：基于光标迭代器（clone 预读下一时值）的 Web Audio 调度。`score/exporter.ts`：SVG→canvas（data: URL，符合 CSP）→ PNG/JPEG，批注清单页用 canvas 排版中文后进 PDF。
+- UI：`App.tsx` 状态与流程，`FileMenu`（乐谱库）、`ScoreToolbar`、`Ledger`、`Menu`（Escape/外部点击关闭并还焦点）、`sources.ts`（分块上传、MusicXML 缓存两份）。
 
-## 边界与恢复
+## 边界
 
-MusicXML 不是任意 XML 查看器；不加载外部 DTD、实体、图片、链接或脚本。MXL 不支持分卷/ZIP64/加密，只处理首个 rootfile；不从文件中的 URL 发起网络请求。输入必须先通过业务校验与离屏真实试渲染，才替换 React 项目状态。
-
-所有会修改数据的控件在导入/保存/打开期间禁用。失败保留原文、批注；保存成功但列表刷新失败单独提示。空白批注不会保存，项目原件和批注在同一版本中提交。显示声部与批注声部是不同概念，批注绑定原始声部 ID + 小节序号，展示小节号单独记录，以支持弱起/重复编号。
+- 批注坐标存在 SVG 用户坐标里（OSMD 单位 × 10），因此缩放、导出与打印保持对齐；在“无限滚动/单行横卷”版式下导出 PDF 时另做一次屏幕外 A4 排版。
+- 回放为简单合成音色，不区分乐器、不演奏装饰音/力度变化；反复记号按 OSMD 迭代器展开。
+- OSMD 排版在主线程执行。本机 Chrome 从选择文件到出图：12 声部 240 小节的 MXL 约 2 s（31 页），8 声部 1200 小节的 5.4 MB MusicXML 约 5 s（76 页）。
+- 未引用的原件保留在原件库，暂无回收。
 
 ## 验证
 
-pnpm workbench:check → pnpm test → pnpm dev Chrome 主流程 → pnpm package。测试覆盖 XML/实体/外部资源、ZIP 路径/大小/伪报长度、原件一致性、批注锚点、报告哈希、SQLite 恢复和409冲突。浏览器覆盖真实文件与导出、刷新恢复、暗色/375px/reduced-motion、无失败资源与CSP错误。没有音频、模型或其他 Host 能力；客户端导入安装不由本地预览代替。
-
-scripts/collect-licenses.mjs 可重新生成生产依赖许可证汇编；它是维护脚本，不参与工作台运行或自定义编译。
-
-## 自动保存与工作草稿
-
-新增 0003_autosave.sql，旧迁移保持不变。autosave-server 在事务中保存完整工作副本，并仅将通过业务验证的内容写入 projects；documentId/mutationId 支持丢失响应后的幂等重试。客户端串行提交、防抖、IndexedDB 回退，documentKey/loadEpoch 仅在文档切换时更新。保存返回时不覆盖期间继续输入的内容。草稿状态与正式内容状态明确区分。
-
-音乐原件通过 verifySource 在事务之前进行异步字节对应校验；恢复器仅放宽空批注，XML/ZIP 安全和锚点检查保持。
+`pnpm workbench:check` → `pnpm test`（17 项）→ `pnpm dev` 真实浏览器（1440 / 375、暗色）→ `pnpm package`。没有 Host 能力调用；客户端导入安装不由本地预览代替。scripts/collect-licenses.mjs 可重新生成生产依赖许可证汇编。

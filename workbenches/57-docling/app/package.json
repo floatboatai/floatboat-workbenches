@@ -1,7 +1,7 @@
 {
   "name": "floatboat-docling-app",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "start": "node --enable-source-maps dist/server/index.mjs",
@@ -11,7 +11,11 @@
     "node": ">=22.16.0"
   },
   "dependencies": {
+    "fflate": "0.8.2",
     "lucide-react": "0.562.0",
+    "marked": "16.4.2",
+    "parse5": "7.3.0",
+    "pdfjs-dist": "6.4.299",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

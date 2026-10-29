@@ -1,43 +1,30 @@
-# 乐谱审校室 · OpenSheetMusicDisplay
+# 乐谱审校台 · OpenSheetMusicDisplay
 
-当前版本：**0.3.0**（自动保存与产品化布局）。
-导入已有 MusicXML/MXL，在真实乐谱上核对声部与版式，按小节留下审校记录。原文件、显示设置、当前审阅位置和批注一起保存，刷新后可重新打开。支持导出当前谱面 SVG、原始文件、MXL 中的 MusicXML，以及带原件 SHA-256 的批注报告 JSON。
+当前版本：**0.9.0**。导入制谱软件导出的 MusicXML / MXL（最大 32 MB），在 OpenSheetMusicDisplay 渲染的真实谱面上逐音移动光标、回放、移调、切换声部与版式；在音符或小节上留下编号批注，批注直接画在谱面上并与右侧账本联动；导出带批注的 PDF 校样、PNG、SVG 与批注 JSON。原文件逐字节保留。
 
-软件用于乐谱审阅，不编辑音符、不提供音频播放。内置《Morning Lines》为本项目原创双声部示例，没有复制第三方乐谱。
+![乐谱审校台](../../docs/screenshots/opensheetmusicdisplay.png)
 
 ## 使用
 
-在总仓库执行 `pnpm workbench prepare opensheetmusicdisplay`，进入本目录执行：
+在总仓库执行 `pnpm workbench prepare opensheetmusicdisplay`，进入本目录：
 
 ```sh
-pnpm dev
+pnpm dev               # 打开打印出的完整地址
 pnpm workbench:check
 pnpm test
 pnpm package
 ```
 
-打开预览命令打印的完整地址。新建或导入乐谱，选择显示声部；在小节索引中选择批注声部与小节，再添加记录、标记已核对。修改后自动保存，可从顶部稿件列表重新打开。窄屏使用小节选择和“转到批注区”，谱纸在独立区域横向滚动。
-
-`artifacts/opensheetmusicdisplay-studio-0.3.0.fbworkbench` 可通过 **Floatboat → My → Workbenches → Import workbench** 导入。源包不包含预览数据库；客户端安装流程尚未验收。
+首开即是示例《小步舞曲 G 大调》。在谱面上点击音符定位（蓝色光标跟随），「在此添加批注」写下问题并选类别；←/→ 逐音移动光标、Shift+←/→ 逐小节、空格回放、N 添加批注。「乐谱库」菜单负责导入、示例、最近的审校、恢复草稿与删除；修改自动保存。
 
 ## 支持范围
 
-- UTF-8、score-partwise MusicXML；原文件 1–200 KB，XML 内容不超过 180 KB。
-- 1–12 个声部，每声部 1–200 小节，总计 1–4000 个音符或休止符；最多 100 条批注，每条 1000 字符。
-- 不接受 DOCTYPE、ENTITY、外部图片/链接/脚本及样式处理指令；带外部 DTD 的文件需先在制谱软件中导出不含声明的版本。不会访问外部 DTD 或网络字体。
-- MXL 使用 META-INF/container.xml 的第一个 rootfile；只支持普通非加密 ZIP（Stored/Deflate），最多 32 个条目，声明解压总量不超过 500 KB，每条目不超过 180 KB。另对实际解压流限额，拒绝路径穿越、重复条目及 ZIP64。
-- SVG 对应当前显示声部、版式和比例，批注作为报告单独导出。源文件下载保留上传字节；报告是审校清单，不是完整项目备份或 MusicXML 制谱文件。
+- `.musicxml` / `.xml`（UTF-8、UTF-16 等）与 `.mxl`；原文件 ≤ 32 MB，解压后的 MusicXML ≤ 64 MB；≤ 64 声部、每声部 ≤ 5000 小节、≤ 40 万音符。标准 MusicXML DOCTYPE 可直接导入（不下载 DTD）；DTD 内部子集、实体声明、样式表处理指令被拒绝；外部图片与链接仅提示忽略。
+- 版式：A4 竖版/横版分页、无限滚动、单行横卷；缩放 30–300%；移调 ±12 半音；声部显示开关；小节号、标题/作曲、声部名可切换。
+- 批注：锚定声部 + 小节 + 可选拍位，7 种类别，最多 1000 条；空白批注保存为草稿。
+- 导出：PDF（谱页 + 批注清单页，谱页为 JPEG 图像）、PNG（当前页）、SVG（全部页）、批注 JSON v2、原文件、MXL 展开的 MusicXML。
+- 回放为 Web Audio 简单合成音色，不代表乐器音色与演奏法。
 
-## 验收
+示例：Petzold《小步舞曲 G 大调》BWV Anh. 114（旋律公有领域，左手为本项目简化编配）、贝多芬《欢乐颂》主题（公有领域，本项目弦乐四重奏编配）、《Morning Lines》（本项目原创）。均由本项目录入，未复制第三方版本。
 
-2026-10-27：严格模板构建、12 项契约/业务/数据库测试通过。Chrome 真实 MusicXML/MXL 导入、声部筛选、版式与比例、小节批注及核对状态、保存刷新恢复、原件逐字节下载通过；无效 XML/外部声明拒绝后保留原工作，切换项目会先同步工作草稿。SVG 独立打开有真实音符路径，源 XML 独立打开并通过 XML 解析；报告包含原件哈希与正确小节锚点。375px、暗色、reduced-motion、键盘导航均检查。
-
-模型与外部服务不是本应用功能，manifest 没有 llm 能力。上游版本与许可见 [NOTICE.md](NOTICE.md)，工程边界见 [app/ENGINEERING.md](app/ENGINEERING.md)。
-
-自动保存：停止输入约 700 ms 后保存，后台请求不锁编辑。未写完的空白批注、显示设置及当前小节可在刷新后恢复；不合法的业务输入显示“草稿已自动保存，待完善输入”，不会覆盖最后的合法内容。网络失败时保留本机副本，版本冲突提供恢复草稿导出与服务器版本入口。导入先验证，再创建独立项目。
-
-当前布局：谱面为主体、右侧小节索引与审校批注；375px、暗色与减少动画偏好保持可用。
-
-## 0.3.0 保存基础修复
-
-快速编辑后撤回到已确认内容时，保存状态和本机工作副本一起恢复；服务端草稿回执与缓存重试按统一协议处理。整合验收见 [0.3.0 发布记录](../../docs/release-0.3.0.md)。
+验收记录见 [app/ACCEPTANCE.md](app/ACCEPTANCE.md)，工程边界见 [app/ENGINEERING.md](app/ENGINEERING.md)，上游版本与许可见 [NOTICE.md](NOTICE.md)。`artifacts/opensheetmusicdisplay-studio-0.9.0.fbworkbench` 可通过 **Floatboat → My → Workbenches → Import workbench** 导入；客户端安装流程尚未验收。

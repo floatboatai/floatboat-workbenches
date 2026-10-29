@@ -1,11 +1,24 @@
-# DeerFlow集成
+# 工程说明
 
-上游源快照d4ed40075f9101db6424b2331ea410934af146ac；harness2.1.0、app2.2.0-dev。核对routers/threads.py的ThreadStateResponse、client.py的get_thread、runtime/serialization.py消息序列化与artifacts路径契约。
+上游：DeerFlow 源快照 `d4ed40075f9101db6424b2331ea410934af146ac`（harness 2.1.0、app 2.2.0-dev）。0.9.0 另核对了同一提交的 `routers/thread_runs.py`（后台 run、`/runs/{id}/stream` 只读加入、`/join`、取消）、`services.py`（`format_sse`、`sse_consumer`：event/data/id 帧、心跳注释、`end`、`gap` 与 `Last-Event-ID`）、`run_models.py` 与 `runtime/stream_modes.py`（`values`、`updates` 为受支持模式）、`routers/models.py`（`GET /api/models`）与 README 启动方式。
 
-规范数据包含原生JSON文本、独立brief/人工Markdown报告、来源复核与版本状态。原生导出保留未知字段，读取过程中不执行tool_calls/计划/文件路径。服务端独立同步账本记录请求ID、线程ID、状态和快照；GET状态请求不产生远端写入，未知回执可查询原同步ID。只读适配器由DEERFLOW_URL和可选DEERFLOW_TOKEN配置，远程HTTPS，禁止重定向、限制响应和超时。没有把Host模型调用当作DeerFlowAgent运行。
+## 模块
 
-verification保存MIT上游序列化器原文，配固定langchain-core1.4.9验证消息与隐藏图片处理；这是格式验证，不是推理。浏览器使用ReactMarkdown禁用HTML，来源链接只接受HTTP(S)，状态字段按真实含义显示。共享SQLite/IndexedDB自动保存和冲突机制不改。
+- `contracts/research.ts`：v2 研究模型（问题、范围、计划步骤、带 `cite` 编号的来源、报告、交付状态、原生会话），旧版 v1 项目在读取时升级；引用解析与交付检查。
+- `contracts/plan.ts`：模板计划、步骤问题检查、模型计划的 JSON Schema 与校验、DeerFlow 研究简报。
+- `contracts/report.ts`：本地底稿、引用链接化、Markdown/HTML 导出、模型起草材料与提示词。
+- `contracts/retrieval.ts`：检索请求/结果契约与合并规则（重跑保留编号、备注、核验与被引来源）。
+- `contracts/native.ts`：原生会话解析、链接提取、最新答复、压缩。
+- `server/retrieval/`：`net.ts` 公网读取（SSRF 防护、代理、上限、夹具来源）；`channels.ts` 网页直读/Jina/Exa/GitHub；`index.ts` 路由。
+- `server/assist.ts`：Host 状态、`generateObject` 计划建议、`generateText` 报告草稿；Host 可注入以做合同测试。
+- `server/deerflow.ts`：地址配置（环境变量优先，`deerflow_settings` 表次之）、`/api/models` 连通检查、只读状态读取。
+- `server/research-gateway.ts`：JSON 请求与 SSE 解码、加入运行事件流。
+- `server/research-runs.ts`：研究运行账本（命令先写库、未知回执只读核对），跟随事件流写入 `deerflow_run_events` 与运行中快照，断线指数退避重连，多次失败暂停。
+- `server/run-events.ts`：页面事件流 `GET /api/research/:id/events`（按序号回放、Last-Event-ID、50 秒轮换连接）与 `/log`。
+- `ui/useDesk.ts` 业务状态；`PlanStage`/`ExecuteStage`/`DeerFlowPanel`/`ReportStage`/`SourcesPanel`/`FileMenu` 组件；HTML 导出按需加载 `react-dom/server`。
 
-研究运行使用独立模块research-runs/research-gateway与0005/0006迁移。SQLite存命令、固定thread_id、brief/model/origin、阶段、run_id/status、错误和结果。先写creating_thread再POST线程，验证metadata归属；先写submitting再POST run，传Idempotency-Key。启动时creating/submitting变unknown，不重发。GET runs匹配floatboat_operation_id恢复；已知run_id只GET对应run；成功读state作为独立快照。未知、pending/running阻止当前项目新命令，避免重复研究；人工报告独立。远端服务origin改变时不向新地址恢复旧任务。
+迁移 0007 追加事件表、设置表与运行列。依赖新增 `@mozilla/readability` 0.6.0、`linkedom` 0.18.13、`remark-gfm` 4.0.1。共享自动保存文件未改动。
 
-官方证据：thread_runs.py:985后台run立即返回；:1215列表、:1267详情；threads.py:959客户端指定线程ID且幂等；run_models.py的context与on_disconnect；services.py:2192读取model_name并验证模型白名单。verify_run_contract.py加载固定上游RunCreateRequest实际Pydantic模型，未运行Agent。HTTP契约样例与live部署验证分开记录。
+## 外部效果
+
+只有用户点击执行时访问公网检索；只有用户提交时向 DeerFlow 发出写请求（每次研究两次 POST）；Host 模型只在点击起草时调用。页面加载只请求本机 API。

@@ -1,13 +1,15 @@
+// ABOUTME: 本应用的业务路由：文稿列表/删除、可选 Floatboat 模型起草、可选 Presenton 服务状态与制作记录。
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
-import { registerAutosaveRoutes } from "./autosave.ts";
 import { validateDeck } from "../contracts/deck.ts";
 import { isRecord } from "../contracts/project.ts";
 import { createStore, StoreError } from "./store.ts";
 import { configFrom, createPresenton } from "./presenton.ts";
 import { createJobs } from "./jobs.ts";
+import { createModelChannel } from "./model.ts";
+
 export function registerRoutes(app: WorkbenchServer) {
   const store = createStore(app.database, validateDeck);
-  registerAutosaveRoutes(app, validateDeck);
+  const model = createModelChannel(app.host);
   const service = () => {
     const c = configFrom(process.env);
     return c ? createPresenton(c) : null;
@@ -36,28 +38,30 @@ export function registerRoutes(app: WorkbenchServer) {
       return store.remove(params.id, body.revision);
     }),
   );
-  app.route("GET", "/api/presenton", () =>
-    protect(() => {
-      const configured = Boolean(service());
-      return {
-        configured,
-        message: configured
-          ? "Presenton 已配置；连接将在查询或制作时验证。"
-          : "尚未连接 Presenton。可继续编排大纲、导入和复核已有文稿。",
-      };
-    }),
-  );
-  app.route("POST", "/api/presenton/check", () =>
-    protect(async () => {
-      const client = service();
-      if (!client) throw new Error("尚未配置 Presenton 服务。");
-      await client.health();
-      return {
-        configured: true,
-        message: "Presenton 服务可访问；模型生成尚未验证。",
-      };
-    }),
-  );
+  app.route("GET", "/api/model-status", () => model.status());
+  app.route("POST", "/api/outline/draft", ({ body }) => protect(() => model.draft(body)));
+  // Presenton is optional: status never fails the page, it explains how to start the service.
+  const presentonState = () => {
+    try {
+      const c = configFrom(process.env);
+      return c
+        ? { configured: true, origin: c.origin, message: `已配置 ${c.origin}，尚未检查连通性。` }
+        : { configured: false, origin: "", message: "未配置 Presenton 服务。本地生成与导出不受影响。" };
+    } catch (e) {
+      return { configured: false, origin: "", message: `PRESENTON_URL 无效：${e instanceof Error ? e.message : "格式错误"}` };
+    }
+  };
+  app.route("GET", "/api/presenton", () => ({ ...presentonState(), reachable: null }));
+  app.route("POST", "/api/presenton/check", async () => {
+    const state = presentonState();
+    if (!state.configured) return { ...state, reachable: false };
+    try {
+      await service()!.health();
+      return { ...state, reachable: true, message: `${state.origin} 可访问，已提供异步制作接口；模型质量需以实际任务为准。` };
+    } catch (e) {
+      return { ...state, reachable: false, message: `无法使用 ${state.origin}：${e instanceof Error ? e.message : "连接失败"}` };
+    }
+  });
   app.route("GET", "/api/jobs", () => jobs.list());
   app.route("POST", "/api/jobs", ({ body }) =>
     protect(() => jobs.submit(body)),

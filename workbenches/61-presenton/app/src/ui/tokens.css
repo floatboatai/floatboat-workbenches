@@ -1,41 +1,45 @@
 :root {
   color-scheme: light;
-  --paper: var(--workbench-background, #f7f6f2);
-  --surface: #fffefa;
-  --rail: #f0efe9;
-  --ink: var(--workbench-text, #26343a);
-  --muted: var(--workbench-muted, #697272);
-  --line: var(--workbench-border, #dadfd8);
-  --accent: var(--workbench-primary, #315c62);
-  --accent-hover: #234950;
-  --accent-text: var(--accent);
-  --focus: #76a1a8;
-  --hover: #eceee8;
-  --pale: #e9efea;
-  --success: #45755d;
-  --danger: #a1342d;
-  --error-bg: #fff0e9;
-  --slide: #fcfbf5;
-  --slide-ink: #253b37;
-  --slide-muted: #6f8075;
+  --paper: var(--workbench-background, #f4f1ea);
+  --surface: #fffdf8;
+  --sunk: #ebe6db;
+  --ink: var(--workbench-text, #1f2a3a);
+  --muted: var(--workbench-muted, #686d76);
+  --line: var(--workbench-border, #dcd5c6);
+  --accent: var(--workbench-primary, #2f5da8);
+  --accent-hover: #244a8a;
+  --accent-soft: #e3eaf6;
+  --on-accent: #ffffff;
+  --amber: #b9792a;
+  --focus: #5b86cf;
+  --hover: #ece7dc;
+  --success: #3f7a55;
+  --danger: #a3372e;
+  --error-bg: #fbeae4;
+  --stage: #e4dfd3;
+  --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", Georgia, serif;
+  --sans: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --paper: var(--workbench-background, #1d2425);
-    --surface: #252e2f;
-    --rail: #20292a;
-    --ink: var(--workbench-text, #e4ece7);
-    --muted: var(--workbench-muted, #a2b4b0);
-    --line: var(--workbench-border, #425151);
-    --accent: var(--workbench-primary, #3e787c);
-    --accent-hover: #4a898d;
-    --accent-text: #a3d0d4;
-    --focus: #93c6cc;
-    --hover: #344445;
-    --pale: #2a4140;
-    --success: #9bcdb0;
-    --danger: #f3aaa2;
-    --error-bg: #482c2a;
+    --paper: var(--workbench-background, #171b22);
+    --surface: #20252e;
+    --sunk: #1b2028;
+    --ink: var(--workbench-text, #e9e6de);
+    --muted: var(--workbench-muted, #a3a8b2);
+    --line: var(--workbench-border, #39404c);
+    --accent: var(--workbench-primary, #6d98e0);
+    --accent-hover: #86abea;
+    --accent-soft: #263552;
+    --on-accent: #0f1622;
+    --amber: #e0a85a;
+    --focus: #8fb2ec;
+    --hover: #2a313c;
+    --success: #8fcaa2;
+    --danger: #f0a39a;
+    --error-bg: #42261f;
+    --stage: #12151a;
   }
 }

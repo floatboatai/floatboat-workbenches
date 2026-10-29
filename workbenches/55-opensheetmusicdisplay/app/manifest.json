@@ -3,9 +3,9 @@
   "appId": "workbench.bea0c027-bedd-4ee0-ba91-00c23c23361e",
   "registryName": "opensheetmusicdisplay-studio",
   "name": "乐谱审校室",
-  "description": "MusicXML/MXL 原件留存、声部与版式审阅、小节批注和 SVG 导出",
-  "version": "0.3.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "description": "MusicXML/MXL 原件审校：OSMD 光标逐音移动与回放、移调、声部与版式切换，批注编号标在谱面上，导出带批注的 PDF/PNG/SVG 与批注 JSON",
+  "version": "0.9.0",
+  "changelog": "0.9.0：原件库分块上传，接住 32 MB 原文件与标准 DOCTYPE 的真实 MusicXML/MXL；光标、Web Audio 回放、移调、四种版式、声部开关与小节号；批注锚定小节/拍位并编号画在谱面上，与批注账本联动；带批注的 PDF/PNG/SVG 导出；三份公有领域/原创示例。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

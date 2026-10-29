@@ -1,7 +1,7 @@
 {
   "name": "floatboat-openmontage",
   "private": true,
-  "version": "0.5.1",
+  "version": "0.9.0",
   "type": "module",
   "packageManager": "pnpm@10.22.0",
   "engines": {
@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "lucide-react": "0.562.0",
+    "mediabunny": "1.61.4",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

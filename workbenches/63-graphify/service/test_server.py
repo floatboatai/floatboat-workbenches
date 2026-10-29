@@ -18,4 +18,13 @@ class ExtractionTests(unittest.TestCase):
     def test_traversal_and_empty_rejected(self):
         for body in [{"name":"../bad.py","code":"print(1)"},{"name":"bad.sh","code":"exit 1"},{"name":"a.py","code":""}]:
             with self.assertRaises(ValueError):extract_graph(body)
+    def test_multi_file_set_resolves_cross_file_calls(self):
+        out=run_isolated({"files":[{"path":"pkg/util.py","code":"def normalize(x):\n    return x.strip()\n"},{"path":"pkg/search.py","code":"from pkg.util import normalize\n\ndef search(x):\n    return normalize(x)\n"}]})
+        files={n.get("source_file") for n in out["graph"]["nodes"]}
+        self.assertIn("pkg/util.py",files)
+        self.assertIn("pkg/search.py",files)
+        self.assertFalse(any(isinstance(f,str) and f.startswith("/") for f in files))
+    def test_multi_file_rejects_escape_and_non_code(self):
+        for files in [[{"path":"../x.py","code":"a=1"}],[{"path":"/abs.py","code":"a=1"}],[{"path":"README.md","code":"# x"}]]:
+            with self.assertRaises(ValueError):extract_graph({"files":files})
 if __name__=="__main__":unittest.main()

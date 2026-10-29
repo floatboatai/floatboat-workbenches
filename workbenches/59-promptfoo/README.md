@@ -1,51 +1,63 @@
 # Promptfoo 评测台
 
-把 Promptfoo 的评测结果变成可复核的发布依据：用例×提示版本矩阵、失败断言、基线输出比较、人工判断与审阅意见。项目、完整测试配置草稿和报告自动保存到本机 SQLite；导入项目创建新项目。
+在用例 × 提示版本 × provider 矩阵中找出退步，检查断言与输出，记录发布判断，导出完整评测报告。0.9.0 的本机评测不需要外部执行器或模型账户。
 
-## 使用
+## 开始
 
-从仓库根目录执行：
+使用 Node 22.16+（22.x）与 pnpm 10.22.0，从仓库根目录执行：
 
 ```sh
 pnpm workbench prepare promptfoo
 pnpm workbench dev promptfoo
 ```
 
-可以直接导入 Promptfoo v3 summary 或带 `results` 外层的 CLI JSON。每份结果限600KB、400个单元格，整个工作项目限750KB。通过/失败筛选、复核意见、原始JSON和CSV导出不要求模型服务。页面示例由真实 Promptfoo 0.125.1 回显提供者产生，含3个通过/1个失败；它验证评测过程，不是模型效果示例。
+打开打印的完整地址。首次使用载入 36 个中英文售后工单、3 个提示版本、2 个示例录制 provider 和一列规则脚本，共 252 格。录制输出是虚构手工示例。点击“运行评测”在本机重新评分；收紧断言后重跑，选择旧运行为基线，即可筛选退步并审阅。
 
-## 运行评测
+“评测”菜单提供空白评测、最近评测、本机草稿、导入与导出。配置和复核自动保存，未完成 YAML 也会在刷新后恢复。
 
-执行器独立运行，不属于工作台 Node 纯JS运行包。需要 Node 22.22.0+（22.x）：
+## 输入与交付
+
+| 文件 | 行为 |
+| --- | --- |
+| YAML / JSON 配置 | 新建评测 |
+| Promptfoo v3 结果 / v2 results 列表 | 加入当前评测，提供录制输出 |
+| CSV / TSV | 追加测试变量与 __expected 断言 |
+| 完整评测项目 | 新建评测，恢复全部运行、配置、复核和发布判断 |
+| workbench-working-copy.json | 新建评测，恢复未生效输入；结果仍引用原本机资料 |
+
+可导出 YAML、当前运行原始 JSON、逐格 CSV、自包含 HTML 发布报告和完整项目。单个文件最多 40 MiB / 20,000 结果格；结果原文独立存储。多运行完整项目若超过 40 MiB，需拆分再导入。单次运行最多 2,000 用例、24 提示、24 providers、6,000 格；其他容量见 [REQUIREMENTS](app/REQUIREMENTS.md)。
+
+## 配置与运行
+
+本机支持 echo、recorded:<provider> 回放、floatboat:script 规则脚本、21 类确定性断言、weight、threshold、metric、transform 和 assert-set。模板支持变量、过滤器、条件及循环的受限子集。模型评分断言保留并标为未执行，不能据此自动建议发布。
+
+floatboat:<model> 通过 Host 运行真实模型，需要连接、授权及调用次数确认。“执行环境”显示状态和重新检查。**本轮真实 Host / LLM 未测**，只有 mock 合同验证。普通预览可能自动发现 Floatboat；离线工作可用 `FLOATBOAT_HOST_MODE=offline pnpm workbench dev promptfoo`。
+
+回放匹配 provider 与完整渲染提示，改提示后缺少录制会明确报错；耗时/成本沿用录制数据。含 recorded:/floatboat: 的导出 YAML 需要本工作台或配套适配器，不能直接在未改造的官方 CLI 中运行。
+
+## 可选官方核对
+
+Node 22.22+（22.x），从仓库安装启动：
 
 ```sh
 cd workbenches/59-promptfoo/service
 pnpm install --frozen-lockfile --ignore-scripts
-pnpm start
+# 示例含 JavaScript 断言，仅对可信配置启用
+PROMPTFOO_RUNNER_ALLOW_JS=1 pnpm start
 ```
 
-另一个终端从工作台目录启动：
+另一终端从仓库根目录运行：
 
 ```sh
-PROMPTFOO_RUNNER_URL=http://127.0.0.1:8770 pnpm dev
+PROMPTFOO_RUNNER_URL=http://127.0.0.1:8770 pnpm workbench dev promptfoo
 ```
 
-默认回显模式 `echo` 在实际 Promptfoo evaluator 中执行模板与断言；`model` 模式需要执行器进程配置 `EVAL_MODEL_URL`（完整 Chat Completions URL）、`EVAL_MODEL_NAME`，按供应商需要配置 `EVAL_MODEL_KEY`。模型密钥只保存在执行器的服务环境中，不输入工作台、不进入项目导出。执行器可用 `PROMPTFOO_RUNNER_TOKEN` 保护，工作台进程设置同名变量；默认只监听127.0.0.1。远程部署需HTTPS、鉴权和自有反向代理，浏览器始终调用工作台同源API。
+执行环境中点击“用官方 promptfoo 交叉核对”。固定 promptfoo 0.125.1，仅核对 echo/录制列和确定性断言，跳过 Host/本机脚本列，拒绝模型评分。可设置 PROMPTFOO_RUNNER_TOKEN，两进程需一致；默认监听 loopback。官方 JavaScript 不使用工作台沙箱，必须信任配置来源。
 
-执行器接受限定JSON：`mode`、`description`、`prompts: [{label,raw}]`、`tests: [{vars,assert}]`。提示只接受所有用例均已声明的 `{{变量名}}`；变量、断言、名称仅接受字面文本，拒绝环境模板和 file/package/portkey/langfuse/helicone 等引用；支持contains/not-contains/equals/is-json；不加载上传的脚本、插件、文件、任意provider或transform。一个任务最多25用例×4版本，执行器串行处理任务、每个评测最多2个并发请求。
+任务保存编号和输入，同编号重试不会重复执行，刷新继续查询；重启标为 interrupted，不自动重放。本机任务可停止，已完成的模型调用不能撤销；官方执行器尚无取消接口。
 
-提交前保存操作ID。执行器SQLite按同一ID及输入摘要去重；丢失回执可查询/重试同一任务。刷新重新查询原ID，不重跑模型。重启中断的任务明确标为interrupted。当前版本不提供执行中取消；关闭页面不会撤销已经提交的推理。完成结果加入新的报告版本，人工复核不会被生成内容覆盖。
+## 检查与包
 
-## 文件与验证
+工作台目录执行 `pnpm workbench:check`、`pnpm test`、`pnpm --dir service test`、`pnpm package`。包包含本机评测源码、依赖声明、示例和许可，不包含数据库、凭据或可选执行器。导入路径：Floatboat → 我的 → 工作台 → 导入工作台；本次未实际验证客户端导入。
 
-- `app/`：固定模板应用，声明了普通示例JSON资源。
-- `service/`：独立Promptfoo执行器和锁定依赖；使用同项目契约文件，启动需保持仓库目录结构。
-- `.local/`：忽略的运行数据，默认不进入源码包。
-- `ACCEPTANCE.md`：实际构建、测试、浏览器与服务验证范围。
-
-`.fbworkbench` 包包含工作台源码，不安装或启动外部执行器。需要执行功能的接收方也应从本仓库准备上述 `service/`。Host LLM与平台客户端导入单独记录，不将OpenAI-compatible服务冒称为Floatboat Host。
-
-## 上游与许可
-
-[Promptfoo](https://github.com/promptfoo/promptfoo) / [Node API](https://www.promptfoo.dev/docs/usage/node-api-reference/) / [MIT许可](https://github.com/promptfoo/promptfoo/blob/0.125.1/LICENSE)。本工作台复用结果格式，并在独立服务中执行锁定的promptfoo 0.125.1；没有复制整个上游前端。保留上游版权与许可，模型服务条款和依赖分别适用。根仓库尚未选择覆盖全部工作台的统一许可证。
-
-超过750KB模型容量的复核输入保留为可恢复草稿（上限1.3MB）；草稿JSON可导出、导入新项目，整理或拆分后再成为已保存模型。
+详见 [验收](app/ACCEPTANCE.md)、[设计](app/DESIGN.md)、[工程边界](app/ENGINEERING.md) 和 [第三方材料](app/notices/THIRD-PARTY.md)。

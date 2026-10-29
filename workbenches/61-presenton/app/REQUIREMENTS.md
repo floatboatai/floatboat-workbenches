@@ -1,13 +1,15 @@
 # Presenton 工作台
 
-For people preparing presentations from source material and a per-slide narrative. The workbench provides an offline production plan and a server-side connector to a separately operated Presenton instance.
+面向要把一份资料讲成演示稿的人：资料 → 大纲 → 成稿 → PPTX/PDF。无外部服务时完整可用；Presenton 服务与 Floatboat 模型是可选通道。
 
-- Edit source text/Markdown, audience, objective, per-slide title and Markdown, speaker notes and review state. Add, reorder and remove slides with confirmation. Persist the entire working copy, including incomplete slides and unparsed import text.
-- Review a focused outline stage and numbered slide sequence. The stage is a text planning preview; it does not claim to render the generated PPTX/PDF layout.
-- Configure language, Presenton template, tone, density, instructions, title/contents slides, web search and PPTX/PDF output. Generation uses the real Presenton async endpoint and sends the full saved input snapshot.
-- Save an operation before submission. Keep task IDs, input, source origin, state and output durably in SQLite. Never resubmit an unknown operation automatically. Reconcile via the original task ID; stop tracking does not stop upstream model execution.
-- Import portable projects, autosave recovery exports, Presenton generation responses/async tasks and PresentationWithSlides JSON as new documents. Preserve the original response; render imported content as inert text. Read an existing presentation from the configured service into a new document.
-- Cache actual generated PPTX/PDF bytes in a declared data resource and download through constrained same-origin routes. Export portable JSON and Markdown outlines locally. Export an existing upstream presentation without regenerating its content.
-- Keep ongoing results separate from manual edits. No imported HTML, external editor iframe, homemade PPTX generator, Host LLM fallback or simulated successful generation.
+- 资料：粘贴或读入 .md/.markdown/.txt（UTF-8 或 GB18030）、.docx（标题样式、列表、表格）、.html（标题/段落/列表/引语/表格，脚本丢弃）、.csv/.tsv；资料上限 28 万字，文件上限 40 MB。设定听众、目标、语言、目标页数（自动或 1–80）、每页内容密度。
+- 本地确定性生成大纲：按 Markdown 标题或独立短行分章节；表格 → 原生图表（时间分类为折线、构成类为环形、其他为柱形；排除量级不同的列；自动写出平均变化、变化最大项、合计与占比等结论）；带数字的短要点 → 关键数字；“时间：事项” → 时间线；两个小节 → 左右对比；引语 → 引语页；行动/决定类末章 → 结尾页；章节多时加目录；一页要点过多时拆为续页、余下内容进入演讲备注；按目标页数精简。每次生成附“生成说明”。
+- 可选 Floatboat 模型起草大纲：显示状态与重新检查，发送前页内确认，结果作为候选，采用前不改动当前大纲。Host 未连接时说明原因，本地生成不受影响。
+- 大纲编辑：版式、标题、要点、左右栏与栏标题、演讲备注；排序、复制、插入、删除；右侧对照资料原文。
+- 幻灯片：11 种版式（封面、目录、章节页、要点、左右对比、图文、图表、关键数字、引语、时间线、结尾），5 套主题；舞台点选定位字段；编辑标题/副标题/要点/右栏/关键数字/图表类型、单位与数据表/图片（6 种内置插画或上传图片，浏览器内缩放后存入应用媒体库）与替代文字、演讲备注；切换版式时从要点派生图表或关键数字；页的增删复制排序；按大纲重置单页。重新生成整套幻灯片前确认。
+- 导出：PPTX（PptxGenJS 4.0.1：原生文本框与项目符号、原生可编辑图表、图片、备注）；PDF（每页 1920px 位图，与舞台同一几何）；项目 JSON（含图片）；大纲 Markdown（含图表数据与备注）。
+- 可选 Presenton 通道：状态胶囊、启动方式、重新检查；可用时提交大纲生成、跟踪任务、下载原件、读入生成页面为新文稿。保留先持久化再提交、未知结果不自动重试、停止跟踪不等于取消的契约。
+- 导入：本工作台 0.4/0.9 项目、自动保存恢复副本、Presenton 任务与 PresentationWithSlides JSON，均新建文稿；0.4 旧数据确定性迁移。
+- 自动保存完整工作副本（含步骤、选中页、粘贴中的 JSON、模型候选）；未完成的值保存为草稿。
 
-Acceptance: contracts and durable SQLite behavior, save/reload, delayed/lost save responses, incomplete draft recovery, import as new document, conflict protection, request/response bounds, safe download origin, desktop/mobile, keyboard, reduced motion and truthful disconnected status. Real model generation and Host installation are separate acceptance gates and are unverified without those environments.
+验收：契约与 SQLite 持久化、PPTX/PDF 结构、生成规则、资料文件解析、Host 通道（mock）、自动保存回归、真实浏览器 1440/375、键盘与菜单焦点。真实 Host 调用、真实 Presenton 实例与 Floatboat 客户端导入另行验收。

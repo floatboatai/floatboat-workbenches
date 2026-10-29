@@ -2,10 +2,9 @@
 
 本指南随工作台源码包附带。仓库级命令在[完整仓库](https://github.com/floatboatai/floatboat-workbenches)中执行，外部服务源码与锁文件位于对应项目目录；普通工作台包不包含服务运行环境。
 
-# 镜头制作 · OpenMontage
+# 剪辑台 · OpenMontage
 
-从现有MP4原片制作短片：为镜头补充说明、设置入出点、逐个确认，再用OpenMontage原始VideoTrimmer和VideoStitch工具裁切、统一格式和组接成片。
-
+多轨时间线剪辑台：把视频、图片、音乐和字幕放上时间线，修剪、分割、移动，加淡入淡出、交叉溶解、标题和字幕，调音量，在浏览器里预览，并导出真实的 MP4。不需要外部服务。OpenMontage 服务可选，用固定版本的官方工具做裁切拼接渲染。
 
 ## 运行
 
@@ -14,26 +13,36 @@ pnpm workbench prepare openmontage
 pnpm workbench dev openmontage
 ```
 
-制作服务独立启动，需Node22、Python3.10+、Git和FFmpeg/ffprobe：
-
-```sh
-cd workbenches/67-openmontage/service
-pnpm setup
-pnpm start
-```
-
-setup仅在service/.local/upstream安装固定官方提交`e01dbf433f46eeb91d39bf905e194162921019a3`；不会覆盖已有修改。已有该提交检出可用`OPENMONTAGE_SOURCE`指定路径。`OPENMONTAGE_PYTHON`选择Python命令，`OPENMONTAGE_DATA`选择服务输出目录。默认服务`http://127.0.0.1:8797`，工作台通过`OPENMONTAGE_SERVICE_URL`和可选`OPENMONTAGE_SERVICE_TOKEN`连接；远程要求HTTPS。
+打开后是示例影片《海边的一天 · 粗剪》，可以直接播放、修改、导出。示例素材由 `samples-src/generate.mjs` 用程序绘制、合成后经 FFmpeg 编码，均为原创，约 2.6 MB。
 
 ## 已实现
 
-- 逐镜头MP4上传、回放、顺序、标题/说明、精确入出点与人工审批。修改镜头撤销其审批。
-- 说明、未完成时间与未应用JSON自动保存；丢回执、冲突和完整工作稿恢复。
-- 完整工程导出包含原片；导入逐个校验内容哈希、上传原件后创建新项目，不重放历史制作任务。
-- 真实官方工具裁切与拼接：720p、24fps、H.264 MP4；原始输入快照与成片任务独立。
-- 制作前持久化操作编号与快照，同编号重试幂等；服务重启将未完成任务标中断，取消阻止迟到结果复活。
+- **多轨时间线**：画面、音频、文字三类轨道，可增删和改名，可隐藏或静音，可调轨道音量。片段可拖动、换轨、拖边修剪（左修剪同步移动素材入点，受素材长度限制），在播放头处分割（S），删除，复制。吸附到播放头和片段边缘，按住 ⌘/Ctrl 滚轮缩放，撤销和重做。
+- **转场与画面**：淡入、淡出、与上一段交叉溶解（后续片段自动前移），经黑场转场。画面可选填满或完整显示；静帧可推近、拉远、平移。
+- **文字**：大标题、下方字条、字幕、角标四种样式，可调字号、颜色、位置、对齐、粗体和底衬。可导入 SRT/WebVTT 字幕到字幕轨，也可导出 SRT。
+- **声音**：视频自带的声音、配乐轨、环境声轨分别调片段音量和轨道音量，淡入淡出同时作用于声音。
+- **预览**：监视器按时间线实时合成，提供逐帧、首尾跳转和时间码（分:秒:帧）。
+- **本机导出**：在浏览器里用 Mediabunny + WebCodecs 逐帧合成全部轨道并混音，输出 MP4（H.264 + AAC；本机不支持时用 WebM），可选分辨率与质量，可以取消。成片保存在成片架，可回看、下载，或放回素材库继续剪。
+- **素材**：可导入 MP4、MOV、WebM、MKV、PNG、JPEG、WebP、GIF、MP3、M4A、WAV、OGG、FLAC，单个最大 2 GB。导入前读取时长与尺寸，确认本机能解码；不支持的文件会说明原因，同批其他文件照常导入。
+- **影片菜单**：新建空白影片、打开示例、最近的影片、导入/导出完整工程 `.openmontage`（含素材，按内容哈希核对）、恢复稿、工程 JSON、剪辑单 Markdown、删除。
+- **自动保存**：保存完整工作稿、未应用的 JSON 与时间数值输入；回执丢失时用同一 mutation 重试；冲突时保留草稿；有本机副本。导入工程总是新建影片；新建/切换影片时保护输入不被异步切换覆盖。
 
-本版仅实现“已有素材→分镜审批→裁切组接”管线，不含AI生成视频、配音、素材搜索或完整OpenMontage编排。单素材20MB、工程原件总量60MB、2–12镜头、成片120秒。原件在工作台数据资源中，成片在独立服务数据目录中；普通源码包不包含这些数据或外部服务。
+## OpenMontage 服务（可选）
 
-打包：`pnpm workbench package openmontage`。导入：Floatboat → 我的 → 工作台 → 导入工作台。客户端导入未实测，独立服务另行安装。原始上游源码使用AGPL-3.0，许可原文随包保留；[验收记录](https://github.com/floatboatai/floatboat-workbenches/blob/main/workbenches/67-openmontage/ACCEPTANCE.md)区分真实上游与合同测试。
+导出对话框里显示服务状态、地址、启动命令和“重新检查”。服务需要 Node 22、Python 3.10+、Git 和 FFmpeg/ffprobe：
 
-恢复草稿也可通过工程导入读回为新编辑副本，完整保留未应用JSON。携带未确认任务时需明确确认不重放；原任务信息保留为来源记录。OpenMontage恢复稿不含视频原件，缺失时可重新上传或改用完整工程。新建/打开/导入期间暂停编辑，避免旧文档离开过程中的输入丢失。
+```sh
+cd workbenches/67-openmontage/service
+pnpm setup   # 在 service/.local/upstream 检出固定提交 e01dbf433f46eeb91d39bf905e194162921019a3
+pnpm start   # http://127.0.0.1:8797
+```
+
+服务只处理主画面轨的 MP4 片段（单段 ≤20 MB、2–12 段、≤120 秒），用官方 VideoTrimmer 裁切、VideoStitch 统一为 720p/24fps 后硬切拼接。文字、转场、其他轨道请用本机导出。条件不满足时，界面会说明是哪一段、为什么。`OPENMONTAGE_SERVICE_URL`、`OPENMONTAGE_SERVICE_TOKEN`、`OPENMONTAGE_SOURCE`、`OPENMONTAGE_PYTHON`、`OPENMONTAGE_DATA` 的含义与 0.5 版相同。远程服务要求 HTTPS。
+
+## 限制
+
+本机导出需要支持 WebCodecs 的浏览器（Chromium 系 116+）。不含画中画位置/缩放关键帧、调色、变速、倒放和音频波形显示。素材在工作台数据目录中；普通源码包不含用户素材，也不含外部服务。单个 2 GB 是格式校验上限，实际导出受浏览器内存和编码器限制，未验证长片/上限负载。
+
+打包：`pnpm workbench package openmontage`。导入：Floatboat → 我的 → 工作台 → 导入工作台。客户端导入未实测。上游 OpenMontage 源码使用 AGPL-3.0，Mediabunny 使用 MPL-2.0，许可原文随包保留。
+
+[验收记录](https://github.com/floatboatai/floatboat-workbenches/blob/main/workbenches/67-openmontage/ACCEPTANCE.md)区分本机验收、真实上游执行与合同测试。

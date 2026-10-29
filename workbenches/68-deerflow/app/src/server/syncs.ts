@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { threadValue, nativeValue } from "../contracts/research.ts";
+import { threadValue, nativeValue, compactNative } from "../contracts/native.ts";
 import { StoreError } from "./store.ts";
 export type Sync = {
   id: string;
@@ -32,7 +32,7 @@ export function createSyncs(
   async function perform(id: string) {
     const r = read(id);
     try {
-      const value = await fetcher(r.threadId);
+      const value = compactNative(await fetcher(r.threadId));
       nativeValue(value);
       db.prepare(
         "UPDATE deerflow_syncs SET status='completed',native=?,error='',updated_at=? WHERE id=? AND status='running'",
@@ -60,7 +60,7 @@ export function createSyncs(
         .all(projectId)
         .map((x) => ({ ...read(String(x.id)), native: "" }));
     },
-    start(projectId: string, id: string, threadId: string) {
+    async start(projectId: string, id: string, threadId: string) {
       if (!/^[0-9a-f-]{36}$/i.test(id) || !projectId)
         throw new Error("同步编号无效。");
       threadValue(threadId);
@@ -79,7 +79,7 @@ export function createSyncs(
       db.prepare(
         "INSERT INTO deerflow_syncs(id,project_id,thread_id,status,created_at,updated_at) VALUES(?,?,?,'running',?,?)",
       ).run(id, projectId, threadId, now, now);
-      void perform(id);
+      await perform(id);
       return read(id);
     },
   };

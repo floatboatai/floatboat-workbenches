@@ -1,32 +1,31 @@
-# Engineering
+# 工程说明（0.9.0）
 
-Node 22 / React 19, fixed official build profile and CSP. Existing identity and migrations 0001–0003 are preserved; 0004 adds a dedicated durable production ledger. No new runtime dependencies, browser model endpoint, external iframe, eval or WASM.
+Node 22 / React 19，模板固定构建配置与 CSP。新增运行时依赖 pptxgenjs 精确 4.0.1（与 05-pptxgenjs 相同版本；root 与 app 两份清单和锁同步）。浏览器加载 npm 官方 `dist/pptxgen.bundle.js` 的原字节副本（`src/vendor/`，`?url` 同源脚本；官方 ESM 含 Node `fs` 动态导入，模板构建不接受），类型来自 `import type`；Node 测试直接导入 `pptxgenjs`。App identity 与迁移 0001–0004 保留，0005 新增图片媒体表。manifest 声明 `llm`。
 
-## Boundaries
+## 模块
 
-- `src/contracts/deck.ts`: bounded working-copy decoding, stricter production validation, exact upstream request mapping, safe text extraction, portable/recovery imports and Markdown export.
-- `src/contracts/operation.ts` and `src/ui/submission-guard.ts`: validated persisted submission intent, exact-ID recovery, retained local records and explicit duplicate-task confirmation even when history cannot be read.
-- `src/server/presenton.ts`: server-only fixed-origin HTTP client; environment config, timeouts, stream bounds, response validation, strict artifact URLs, format signatures and no redirects.
-- `src/server/jobs.ts`: persisted operation-before-POST, immutable input, duplicate-operation protection, interrupted submission reconciliation, terminal result protection, manual adoption, original-file cache and bounded download chunks.
-- `src/server/routes.ts`: own same-origin routes and shared autosave/store registration. `app.host.llm` is never used; capability list is empty.
-- `src/ui/App.tsx`: document/outline, production and import surfaces. Existing `useProjects` autosave implementation remains unchanged. Business state stays editable while saves and generation run. Results open as new documents; they never replace the input project silently.
+- `contracts/model.ts`：Deck v2（brief、outline、slides、theme、Presenton settings、result）、上限、`restoreDeck`（草稿：结构与大小，允许未完成值）、`validateDeck`（正式：900 KB、每页有标题、图表值为数字）、0.4 `schemaVersion 1` 确定性迁移。
+- `contracts/brief.ts`：资料解析（标题/中文序号标题/无标题短行、段落、列表与续行、表格、引语与出处）、数字/时间/关键数字抽取、分句与要点压缩（整句优先、去引导语、不截断数字）。
+- `contracts/generate.ts`：`outlineFromBrief`（版式选择规则、表格转图表与结论、续页、目录、结尾、目标页数精简、生成说明）、`slideFromItem`/`slidesFromOutline`、`switchLayout`。纯函数，同一输入同一输出。
+- `contracts/brief-import.ts`：.docx（自带 ZIP 读取，只解压 document/styles）、HTML、CSV/TSV、GB18030 文本到 Markdown。
+- `contracts/model-outline.ts` + `server/model.ts`：Host 起草提示词与宽松解析；`createModelChannel(host)` 封装 `capabilities.list` 与 `llm.generateText`，可注入 mock。
+- `contracts/deck.ts`：示例文稿（`sample-brief.ts` 原创资料经本地生成器产出）、Presenton 请求映射、Presenton/便携/恢复导入、Markdown 讲义。
+- `shared/geometry.ts`：每种版式的英寸坐标图元与统一字号估算；`shared/marks.ts`：图表与插画标记；`shared/themes.ts`：主题。三个渲染器共用：`ui/SlideView.tsx`（HTML/SVG 舞台与缩略图）、`ui/render-canvas.ts`（Canvas：PDF 页面与 PPTX 插画位图）、`shared/pptx-render.ts`（PptxGenJS 原生对象）。
+- `shared/pdf.ts`：最小 PDF 1.4 写出（每页 JPEG/DCTDecode、UTF-16 标题、精确 xref）。`shared/zip.ts`：ZIP 读写与 PptxGenJS 段落属性修正（与 05 同源，读取增加按名过滤）。
+- `server/media.ts` + `contracts/media.ts` + `ui/media-client.ts`：图片媒体库（与 05 相同实现：内容哈希去重、1.4 MB、PNG/JPEG/GIF 识别）。
+- `server/presenton.ts`、`server/jobs.ts`、`contracts/operation.ts`、`ui/submission-guard.ts`：Presenton 连接器与持久任务账本，契约未变；`/api/presenton` 不再报错而返回配置状态，`/api/presenton/check` 返回可达性。
+- UI：`App.tsx`（外壳、步骤、恢复条）、`FileMenu.tsx`（文件生命周期与导出）、`BriefStep.tsx`、`OutlineStep.tsx`、`DeckStep.tsx`、`Inspector.tsx`、`PresentonPanel.tsx`、`ConfirmBar.tsx`、`channels.ts`、`export.ts`。
 
-## Stored data and recovery
+## 持久化
 
-The project contains source material, audience, objective, ordered slide IDs/titles/Markdown/notes/review flags, settings and optional imported-result metadata/raw JSON. Extra draft fields retain unfinished import text, a local operation pointer, structured pending-operation metadata and recovery/presentation IDs. Portable and recovery imports preserve those decoded fields, including unfinished JSON. Stable operation records are independent of project deletion and can be found with “所有文稿”. Recent ledger listing is bounded to 100 records.
+共享 `autosave-client.ts`、`autosave-cache.ts`、`requests.ts`、`server/autosave.ts` 未修改。`registerAutosaveRoutes(app, validateDeck, undefined, { verify })`：verify 检查引用的图片均在媒体库，否则保存为草稿。storageKey 仍为 `presenton-studio-v1`，旧本机恢复项经 `restoreDeck` 迁移。图片不进项目 JSON（便携导出时以 base64 附带，导入时重新入库并重映射 ID）。extra 字段按类型解码（`restoreExtra`）。
 
-Formal models have a 700 KB UTF-8 JSON limit. The draft decoder independently accepts the same structural/per-field bounds up to 9 MB, so crossing the model threshold cannot make a saved draft unreadable. Native portable/recovery imports allow 24 MB to cover JSON escaping and raw editor state; upstream response import is limited to 250,000 characters. Large native files are parsed directly instead of duplicating them into the raw-input editor. Unfinished editor text is bounded to 1,800,000 characters.
+## 外部效果
 
-The shared autosave request envelope is limited to 1.95 MB. Working copies above it cannot be saved to the server; the existing IndexedDB recovery path reports offline/local preservation only after its transaction succeeds. Such copies remain exportable/importable. Reducing content below the envelope resumes server saves, and below 700 KB permits a formal model. No binary artifacts are embedded in project JSON or localStorage.
+- 本地生成、编辑、导出不访问网络。
+- Floatboat 模型：仅在用户确认后调用 `app.host.llm.generateText`，发送资料前 6 万字；结果只作候选。
+- Presenton：仅在配置 `PRESENTON_URL` 且用户提交时调用，契约见 `PRESENTON.md`。
 
-Artifact bytes live in declared `generated-files` (data directory) by SHA-256 + extension. Originals are bounded to 50 MiB, fetched only from the operation's configured service origin under `/app_data/exports/`, without query strings, credentials, traversal or redirects. Authorization is attached only to the fixed service origin. Responses are never forwarded verbatim as error logs. Browser downloads use 256 KiB JSON/base64 chunks to stay within SDK response sizes. Content headers alone are not trusted: PDF and ZIP/PPTX signatures are checked. A signature is not semantic validation of every slide.
+## 验证
 
-## Operation semantics
-
-`POST /api/jobs` receives a caller operation UUID, project ID, title and snapshot. It validates before insertion, inserts synchronously, then calls `/api/v1/ppt/presentation/generate/async`. Before this route is called, the browser saves structured operation intent and displays a local pending record. On reload it queries that exact ID independently of the history list. Failed/404 reads preserve the unknown guard; creating another operation then requires an explicit confirmation. Stopped tracking does not imply the upstream task ended. Repeating the same operation returns the stored record; reusing its ID with different input is rejected. The upstream does not document idempotency, so unknown submissions never automatically retry. Startup changes interrupted `submitting` to `unknown`. Known tasks use `/status/{id}`. Client polling does not overlap; completed/error records cannot regress to pending, and a late polling response cannot reverse “stop tracking”. Manual queries can resume a stopped task. The API has no documented generation-cancel contract, so no cancellation is claimed.
-
-Export-existing operations also persist before their POST and retain their known presentation ID if the response is lost. Export can be retried intentionally from the existing presentation; it does not regenerate content. Adoption requires the user to verify that the task ID belongs to the saved input; upstream does not expose a submission-key query.
-
-## Verification
-
-From repository root: `pnpm workbench check presenton`, `pnpm workbench test presenton`, `pnpm workbench package presenton`. From workbench root: `pnpm dev`. Contract tests inject a fake HTTP responder and explicitly do not count as real Presenton/model acceptance. See `ACCEPTANCE.md` and `PRESENTON.md` for exact evidence and connection setup.
+仓库根：`pnpm workbench check presenton`、`pnpm workbench test presenton`、`pnpm workbench package presenton`；工作台目录：`pnpm dev`。浏览器验收脚本与截图在仓库外（见 ACCEPTANCE.md）。已知提示：共享 `autosave-client.ts` 的 `WORKBENCH_LARGE_MODULE`。

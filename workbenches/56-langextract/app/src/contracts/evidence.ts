@@ -1,4 +1,5 @@
 import { isRecord, boundedText } from "./project.ts";
+import { alignContext, alignExtraction, sliceCodepoints } from "./align.ts";
 export type ReviewStatus = "pending" | "accepted" | "rejected" | "corrected";
 export interface Extraction {
   extraction_class: string;
@@ -10,10 +11,23 @@ export interface Extraction {
   description: string | null;
   attributes: Record<string, string | string[]> | null;
 }
+export interface Span {
+  start: number;
+  end: number;
+}
+/** Human layer for one record. The upstream extraction above is never rewritten. */
 export interface Review {
   status: ReviewStatus;
   correctedText: string;
   note: string;
+  /** Reviewer's class when it differs from the upstream class; empty keeps the original. */
+  correctedClass: string;
+  /** Reviewer or Node re-alignment anchor; null keeps the upstream char_interval. */
+  span: Span | null;
+  /** Corrected attributes; null keeps the upstream attributes. */
+  attributes: Record<string, string | string[]> | null;
+  /** model: imported / Host / service output. manual: a reviewer's own annotation. */
+  source: "model" | "manual";
 }
 export interface EvidenceDocument {
   id: string;
@@ -25,6 +39,7 @@ export interface EvidenceDocument {
 export interface Field {
   name: string;
   description: string;
+  attributes: string[];
 }
 export interface Example {
   text: string;
@@ -34,13 +49,16 @@ export interface Example {
     attributes?: Record<string, string | string[]> | null;
   }[];
 }
+export type Origin = "example" | "import" | "manual" | "service" | "host";
 export interface EvidenceProject {
   schemaVersion: 1;
-  origin: "example" | "import" | "manual" | "service";
+  origin: Origin;
   documents: EvidenceDocument[];
   fields: Field[];
   prompt: string;
   examples: Example[];
+  /** Floatboat Host model ID used by the built-in channel. */
+  model: string;
 }
 export interface RunInput {
   documents: { id: string; text: string }[];
@@ -67,6 +85,15 @@ export interface Job {
   input: RunInput;
   result: unknown[] | null;
 }
+export const LIMITS = {
+  documents: 40,
+  documentChars: 200_000,
+  records: 2000,
+  fields: 40,
+  examples: 8,
+};
+export const DEFAULT_MODEL = "gemini-3.8-flash";
+const ORIGINS: Origin[] = ["example", "import", "manual", "service", "host"];
 const text = (v: unknown, max = 20000) => boundedText(v, max);
 const nullableNumber = (v: unknown): number | null => {
   if (v === undefined || v === null) return null;
@@ -118,14 +145,23 @@ export function extraction(v: unknown): Extraction {
   };
 }
 export function fields(v: unknown): Field[] {
-  if (!Array.isArray(v) || v.length > 24) throw Error("字段定义最多24项。");
+  if (!Array.isArray(v) || v.length > LIMITS.fields)
+    throw Error(`类别定义最多${LIMITS.fields}项。`);
   return v.map((x) => {
-    if (!isRecord(x)) throw Error("字段格式无效。");
-    return { name: text(x.name, 100), description: text(x.description, 1000) };
+    if (!isRecord(x)) throw Error("类别格式无效。");
+    const attrs = x.attributes === undefined ? [] : x.attributes;
+    if (!Array.isArray(attrs) || attrs.length > 12)
+      throw Error("每个类别最多12个属性名。");
+    return {
+      name: text(x.name, 100),
+      description: text(x.description, 1000),
+      attributes: attrs.map((a) => text(a, 60)),
+    };
   });
 }
 export function examples(v: unknown): Example[] {
-  if (!Array.isArray(v) || v.length > 8) throw Error("示例需要数组，最多8项。");
+  if (!Array.isArray(v) || v.length > LIMITS.examples)
+    throw Error("示例需要数组，最多8项。");
   return v.map((x) => {
     if (
       !isRecord(x) ||
@@ -146,6 +182,25 @@ export function examples(v: unknown): Example[] {
     };
   });
 }
+function span(v: unknown): Span | null {
+  if (v === undefined || v === null) return null;
+  if (!isRecord(v)) throw Error("复核区间无效。");
+  const start = nullableNumber(v.start),
+    end = nullableNumber(v.end);
+  if (start === null || end === null || end <= start) throw Error("复核区间无效。");
+  return { start, end };
+}
+export function blankReview(source: Review["source"] = "model"): Review {
+  return {
+    status: source === "manual" ? "accepted" : "pending",
+    correctedText: "",
+    note: "",
+    correctedClass: "",
+    span: null,
+    attributes: null,
+    source,
+  };
+}
 function review(v: unknown): Review {
   if (
     !isRecord(v) ||
@@ -156,61 +211,68 @@ function review(v: unknown): Review {
     status: v.status as ReviewStatus,
     correctedText: text(v.correctedText, 10000),
     note: text(v.note, 4000),
+    correctedClass: v.correctedClass === undefined ? "" : text(v.correctedClass, 120),
+    span: span(v.span),
+    attributes: attributes(v.attributes),
+    source: v.source === "manual" ? "manual" : "model",
   };
 }
 function decodeProject(v: unknown, limit: number): EvidenceProject {
   if (
     !isRecord(v) ||
     v.schemaVersion !== 1 ||
-    !["example", "import", "manual", "service"].includes(String(v.origin)) ||
+    !ORIGINS.includes(v.origin as Origin) ||
     !Array.isArray(v.documents) ||
     v.documents.length < 1 ||
-    v.documents.length > 8
+    v.documents.length > LIMITS.documents
   )
-    throw Error("项目需要1–8份资料。");
+    throw Error(`批次需要1–${LIMITS.documents}份资料。`);
   const docs = v.documents.map((x) => {
     if (
       !isRecord(x) ||
       !Array.isArray(x.extractions) ||
-      x.extractions.length > 300 ||
+      x.extractions.length > LIMITS.records ||
       !Array.isArray(x.reviews) ||
       x.reviews.length !== x.extractions.length
     )
       throw Error("记录与复核数据不匹配。");
     return {
       id: text(x.id, 120),
-      text: text(x.text, 30000),
-      originalText: text(x.originalText, 30000),
+      text: text(x.text, LIMITS.documentChars),
+      originalText: text(x.originalText, LIMITS.documentChars),
       extractions: x.extractions.map(extraction),
       reviews: x.reviews.map(review),
     };
   });
   if (
-    docs.some((x) => !x.id) ||
+    docs.some((x) => !x.id.trim()) ||
     new Set(docs.map((x) => x.id)).size !== docs.length
   )
-    throw Error("资料标识必须唯一。");
+    throw Error("资料标识必须唯一且不能为空。");
+  const model = v.model === undefined ? DEFAULT_MODEL : text(v.model, 120).trim();
+  if (!/^[A-Za-z0-9._:/@-]{1,120}$/.test(model)) throw Error("模型 ID 格式无效。");
   const out: EvidenceProject = {
     schemaVersion: 1,
-    origin: v.origin as EvidenceProject["origin"],
+    origin: v.origin as Origin,
     documents: docs,
     fields: fields(v.fields),
     prompt: text(v.prompt, 12000),
     examples: examples(v.examples),
+    model,
   };
   if (jsonBytes(out) > limit)
     throw Error(
       limit === MODEL_BYTES
-        ? "项目超过800KB，请拆分资料后提交正式项目。"
-        : "工作稿超过1.2MB恢复上限，请先导出并减少资料或修订。",
+        ? "批次超过880KB，请拆成多个批次后保存为正式项目。"
+        : "工作稿超过1.35MB恢复上限，请先导出并减少资料或修订。",
     );
   return out;
 }
-export const MODEL_BYTES = 800_000;
-export const DRAFT_DATA_BYTES = 1_200_000;
-export const DRAFT_EXTRA_BYTES = 600_000;
+export const MODEL_BYTES = 880_000;
+export const DRAFT_DATA_BYTES = 1_350_000;
+export const DRAFT_EXTRA_BYTES = 450_000;
 export const WORKING_COPY_BYTES = 1_850_000;
-export const PORTABLE_FILE_BYTES = 6_000_000;
+export const PORTABLE_FILE_BYTES = 8_000_000;
 export const jsonBytes = (value: unknown): number =>
   new TextEncoder().encode(JSON.stringify(value)).length;
 export function validateProject(v: unknown): EvidenceProject {
@@ -218,6 +280,28 @@ export function validateProject(v: unknown): EvidenceProject {
 }
 export function restoreProjectDraft(v: unknown): EvidenceProject {
   return decodeProject(v, DRAFT_DATA_BYTES);
+}
+export interface PendingRun {
+  id: string;
+  channel: "host" | "service";
+  input: RunInput;
+  model: string;
+}
+export function pendingRunValue(value: unknown): PendingRun {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value.id,
+    )
+  )
+    throw Error("待提交任务草稿无效。");
+  return {
+    id: value.id,
+    channel: value.channel === "host" ? "host" : "service",
+    input: runInput(value.input),
+    model: typeof value.model === "string" ? text(value.model, 120) : DEFAULT_MODEL,
+  };
 }
 export interface EvidenceWorkingCopy {
   title: string;
@@ -231,21 +315,12 @@ export function restoreWorkingCopy(v: unknown): EvidenceWorkingCopy {
     if (key === "examplesEditor" || key === "importText") {
       if (typeof value !== "string") throw Error("编辑器草稿必须是文本。");
       extra[key] = value;
-    } else if (key === "pendingRun") {
-      if (
-        !isRecord(value) ||
-        typeof value.id !== "string" ||
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-          value.id,
-        )
-      )
-        throw Error("待提交任务草稿无效。");
-      extra[key] = { id: value.id, input: runInput(value.input) };
-    } else throw Error("工作稿含不支持的附加字段。");
+    } else if (key === "pendingRun") extra[key] = pendingRunValue(value);
+    else throw Error("工作稿含不支持的附加字段。");
   }
   if (jsonBytes(extra) > DRAFT_EXTRA_BYTES)
     throw Error(
-      "编辑器与待提交任务草稿合计超过600KB。请清理导入文本或缩短示例后再编辑；大文件请从文件直接导入。",
+      "编辑器与待提交任务草稿合计超过450KB。请清理粘贴的导入文本或缩短示例后再编辑；大文件请从文件直接导入。",
     );
   const copy = {
     title: text(v.title, 120),
@@ -268,7 +343,7 @@ export function parseWorkingImport(
   fallbackTitle = "导入资料",
 ): EvidenceWorkingCopy {
   if (new TextEncoder().encode(raw).length > PORTABLE_FILE_BYTES)
-    throw Error("导入文件超过6MB，请拆分后再导入。");
+    throw Error("导入文件超过8MB，请拆分后再导入。");
   let value: unknown;
   try {
     value = JSON.parse(raw);
@@ -293,28 +368,34 @@ export function parseWorkingImport(
     extra: {},
   });
 }
-export function importedDocuments(
-  values: unknown[],
-  origin: EvidenceProject["origin"] = "import",
-): EvidenceProject {
-  if (!values.length || values.length > 8) throw Error("一次导入1–8份资料。");
-  const documents = values.map((v, index) => {
+export function documentsFromAnnotated(values: unknown[]): EvidenceDocument[] {
+  if (!values.length || values.length > LIMITS.documents)
+    throw Error(`一次导入1–${LIMITS.documents}份资料。`);
+  const used = new Set<string>();
+  return values.map((v, index) => {
     if (!isRecord(v) || !Array.isArray(v.extractions))
       throw Error(`第${index + 1}行需要 text 和 extractions。`);
-    const source = text(v.text, 30000),
+    if (v.extractions.length > LIMITS.records)
+      throw Error(`第${index + 1}份资料超过${LIMITS.records}条记录。`);
+    const source = text(v.text, LIMITS.documentChars),
       items = v.extractions.map(extraction);
+    let id = v.document_id == null ? `doc-${index + 1}` : text(v.document_id, 120).trim() || `doc-${index + 1}`;
+    while (used.has(id)) id = id + "-2";
+    used.add(id);
     return {
-      id: v.document_id == null ? `doc-${index + 1}` : text(v.document_id, 120),
+      id,
       text: source,
       originalText: source,
       extractions: items,
-      reviews: items.map(() => ({
-        status: "pending" as const,
-        correctedText: "",
-        note: "",
-      })),
+      reviews: items.map(() => blankReview()),
     };
   });
+}
+export function importedDocuments(
+  values: unknown[],
+  origin: Origin = "import",
+): EvidenceProject {
+  const documents = documentsFromAnnotated(values);
   const names = [
     ...new Set(
       documents.flatMap((d) => d.extractions.map((e) => e.extraction_class)),
@@ -324,33 +405,77 @@ export function importedDocuments(
     schemaVersion: 1,
     origin,
     documents,
-    fields: names.slice(0, 24).map((name) => ({ name, description: "" })),
-    prompt: "从原文提取有明确依据的字段，不推断未出现的信息。",
+    fields: names.slice(0, LIMITS.fields).map((name) => ({ name, description: "", attributes: [] })),
+    prompt: "从原文提取有明确依据的片段，不推断未出现的信息。",
     examples: [],
+    model: DEFAULT_MODEL,
+  });
+}
+/** Accept a LangExtract JSONL file, a JSON array, a single AnnotatedDocument or a project object. */
+export function parseAnnotated(raw: string): unknown[] {
+  let single: unknown;
+  try {
+    single = JSON.parse(raw);
+  } catch {}
+  if (Array.isArray(single)) return single;
+  if (isRecord(single)) return [single];
+  const lines = raw.split(/\r?\n/).filter((x) => x.trim());
+  return lines.map((x, i) => {
+    try {
+      return JSON.parse(x);
+    } catch {
+      throw Error(`第${i + 1}行不是有效 JSON。`);
+    }
   });
 }
 export function parseImport(raw: string): EvidenceProject {
-  text(raw, 800000);
+  text(raw, MODEL_BYTES);
   let single: unknown;
   try {
     single = JSON.parse(raw);
   } catch {}
   if (isRecord(single) && single.schemaVersion === 1)
     return validateProject(single);
-  if (Array.isArray(single)) return importedDocuments(single);
-  if (isRecord(single)) return importedDocuments([single]);
   try {
-    return importedDocuments(
-      raw
-        .split(/\r?\n/)
-        .filter((x) => x.trim())
-        .map((x) => JSON.parse(x)),
-    );
+    return importedDocuments(parseAnnotated(raw));
   } catch (e) {
     throw Error(
       "无法导入 JSONL：" + (e instanceof Error ? e.message : "格式无效。"),
     );
   }
+}
+/** New documents from plain text files; ids are made unique against the current batch. */
+export function textDocuments(
+  files: { name: string; text: string }[],
+  existing: string[] = [],
+): EvidenceDocument[] {
+  const used = new Set(existing);
+  return files.map((f) => {
+    const body = text(f.text.replace(/\r\n?/g, "\n"), LIMITS.documentChars);
+    let id = f.name.replace(/\.[^.]+$/, "").trim().slice(0, 100) || "资料";
+    const base = id;
+    for (let n = 2; used.has(id); n++) id = `${base}-${n}`;
+    used.add(id);
+    return { id, text: body, originalText: body, extractions: [], reviews: [] };
+  });
+}
+export function isStale(doc: EvidenceDocument) {
+  return doc.text !== doc.originalText;
+}
+/** Effective interval of a record: reviewer anchor first, then the upstream char_interval. */
+export function recordSpan(doc: EvidenceDocument, index: number): Span | null {
+  if (isStale(doc)) return null;
+  const e = doc.extractions[index],
+    r = doc.reviews[index];
+  if (!e) return null;
+  const length = Array.from(doc.originalText).length;
+  const s = r?.span ?? {
+    start: e.char_interval?.start_pos ?? -1,
+    end: e.char_interval?.end_pos ?? -1,
+  };
+  if (s.start == null || s.end == null || s.start < 0 || s.end <= s.start || s.end > length)
+    return null;
+  return { start: s.start, end: s.end };
 }
 export function evidenceSpan(
   doc: EvidenceDocument,
@@ -362,20 +487,109 @@ export function evidenceSpan(
   start: number;
   end: number;
 } | null {
-  if (doc.text !== doc.originalText) return null;
-  const a = e.char_interval?.start_pos,
-    b = e.char_interval?.end_pos,
-    chars = Array.from(doc.originalText);
-  if (a == null || b == null || a < 0 || b <= a || b > chars.length)
-    return null;
+  const i = doc.extractions.indexOf(e);
+  const s = i >= 0 ? recordSpan(doc, i) : null;
+  if (!s) {
+    if (i >= 0 || isStale(doc)) return null;
+    const a = e.char_interval?.start_pos,
+      b = e.char_interval?.end_pos;
+    if (a == null || b == null || b <= a || b > Array.from(doc.originalText).length) return null;
+    return evidenceSpan({ ...doc, extractions: [e], reviews: [blankReview()] }, e);
+  }
+  const chars = Array.from(doc.originalText);
   return {
-    before: chars.slice(0, a).join(""),
-    quote: chars.slice(a, b).join(""),
-    after: chars.slice(b).join(""),
-    start: a,
-    end: b,
+    before: chars.slice(0, s.start).join(""),
+    quote: chars.slice(s.start, s.end).join(""),
+    after: chars.slice(s.end).join(""),
+    start: s.start,
+    end: s.end,
   };
 }
+export function finalClass(doc: EvidenceDocument, i: number) {
+  return doc.reviews[i]?.correctedClass || doc.extractions[i].extraction_class;
+}
+export function finalText(doc: EvidenceDocument, i: number) {
+  const r = doc.reviews[i];
+  return r?.status === "corrected" && r.correctedText
+    ? r.correctedText
+    : doc.extractions[i].extraction_text;
+}
+export function finalAttributes(doc: EvidenceDocument, i: number) {
+  return doc.reviews[i]?.attributes ?? doc.extractions[i].attributes;
+}
+export type LocationKind = "exact" | "fuzzy" | "anchored" | "unaligned" | "stale";
+export function locationKind(doc: EvidenceDocument, i: number): LocationKind {
+  if (isStale(doc)) return "stale";
+  if (!recordSpan(doc, i)) return "unaligned";
+  if (doc.reviews[i]?.span) return "anchored";
+  return doc.extractions[i].alignment_status === "match_exact" ? "exact" : "fuzzy";
+}
+/** Re-align unlocated records with the Node aligner; anchors go into the review layer only. */
+export function realignDocument(doc: EvidenceDocument): {
+  doc: EvidenceDocument;
+  aligned: number;
+} {
+  if (isStale(doc)) return { doc, aligned: 0 };
+  const ctx = alignContext(doc.originalText);
+  let cursor = 0,
+    aligned = 0;
+  const reviews = doc.reviews.map((r, i) => {
+    const current = recordSpan(doc, i);
+    if (current) {
+      cursor = current.end;
+      return r;
+    }
+    const hit = alignExtraction(ctx, doc.extractions[i].extraction_text, cursor);
+    if (!hit) return r;
+    cursor = hit.end;
+    aligned++;
+    return { ...r, span: { start: hit.start, end: hit.end } };
+  });
+  return { doc: { ...doc, reviews }, aligned };
+}
+/** A reviewer's own annotation over a codepoint range of the original text. */
+export function manualRecord(
+  doc: EvidenceDocument,
+  cls: string,
+  range: Span,
+  attrs: Record<string, string> | null = null,
+): EvidenceDocument {
+  if (isStale(doc)) throw Error("原文已变更，请先恢复原文再标注。");
+  if (!cls.trim()) throw Error("请先选择类别。");
+  const quote = sliceCodepoints(doc.originalText, range.start, range.end);
+  if (!quote.trim() || range.end <= range.start) throw Error("请先在原文中选中要标注的文字。");
+  if (doc.extractions.length >= LIMITS.records) throw Error("本资料记录已达上限。");
+  const e: Extraction = {
+    extraction_class: cls,
+    extraction_text: quote,
+    char_interval: { start_pos: range.start, end_pos: range.end },
+    alignment_status: "match_exact",
+    extraction_index: null,
+    group_index: null,
+    description: null,
+    attributes: attrs && Object.keys(attrs).length ? attrs : null,
+  };
+  // Keep the ledger in reading order.
+  let at = doc.extractions.findIndex((_, i) => {
+    const s = recordSpan(doc, i);
+    return s ? s.start > range.start : false;
+  });
+  if (at < 0) at = doc.extractions.length;
+  return {
+    ...doc,
+    extractions: [...doc.extractions.slice(0, at), e, ...doc.extractions.slice(at)],
+    reviews: [...doc.reviews.slice(0, at), blankReview("manual"), ...doc.reviews.slice(at)],
+  };
+}
+export function removeRecord(doc: EvidenceDocument, i: number): EvidenceDocument {
+  if (doc.reviews[i]?.source !== "manual") throw Error("模型记录只能驳回，不能删除。");
+  return {
+    ...doc,
+    extractions: doc.extractions.filter((_, j) => j !== i),
+    reviews: doc.reviews.filter((_, j) => j !== i),
+  };
+}
+/** LangExtract AnnotatedDocument JSONL with the records as the model returned them (manual records excluded). */
 export function rawJsonl(project: EvidenceProject): string {
   return (
     project.documents
@@ -383,7 +597,43 @@ export function rawJsonl(project: EvidenceProject): string {
         JSON.stringify({
           document_id: d.id,
           text: d.originalText,
-          extractions: d.extractions,
+          extractions: d.extractions.filter((_, i) => d.reviews[i]?.source !== "manual"),
+        }),
+      )
+      .join("\n") + "\n"
+  );
+}
+/** Accepted, corrected and manual records with final class/value/interval, in the same JSONL format. */
+export function reviewedJsonl(project: EvidenceProject): string {
+  return (
+    project.documents
+      .map((d) =>
+        JSON.stringify({
+          document_id: d.id,
+          text: d.originalText,
+          extractions: d.extractions.flatMap((e, i) => {
+            const r = d.reviews[i];
+            if (r.status !== "accepted" && r.status !== "corrected") return [];
+            const s = recordSpan(d, i);
+            const value = finalText(d, i);
+            return [
+              {
+                extraction_class: finalClass(d, i),
+                extraction_text: value,
+                char_interval: s ? { start_pos: s.start, end_pos: s.end } : null,
+                // A corrected value that is not verbatim keeps its evidence interval but is not claimed exact.
+                alignment_status: !s
+                  ? null
+                  : sliceCodepoints(d.originalText, s.start, s.end) === value
+                    ? "match_exact"
+                    : "match_fuzzy",
+                extraction_index: i + 1,
+                group_index: e.group_index,
+                description: r.note || null,
+                attributes: finalAttributes(d, i),
+              },
+            ];
+          }),
         }),
       )
       .join("\n") + "\n"
@@ -393,38 +643,48 @@ const csvCell = (v: string) =>
   '"' +
   (/^\s*[=+\-@]|^[\t\r\n]/.test(v) ? "'" + v : v).replaceAll('"', '""') +
   '"';
+const locationName: Record<LocationKind, string> = {
+  exact: "精确定位",
+  fuzzy: "模糊定位",
+  anchored: "人工定位",
+  unaligned: "未定位",
+  stale: "原文已变更",
+};
 export function reviewCsv(p: EvidenceProject): string {
   const rows = [
     [
       "资料",
       "类别",
       "原始抽取",
+      "复核类别",
       "复核值",
       "状态",
+      "来源",
       "区间起点",
       "区间终点",
       "证据状态",
+      "原文片段",
       "属性",
       "备注",
     ],
   ];
   for (const d of p.documents)
     d.extractions.forEach((e, i) => {
-      const r = d.reviews[i];
+      const r = d.reviews[i],
+        s = recordSpan(d, i);
       rows.push([
         d.id,
         e.extraction_class,
         e.extraction_text,
-        r.status === "corrected" ? r.correctedText : e.extraction_text,
+        finalClass(d, i),
+        finalText(d, i),
         r.status,
-        String(e.char_interval?.start_pos ?? ""),
-        String(e.char_interval?.end_pos ?? ""),
-        d.text !== d.originalText
-          ? "原文已变更"
-          : evidenceSpan(d, e)
-            ? "有定位"
-            : "未定位",
-        JSON.stringify(e.attributes ?? {}),
+        r.source === "manual" ? "人工标注" : "模型",
+        String(s?.start ?? ""),
+        String(s?.end ?? ""),
+        locationName[locationKind(d, i)],
+        s ? sliceCodepoints(d.originalText, s.start, s.end) : "",
+        JSON.stringify(finalAttributes(d, i) ?? {}),
         r.note,
       ]);
     });
@@ -432,17 +692,60 @@ export function reviewCsv(p: EvidenceProject): string {
     "\ufeff" + rows.map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n"
   );
 }
+export interface ClassStat {
+  name: string;
+  defined: boolean;
+  total: number;
+  pending: number;
+  accepted: number;
+  corrected: number;
+  rejected: number;
+  manual: number;
+  unaligned: number;
+  documents: number;
+}
+/** Counts per final class across the batch. */
+export function classStats(p: EvidenceProject): ClassStat[] {
+  const map = new Map<string, ClassStat & { docs: Set<string> }>();
+  const make = (name: string, defined: boolean) => ({
+    name,
+    defined,
+    total: 0,
+    pending: 0,
+    accepted: 0,
+    corrected: 0,
+    rejected: 0,
+    manual: 0,
+    unaligned: 0,
+    documents: 0,
+    docs: new Set<string>(),
+  });
+  for (const f of p.fields) if (f.name.trim() && !map.has(f.name)) map.set(f.name, make(f.name, true));
+  for (const d of p.documents)
+    d.extractions.forEach((_, i) => {
+      const name = finalClass(d, i);
+      let s = map.get(name);
+      if (!s) map.set(name, (s = make(name, false)));
+      const r = d.reviews[i];
+      s.total++;
+      s[r.status]++;
+      if (r.source === "manual") s.manual++;
+      if (!recordSpan(d, i)) s.unaligned++;
+      s.docs.add(d.id);
+    });
+  return [...map.values()].map(({ docs, ...s }) => ({ ...s, documents: docs.size }));
+}
 export function runInput(v: unknown): RunInput {
   if (
     !isRecord(v) ||
     !Array.isArray(v.documents) ||
     v.documents.length < 1 ||
-    v.documents.length > 8
+    v.documents.length > LIMITS.documents
   )
-    throw Error("抽取任务需要1–8份资料。");
+    throw Error(`抽取任务需要1–${LIMITS.documents}份资料。`);
   const documents = v.documents.map((d) => {
     if (!isRecord(d)) throw Error("资料格式无效。");
-    const source = text(d.text, 30000),
+    const source = text(d.text, LIMITS.documentChars),
       id = text(d.id, 120);
     if (!source.trim() || !id) throw Error("资料原文和标识不能为空。");
     return { id, text: source };
@@ -454,11 +757,22 @@ export function runInput(v: unknown): RunInput {
     fs = fields(v.fields);
   if (!prompt.trim()) throw Error("请填写抽取要求。");
   if (!ex.length) throw Error("至少提供一个已应用的抽取示例。");
-  if (fs.some((f) => !f.name.trim())) throw Error("字段名称不能为空。");
+  if (fs.some((f) => !f.name.trim())) throw Error("类别名称不能为空。");
   const out = { documents, fields: fs, prompt, examples: ex };
-  if (new TextEncoder().encode(JSON.stringify(out)).length > 400000)
-    throw Error("抽取输入超过400KB，请拆分任务。");
+  if (new TextEncoder().encode(JSON.stringify(out)).length > 1_000_000)
+    throw Error("抽取输入超过1MB，请拆成多个批次。");
   return out;
+}
+/** The optional Python service keeps its own 1.7.1 adapter limits (8 documents, 30k characters each). */
+export function serviceInput(input: RunInput): RunInput {
+  if (input.documents.length > 8)
+    throw Error("Python 服务一次最多8份资料，请选择“当前资料”或拆分批次。");
+  if (input.documents.some((d) => d.text.length > 30000))
+    throw Error("Python 服务单份资料最多30,000字符，请拆分资料或改用 Floatboat 模型。");
+  return {
+    ...input,
+    fields: input.fields.slice(0, 24).map((f) => ({ name: f.name, description: f.description, attributes: [] })),
+  };
 }
 export function validateJob(v: unknown): Job {
   if (
@@ -488,91 +802,12 @@ export function validateJob(v: unknown): Job {
     result:
       v.result === null
         ? null
-        : importedDocuments(
-            Array.isArray(v.result) ? v.result : [],
-            "service",
-          ).documents.map((d) => ({
-            document_id: d.id,
-            text: d.originalText,
-            extractions: d.extractions,
-          })),
+        : documentsFromAnnotated(Array.isArray(v.result) ? v.result : []).map(
+            (d) => ({
+              document_id: d.id,
+              text: d.originalText,
+              extractions: d.extractions,
+            }),
+          ),
   };
 }
-export const exampleText =
-  "采购访谈记录 · 2026年10月\n\n🌿 青禾工作室正在为冬季展览采购灯具。项目负责人林晓确认，首批需要24套可调光射灯，预算为18,000元。\n\n供应商北辰照明承诺于11月15日前交付，安装地点是西岸展厅。林晓希望每套灯具附带两年质保，并在交付前提供色温测试报告。\n\n待确认：第二批追加数量尚未决定。";
-function seedExtraction(
-  cls: string,
-  value: string,
-  attrs: Record<string, string>,
-): Extraction {
-  const start = Array.from(
-    exampleText.slice(0, exampleText.indexOf(value)),
-  ).length;
-  return {
-    extraction_class: cls,
-    extraction_text: value,
-    char_interval: {
-      start_pos: start,
-      end_pos: start + Array.from(value).length,
-    },
-    alignment_status: "match_exact",
-    extraction_index: null,
-    group_index: null,
-    description: null,
-    attributes: attrs,
-  };
-}
-export const seed: EvidenceProject = {
-  schemaVersion: 1,
-  origin: "example",
-  documents: [
-    {
-      id: "采购访谈-01",
-      text: exampleText,
-      originalText: exampleText,
-      extractions: [
-        seedExtraction("负责人", "林晓", { 角色: "项目负责人" }),
-        seedExtraction("供应商", "北辰照明", { 行业: "照明" }),
-        seedExtraction("数量", "24套", { 对象: "可调光射灯" }),
-        seedExtraction("预算", "18,000元", { 币种: "人民币" }),
-        seedExtraction("交付日期", "11月15日前", { 限定: "最晚交付" }),
-        {
-          extraction_class: "追加数量",
-          extraction_text: "尚未确定",
-          char_interval: null,
-          alignment_status: null,
-          extraction_index: null,
-          group_index: null,
-          description: "示例：需要人工确认的未定位项",
-          attributes: null,
-        },
-      ],
-      reviews: Array.from({ length: 6 }, () => ({
-        status: "pending",
-        correctedText: "",
-        note: "",
-      })),
-    },
-  ],
-  fields: [
-    { name: "负责人", description: "负责项目交付的人" },
-    { name: "供应商", description: "提供产品的组织" },
-    { name: "数量", description: "明确数量与单位" },
-    { name: "预算", description: "明确金额和币种" },
-    { name: "交付日期", description: "明确交付时间" },
-  ],
-  prompt:
-    "提取采购访谈中的负责人、供应商、数量、预算和交付日期。只使用原文中的确切表达；未决定的事项不要推断。",
-  examples: [
-    {
-      text: "陈越向远山设备采购12台灯具，预算6000元，6月1日前交付。",
-      extractions: [
-        { extraction_class: "负责人", extraction_text: "陈越" },
-        { extraction_class: "供应商", extraction_text: "远山设备" },
-        { extraction_class: "数量", extraction_text: "12台" },
-        { extraction_class: "预算", extraction_text: "6000元" },
-        { extraction_class: "交付日期", extraction_text: "6月1日前" },
-      ],
-    },
-  ],
-};

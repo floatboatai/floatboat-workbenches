@@ -32,7 +32,7 @@ load('deerflow.runtime.stream_modes', 'backend/packages/harness/deerflow/runtime
 load('deerflow.utils.thread_id', 'backend/packages/harness/deerflow/utils/thread_id.py')
 models = load('deerflow_gateway_run_models', 'backend/app/gateway/run_models.py')
 id = 'ca8ada3d-cefd-4dad-b2ef-a36b08ebc664'
-body = {'input': {'messages': [{'id': id, 'role': 'user', 'content': 'Ordinary research contract fixture'}]}, 'context': {'model_name': 'gemini-3.8-flash'}, 'metadata': {'floatboat_operation_id': id}, 'multitask_strategy': 'reject', 'on_disconnect': 'continue'}
+body = {'input': {'messages': [{'id': id, 'role': 'user', 'content': 'Ordinary research contract fixture'}]}, 'context': {'model_name': 'gemini-3.8-flash'}, 'metadata': {'floatboat_operation_id': id}, 'stream_mode': ['values', 'updates'], 'multitask_strategy': 'reject', 'on_disconnect': 'continue'}
 request = models.RunCreateRequest.model_validate(body)
 assert request.context['model_name'] == 'gemini-3.8-flash'
 assert request.on_disconnect == 'continue'

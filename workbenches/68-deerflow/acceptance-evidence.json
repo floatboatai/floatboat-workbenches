@@ -1,7 +1,7 @@
 {
-  "version": "0.5.0",
+  "version": "0.9.0",
   "build": "passed",
-  "tests": 19,
+  "tests": 53,
   "browser": "passed",
   "autosave": "passed",
   "workingDraftRecovery": "passed",
@@ -13,11 +13,16 @@
     "liveResearch": "not-run",
     "liveDeerFlowService": "unverified",
     "officialRunRequest": "Pinned official Pydantic RunCreateRequest validates actual background launch payload; no Agent execution",
-    "httpRun": "Explicit HTTP contract fixture: thread creation, background run, metadata matching, fixed Idempotency-Key, GET-only recovery and native state retrieval"
+    "httpRun": "Explicit HTTP contract fixture: thread creation, background run, metadata matching, fixed Idempotency-Key, GET-only recovery and native state retrieval",
+    "streaming": "official run join SSE (GET /api/threads/{t}/runs/{r}/stream) with Last-Event-ID; verified against loopback Gateway contract fixture"
   },
-  "hostLlm": "not-used",
+  "hostLlm": "mock contract only; real Host not called",
   "hostImport": "unverified",
-  "package": "passed",
+  "package": {
+    "path": "artifacts/deerflow-studio-0.9.0.fbworkbench",
+    "files": 72,
+    "sha256": "f785d7207339bf0db288b71db1d61fc2c595e3380fb862358be5f9f4641b508b"
+  },
   "recoveryExportImportReload": {
     "passed": true,
     "schema": "snapshot:{title,data,extra}",
@@ -30,17 +35,19 @@
     "oldAndNewDocumentsPreserved": true,
     "sharedAutosaveChanged": false
   },
-  "browserErrors": [],
+  "browserErrors": [
+    "expected ERR_CONNECTION_RESET from deliberate lost-receipt test only"
+  ],
   "screenshot": {
     "path": "../../docs/screenshots/deerflow.png",
     "dimensions": [
       1440,
-      1337
+      900
     ],
-    "sha256": "afe240962bb7b23a5cf75ce632210058acb93c9d4b001036cfdee1b568955e69"
+    "sha256": "e2025ecf9f43b5c8012b9073e96b0eec1306da490f0158411fc4fb609da96af8"
   },
   "limitations": [
-    "Requires an existing configured DeerFlow Gateway, models, tools and authorization; live execution remains unverified",
+    "Real Floatboat Host, real DeerFlow deployment and public retrieval endpoints not called during acceptance",
     "Cancel, human confirmation and interrupted-run continuation are handled in upstream DeerFlow",
     "Original artifact bytes are not downloaded",
     "Floatboat source-package import unverified"
@@ -80,5 +87,11 @@
     "deliveryPath": "workbench-deerflow/deerflow-studio-0.5.0.fbworkbench",
     "introductionFile": "workbench-deerflow/presentation.json",
     "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
+  },
+  "browserChecks": 55,
+  "localResearch": {
+    "retrieval": "Node built-in (direct+Readability, Jina fallback, Exa, GitHub); verified with loopback fixture only",
+    "plan": "template + optional Host draft; human confirmation required",
+    "report": "Markdown editor, citations, local draft, MD/HTML export"
   }
 }

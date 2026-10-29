@@ -4,15 +4,16 @@
 
 ## 已实现
 
-- 导入 LangExtract `AnnotatedDocument` JSONL、JSON 数组或完整项目；一次1–8份资料。
-- 按 Python Unicode 字符区间定位中文与 emoji；未定位和原文变更明确提示，不伪造定位。
-- 接受、驳回、修订值、复核笔记与状态筛选；保留上游原始抽取和人工修订两层数据。
-- 编辑原文、字段定义、抽取要求和 few-shot 示例；无效 JSON 作为草稿保留。
-- SQLite 自动保存、IndexedDB 本机恢复、延迟保存不阻挡编辑、幂等重试与版本冲突保护。
-- 导出原始 JSONL、审校 CSV、包含未应用编辑内容的完整工作稿 JSON；导入创建独立项目。
-- 独立 Python LangExtract 服务与 Node 同源连接器，保存任务快照和标识，查询、恢复状态及停止接收结果。完成的结果另开为新项目。
+- **资料批次**：1–40 份资料，粘贴原文、添加 .txt/.md 文件，或导入 LangExtract `AnnotatedDocument` JSONL / JSON 数组 / 完整工作稿；横向资料条显示每份复核进度。首屏是 5 份采购资料的示例批次（人工编制，非模型输出）。
+- **抽取配方**：任务说明、类别定义（含义与属性名）、结构化 few-shot 示例；按 LangExtract 的做法检查示例片段是否逐字出现在示例原文中；可预览实际提示词。
+- **Floatboat 模型通道**：`llm.generateText`，按 LangExtract 的 Q/A few-shot 格式逐段（约 1800 字符）提示；输出解析与原文区间对齐（精确 → 规范化 → 模糊 ≥0.75，否则未定位）全部在 Node 内完成。任务输入先落盘，同一标识不重复调用模型；结果另开为新批次。
+- **无模型也能完成主任务**：选中原文即标注为某类别；修改类别、值和属性；把记录重新定位到选区或自动对齐未定位记录；接受 / 驳回 / 修订 / 笔记，键盘 J/K/A/X。
+- **类别统计**：类别 × 状态（待复核、接受、修订、驳回、未定位）与逐份资料进度。
+- **导出**：审定结果 JSONL（LangExtract 格式，含最终类别/值/区间）、可视化审校页 HTML（自包含、无脚本）、审校表 CSV、原始抽取 JSONL（模型原样，不含人工标注）、完整工作稿 JSON。
+- **LangExtract Python 服务（可选）**：独立的 `langextract==1.7.1` 服务仍可用，抽取面板内显示其状态、启动命令与“重新检查”。
+- SQLite 自动保存、IndexedDB 本机恢复、延迟保存不阻挡编辑、幂等重试与版本冲突保护；导入一律新建批次。
 
-**验证边界：**本地编辑/导入/导出与自动保存已通过 Chrome 验收；实际 `langextract==1.7.1` 的 grounding/JSONL 已以显式 stub model 做契约检查。Node→Python 真实 HTTP、鉴权和未配置模型状态已验证。没有调用真实模型提供方；没有把样例或 stub 当作 AI 输出。Host 与 Floatboat 客户端导入未实测。详见 [验收记录](ACCEPTANCE.md)。
+**验证边界：**本地编辑、标注、导入导出、自动保存与 Host 通道合同（mock）已验证；**真实 Floatboat Host / 模型调用未测**；Python 服务沿用 0.4 的契约验证，本轮未连真实模型。Floatboat 客户端导入未实测。详见 [验收记录](ACCEPTANCE.md)。
 
 ## 运行
 
@@ -26,9 +27,9 @@ pnpm workbench dev langextract
 pnpm workbench package langextract
 ```
 
-预览有真实 SQLite 数据；界面会自动恢复当前工作稿。导出包位于本项目 `artifacts/`，在 Floatboat「我的 → 工作台 → 导入工作台」导入。源包默认不含预览数据和 Python 服务；服务需独立运行。已有项目跨机器移动请使用“完整项目 JSON”。
+预览有真实 SQLite 数据；界面会自动恢复当前批次。Floatboat 运行时，抽取面板的“Floatboat 模型”通道自动可用；不想连接时用 `FLOATBOAT_HOST_MODE=offline pnpm dev`。导出包位于本项目 `artifacts/`，在 Floatboat「我的 → 工作台 → 导入工作台」导入。源包默认不含预览数据和 Python 服务。跨机器移动批次请用“完整工作稿 JSON”。
 
-## 配置实际抽取服务
+## 可选：LangExtract Python 服务
 
 在此项目目录创建隔离 Python 环境。`requirements.lock` 是本次 Python3.12 环境的精确依赖快照；其他系统先验证兼容性。
 
@@ -47,7 +48,7 @@ export LX_JOB_DATABASE='service/.local/jobs.sqlite'
 service/.venv/bin/python service/server.py
 ```
 
-默认监听 `127.0.0.1:8767`。Ollama 路线使用 `LX_MODEL_URL` 指定已部署服务，并选择其实际模型 ID；模型权重、显存和许可由该服务管理。此版本未代替用户安装模型，未提供 Host→Python provider bridge。
+默认监听 `127.0.0.1:8767`。Ollama 路线使用 `LX_MODEL_URL` 指定已部署服务，并选择其实际模型 ID；模型权重、显存和许可由该服务管理。此版本未代替用户安装模型。Python 服务一次最多 8 份资料、每份 3 万字符；更大的批次请用 Floatboat 模型通道或拆分。
 
 在启动 Node 预览的终端设置：
 
@@ -63,11 +64,9 @@ pnpm dev
 
 ## 输入与导出约定
 
-每行 JSONL 包含 `document_id`、`text` 和 `extractions`；记录支持 `extraction_class`、`extraction_text`、`char_interval`、`attributes`、`alignment_status` 等上游字段。区间左闭右开。连续中文的上游对齐可能为空或模糊，需要人工核对。
+每行 JSONL 包含 `document_id`、`text` 和 `extractions`；记录支持 `extraction_class`、`extraction_text`、`char_interval`、`attributes`、`alignment_status` 等上游字段。区间为 Python Unicode 码点、左闭右开。人工层（复核类别、值、属性、区间锚点、来源）与上游记录分开保存，0.4 的项目文件可直接打开。
 
-“原始抽取 JSONL”始终输出抽取时原文和原始记录，不混入人工改写；“审校表 CSV”包含原始值、修订值、状态、区间、属性和备注；“完整项目 JSON”使用 `langextract-working-copy` v1 封套，包含名称、原文修改、配置、全部修订和未应用的编辑器草稿；也兼容导入旧项目 JSON 与旧恢复文件。导入旧恢复文件只读取其快照，不重放保存请求或覆盖旧项目。选择文件会直接导入为新项目，避免将整个大文件重复存入文本编辑器。
-
-文本单份最多30k字符；正式模型仍限800KB，原始 JSONL 导入沿用该限制。超过正式容量的修订作为工作稿保存：数据上限1.2MB，未应用编辑器与待提交任务合计600KB，整个工作快照上限1.85MB，低于1.95MB自动保存请求上限。达到恢复上限时会拒绝本次增量并保留原内容；请导出后拆分资料或缩短修订。便携工作稿文件读取上限6MB（允许旧恢复文件的冗余包装），导入后的有效快照仍严格受上述预算约束。不解析扫描件或 PDF。
+正式批次保存上限 880KB（共享存储拒收 900KB 以上的项目）；超出部分作为工作稿保存：数据 1.35MB、未应用编辑器与待提交任务 450KB、整体 1.85MB。文件读取上限 8MB。不解析扫描件或 PDF。
 
 ## 许可与上游
 

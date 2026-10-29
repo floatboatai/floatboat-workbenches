@@ -4,31 +4,40 @@
 
 固定 Node22 / React19 / SQLite 模板；应用无新增 runtime npm 依赖，没有修改 CSP 或 SDK。`src/server/index.ts` 注册业务路由；浏览器使用 SDK page connection 同源访问。manifest capabilities 为空，因为本应用不调用 Host ASR/LLM。
 
-Python 推理在仓库同项目的 `service/` 独立运行，默认地址 http://127.0.0.1:8768。应用包只携带 Node/React 业务源码，不包含 Python 或模型。安装说明见仓库 `workbenches/60-faster-whisper/README.md`，源码链接：https://github.com/floatboatai/floatboat-workbenches/tree/main/workbenches/60-faster-whisper/service 。
+Python 推理在同项目的 `service/` 独立运行，默认地址 http://127.0.0.1:8768。应用包只携带 Node/React 业务源码与示例，不包含 Python 或模型。安装说明见项目 `README.md`，源码：https://github.com/floatboatai/floatboat-workbenches/tree/main/workbenches/60-faster-whisper/service 。
+
+### 为什么没有浏览器内转写后备
+
+评估了 transformers.js（onnxruntime-web）的 Whisper，结论是在本模板中不可行：
+
+1. **CSP**：工作台页面的策略是 `script-src 'self'`、`connect-src 'self'`，没有 `'wasm-unsafe-eval'`。真实 Chrome 里 `WebAssembly.compile()` 直接抛 `CompileError ... violates the following Content Security Policy`，向 huggingface.co 的 `fetch` 被拒（浏览器验收已记录）。onnxruntime-web 的 WASM 与 WebGPU 后端都需要编译 WASM；模型也无法在运行时下载。CSP 由 SDK 运行时设定，不属于本应用可改范围。
+2. **体积**：即使打包进应用，whisper-tiny 量化 ONNX 约 40 MB、base 约 75 MB、small 约 250 MB，再加约 20 MB 的 ORT 运行时；`.wasm` 不在 SDK 静态 MIME 表里。tiny/base 的中文质量也不足以作为“可校对的初稿”。
+
+因此首屏可用性改由“自带示例 + 全部校对与导出在页面内完成”保证，转写保持为外接能力。
 
 ## 模块
 
-- `contracts/transcript.ts`：音频 metadata、字幕行/草稿类型、时间校验、SRT/VTT/上游 JSON 导入和导出、拆分。
-- `contracts/job.ts`：任务标识、输入、远端结果和页面任务响应校验。
-- `server/files.ts`：有界分块、SHA-256、容器签名、临时文件原子重命名、资源存在性验证。
-- `server/jobs.ts`：先持久化再调用服务，固定任务 ID、并发去重、输入一致性验证、结果身份校验、状态未知后的对账；远端 URL 只从服务端环境读取，禁止重定向。
-- `server/routes.ts`：项目/自动保存、音频与任务 HTTP 路由。
-- `ui/App.tsx`：音频监看、可编辑字幕、审校与任务结果采纳。播放时间不写项目；字幕行 memo 并使用稳定事件引用。
-- `ui/media.ts`：受限音频上传、下载与便携项目中的字节转换。
-- `ui/autosave-*`、`workspace.tsx` 等：原样沿用仓库当前自动保存协议。
+- `contracts/transcript.ts`：音频引用与按内容识别容器（`sniffAudio`）、字幕行（含 `speaker`、`words: {s,e,w,p}`）、说话人、保存/工作稿两级校验与 0.4 数据兼容、时间码、页面草稿字段。
+- `contracts/options.ts`：`transcribe()` 参数的页面值、校验、默认值（旧任务/旧项目回落）与 snake_case 线格式；语言表。
+- `contracts/edit.ts`：纯变换——按字符 LCS 的逐词时间重对齐（保留的字沿用识别时间，插入的字插值并标为人工修改 `p=-1`）、按播放头/所选词拆分、合并（中文不加空格）、入出点微调与设为播放头、查找替换（大小写、正则、`$1`）、按时间重叠沿用说话人。
+- `contracts/subtitles.ts`：SRT/VTT（`<v 名字>`）与 faster-whisper 分段 JSON（`words`/`speaker`）导入；SRT/VTT/TXT/JSON 导出。
+- `contracts/job.ts`：任务标识、输入快照（音频、语言、参数）、远端结果与运行信息（识别语言、置信、时长、VAD 后时长）。
+- `contracts/sample.ts`、`server/sample-audio.ts`：示例字幕与 Ogg Opus 原件（base64，约 310 KB 源文本）。服务启动时按内容哈希写入音频目录；数据目录被清理后读取时也会补写。
+- `server/files.ts`：1 MiB 有界分块、SHA-256、容器签名、临时文件原子重命名、内容寻址的 `ensure`。
+- `server/jobs.ts`：先持久化再调用服务；固定任务 ID、并发去重、输入一致性；结果须匹配任务 ID、音频哈希、语言与 key 排序后的参数回显；状态未知后对账；健康检查区分未运行/令牌/版本/非本服务。
+- `ui/App.tsx` 组合页面；`Timeline.tsx`（canvas 波形 + 区间/手柄/逐词轨，只渲染可视范围）、`CueRow.tsx`、`Inspector.tsx`、`TranscribePanel.tsx`、`Menus.tsx`、`FindBar.tsx`、`Monitor.tsx`；状态逻辑在 `useTranscription.ts`、`useFiles.ts`、`useFind.ts`、`usePlayer.ts`（以 8 kHz 解码出最多 6 万个峰值，支持缩放）。
+- `ui/autosave-*`、`workspace.tsx`：沿用仓库自动保存协议，未改动。
 
 ## 数据与状态
 
-项目模型含音频 SHA-256 引用、字幕行、语言、备注和来源。字幕时间保留为字符串；保存模型校验要求合法时间，完整工作稿允许暂未完成的时间。待导入字幕等额外输入通过保存协议的 `extra` 保存。导入和采用新结果始终调用 `replace` 创建新项目。
+字幕时间保留为字符串（可编辑草稿），逐词时间为秒数。保存模型要求合法时间、已命名的说话人、引用存在的说话人；工作稿允许未完成的值。项目 JSON 正式上限 880 KB（共享自动保存服务端 900 KB 上限之下），工作稿 1.25 MB；含逐词时间时约可容纳 1.5 小时中文语音。音频 200 MB，字幕 4000 行、6 小时。
 
-`0004_transcriptions.sql` 是新增迁移；既有迁移保留。`transcription_jobs` 保存 project ID、输入快照、状态、模型、结果和错误；在第一次外部 PUT 前落盘。并发重复提交通过 `INSERT OR IGNORE` 和输入比较收敛为同一记录。`submitting/queued/running/unknown` 仅查询原任务；未知结果不会自动创建新 ID。已知拒绝是失败，网络/无效响应是未知。
+`0005_job_info.sql` 为任务表加 `info` 列；既有迁移保留。任务输入 JSON 新增 `options`，旧行按默认参数解码。服务端（Python）任务表增加 `options`、`info` 列并自动迁移。
 
-结果必须匹配任务 ID、音频哈希和语言。SQLite 保存结果，但刷新不会自动采用它；用户选择“采用为新项目”后，原稿保留。服务自行保存模型与引擎版本快照，并对服务重启留下的运行任务标为中断；不把新配置套到旧任务上。
-
-原件放在 manifest 的 `audio-originals` 数据资源目录，包默认不携带预览数据。项目 JSON 限制 750 KB，音频 40 MB；最多 1200 行、6 小时字幕。便携项目导出把受限原件加入用户主动下载的 JSON；恢复时重新分块校验。仅删除项目时保留共享原件，避免其他项目失效。
+健康检查协议：`/health` 返回 `protocol: 2` 与 `multilingual`。旧版服务（无 protocol）显示“服务版本过旧”而非可用；英语专用模型禁用非英语语言与翻译。
 
 ## 验证
 
-`pnpm workbench:check`、`pnpm test`、`pnpm package` 在项目根目录执行。测试以临时 SQLite 和文件目录验证导入/导出、草稿、文件、修订冲突、任务幂等、响应丢失与边界；假的 HTTP responder 只算契约测试。
+`pnpm workbench:check`、`pnpm test`、`pnpm package` 在项目根目录执行。30 项 Node 测试以临时 SQLite 与文件目录验证格式往返、重对齐、拆分合并、查找替换、说话人、参数线格式、回显不一致拒收、健康检查分类、示例完整性、旧数据兼容、草稿与任务幂等；假的 HTTP responder 只算契约测试。7 项 Python 队列测试覆盖参数快照与冲突。
 
-真实 Chrome 与 tiny.en CPU 推理记录见项目根目录 `ACCEPTANCE.md`。独立服务的 Node 入口需先准备好服务；模型效果、硬件与语言范围以实际验证记录为准。Floatboat 客户端导入尚未测试。
+真实 Chrome 与 small 模型 CPU 推理记录见项目根目录 `ACCEPTANCE.md`。Floatboat 客户端导入尚未测试。

@@ -1,5 +1,4 @@
 import { Component, type ReactNode, useEffect, useRef, useState } from "react";
-import type { ProjectSummary } from "../contracts/project";
 import { useWorkbenchState, type AutosaveOptions } from "./autosave-client";
 import { request } from "./requests";
 export { request, download } from "./requests";
@@ -14,48 +13,18 @@ export function useProjects<T>(seed:T,validate:(value:unknown)=>T,defaultTitle:s
   function applySuggestion(){if(suggestion){project.setData(suggestion);discardSuggestion();project.setNotice('已采用生成稿。');}}
   return {...project,aiBusy,suggestion,generate,applySuggestion,discardSuggestion};
 }
-export function ProjectPicker({
-  items,
-  id,
-  disabled,
-  onOpen,
-}: {
-  items: ProjectSummary[];
-  id?: string;
-  disabled: boolean;
-  onOpen: (id: string) => void;
-}) {
+export function Notice({ error, notice, onDismiss }: { error: string; notice: string; onDismiss?: () => void }) {
+  if (!error && !notice) return null;
   return (
-    <label className="project-picker">
-      <span className="sr-only">打开已保存项目</span>
-      <select
-        aria-label="打开已保存项目"
-        value={id ?? ""}
-        disabled={disabled}
-        onChange={(event) => {
-          if (event.target.value) onOpen(event.target.value);
-        }}
-      >
-        <option value="">当前草稿</option>
-        {items.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.title}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className={error ? "notice error" : "notice"} role={error ? "alert" : "status"}>
+      <span>{error || notice}</span>
+      {onDismiss ? (
+        <button className="quiet" onClick={onDismiss}>
+          知道了
+        </button>
+      ) : null}
+    </div>
   );
-}
-export function Notice({ error, notice }: { error: string; notice: string }) {
-  return error ? (
-    <p className="notice error" role="alert">
-      {error}
-    </p>
-  ) : notice ? (
-    <p className="notice" role="status">
-      {notice}
-    </p>
-  ) : null;
 }
 export class RenderBoundary extends Component<
   { children: ReactNode },

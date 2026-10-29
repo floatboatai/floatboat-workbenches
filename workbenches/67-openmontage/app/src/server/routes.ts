@@ -1,18 +1,22 @@
 import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { isRecord } from "../contracts/project.ts";
-import { montageValue, readyMontage } from "../contracts/montage.ts";
+import { readyMontage, MAX_VIDEO_BYTES } from "../contracts/montage.ts";
+import { timelineValue } from "../contracts/timeline.ts";
 import { createStore, StoreError } from "./store.ts";
 import { registerAutosaveRoutes } from "./autosave.ts";
 import { reconcileRender } from "./render-state.ts";
-import { createVideoFiles, detectMime } from "./files.ts";
+import { createMediaFiles } from "./files.ts";
+export const SERVICE_START = "cd workbenches/67-openmontage/service && pnpm setup && pnpm start";
 export function registerRoutes(app: WorkbenchServer) {
-  const store = createStore(app.database, montageValue);
-  const files = createVideoFiles((p, w) =>
-    app.resources.path("media", p, w ? "write" : "read"),
+  const store = createStore(app.database, timelineValue);
+  const files = createMediaFiles(
+    (p, w) => app.resources.path("media", p, w ? "write" : "read"),
+    (p) => app.resources.path("samples", p, "read"),
   );
-  registerAutosaveRoutes(app, montageValue, undefined, {
+  // 素材文件在保存前核对；缺失时工作稿仍保存为草稿，界面提示补齐素材。
+  registerAutosaveRoutes(app, timelineValue, undefined, {
     verify: async (data) => {
-      await Promise.all(data.shots.map((s) => files.verify(s.source)));
+      await Promise.all([...data.assets, ...data.outputs].map((a) => files.verify(a)));
     },
   });
   const failure = (e: unknown) =>
@@ -91,18 +95,23 @@ export function registerRoutes(app: WorkbenchServer) {
       const r = await upstream("/health");
       if (!r.ok) throw new Error();
       const v: unknown = await r.json();
+      const ready = isRecord(v) && v.ready === true && v.engine === "openmontage";
       return {
-        available:
-          isRecord(v) && v.ready === true && v.engine === "openmontage",
-        message:
-          isRecord(v) && v.ready === true && v.engine === "openmontage"
-            ? "制作服务已连接"
-            : "制作服务尚未就绪",
+        available: ready,
+        state: ready ? "ready" : "not-ready",
+        message: ready
+          ? "OpenMontage 服务已连接（固定提交 " + String(isRecord(v) ? v.version : "").slice(0, 8) + "）"
+          : "服务已启动，但 Python、FFmpeg 或固定版本的 OpenMontage 源码尚未就绪。",
+        command: SERVICE_START,
+        url: origin,
       };
     } catch {
       return {
         available: false,
-        message: "未连接制作服务；启动项目 service 后重新检查。",
+        state: "offline",
+        message: "未连接 OpenMontage 服务（" + origin + "）。浏览器导出不受影响。",
+        command: SERVICE_START,
+        url: origin,
       };
     }
   });
@@ -240,7 +249,7 @@ export function registerRoutes(app: WorkbenchServer) {
       return failure(e);
     }
   });
-  app.route("PUT", "/api/media/:id/chunks/:index", async ({ params, body }) => {
+  app.route("PUT", "/api/uploads/:id/chunks/:index", async ({ params, body }) => {
     try {
       if (!isRecord(body)) throw new Error("请求无效");
       return await files.chunk(params.id, Number(params.index), body.base64);
@@ -248,23 +257,27 @@ export function registerRoutes(app: WorkbenchServer) {
       return failure(e);
     }
   });
-  app.route("POST", "/api/media", async ({ body }) => {
+  app.route("POST", "/api/uploads/:id/finish", async ({ params, body }) => {
     try {
-      return await files.finish(body);
+      if (!isRecord(body)) throw new Error("请求无效");
+      return await files.finish(params.id, { bytes: body.bytes, mime: body.mime });
     } catch (e) {
       return failure(e);
     }
   });
-  app.route("GET", "/api/media/:id", async ({ params }) => {
+  app.route("GET", "/api/media/:id", async ({ params, request, url }) => {
     try {
-      return new Response(new Uint8Array(await files.read(params.id)), {
-        headers: {
-          "content-type": "video/mp4",
-          "cache-control": "private,max-age=31536000,immutable",
-        },
-      });
+      const name = url.searchParams.get("download");
+      return await files.response(
+        params.id,
+        typeof request.headers.range === "string" ? request.headers.range : undefined,
+        name ? name.slice(0, 200) : undefined,
+      );
     } catch (e) {
-      return failure(e);
+      return Response.json(
+        { error: { message: e instanceof Error ? e.message : "素材读取失败。" } },
+        { status: isRecord(e) && e.status === 404 ? 404 : 400 },
+      );
     }
   });
   async function payload(id: string, snapshot: string) {
@@ -272,6 +285,7 @@ export function registerRoutes(app: WorkbenchServer) {
     const sources = new Map(plan.shots.map((s) => [s.source!.id, s.source!]));
     const assets = await Promise.all(
       [...sources.values()].map(async (source) => {
+        if (source.bytes > MAX_VIDEO_BYTES) throw new Error("服务只接收20MB以内的MP4。");
         await files.verify(source);
         return {
           id: source.id,

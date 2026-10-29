@@ -1,13 +1,44 @@
-# Presenton — presentation production desk
+# Presenton 工作台 0.9.0：资料 → 大纲 → 成稿
 
-Users turn source material into a coherent slide narrative, submit it to Presenton, and review a resulting deck. Primary task: arrange/refine an outline before generation. Generation never overwrites an edited plan.
+## 用户与主任务
 
-A warm paper stage, compact vertical shot list and editorial brief sit under one document bar. Ivory, ink navy and muted cobalt; large serif slide headlines contrast with compact sans-serif controls. The numbered sequence establishes reading order. No metric cards or chat feed.
+要汇报的人手里有一份资料（评估报告、方案、复盘、会议纪要，常带表格和数字），需要在有限时间里做出一份能讲的演示稿：把资料读成一页一个观点的大纲 → 让每页有合适的版式（数据成图、成果成数字、时间成时间线）→ 逐页修改措辞、图片和数据 → 导出 PPTX/PDF 拿去讲。主对象是“这份文稿”：资料、大纲和幻灯片三者同在一个工作副本里，前一步的产物就是后一步的输入。
 
-编排: brief, selected slide and notes. 制作: settings and durable job ledger. 导入: portable projects or genuine Presenton JSON, with raw draft preservation. Stage explicitly previews the outline. Imported HTML stays inert. Generated originals download as original files.
+## 首次使用
 
-P0: slide, title, save state, editing. P1: source, slide order, notes, job state. P2: import/export and recovery. Native controls, labelled fields, skip link and visible focus. Destructive actions require confirmation. Saved, pending, saved draft, offline and conflict are separate; incomplete data remains recoverable. Jobs retain input snapshots. Unknown submissions require reconciliation, never automatic retry. Stop tracking does not cancel upstream generation.
+全新数据目录、无 Presenton 服务、无 Floatboat Host 时，首屏是示例文稿的「成稿」步骤：左侧缩略页轨 12 页、中间舞台、右侧检查器；顶部三段步骤条显示「资料 1,745 字 → 大纲 12 页 → 成稿 12 页」，说明这份成稿就是由左边的资料本地生成的。用户可以立刻改字、换版式、导出 PPTX；点「1 资料」看到原始资料与识别摘要，点「生成大纲」重新走一遍。
 
-375px: brief disclosure, horizontal slide strip, stacked stage/editor. 1440px: central stage dominates. Every action remains reachable. Reduced motion removes transitions.
+从零开始：「文稿 → 新建空白文稿」进入资料步，粘贴或「读入文件」（.md .txt .docx .html .csv），填听众与目标 → 「生成大纲」→ 大纲步调整 →「生成幻灯片」→ 成稿步修改 →「导出 PPTX / 导出 PDF」。
 
-Sequence: contracts/import → durable jobs/connector → stage/editor → autosave/recovery → browser/security/tests → screenshot/package. Verify source/notes reload, order/edit, new-project import, delayed/lost saves, conflict, unavailable generation, immutable jobs, original artifact download, keyboard/mobile and fixed CSP.
+## 继续上次工作与导入恢复
+
+工作副本（资料、大纲、幻灯片、主题、Presenton 设置，以及当前步骤、选中页、未应用的粘贴 JSON、模型候选大纲、生成说明）随编辑自动保存；重新打开恢复到上次的步骤和页面。「文稿」菜单是唯一的文件入口：新建空白 / 用示例资料新建 / 导入文件（资料文件新建文稿；项目或 Presenton JSON 新建文稿）/ 粘贴 JSON 导入 / 导出 PPTX、PDF、项目（含图片）、大纲 Markdown / 最近文稿（含本机恢复项）/ 删除。导入总是新建文稿，不覆盖当前文稿。保存草稿、离线、冲突时在页头下方出现恢复条（导出完整工作副本、重试、打开服务器版本）。
+
+## 空间关系
+
+- 顶部单行文件条：「文稿」菜单、文稿名（衬线，可改）、安静的保存状态、右侧三段步骤条（编号 + 名称 + 计数）。没有项目选择器、新建/保存按钮组。
+- 资料步：左侧大张“纸面”承载资料正文（衬线、宽行距，像在读一份文件），纸下沿一行“识别到 N 个章节、N 张表格；本地生成约 N 页”；右侧两张卡片：「这次讲给谁」（听众、目标、语言、目标页数、每页内容密度），「生成大纲」（主按钮）及其下方可选的「Floatboat 模型起草」状态与重新检查。
+- 大纲步：吸顶的步骤栏放「回到资料」「Presenton 状态胶囊」「生成幻灯片」（主按钮）；主区是逐页卡片（编号、版式下拉、对应资料章节、标题、每行一条要点、左右栏、图表数据摘要、折叠的演讲备注、上移/下移/复制/删除/插入）；右侧「资料原文」对照当前页引用的资料章节，下方「生成说明」逐条解释每个章节为什么成了这种版式。
+- 成稿步：缩略页轨（左）/ 暖灰舞台（中，16:9，点文字、图表、图片直接定位到右侧字段）/ 检查器（右：版式 11 种、按版式显示的内容字段、关键数字、图表数据表、插画与上传图片、整套主题 5 种、按大纲重置此页）；舞台上沿是页操作与「导出 PDF」「导出 PPTX」（主按钮），下沿是演讲备注。
+
+主操作贴近对象：生成大纲在资料旁，生成幻灯片在大纲上方，导出在舞台上方。外部通道都是“旁边的可选项”，不挡主路径：Floatboat 模型在生成大纲按钮下方，只在可用时出现发送按钮且需页内确认；Presenton 是生成幻灯片旁的状态胶囊，点开抽屉给出启动命令、环境变量、重新检查，可用后才出现提交与制作记录。
+
+## 视觉与密度
+
+象牙纸色底、墨蓝正文、钴蓝强调、琥珀作第二强调；标题与资料正文用系统衬线（思源宋体/宋体），控件与幻灯片正文用系统黑体。资料步宽松（阅读），大纲步中等（逐条编辑），成稿步紧凑（舞台优先）。幻灯片主题与界面主题分开：界面跟随系统明暗，幻灯片只跟随所选主题（纸本、林荫、夜航、赭石、简白）。无统计卡、聊天流、营销标题；替换类操作用页内确认条；遵循 reduced-motion。
+
+## 关键状态
+
+保存：等待/保存中/已保存/草稿/离线/冲突分开显示（role=status）；空标题、非数字图表值保存为草稿并说明哪一页。外部通道：检查中/可用/不可用（附原因与启动方式）。导出：按钮显示“正在生成…”，失败给出可读原因（如引用的图片不在媒体库）。
+
+## 窄屏（375px）
+
+文件条两行：「文稿」+ 文稿名；三段步骤条占满第二行（只显示编号与名称）。资料步单列：纸面在上、设定与生成在下。大纲步单列，左右栏改为上下，资料对照在列表下方。成稿步：缩略轨变横向滚动条（带“+”），其下页操作与两个导出按钮各占一半宽，再下是舞台（按屏宽 16:9）、备注、检查器。Presenton 抽屉全宽；菜单与抽屉 Escape 关闭并把焦点还给触发按钮。
+
+## 与相邻工作台的差异（结构对照）
+
+对照 05-pptxgenjs（`docs/screenshots/pptxgenjs.png`）与 64-pageindex（`docs/screenshots/pageindex.png`）的实际截图：
+
+- 05 演示编排室是**母版版式编辑器**：深色界面，舞台上自由选择、拖动、缩放元素，插入工具条在舞台上沿，检查器编辑的是“元素”（位置尺寸、层级）。本工作台是**生成工作流**：三个步骤是一级结构，舞台上的内容由版式排好，用户编辑的是“页的内容字段”（标题、要点、数字、数据），没有自由摆放；资料与大纲是持久的工作对象，每页可追溯到资料章节并可按大纲重置。
+- 64 页间是阅读台：章节树/原页/审阅三栏。本工作台的资料步同样以“纸面”承载原文，但它是输入区而非阅读区，右侧是生成设定而不是证据。
+- 文件生命周期三者都收在产品自己的菜单里；本工作台额外把“生成”放在步骤内部、把外部服务降为状态胶囊与抽屉。
