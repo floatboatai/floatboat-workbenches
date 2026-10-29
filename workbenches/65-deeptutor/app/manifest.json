@@ -4,8 +4,8 @@
   "registryName": "deeptutor-studio",
   "name": "课程练习册 · DeepTutor",
   "description": "讲义对页练习：离线判题、错题讲解、出题与间隔复习",
-  "version": "0.9.0",
-  "changelog": "判题、复习排程与题库导入移植进工作台服务，无需外部Python进程；答错后显示解析并可请Floatboat导师讲解与追问；出题可设题数、题型与难度并追加到练习册；对页练习册结构与12题示例讲义。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

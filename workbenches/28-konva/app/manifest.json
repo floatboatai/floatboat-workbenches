@@ -4,8 +4,8 @@
   "registryName": "konva-studio",
   "name": "Konva 标注画板",
   "description": "图片标注、标签与图形编排，保留原图和可编辑工程",
-  "version": "0.6.0",
-  "changelog": "原生 Konva 标注、变换、图层及完整工程，工作稿自动保存。",
+  "version": "0.6.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

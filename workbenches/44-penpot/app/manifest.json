@@ -4,8 +4,8 @@
   "registryName": "penpot-studio",
   "name": "设计资产 · Penpot",
   "description": "色彩、字体与组件样本库，生成原生Penpot交付文件",
-  "version": "0.5.0",
-  "changelog": "可编辑设计资产与组件样本，自动保存不完整输入，使用官方Penpot库导出原生文件。",
+  "version": "0.5.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

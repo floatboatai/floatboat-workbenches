@@ -4,8 +4,8 @@
   "registryName": "ray-optics-studio",
   "name": "Ray Optics Simulation 工作台",
   "description": "搭建光路、调整元件并保存实验与场景",
-  "version": "0.7.0",
-  "changelog": "原生CPU光路实验、完整工作稿与场景导出。",
+  "version": "0.7.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

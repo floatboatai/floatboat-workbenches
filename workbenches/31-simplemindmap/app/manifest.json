@@ -4,8 +4,8 @@
   "registryName": "simplemindmap-studio",
   "name": "SimpleMindMap 思绪地图",
   "description": "原生节点编排、分支导航与结构主题，自动保存导图和未完成输入",
-  "version": "0.6.0",
-  "changelog": "原生 SimpleMindMap 节点编辑、结构主题和 SVG/JSON，完整工作稿自动恢复。",
+  "version": "0.6.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

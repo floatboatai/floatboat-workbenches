@@ -4,8 +4,8 @@
   "registryName": "wavesurfer-js-studio",
   "name": "wavesurfer.js 工作台",
   "description": "录音听审、时间标注与素材选段；保留原件、摘录和完整工作稿",
-  "version": "0.6.0",
-  "changelog": "波形、区间循环听审、人工摘录、自动保存与工程导出。",
+  "version": "0.6.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

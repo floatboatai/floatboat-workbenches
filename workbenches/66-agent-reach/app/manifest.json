@@ -4,8 +4,8 @@
   "registryName": "agent-reach-studio",
   "name": "调研资料台 · Agent-Reach",
   "description": "公开来源采集、原文阅读、证据摘录与带出处的调研报告",
-  "version": "0.9.0",
-  "changelog": "采集移入工作台Node服务（GitHub、网页阅读/直接读取/搜索、V2EX），含SSRF防护与代理支持；首次打开即有真实示例调研；资料桌三栏布局与调研文件菜单；可选Floatboat模型概括。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

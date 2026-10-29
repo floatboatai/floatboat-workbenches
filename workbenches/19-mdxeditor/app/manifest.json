@@ -4,8 +4,8 @@
   "registryName": "mdxeditor-studio",
   "name": "MDXEditor 文档审阅台",
   "description": "产品文档、教程与 Markdown 内容审校工作台",
-  "version": "0.3.0",
-  "changelog": "原生 Markdown 写作、源文与差异对照、固定比较基线、审阅意见及完整工作副本自动保存。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -4,8 +4,8 @@
   "registryName": "mesh2motion-studio",
   "name": "Mesh2Motion 角色动作工坊",
   "description": "人形模型骨架绑定、动作预览与动画GLB交付",
-  "version": "0.7.0",
-  "changelog": "原生人形绑定、完整工作稿与模型资源恢复。",
+  "version": "0.7.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

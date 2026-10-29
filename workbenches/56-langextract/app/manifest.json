@@ -4,8 +4,8 @@
   "registryName": "langextract-studio",
   "name": "LangExtract · 证据书桌",
   "description": "原文证据、字段抽取与人工复核，支持 LangExtract JSONL 和独立服务。",
-  "version": "0.4.0",
-  "changelog": "AI 工作台：业务项目自动保存、结果复核和上游服务接入。",
+  "version": "0.4.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

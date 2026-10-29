@@ -4,8 +4,8 @@
   "registryName": "figcraft-studio",
   "name": "原型校样 · FigCraft",
   "description": "逐屏审阅FigCraft原型：内置近似校样、文案/名称/填色修订、交付状态与备注，可选原生引擎渲染",
-  "version": "0.9.0",
-  "changelog": "0.9.0：无需引擎即可打开.figcraft——内置读取document.json、近似渲染画板、直接写回文案/名称/填色/交付状态/画板顺序并重新打包；SVG/PNG近似导出与交付说明；引擎状态卡替代fetch failed；文件生命周期移入校样文件对话框；上限放宽到1.35MB/6万图层。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

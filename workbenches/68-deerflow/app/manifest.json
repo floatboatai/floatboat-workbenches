@@ -4,8 +4,8 @@
   "registryName": "deerflow-studio",
   "name": "研究交付 · DeerFlow",
   "description": "研究任务提交、状态恢复、证据复核与报告交付",
-  "version": "0.5.0",
-  "changelog": "以官方后台run API提交研究，先持久化命令，未知回执只读恢复；自动保存报告、证据与工作稿。",
+  "version": "0.5.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

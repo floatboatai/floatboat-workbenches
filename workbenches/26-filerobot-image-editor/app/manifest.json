@@ -4,8 +4,8 @@
   "registryName": "filerobot-image-editor-studio",
   "name": "Filerobot Image Editor 工作台",
   "description": "本地照片裁剪、调色、标注与尺寸调整，自动保存原图和可编辑工程",
-  "version": "0.3.0",
-  "changelog": "真实 Filerobot 图片编辑器、原图资源、自动恢复及便携工程导入导出。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

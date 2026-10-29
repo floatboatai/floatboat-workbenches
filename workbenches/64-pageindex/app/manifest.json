@@ -4,8 +4,8 @@
   "registryName": "pageindex-studio",
   "name": "页间 · PageIndex",
   "description": "长报告阅读：章节目录、原页证据、摘录审阅与引用问答",
-  "version": "0.9.0",
-  "changelog": "浏览器内PDF.js阅读与原文提取，无需外部服务即可打开示例和自有PDF；PDF书签或版面标题生成章节树；全文检索、选中原文摘录、引用与摘录在原页高亮；PageIndex服务改为可选章节树增强（含启动命令与重新检查）；PDF上限提高到64MiB/1000页；阅读器重排为文档菜单＋目录/原页/审阅。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

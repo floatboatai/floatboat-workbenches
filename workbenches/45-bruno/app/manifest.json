@@ -4,8 +4,8 @@
   "registryName": "bruno-studio",
   "name": "Bruno 工作台",
   "description": "Bruno 原生集合：环境变量、认证、断言与显式 HTTP 调试",
-  "version": "0.9.0",
-  "changelog": "0.9.0：结构化编辑与 .bru 源双向自动同步、环境与秘密变量、Bearer/Basic/API Key、表单/multipart/GraphQL 正文、断言评估、请求历史、本机回声示例、连接失败明确分类、集合树/请求编辑器/响应控制台三栏与集合菜单。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

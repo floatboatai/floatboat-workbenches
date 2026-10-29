@@ -4,8 +4,8 @@
   "registryName": "mermaid-studio",
   "name": "Mermaid 图形工坊",
   "description": "Mermaid 源码 IDE：语法高亮与错误定位、17 个图类型模板、主题/手绘风格、缩放预览，导出 SVG/PNG 并自动保存",
-  "version": "0.9.0",
-  "changelog": "0.9.0：CodeMirror 源码编辑器（高亮、补全、行内错误标记）；修正误拦截“image:”文字；导入 .mmd/.md；17 种模板；主题与手绘风格按文件保存；预览缩放平移；PNG 1×/2×/4×、透明背景与剪贴板；安全文件名；文件菜单替代页头项目组合。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

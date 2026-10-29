@@ -4,8 +4,8 @@
   "registryName": "grapesjs-studio",
   "name": "GrapesJS 工作台",
   "description": "可视化单页网站构建：组件、图层、响应式样式与网页导出",
-  "version": "0.3.0",
-  "changelog": "接入 GrapesJS 0.23.8 核心、自动保存、受限项目导入和完整网页导出。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

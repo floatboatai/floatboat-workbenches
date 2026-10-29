@@ -4,8 +4,8 @@
   "registryName": "gltf-transform-studio",
   "name": "glTF 模型优化台",
   "description": "导入 GLB/glTF/ZIP，逐步运行 glTF Transform 优化并对照报告，导出可压缩的 GLB",
-  "version": "0.9.0",
-  "changelog": "接受带扩展的 GLB、glTF+资源与 ZIP（≤64 MB，Draco/Meshopt 解码）；一键优化流水线（剪除、去重、焊接、简化、重采样、量化、展平、合并、实例化、居中、缩小贴图），每步可预览、撤销并附前后报告；贴图清单与替换、节点 TRS、动画片段；Meshopt/Draco 导出；风机样例。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

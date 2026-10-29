@@ -4,8 +4,8 @@
   "registryName": "pdf-js-studio",
   "name": "PDF 阅读室",
   "description": "本地 PDF 阅读、全文检索与逐页笔记",
-  "version": "0.3.0",
-  "changelog": "PDF.js 原生渲染、逐页笔记自动保存、原文件与便携项目导入导出。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

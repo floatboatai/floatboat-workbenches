@@ -4,8 +4,8 @@
   "registryName": "swagger-ui-studio",
   "name": "API 参考台",
   "description": "OpenAPI/Swagger 参考台：导入 YAML/JSON 规格、按端点阅读原生文档、经代理试调、并排编辑原文",
-  "version": "0.9.0",
-  "changelog": "接受 OpenAPI 3.x 与 Swagger 2.0 的 YAML/JSON 原文；并排源码与行号诊断；全部方法经服务端代理试调（默认阻止内网）；内置图书馆示例服务；端点目录与规格菜单取代顶部项目栏。",
+  "version": "0.9.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -4,8 +4,8 @@
   "registryName": "graphify-studio",
   "name": "知识地图 · Graphify",
   "description": "源码关系、来源追溯、路径查询与人工审阅",
-  "version": "0.5.0",
-  "changelog": "接入真实Graphify AST提取，原生图谱导入导出、关系地图、路径与完整草稿自动保存。",
+  "version": "0.5.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

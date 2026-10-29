@@ -4,8 +4,8 @@
   "registryName": "logicflow-studio",
   "name": "LogicFlow 工作台",
   "description": "审批与 SOP 流程图纸、结构检查和路径审阅",
-  "version": "0.6.0",
-  "changelog": "原生 LogicFlow 编辑、完整工作稿与图纸导出。",
+  "version": "0.6.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

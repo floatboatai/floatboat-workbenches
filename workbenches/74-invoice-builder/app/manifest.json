@@ -4,8 +4,8 @@
   "registryName": "invoice-builder-studio",
   "name": "Invoice Builder 工作台",
   "description": "报价与商业发票制作、明细核对和PDF校样",
-  "version": "0.7.0",
-  "changelog": "上游计价与PDF模板、完整工作稿恢复、独立单据桌",
+  "version": "0.7.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -50,7 +50,7 @@
     "slug": "excalidraw",
     "directory": "workbenches/01-excalidraw",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -111,7 +111,7 @@
     "slug": "markmap",
     "directory": "workbenches/02-markmap",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -171,7 +171,7 @@
     "slug": "pdfme",
     "directory": "workbenches/03-pdfme",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -232,7 +232,7 @@
     "slug": "tiptap",
     "directory": "workbenches/04-tiptap",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -293,7 +293,7 @@
     "slug": "pptxgenjs",
     "directory": "workbenches/05-pptxgenjs",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -354,7 +354,7 @@
     "slug": "react-flow",
     "directory": "workbenches/06-react-flow",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -415,7 +415,7 @@
     "slug": "surveyjs-form-library",
     "directory": "workbenches/07-surveyjs-form-library",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -473,7 +473,7 @@
     "slug": "mermaid",
     "directory": "workbenches/08-mermaid",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -532,7 +532,7 @@
     "slug": "swagger-ui",
     "directory": "workbenches/09-swagger-ui",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -593,7 +593,7 @@
     "slug": "vega-lite",
     "directory": "workbenches/10-vega-lite",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -654,7 +654,7 @@
     "slug": "observable-plot",
     "directory": "workbenches/11-observable-plot",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -893,7 +893,7 @@
       "@blocknote/react": "0.56.0",
       "@blocknote/mantine": "0.56.0"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -956,7 +956,7 @@
     "upstreamVersions": {
       "@mdxeditor/editor": "4.3.3"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1020,7 +1020,7 @@
       "@milkdown/crepe": "7.23.0",
       "@milkdown/kit": "7.23.0"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1083,7 +1083,7 @@
     "upstreamVersions": {
       "pdfjs-dist": "6.4.299"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1146,7 +1146,7 @@
     "upstreamVersions": {
       "reveal.js": "6.0.2"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1210,7 +1210,7 @@
       "@univerjs/presets": "1.2.0",
       "@univerjs/preset-sheets-core": "1.2.0"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1274,7 +1274,7 @@
       "vditor": "4.0.1",
       "bundled-lute": "1.7.6"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1336,7 +1336,7 @@
     "upstreamVersions": {
       "fabric": "7.4.0"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1399,7 +1399,7 @@
     "upstreamVersions": {
       "react-filerobot-image-editor": "5.0.0-beta.159"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1461,7 +1461,7 @@
     "upstreamVersions": {
       "grapesjs": "0.23.8"
     },
-    "version": "0.3.0",
+    "version": "0.3.1",
     "presentation": {
       "screenshots": [
         {
@@ -1519,7 +1519,7 @@
     "slug": "konva",
     "directory": "workbenches/28-konva",
     "status": "local-verified",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "presentation": {
       "screenshots": [
         {
@@ -1577,7 +1577,7 @@
     "slug": "logicflow",
     "directory": "workbenches/29-logicflow",
     "status": "local-verified",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "presentation": {
       "screenshots": [
         {
@@ -1664,7 +1664,7 @@
     "slug": "simplemindmap",
     "directory": "workbenches/31-simplemindmap",
     "status": "local-verified",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "presentation": {
       "screenshots": [
         {
@@ -1751,7 +1751,7 @@
     "slug": "wavesurfer-js",
     "directory": "workbenches/33-wavesurfer-js",
     "status": "local-verified",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "presentation": {
       "screenshots": [
         {
@@ -2043,7 +2043,7 @@
     "slug": "react-email",
     "directory": "workbenches/42-react-email",
     "status": "local-verified",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "presentation": {
       "screenshots": [
         {
@@ -2131,7 +2131,7 @@
     "slug": "penpot",
     "directory": "workbenches/44-penpot",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "presentation": {
       "screenshots": [
         {
@@ -2191,7 +2191,7 @@
     "slug": "bruno",
     "directory": "workbenches/45-bruno",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -2368,7 +2368,7 @@
       "https://github.com/microsoft/maker.js",
       "docs/research/niche-manufacturing.md"
     ],
-    "version": "0.3.0",
+    "version": "0.3.1",
     "verification": {
       "build": "passed",
       "tests": 6,
@@ -2423,7 +2423,7 @@
       "https://github.com/Lattice-Automation/seqviz",
       "docs/research/niche-laboratory.md"
     ],
-    "version": "0.3.0",
+    "version": "0.3.1",
     "verification": {
       "build": "passed",
       "tests": 7,
@@ -2478,7 +2478,7 @@
       "https://github.com/farmOS/farmOS-map",
       "docs/research/niche-operations.md"
     ],
-    "version": "0.3.0",
+    "version": "0.3.1",
     "verification": {
       "build": "passed",
       "tests": 9,
@@ -2533,7 +2533,7 @@
       "https://github.com/ProjectMirador/mirador",
       "docs/research/niche-operations.md"
     ],
-    "version": "0.3.0",
+    "version": "0.3.1",
     "verification": {
       "build": "passed",
       "tests": 15,
@@ -2588,7 +2588,7 @@
       "https://github.com/opensheetmusicdisplay/opensheetmusicdisplay",
       "docs/research/niche-creative.md"
     ],
-    "version": "0.3.0",
+    "version": "0.3.1",
     "verification": {
       "build": "passed",
       "tests": 12,
@@ -2666,7 +2666,7 @@
     "slug": "langextract",
     "directory": "workbenches/56-langextract",
     "status": "local-verified",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "presentation": {
       "screenshots": [
         {
@@ -2721,7 +2721,7 @@
     "slug": "docling",
     "directory": "workbenches/57-docling",
     "status": "local-verified",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "presentation": {
       "screenshots": [
         {
@@ -2778,7 +2778,7 @@
     "slug": "langgraph",
     "directory": "workbenches/58-langgraph",
     "status": "local-verified",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "presentation": {
       "screenshots": [
         {
@@ -2833,7 +2833,7 @@
     "slug": "promptfoo",
     "directory": "workbenches/59-promptfoo",
     "status": "local-verified",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "presentation": {
       "screenshots": [
         {
@@ -2888,7 +2888,7 @@
     "slug": "faster-whisper",
     "directory": "workbenches/60-faster-whisper",
     "status": "local-verified",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "presentation": {
       "screenshots": [
         {
@@ -2943,7 +2943,7 @@
     "slug": "presenton",
     "directory": "workbenches/61-presenton",
     "status": "local-verified",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "presentation": {
       "screenshots": [
         {
@@ -2976,7 +2976,7 @@
     "slug": "hyperframes",
     "directory": "workbenches/62-hyperframes",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "verification": {
       "build": "passed",
       "tests": 9,
@@ -3032,7 +3032,7 @@
     "slug": "graphify",
     "directory": "workbenches/63-graphify",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "verification": {
       "build": "passed",
       "tests": 12,
@@ -3088,7 +3088,7 @@
     "slug": "pageindex",
     "directory": "workbenches/64-pageindex",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "verification": {
       "build": "passed",
       "tests": 21,
@@ -3145,7 +3145,7 @@
     "slug": "deeptutor",
     "directory": "workbenches/65-deeptutor",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "verification": {
       "build": "passed",
       "tests": 55,
@@ -3202,7 +3202,7 @@
     "slug": "agent-reach",
     "directory": "workbenches/66-agent-reach",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "verification": {
       "build": "passed",
       "tests": 34,
@@ -3259,7 +3259,7 @@
     "slug": "openmontage",
     "directory": "workbenches/67-openmontage",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "verification": {
       "build": "passed",
       "tests": 9,
@@ -3315,7 +3315,7 @@
     "slug": "deerflow",
     "directory": "workbenches/68-deerflow",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "verification": {
       "build": "passed",
       "tests": 19,
@@ -3371,7 +3371,7 @@
     "slug": "mirofish",
     "directory": "workbenches/69-mirofish",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "verification": {
       "build": "passed",
       "tests": 14,
@@ -3427,7 +3427,7 @@
     "slug": "geoinflow",
     "directory": "workbenches/70-geoinflow",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "verification": {
       "build": "passed",
       "tests": 13,
@@ -3483,7 +3483,7 @@
     "slug": "openpencil",
     "directory": "workbenches/71-openpencil",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "verification": {
       "build": "passed",
       "tests": 8,
@@ -3539,7 +3539,7 @@
     "slug": "figcraft",
     "directory": "workbenches/72-figcraft",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "verification": {
       "build": "passed",
       "tests": 14,
@@ -3597,7 +3597,7 @@
     "slug": "ray-optics",
     "directory": "workbenches/73-ray-optics",
     "status": "local-verified",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "presentation": {
       "screenshots": [
         {
@@ -3653,7 +3653,7 @@
     "slug": "invoice-builder",
     "directory": "workbenches/74-invoice-builder",
     "status": "local-verified",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "presentation": {
       "screenshots": [
         {
@@ -3709,7 +3709,7 @@
     "slug": "mesh2motion",
     "directory": "workbenches/75-mesh2motion",
     "status": "local-verified",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "presentation": {
       "screenshots": [
         {
@@ -3765,7 +3765,7 @@
     "slug": "oasis-editor",
     "directory": "workbenches/76-oasis-editor",
     "status": "local-verified",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "presentation": {
       "screenshots": [
         {
@@ -3821,7 +3821,7 @@
     "slug": "circuitjs",
     "directory": "workbenches/77-circuitjs",
     "status": "local-verified",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "presentation": {
       "screenshots": [
         {
@@ -3878,7 +3878,7 @@
     "slug": "gltf-transform",
     "directory": "workbenches/78-gltf-transform",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {

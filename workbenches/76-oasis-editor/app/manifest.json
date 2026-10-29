@@ -4,8 +4,8 @@
   "registryName": "oasis-editor-studio",
   "name": "Oasis Editor 工作台",
   "description": "分页文档编辑、DOCX往返、纸张校样与完整工作稿",
-  "version": "0.8.1",
-  "changelog": "纸张优先的专注文稿编辑；文件菜单、按需页索引/笔记/文档信息；完整保存与导出保持。",
+  "version": "0.8.2",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

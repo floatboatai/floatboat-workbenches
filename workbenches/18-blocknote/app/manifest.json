@@ -4,8 +4,8 @@
   "registryName": "blocknote-studio",
   "name": "BlockNote 知识夹",
   "description": "团队手册、会议记录与项目知识页工作台",
-  "version": "0.3.0",
-  "changelog": "原生块编辑、知识页目录、自动保存与草稿恢复、JSON/Markdown/HTML 导入导出。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

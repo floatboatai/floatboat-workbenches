@@ -4,8 +4,8 @@
   "registryName": "reveal-js-studio",
   "name": "Reveal 排练桌",
   "description": "Markdown 幻灯片编排、讲者备注与网页演示",
-  "version": "0.3.0",
-  "changelog": "原生 Reveal.js 排练、Markdown 编排、自动草稿恢复与离线 HTML 导出。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

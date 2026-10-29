@@ -4,8 +4,8 @@
   "registryName": "hyperframes-studio",
   "name": "动效剪辑 · HyperFrames",
   "description": "分镜、品牌画面、时间线与真实MP4渲染",
-  "version": "0.5.0",
-  "changelog": "Initial application.",
+  "version": "0.5.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -4,8 +4,8 @@
   "registryName": "openmontage-studio",
   "name": "镜头制作 · OpenMontage",
   "description": "分镜审阅、本地视频素材裁切与拼接交付",
-  "version": "0.5.0",
-  "changelog": "Initial application.",
+  "version": "0.5.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

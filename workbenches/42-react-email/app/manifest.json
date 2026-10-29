@@ -4,8 +4,8 @@
   "registryName": "react-email-studio",
   "name": "React Email 工作台",
   "description": "邮件组件创作、变量校样与官方React Email HTML/纯文本导出",
-  "version": "0.6.0",
-  "changelog": "结构化邮件编辑、示例变量、桌面/手机校样与完整草稿恢复。",
+  "version": "0.6.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

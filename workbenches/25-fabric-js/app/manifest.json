@@ -4,8 +4,8 @@
   "registryName": "fabric-js-studio",
   "name": "Fabric.js 海报排版台",
   "description": "文字与形状排版、精确变换、图层、模板和 PNG/SVG 出图",
-  "version": "0.3.0",
-  "changelog": "原生 Fabric 7.4 画板、属性草稿自动保存、模板与便携项目导入导出。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

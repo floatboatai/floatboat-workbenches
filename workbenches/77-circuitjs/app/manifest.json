@@ -4,8 +4,8 @@
   "registryName": "circuitjs-studio",
   "name": "CircuitJS1 工作台",
   "description": "电路实验、示波器和实验记录",
-  "version": "0.8.1",
-  "changelog": "电路仪器台布局：纵向元件架、底部运行与测量、按需实验簿。",
+  "version": "0.8.2",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

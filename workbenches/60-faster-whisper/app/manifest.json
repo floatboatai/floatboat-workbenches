@@ -4,8 +4,8 @@
   "registryName": "faster-whisper-studio",
   "name": "字幕剪辑室",
   "description": "音频转写、逐句回听与字幕时间轴审校",
-  "version": "0.4.0",
-  "changelog": "AI 工作台：业务项目自动保存、结果复核和上游服务接入。",
+  "version": "0.4.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

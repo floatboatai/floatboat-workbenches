@@ -4,8 +4,8 @@
   "registryName": "openpencil-studio",
   "name": "组件制图 · OpenPencil",
   "description": "原生FIG图层编辑、画板预览与设计交付",
-  "version": "0.5.0",
-  "changelog": "使用OpenPencil原生文档核心编辑FIG图层，自动保存完整文档与属性草稿，导出FIG与SVG。",
+  "version": "0.5.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -4,8 +4,8 @@
   "registryName": "seqviz-studio",
   "name": "DNA 序列审阅台",
   "description": "序列与特征区间 → 环形/线性核对 → 选区序列、标注清单",
-  "version": "0.3.0",
-  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
+  "version": "0.3.1",
+  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
