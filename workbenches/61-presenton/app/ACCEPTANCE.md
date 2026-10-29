@@ -1,50 +1,70 @@
-# Acceptance — 2026-10-27
+# Presenton 工作台 0.9.0 验收
 
-## Verified locally
+日期 2026-10-29。功能验收与结构审查分开记录。
 
-`pnpm workbench check presenton` passed manifest/dependency/TypeScript/build validation. The tool reports advisory large-module warnings for the reused autosave client and the three-surface React page; no SDK/tooling changes or suppression were introduced. `pnpm workbench test presenton` passed **23 tests**.
+## 之前 → 现在
 
-Tests cover incomplete data and formal-model capacity boundaries, portable and recovery import/export, exact Presenton request/response mapping, inert slide HTML handling, URL/auth/response-size restrictions, persist-before-POST, duplicate operation input, immutable snapshots, unknown/lost submissions, restart recovery, origin changes, disconnected status, durable original-file chunks and late polling after stop/terminal state. HTTP responder tests are contract tests, not real upstream/model inference.
-
-Chrome headless browser acceptance used the real local HTTP/SQLite preview at 1440×1100 and 375×812, plus reduced-motion and dark mode:
-
-| Flow | Result |
+| 之前（0.4.1） | 现在（0.9.0） |
 | --- | --- |
-| Edit source/slide/notes; automatic save; reload | Passed |
-| Reorder selected slide, then restore order | Passed |
-| Unfinished raw JSON survives reload and stays unapplied | Passed |
-| Empty slide title is saved as draft and restored | Passed |
-| Edit while a server save receipt is delayed | Latest text remains, persists and reloads |
-| Server commits, HTTP receipt is lost, retry | Same project; revision advances once (4 → 5 in final run) |
-| Two-window optimistic conflict | Server keeps newer content; stale edit remains available and conflict survives reload |
-| Portable import | Creates a distinct project; original revision unchanged |
-| Markdown export with keyboard Enter | Downloaded and content verified |
-| Disconnected production | Explicit unavailable state; generation disabled; planning/import stay usable |
-| Large draft above 700 KB model limit | 35 slides × 8,000 Chinese characters saved as server draft, reopened, portable roundtrip identical |
-| New offline draft, switch away, recover local item | Content recovered; online save succeeds afterward |
-| 375px outline, production, import | No page horizontal overflow; all primary controls reachable |
-| Dark mode / reduced motion | Reviewed screenshots; visible controls and no required animation |
+| 生成只能交给自建 Presenton 服务，从未实测；无服务时“制作”按钮禁用，只能写 Markdown 大纲 | 本地确定性生成：资料 → 大纲（按内容选 11 种版式之一，附生成说明）→ 幻灯片；导出 PPTX（PptxGenJS 4.0.1 原生文本、项目符号、可编辑图表、图片、备注）与 PDF |
+| 舞台只是文字预览，声明“不渲染版式” | 真实版式舞台：同一几何驱动 HTML 舞台、PDF 位图与 PPTX；点选定位字段，图表数据表、关键数字、插画/上传图片、版式切换、5 套主题 |
+| 资料只能粘贴 6 万字以内 | 读入 .md/.txt（含 GB18030）/.docx/.html/.csv，资料上限 28 万字、文件 40 MB |
+| 示例 4 页、每页 3 行 | 原创示例资料约 1,700 字（背景、表格、成果数字、引语、对比、预算表、时间表、决定事项），示例成稿 12 页即本地生成器的产出 |
+| 页头为品牌 + 立即保存 + 项目下拉，下方三标签与新建/导出/删除按钮排 | 「文稿」菜单承载全部文件生命周期；页头只有文稿名、保存状态与三段步骤条 |
+| 无 Host 能力 | 可选 Floatboat 模型起草大纲（状态、重新检查、页内确认、候选采用）；Presenton 降为生成按钮旁的状态胶囊与抽屉（启动命令、重新检查、提交与制作记录） |
 
-No uncaught page errors. A single `net::ERR_FAILED` console message was intentionally induced by the lost-response test; ordinary loading and interaction produced no console/CSP errors. `docs/screenshots/presenton.png` is the actual edited-and-saved example after the primary browser flow. Other screenshots and private Playwright scripts/logs are kept outside Git in the session's `work/ai-batch/presenton/` directory.
+## 功能验收：local-verified
 
-Web Interface Guidelines and React rules were applied: native actions and controls, labelled editors, skip navigation, visible keyboard focus, live save/error status, destructive-action confirmation, safe content rendering, bounded lists, non-overlapping polling and reduced-motion. The task-specific layout is an editorial deck stage and production ledger; imported HTML is never rendered or executed.
+### 命令（Node 22.22.0）
 
-## Upstream and Host boundaries
+- `pnpm workbench check presenton`：manifest、依赖、类型、构建通过；保留共享 `autosave-client.ts` 的 `WORKBENCH_LARGE_MODULE` 提示。
+- `pnpm workbench test presenton`：**47/47** 通过（之前 29）。新增：生成规则（示例版式序列、表格转图表与排除列、结论文字、关键数字/引语出处、目标页数与密度、无标题与英文资料、确定性）、资料解析与压缩、.docx/HTML/CSV/GB18030 读入、0.4 迁移、草稿/正式模型边界（900 KB）、便携 v2 含图片、Presenton 请求映射与导入、Markdown 讲义、PPTX 解包（12 页、bar+doughnut 两个图表部件、项目符号与编号、备注、媒体、每段至多一个 `a:pPr`、缺图报错）、PDF 结构（xref 偏移、UTF-16 标题、JPEG 校验）、所有版式×主题几何在画布内、Host 通道 mock（可用/未连接/截断/资料过少）。原有 Presenton 连接器、任务账本、提交防重与自动保存测试保留并适配新模型。
+- `pnpm workbench package presenton`：`workbenches/61-presenton/artifacts/presenton-studio-0.9.0.fbworkbench`，79 个文件，不含业务数据；SHA-256 `04586eea0a392b17edf7f4583742bff61ee4fdd6a41d04fef3f4967d01cf61ec`。
 
-The connector was checked against actual official source at commit `93b9dcf947f70ae107b779b51dd3c491e736748a`, including async generation, task status, slides and export-existing contracts. No Presenton service, provider credentials or generated files were available in this environment. **Real model generation, actual upstream PPTX/PDF rendering/download and Host installation remain unverified.** No container image/model was downloaded. Preview explicitly reports `HOST_NOT_CONNECTED`; Host LLM is not used and the manifest declares no Host model capability.
+### 真实浏览器（puppeteer-core + 本机 Chrome，空数据目录，Host 未连接，未配置 PRESENTON_URL）
 
-The binary file tests verify constrained retrieval/cache/chunk mechanics with explicit fixture bytes. They do not claim those bytes came from a model or constitute a production-quality PDF/PPTX. Import/review and offline outline editing are complete independently of live generation. Server-only connection setup and known origin/path requirements are documented in `PRESENTON.md`.
+一个连续脚本 41 项检查全部通过，唯一 console 错误是丢失回执测试故意制造的 `net::ERR_FAILED`。
 
-## Delivery
+1440×900：
 
-Source package is produced with `pnpm workbench package presenton`. It excludes preview SQLite, downloaded artifacts, node_modules and credentials. Install through **Floatboat → My → Workbenches → Import workbench**. A successful source package is not proof of an imported Host connection or model run. Business-data migration should use portable project JSON and separate downloaded originals.
+- 首开即示例成稿（12 页）；资料页识别摘要“10 个章节、2 张表格；本地生成约 12 页”；模型通道显示“未连接 Floatboat … 重新检查”，无发送按钮。
+- 大纲页：生成按钮旁“Presenton 未配置”；抽屉给出 docker 与环境变量启动步骤、重新检查后仍说明未配置、无提交按钮；Escape 关闭并把焦点还给胶囊。文稿菜单打开后焦点进入菜单，Escape 关闭并回到按钮。
+- 新建空白文稿 → 填入示例资料与听众 → 生成大纲（12 页）→ 改第 3 页标题并上移 → 生成幻灯片，第 2 页带上改动。
+- 成稿：点舞台标题聚焦检查器字段，改标题舞台即时更新；改图表数据表单元格后 SVG 显示新值；要点页切到“关键数字”自动派生数字、再切回；“夜航”主题背景生效；上传 PNG 替换封面插画（脚本按标题匹配命中封面）。
+- 导出 PPTX（327 KB）：12 页、2 个原生图表、含改后的标题与上传图片；Python `zipfile.testzip()` 无错误；macOS 快速查看渲染封面页正常（文字、色块、图片位置与舞台一致）。导出 PDF（1.48 MB）：`%PDF-1.4`、12 页，抽出的 JPEG 页面与舞台一致（图表、关键数字卡片、中文断行）。
+- 刷新后回到同一文稿、成稿步骤与改后的内容。
 
-## Review fixes — submission guard and raw import restoration
+自动保存契约：
 
-Follow-up check/test/package passed; the test suite now contains **29 passing tests**. Six targeted tests cover restored intent with unavailable history, 404 uncertainty, explicit new-task confirmation, terminal exact-ID reconciliation, stopped tasks, empty-list preservation, and portable/recovery raw-editor fields.
+- 拦截保存 2.5 秒，期间继续输入；保存后为最新文字。
+- 服务端已提交、回执丢失 → 离线提示 → 重试保存 → saved，项目数不变（2→2）、仅一次提交。
+- 清空标题 → `draft`，提示“第 3 页还没有标题”；刷新后空标题草稿恢复；补全后恢复 saved。
+- 读入 `.md` 资料 → 新建“门店复盘”文稿（原文稿仍在列表中），生成含折线图的大纲；粘贴 Presenton PresentationWithSlides JSON → 新建文稿。
 
-A separate temporary preview and SQLite database exercised the real Node connector against an explicitly labelled local HTTP contract fixture. The browser verified the operation metadata was durably saved before the generation POST. The workbench accepted the request, stored the upstream fixture task, and then the browser response was deliberately dropped. Both list and exact-ID lookups returned injected 503 failures. After reload, the original operation remained visible; clicking generation prompted for explicit confirmation. Dismissing it left **one local POST and one fixture upstream generation call**, with no second operation ID. Restoring only the exact-ID endpoint recovered the original task while the list remained unavailable.
+375×812（移动视口）：成稿、资料、大纲、Presenton 抽屉均无横向溢出；缩略轨横向滚动、导出按钮可见。另查看了暗色界面与 reduced-motion 截图。
 
-The same targeted browser run exported a project containing unfinished raw JSON, imported it as a new project, reloaded it and verified the exact raw text. A full working-copy recovery-file import also retained that text. There were no uncaught page errors. Fixture tasks are confined to the temporary regression database; they are not model runs and do not alter the ordinary preview's production history. No new visual screenshot or unrelated full browser rerun was required. Private evidence is in `work/ai-batch/presenton/guard-evidence.json`.
+### Web Interface Guidelines / React 规则
 
-The application package metadata is aligned to `0.4.0`, matching the root package and manifest. App identity is unchanged. The final reviewed package was rebuilt after this metadata alignment.
+原生按钮与表单控件、全部输入有标签、图标按钮有 `aria-label`、跳至工作区链接、可见焦点、`role=status/alert`、菜单与抽屉 Escape 和焦点返回、替换类操作用页内确认、长文本省略、数字 `tabular-nums`、`touch-action: manipulation`、reduced-motion；资料识别摘要用 `useDeferredValue`；舞台与缩略图共用 `memo` 的 `SlideView`。
+
+### 未覆盖与限制
+
+- **真实 Host 未测**：模型起草只做了 mock/合同测试，本机未连接 Floatboat，未发起任何模型调用。
+- **真实 Presenton 未测**：无实例；连接器与任务账本仍为合同测试。
+- PDF 为逐页位图（1920 px JPEG），文字不可选择或检索；需要可编辑文本请用 PPTX。
+- 舞台、PDF 与 PPTX 共用几何与字号估算，但断行由各自的排版引擎完成，PowerPoint 中个别长行的折行位置可能不同；图表刻度由 PowerPoint 自动计算。未在 Microsoft PowerPoint 中打开验证。
+- 资料不能直接读 PDF/PPT/XLSX（给出另存为的提示）；.docx 只取正文段落、标题样式、列表与表格，不取图片和批注。
+- 本地生成是规则式整理，不改写措辞、不总结观点；需要改写可用模型起草或手动编辑。
+- 没有放映模式、动画、自由摆放元素（这是 05-pptxgenjs 的职责）。
+- 本地恢复依赖同源 IndexedDB，不同预览端口不共享。Floatboat 客户端导入源包未验收。
+
+## 结构审查：pass（待主线整合确认）
+
+- 主任务：三段步骤条是一级结构；每步主区分别是资料纸面、逐页大纲卡片、演示舞台，主操作（生成大纲 / 生成幻灯片 / 导出 PPTX）紧贴对象。旧的品牌 + 立即保存 + 项目下拉与“新建/导出大纲/便携项目/删除”按钮排已删除。
+- 文件生命周期：全部在「文稿」菜单；导入总是新建文稿；恢复条只在草稿/离线/冲突时出现。
+- 外部通道：模型起草位于生成大纲按钮下方，Presenton 为生成幻灯片旁的胶囊与抽屉；不可用时都显示原因、启动方式与重新检查，没有禁用的死按钮。
+- 对照：05-pptxgenjs（`docs/screenshots/pptxgenjs.png`，深色自由元素编辑器）与 64-pageindex（`docs/screenshots/pageindex.png`，三栏阅读台）。本项目为浅色生成流程：资料与大纲是持久对象，舞台编辑的是内容字段而非元素位置，每页可追溯到资料章节并可按大纲重置。
+- 空态与有内容：示例成稿首开；新建空白文稿从资料步开始，提供“读入资料文件 / 填入示例资料”；大纲为空时“添加第一页”；成稿为空时“去大纲 / 新建一页”。
+- 截图：`docs/screenshots/presenton.png`（1440×900，空数据目录首开示例文稿，第 5 页图表与数据表）。
+
+证据（脚本、截图、导出文件）在仓库外：`/Users/zhangqinzhong/IdeaProjects/floatboat/archive/2026-10-29-workbench-depth/presenton/`。

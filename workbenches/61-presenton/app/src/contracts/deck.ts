@@ -1,212 +1,54 @@
+// ABOUTME: 文稿的外部格式：Presenton 生成请求映射与响应导入、便携项目（含图片）与恢复副本导入、Markdown 大纲导出。
 import { localOperation } from "./operation.ts";
 import { boundedText, isRecord } from "./project.ts";
-export type Slide = {
-  id: string;
-  title: string;
-  markdown: string;
-  notes: string;
-  reviewed: boolean;
-};
-export type Settings = {
-  language: string;
-  template: string;
-  tone: string;
-  verbosity: string;
-  format: "pptx" | "pdf";
-  instructions: string;
-  webSearch: boolean;
-  titleSlide: boolean;
-  contents: boolean;
-};
-export type Result = {
-  kind: "imported" | "generated";
-  presentationId: string;
-  taskId: string;
-  path: string;
-  importedAt: string;
-  raw: string;
-};
-export type Deck = {
-  schemaVersion: 1;
-  source: string;
-  audience: string;
-  objective: string;
-  slides: Slide[];
-  settings: Settings;
-  result: Result | null;
-};
-export const defaults: Settings = {
-  language: "Chinese",
-  template: "general",
-  tone: "professional",
-  verbosity: "standard",
-  format: "pptx",
-  instructions: "",
-  webSearch: false,
-  titleSlide: true,
-  contents: false,
-};
-export const blank: Deck = {
-  schemaVersion: 1,
-  source: "",
-  audience: "",
-  objective: "",
-  slides: [
-    { id: "opening", title: "", markdown: "", notes: "", reviewed: false },
-  ],
-  settings: defaults,
-  result: null,
-};
-export const example: Deck = {
-  ...blank,
-  source:
-    "示例资料｜城市绿荫计划\n项目目标：让日常步行路线更凉爽、更宜人。\n试点：三条连接学校、社区与公交站的步行路线。\n行动：补植乡土树种，增加休息座椅，记录夏季体感温度。\n评估：遮荫覆盖、步行体验反馈、树木成活情况。",
-  audience: "社区伙伴与项目支持者",
-  objective: "就三条试点路线达成共识，确认首轮实地调研安排。",
-  slides: [
-    {
-      id: "vision",
-      title: "让每一段步行\n都有树荫相伴",
-      markdown:
-        "一项从社区街道开始的城市绿荫计划。\n\n- 连接日常目的地\n- 改善夏季步行体验\n- 从三条试点路线开始",
-      notes: "开场询问：你每天走的那条路，哪里最需要一片树荫？",
-      reviewed: true,
-    },
-    {
-      id: "problem",
-      title: "从日常路线找到机会",
-      markdown:
-        "- 学校到社区：放学高峰的等候与步行\n- 社区到公交站：最后一公里\n- 公园周边：连续的绿色连接",
-      notes: "带入现场照片与居民观察；暂无实测温度数据，避免作量化承诺。",
-      reviewed: false,
-    },
-    {
-      id: "plan",
-      title: "先观察，再共同设计",
-      markdown:
-        "1. 实地记录遮荫和停留点\n2. 邀请居民标注需求\n3. 与养护团队确认树种和空间\n4. 发布试点方案",
-      notes: "强调社区参与贯穿整个过程。",
-      reviewed: false,
-    },
-    {
-      id: "next",
-      title: "下一步，让路线走起来",
-      markdown:
-        "- 确认三条试点路线\n- 组织第一轮社区步行\n- 汇总观察，安排方案评审",
-      notes: "结尾给出具体的参与方式与时间安排。",
-      reviewed: false,
-    },
-  ],
-};
-const str = (v: unknown, n = 50000) => boundedText(v, n);
-export function identifier(v: unknown): string {
-  const s = str(v, 100);
-  if (!/^[A-Za-z0-9_-]{1,100}$/.test(s)) throw new Error("标识格式无效。");
-  return s;
+import { outlineFromBrief, slidesFromOutline } from "./generate.ts";
+import {
+  LAYOUT_LABELS,
+  LIMITS,
+  MEDIA_ID,
+  blank,
+  defaultSettings,
+  identifier,
+  markdownPoints,
+  restoreDeck,
+  validateDeck,
+  type Deck,
+  type OutlineItem,
+  type Slide,
+} from "./model.ts";
+import { SAMPLE_AUDIENCE, SAMPLE_BRIEF, SAMPLE_OBJECTIVE, SAMPLE_TITLE } from "./sample-brief.ts";
+
+export { blank, identifier, restoreDeck, validateDeck } from "./model.ts";
+export type { Deck, Slide, OutlineItem, Settings, Result } from "./model.ts";
+
+export const PORTABLE_FORMAT = "presenton-workbench";
+
+/** The bundled example: an original brief plus the outline and slides the local generator produced from it. */
+export function exampleDeck(): Deck {
+  const brief = { source: SAMPLE_BRIEF, audience: SAMPLE_AUDIENCE, objective: SAMPLE_OBJECTIVE, language: "auto", length: 0, density: "standard" } as const;
+  const outline = outlineFromBrief(brief).items;
+  return { ...blank, brief, outline, slides: slidesFromOutline(outline, brief), theme: "paper" };
 }
-export function restoreDeck(value: unknown): Deck {
-  if (
-    !isRecord(value) ||
-    value.schemaVersion !== 1 ||
-    !Array.isArray(value.slides) ||
-    !isRecord(value.settings)
-  )
-    throw new Error("项目格式不正确。");
-  if (value.slides.length < 1 || value.slides.length > 60)
-    throw new Error("需要 1–60 页幻灯片。");
-  const slides = value.slides.map((v) => {
-    if (!isRecord(v) || typeof v.reviewed !== "boolean")
-      throw new Error("幻灯片格式不正确。");
-    return {
-      id: identifier(v.id),
-      title: str(v.title, 300),
-      markdown: str(v.markdown, 12000),
-      notes: str(v.notes, 6000),
-      reviewed: v.reviewed,
-    };
-  });
-  if (new Set(slides.map((s) => s.id)).size !== slides.length)
-    throw new Error("幻灯片标识重复。");
-  const s = value.settings;
-  if (
-    ![
-      "default",
-      "casual",
-      "professional",
-      "funny",
-      "educational",
-      "sales_pitch",
-    ].includes(String(s.tone)) ||
-    !["concise", "standard", "text-heavy"].includes(String(s.verbosity)) ||
-    !["pptx", "pdf"].includes(String(s.format)) ||
-    typeof s.webSearch !== "boolean" ||
-    typeof s.titleSlide !== "boolean" ||
-    typeof s.contents !== "boolean"
-  )
-    throw new Error("制作设置无效。");
-  const settings: Settings = {
-    language: str(s.language, 80),
-    template: str(s.template, 120),
-    tone: String(s.tone),
-    verbosity: String(s.verbosity),
-    format: s.format === "pdf" ? "pdf" : "pptx",
-    instructions: str(s.instructions, 6000),
-    webSearch: s.webSearch,
-    titleSlide: s.titleSlide,
-    contents: s.contents,
-  };
-  let result: Result | null = null;
-  if (value.result !== null) {
-    const r = value.result;
-    if (!isRecord(r) || !["imported", "generated"].includes(String(r.kind)))
-      throw new Error("结果格式无效。");
-    result = {
-      kind: r.kind === "generated" ? "generated" : "imported",
-      presentationId: str(r.presentationId, 100),
-      taskId: str(r.taskId, 100),
-      path: str(r.path, 2000),
-      importedAt: str(r.importedAt, 60),
-      raw: str(r.raw, 250000),
-    };
-  }
-  const deck: Deck = {
-    schemaVersion: 1,
-    source: str(value.source, 60000),
-    audience: str(value.audience, 1000),
-    objective: str(value.objective, 2000),
-    slides,
-    settings,
-    result,
-  };
-  if (new TextEncoder().encode(JSON.stringify(deck)).length > 9000000)
-    throw new Error("工作副本超过 9 MB，请先导出并减少内容。");
-  return deck;
-}
-export function validateDeck(value: unknown): Deck {
-  const d = restoreDeck(value);
-  if (new TextEncoder().encode(JSON.stringify(d)).length > 700000)
-    throw new Error(
-      "正式项目超过 700 KB；完整工作副本仍按草稿保留，请减少内容后制作。",
-    );
-  if (d.slides.some((s) => !s.title.trim() || !s.markdown.trim()))
-    throw new Error("未完成的页面已保存为草稿；补充标题和内容后可制作。");
-  return d;
-}
+export const example: Deck = exampleDeck();
+export const EXAMPLE_TITLE = SAMPLE_TITLE;
+
+const str = (v: unknown, n: number) => boundedText(v, n);
+
+/** Presenton request: the outline (or slides when no outline exists) as per-slide Markdown. */
 export function generationRequest(value: unknown) {
   const d = validateDeck(value);
-  if (!d.settings.language.trim() || !d.settings.template.trim())
-    throw new Error("请选择语言并填写模板。");
+  if (!d.settings.language.trim() || !d.settings.template.trim()) throw new Error("请选择语言并填写模板。");
+  const pages: { title: string; points: string[]; notes: string; layout: string }[] = d.outline.length
+    ? d.outline.map((o) => ({ title: o.title, points: [...o.points, ...o.points2], notes: o.notes, layout: o.layout }))
+    : d.slides.map((s) => ({ title: s.title, points: [s.subtitle, ...s.bullets, ...s.bullets2, ...s.stats.map((x) => `${x.value} ${x.label}`)].filter(Boolean), notes: s.notes, layout: s.layout }));
+  if (!pages.length) throw new Error("请先生成或编写大纲。");
+  if (pages.some((p) => !p.title.trim())) throw new Error("大纲中有未命名的页面，请补充标题。");
   return {
-    content: [
-      d.source,
-      `Audience: ${d.audience}`,
-      `Objective: ${d.objective}`,
-    ].join("\n\n"),
-    slides_markdown: d.slides.map(
-      (s) =>
-        `# ${s.title}\n\n${s.markdown}${s.notes ? "\n\nSpeaker guidance: " + s.notes : ""}`,
+    content: [d.brief.source, `Audience: ${d.brief.audience}`, `Objective: ${d.brief.objective}`].join("\n\n"),
+    slides_markdown: pages.map(
+      (p) => `# ${p.title}\n\n${p.points.map((x) => `- ${x}`).join("\n")}${p.notes ? "\n\nSpeaker guidance: " + p.notes.slice(0, 1500) : ""}`,
     ),
-    n_slides: d.slides.length,
+    n_slides: pages.length,
     language: d.settings.language,
     template: d.settings.template,
     tone: d.settings.tone,
@@ -219,22 +61,27 @@ export function generationRequest(value: unknown) {
     trigger_webhook: false,
   };
 }
-export function outline(d: Deck): string {
-  return (
-    `# Presentation outline\n\n## Audience\n${d.audience}\n\n## Objective\n${d.objective}\n\n## Source\n${d.source}\n\n` +
-    d.slides
-      .map(
-        (s, i) =>
-          `---\n\n# ${i + 1}. ${s.title}\n\n${s.markdown}\n\n> Speaker notes\n${s.notes}\n`,
-      )
-      .join("\n")
-  );
+
+/** Markdown hand-out of the outline and slide text with notes. */
+export function outlineMarkdown(title: string, d: Deck): string {
+  const head = `# ${title}\n\n${d.brief.audience ? `- 听众：${d.brief.audience}\n` : ""}${d.brief.objective ? `- 目标：${d.brief.objective}\n` : ""}`;
+  const body = (d.slides.length ? d.slides : d.outline).map((s, i) => {
+    const slide = "bullets" in s ? (s as Slide) : null;
+    const item = slide ? null : (s as OutlineItem);
+    const lines = slide
+      ? [slide.subtitle, ...slide.stats.map((x) => `${x.value} — ${x.label}`), ...slide.bullets, ...slide.bullets2].filter(Boolean)
+      : [...item!.points, ...item!.points2];
+    const chart = slide?.chart
+      ? `\n\n| ${["", ...slide.chart.series.map((x) => x.name || "数值")].join(" | ")} |\n|${" --- |".repeat(slide.chart.series.length + 1)}\n${slide.chart.categories
+          .map((c, ci) => `| ${[c, ...slide.chart!.series.map((x) => x.values[ci] ?? "")].join(" | ")} |`)
+          .join("\n")}`
+      : "";
+    return `## ${i + 1}. ${s.title || "（未命名）"}\n\n_${LAYOUT_LABELS[s.layout]}_\n\n${lines.map((l) => `- ${l}`).join("\n")}${chart}${s.notes ? `\n\n> 演讲备注：${s.notes.replace(/\n/g, "\n> ")}` : ""}`;
+  });
+  return `${head}\n${body.join("\n\n")}\n`;
 }
-export type Task = {
-  id: string;
-  status: "pending" | "completed" | "error";
-  data: Record<string, unknown> | null;
-};
+
+export type Task = { id: string; status: "pending" | "completed" | "error"; data: Record<string, unknown> | null };
 export function taskValue(v: unknown): Task {
   if (
     !isRecord(v) ||
@@ -242,46 +89,71 @@ export function taskValue(v: unknown): Task {
     (v.data !== null && v.data !== undefined && !isRecord(v.data))
   )
     throw new Error("Presenton 任务响应格式无效。");
-  return {
-    id: identifier(v.id),
-    status: v.status as Task["status"],
-    data: isRecord(v.data) ? v.data : null,
-  };
+  return { id: identifier(v.id), status: v.status as Task["status"], data: isRecord(v.data) ? v.data : null };
 }
 function contentText(v: unknown, depth = 0): string[] {
   if (depth > 6) return [];
-  if (typeof v === "string") return [v.slice(0, 12000)];
-  if (Array.isArray(v))
-    return v.flatMap((x) => contentText(x, depth + 1)).slice(0, 80);
+  if (typeof v === "string") return [v.slice(0, 600)];
+  if (Array.isArray(v)) return v.flatMap((x) => contentText(x, depth + 1)).slice(0, 80);
   if (isRecord(v))
     return Object.entries(v)
-      .filter(([k]) => !/(image|url|html|style|icon|font|color)/i.test(k))
+      .filter(([k]) => !/(image|url|html|style|icon|font|color|__)/i.test(k))
       .flatMap(([, x]) => contentText(x, depth + 1))
       .slice(0, 80);
   return [];
 }
+
+const EXTRA_TEXT: Record<string, number> = {
+  importText: 1_800_000,
+  lastOperation: 100,
+  recoveryTask: 100,
+  presentationId: 100,
+  step: 20,
+  activeSlide: 100,
+  activeItem: 100,
+};
+/** Decodes persisted UI/working fields by type; unknown keys are dropped. */
 export function restoreExtra(v: unknown): Record<string, unknown> {
   if (!isRecord(v)) return {};
   const extra: Record<string, unknown> = {};
-  for (const key of [
-    "importText",
-    "lastOperation",
-    "recoveryTask",
-    "presentationId",
-  ])
-    if (v[key] !== undefined)
-      extra[key] = str(v[key], key === "importText" ? 1800000 : 100);
-  if (v.pendingOperation !== undefined)
-    extra.pendingOperation = localOperation(v.pendingOperation);
+  for (const [key, max] of Object.entries(EXTRA_TEXT)) if (typeof v[key] === "string") extra[key] = str(v[key], max);
+  if (v.pendingOperation !== undefined) extra.pendingOperation = localOperation(v.pendingOperation);
+  if (Array.isArray(v.generationLog))
+    extra.generationLog = v.generationLog
+      .slice(0, 80)
+      .filter(isRecord)
+      .map((x) => ({ section: String(x.section ?? "").slice(0, 300), note: String(x.note ?? "").slice(0, 600) }));
+  if (v.modelCandidate !== undefined) {
+    const c = v.modelCandidate;
+    if (isRecord(c) && Array.isArray(c.items) && c.items.length <= LIMITS.slides) {
+      const probe = restoreDeck({ ...blank, outline: c.items });
+      extra.modelCandidate = { items: probe.outline, model: typeof c.model === "string" ? c.model.slice(0, 120) : "" };
+    }
+  }
   return extra;
 }
-export function importDeck(text: string): {
-  title: string;
-  deck: Deck;
-  extra: Record<string, unknown>;
-} {
-  if (new TextEncoder().encode(text).length > 24000000)
-    throw new Error("导入文件超过 24 MB。");
+
+export type PortableMedia = Record<string, { mime: string; base64: string; name: string }>;
+export type Imported = { title: string; deck: Deck; extra: Record<string, unknown>; media: PortableMedia };
+
+export function portable(title: string, deck: Deck, extra: Record<string, unknown>, media: PortableMedia = {}) {
+  return JSON.stringify({ format: PORTABLE_FORMAT, version: 2, title, deck, extra, media }, null, 2);
+}
+function mediaValue(v: unknown): PortableMedia {
+  if (v === undefined) return {};
+  if (!isRecord(v)) throw new Error("项目中的图片数据无效。");
+  const out: PortableMedia = {};
+  for (const [id, m] of Object.entries(v)) {
+    if (!MEDIA_ID.test(id) || !isRecord(m) || typeof m.base64 !== "string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(m.base64))
+      throw new Error("项目中的图片数据无效。");
+    out[id] = { mime: str(m.mime, 40), base64: m.base64, name: typeof m.name === "string" ? m.name.slice(0, 200) : "" };
+  }
+  return out;
+}
+
+/** Imports a portable project (0.4 or 0.9), a recovery working copy, or a Presenton task / PresentationWithSlides JSON. */
+export function importDeck(text: string): Imported {
+  if (new TextEncoder().encode(text).length > 60_000_000) throw new Error("导入文件超过 60 MB。");
   let v: unknown;
   try {
     v = JSON.parse(text);
@@ -289,22 +161,16 @@ export function importDeck(text: string): {
     throw new Error("JSON 尚未完整，请检查后再导入。");
   }
   if (!isRecord(v)) throw new Error("需要一个 JSON 对象。");
-  if (v.format === "presenton-workbench" && v.version === 1) {
-    const title = str(v.title, 120);
-    return {
-      title: title.trim() || "导入的演示文稿",
-      deck: restoreDeck(v.deck),
-      extra: restoreExtra(v.extra),
-    };
+  if (v.format === PORTABLE_FORMAT && (v.version === 1 || v.version === 2)) {
+    const title = str(v.title ?? "", 120);
+    return { title: title.trim() || "导入的演示文稿", deck: restoreDeck(v.deck), extra: restoreExtra(v.extra), media: mediaValue(v.media) };
   }
   if (isRecord(v.snapshot) && isRecord(v.snapshot.data)) {
     return {
-      title:
-        typeof v.snapshot.title === "string"
-          ? v.snapshot.title.slice(0, 120)
-          : "恢复的演示文稿",
+      title: typeof v.snapshot.title === "string" ? v.snapshot.title.slice(0, 120) : "恢复的演示文稿",
       deck: restoreDeck(v.snapshot.data),
       extra: restoreExtra(v.snapshot.extra),
+      media: {},
     };
   }
   const task = typeof v.status === "string" ? taskValue(v) : null;
@@ -316,81 +182,53 @@ export function importDeck(text: string): {
       : typeof data.id === "string" && Array.isArray(data.slides)
         ? identifier(data.id)
         : "";
-  if (
-    !presentationId &&
-    !Array.isArray(data.slides) &&
-    typeof data.path !== "string"
-  )
-    throw new Error("未找到 Presenton 演示文稿或生成响应。");
-  if (text.length > 250000)
-    throw new Error("结果 JSON 超过 250,000 字符，请精简为当前演示文稿。");
-  let slides: Slide[] = [
-    {
-      ...blank.slides[0],
-      title: "待复核的生成结果",
-      markdown: "已导入生成响应。可在制作页按演示文稿 ID 获取页面内容。",
-    },
+  if (!presentationId && !Array.isArray(data.slides) && typeof data.path !== "string")
+    throw new Error("未识别的 JSON：需要本工作台的项目文件、恢复副本，或 Presenton 的任务 / 演示文稿响应。");
+  if (text.length > 250000) throw new Error("Presenton 结果 JSON 超过 250,000 字符，请只导出当前演示文稿。");
+  let outline: OutlineItem[] = [
+    { id: "import-0", layout: "bullets", title: "待复核的生成结果", points: ["已导入生成响应，可在 Presenton 通道按演示文稿 ID 读取页面。"], points2: [], columnTitles: ["", ""], chart: null, notes: "", sourceRef: "" },
   ];
   if (Array.isArray(data.slides)) {
-    if (!data.slides.length || data.slides.length > 60)
-      throw new Error("导入内容需要 1–60 页。");
-    slides = data.slides
+    if (!data.slides.length || data.slides.length > LIMITS.slides) throw new Error(`导入内容需要 1–${LIMITS.slides} 页。`);
+    outline = data.slides
       .map((raw, i) => {
-        if (
-          !isRecord(raw) ||
-          !Number.isInteger(raw.index) ||
-          !isRecord(raw.content)
-        )
-          throw new Error("Presenton 页面格式无效。");
+        if (!isRecord(raw) || !Number.isInteger(raw.index) || !isRecord(raw.content)) throw new Error("Presenton 页面格式无效。");
         const texts = contentText(raw.content);
+        const title = (typeof raw.content.title === "string" ? raw.content.title : texts[0] || `第 ${i + 1} 页`).slice(0, LIMITS.title);
+        const points = texts
+          .filter((t) => t !== title)
+          .flatMap((t) => markdownPoints(t))
+          .slice(0, LIMITS.points);
         return {
-          id: `import-${i}`,
-          title: (typeof raw.content.title === "string"
-            ? raw.content.title
-            : texts[0] || `第 ${i + 1} 页`
-          ).slice(0, 300),
-          markdown:
-            texts.join("\n\n").slice(0, 12000) ||
-            "此页仅有视觉内容；请下载原件检查版式。",
-          notes:
-            typeof raw.speaker_note === "string"
-              ? raw.speaker_note.slice(0, 6000)
-              : "",
-          reviewed: false,
+          item: {
+            id: `import-${i}`,
+            layout: (Number(raw.index) === 0 ? "cover" : "bullets") as OutlineItem["layout"],
+            title,
+            points: points.length ? points : ["此页只有视觉内容；请在 Presenton 原件中检查版式。"],
+            points2: [],
+            columnTitles: ["", ""] as [string, string],
+            chart: null,
+            notes: typeof raw.speaker_note === "string" ? raw.speaker_note.slice(0, LIMITS.notes) : "",
+            sourceRef: "Presenton",
+          },
           index: Number(raw.index),
         };
       })
-      .sort((a, b) => a.index - b.index);
+      .sort((a, b) => a.index - b.index)
+      .map((x) => x.item);
   }
+  const brief = { ...blank.brief, source: typeof data.content === "string" ? data.content.slice(0, LIMITS.source) : "" };
   return {
-    title:
-      typeof data.title === "string"
-        ? data.title.slice(0, 120)
-        : "导入的 Presenton 文稿",
+    title: typeof data.title === "string" ? data.title.slice(0, 120) : "导入的 Presenton 文稿",
     deck: restoreDeck({
       ...blank,
-      source:
-        typeof data.content === "string" ? data.content.slice(0, 60000) : "",
-      slides,
-      result: {
-        kind: "imported",
-        presentationId,
-        taskId: task?.id || "",
-        path: typeof data.path === "string" ? data.path : "",
-        importedAt: new Date().toISOString(),
-        raw: text,
-      },
+      brief,
+      outline,
+      slides: slidesFromOutline(outline, brief),
+      settings: defaultSettings,
+      result: { kind: "imported", presentationId, taskId: task?.id || "", path: typeof data.path === "string" ? data.path : "", importedAt: new Date().toISOString(), raw: text },
     }),
     extra: {},
+    media: {},
   };
 }
-export const portable = (
-  title: string,
-  deck: Deck,
-  extra: Record<string, unknown>,
-) =>
-  JSON.stringify(
-    { format: "presenton-workbench", version: 1, title, deck, extra },
-    null,
-    2,
-  );
