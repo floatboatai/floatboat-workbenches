@@ -3935,7 +3935,7 @@
     "slug": "comfyui",
     "directory": "workbenches/79-comfyui",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "verification": {
       "build": "passed",
       "tests": 24,
