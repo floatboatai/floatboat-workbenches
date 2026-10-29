@@ -2,7 +2,7 @@
 
 真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-29。
 
-0.9.0 第1波更新8项、第2波更新7项；其余保留历史采集版本。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
+0.9.0 第1波更新8项、第2波更新8项；其余保留历史采集版本。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -59,7 +59,7 @@
 | [ray-optics.png](ray-optics.png) | 0.9.0 | 1440 × 900 | 184.9 KiB | `1f32661263f7fff0b6abe6f632dd288b37fc4e94e7719375cb4491f3c82cd8ac` |
 | [invoice-builder.png](invoice-builder.png) | 0.7.0 | 1440 × 1050 | 117.9 KiB | `64edaf214cdfb14730442e43d2c55335da906b1b630dfe45c849f187f9b7bbc2` |
 | [mesh2motion.png](mesh2motion.png) | 0.7.0 | 1440 × 1041 | 188.8 KiB | `5d7d47bcba4b11bc2149d7407a0de3189a703195d1e5007b833085b8cec5b125` |
-| [oasis-editor.png](oasis-editor.png) | 0.8.1 | 1440 × 1000 | 127.1 KiB | `99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6` |
+| [oasis-editor.png](oasis-editor.png) | 0.9.0 | 1440 × 900 | 171.1 KiB | `b64f3ccec04a84ad83bf5dd0f5600c1b34d3300d656d261d8107c0214838fbc2` |
 | [circuitjs.png](circuitjs.png) | 0.9.0 | 1440 × 900 | 103.2 KiB | `6126c3bdf62496c8bb43a4f4228cc3da6063fe77073eff05f76192cd476f613e` |
 | [gltf-transform.png](gltf-transform.png) | 0.9.0 | 1440 × 900 | 143.7 KiB | `e1f5b5a1a8520c4204e8acc28e4f420043e4941dd329a27feeaf9a3f9fdd5aed` |
 

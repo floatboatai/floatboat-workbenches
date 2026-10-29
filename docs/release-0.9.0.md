@@ -62,9 +62,10 @@
 | React Flow | 4 种操作的直线链，把一句话转大写 | 本地数据流水线：20 种确定性节点、类型端口、分支与合并、节点内预览、正则超时保护；调色板拖放、框选、撤销、自动布局；5 个模板 | 25 |
 | Vega-Lite | 必须顶层 mark，拒绝 layer/concat/facet/repeat；仅内嵌数据 | 完整 v6 语法与官方 schema 校验；CSV/TSV/JSON 数据窗（20 MiB）与字段芯片；CodeMirror 补全与悬停说明；13 个示例；PNG/SVG/项目包 | 20 |
 | Ray Optics | 关闭实时光路；只有 12 类对象 | 拖动即实时追迹（按质量设上限）；上游 5.5.0 全部 42 类对象；四种视图与波长色彩；19 个示例 | 14 |
+| Oasis Editor | 约 130 条命令只露出 11 条；原生菜单为英文；示例为重复填充文字；包内缺少 LICENSE 导致商店拒收 | 开始/插入/表格/审阅/布局功能区；修订在纸面显示并可逐条接受拒绝，批注面板；中文原生菜单与断行；修复引擎中修订丢失、脚注崩溃、导出后无法重新打开等 9 处问题；3 页中文项目建议书示例；补齐 `app/LICENSE` | 23 |
 | CircuitJS | 162 种元件放行 17 种；无示例库；编辑即暂停 | 141 种可搜索元件（仅排除读取本地文件或无法交付的 3 种并写明原因）；366 个官方示例；速度、单步与参数滑块；编辑时持续仿真；首屏 555 闪光电路 | 16 |
 
-合并后在主线重新安装依赖并逐项运行 `check` 与 `test`，全部通过。CircuitJS 保留 0.8.1 已通过的结构；其余结构审查仍为待定。Oasis Editor 仍在进行。
+合并后在主线重新安装依赖并逐项运行 `check` 与 `test`，全部通过。CircuitJS 与 Oasis Editor 保留 0.8.1 已通过的结构；其余结构审查仍为待定。
 
 | 工作台 | 改版前 | 0.9.0 |
 | --- | --- | --- |
@@ -74,8 +75,9 @@
 | React Flow | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/react-flow.png" alt="React Flow 改版前" width="360"> | <img src="screenshots/react-flow.png" alt="React Flow 0.9.0" width="360"> |
 | Vega-Lite | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/vega-lite.png" alt="Vega-Lite 改版前" width="360"> | <img src="screenshots/vega-lite.png" alt="Vega-Lite 0.9.0" width="360"> |
 | Ray Optics | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/ray-optics.png" alt="Ray Optics 改版前" width="360"> | <img src="screenshots/ray-optics.png" alt="Ray Optics 0.9.0" width="360"> |
+| Oasis Editor | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/oasis-editor.png" alt="Oasis Editor 改版前" width="360"> | <img src="screenshots/oasis-editor.png" alt="Oasis Editor 0.9.0" width="360"> |
 | CircuitJS | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/circuitjs.png" alt="CircuitJS 改版前" width="360"> | <img src="screenshots/circuitjs.png" alt="CircuitJS 0.9.0" width="360"> |
 
 ## 发布通道
 
-CI 的上传接口只暂存回执，不进入商店审核。后端 PR [AOE-HQ/aoe-backend#414](https://github.com/AOE-HQ/aoe-backend/pull/414) 新增 `POST /api/workbenches/publish`；部署后设置 `FLOATBOAT_PUBLISH_ENABLED=true`，CI 会把每个上传提交为待审核版本，说明见[自动打包与官方上传](ci-packages.md#提交商店审核)。
+CI 的上传接口只暂存回执，不进入商店审核。后端 PR [AOE-HQ/aoe-backend#414](https://github.com/AOE-HQ/aoe-backend/pull/414) 新增 `POST /api/workbenches/publish`；已部署并启用 `FLOATBOAT_PUBLISH_ENABLED=true`：2026-10-29 的重跑中 56 个包全部上传，54 个提交为待审核版本，CircuitJS（GPL）按规则跳过，Oasis 因包内缺少 `LICENSE` 被拒，已补齐。说明见[自动打包与官方上传](ci-packages.md#提交商店审核)。

@@ -3743,8 +3743,8 @@
     "repo": "celsowm/oasis-editor",
     "category": "分页文档",
     "kind": "原生工具/组件",
-    "workbench": "DOCX分页编辑、校样与文档交付",
-    "core_features": "分页DOCX编辑、原始文档保留、表格/图片校样、中文PDF与DOCX及完整工程导出",
+    "workbench": "中文分页文稿：功能区编辑、修订批注与 DOCX/PDF 往返",
+    "core_features": "开始/插入/表格/审阅/布局功能区、样式与编号、图片/表格/脚注/公式、修订显示与接受拒绝、批注、页面设置、查找替换、中文原生菜单、DOCX/PDF 导出与重新打开",
     "integration": "固定原生核心，适配官方模板和完整工作副本",
     "effort": "中–高",
     "priority": "A",
@@ -3762,18 +3762,18 @@
     "slug": "oasis-editor",
     "directory": "workbenches/76-oasis-editor",
     "status": "local-verified",
-    "version": "0.8.2",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/oasis-editor.png",
-          "caption": "Oasis Editor · 居中纸张、文稿菜单与按需页边工具"
+          "caption": "Oasis Editor · 居中纸张、功能区与审阅批注"
         }
       ]
     },
     "verification": {
       "build": "passed",
-      "tests": 9,
+      "tests": 23,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
@@ -3782,16 +3782,17 @@
       "screenshot": "docs/screenshots/oasis-editor.png",
       "hostImport": "unverified",
       "hostLlm": "not-used",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.8.1.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/76-oasis-editor/ACCEPTANCE.md",
       "upstream": "celsowm/oasis-editor 0.0.195 · ad0bd38f7ec7258ee2fb7a9f23fa7815a3d04195 · MIT",
       "structuralLayout": {
         "status": "passed",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "real screenshots and task flow"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.8.1 structure kept"
+      },
+      "firstOpen": "usable without external services"
     }
   },
   {
