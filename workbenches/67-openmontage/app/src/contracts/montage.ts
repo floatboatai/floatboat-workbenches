@@ -1,3 +1,4 @@
+// ABOUTME: OpenMontage 服务的裁切拼接计划格式（0.5 版分镜单），服务与应用共用同一校验。
 import { isRecord, boundedText } from "./project.ts";
 export const CHUNK_BYTES = 384 * 1024,
   MAX_VIDEO_BYTES = 20 * 1024 * 1024;
@@ -82,51 +83,8 @@ export function readyMontage(v: unknown) {
     m.shots.length > 12 ||
     m.shots.some((s) => !s.source || !s.approved)
   )
-    throw new Error("需要2–12个已上传素材并通过审阅的镜头。");
+    throw new Error("需要2–12段已上传的MP4片段。");
   if (m.shots.reduce((n, s) => n + (+s.end - +s.start), 0) > 120)
     throw new Error("成片不能超过120秒。");
   return m;
-}
-export const seed: Montage = {
-  brief:
-    "为一段城市漫游短片整理镜头。先检查每个素材的画面与入出点，再确认组接顺序。",
-  shots: [
-    {
-      id: "opening",
-      title: "开场 · 抵达",
-      script: "留出片头的呼吸感，明确场景与时间。",
-      source: null,
-      start: "0",
-      end: "2",
-      approved: false,
-    },
-    {
-      id: "detail",
-      title: "细节 · 经过",
-      script: "切到更近的视角，保持视觉节奏。",
-      source: null,
-      start: "0",
-      end: "2",
-      approved: false,
-    },
-  ],
-};
-export function shotEdit(
-  s: Shot,
-  patch: Partial<Omit<Shot, "id" | "approved">>,
-): Shot {
-  return { ...s, ...patch, approved: false };
-}
-export function report(m: Montage) {
-  return (
-    "# 分镜制作单\n\n" +
-    m.brief +
-    "\n\n" +
-    m.shots
-      .map(
-        (s, i) =>
-          `## ${i + 1}. ${s.title}\n\n${s.script}\n\n素材：${s.source?.name ?? "未上传"}\n\n入点：${s.start}s / 出点：${s.end}s / ${s.approved ? "已审阅" : "待审阅"}\n`,
-      )
-      .join("\n")
-  );
 }

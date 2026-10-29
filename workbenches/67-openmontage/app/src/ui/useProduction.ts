@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useProjects, request, download } from "./workspace";
 import { isRecord } from "../contracts/project";
 import { readyMontage, type Montage } from "../contracts/montage";
+import type { Timeline } from "../contracts/timeline";
+import { servicePlan } from "../contracts/service-plan";
 import {
   jobValue,
   mergeJobs,
@@ -9,14 +11,18 @@ import {
   type RenderJob,
 } from "../contracts/render-state";
 import { getPageConnection } from "./connection";
-type Workspace = ReturnType<typeof useProjects<Montage>>;
+type Workspace = ReturnType<typeof useProjects<Timeline>>;
+export type RendererStatus = { available: boolean; state: "checking" | "ready" | "not-ready" | "offline"; message: string; command: string; url: string };
 export function useProduction(p: Workspace) {
   const [jobs, setJobs] = useState<RenderJob[]>([]),
     [busy, setBusy] = useState(false),
     [transitioning, setTransitioning] = useState(false),
-    [status, setStatus] = useState({
+    [status, setStatus] = useState<RendererStatus>({
       available: false,
-      message: "正在检查制作服务…",
+      state: "checking",
+      message: "正在检查 OpenMontage 服务…",
+      command: "",
+      url: "",
     });
   const epoch = useRef(p.documentKey),
     sequence = useRef(0),
@@ -40,7 +46,10 @@ export function useProduction(p: Workspace) {
       if (isRecord(v))
         setStatus({
           available: v.available === true,
+          state: v.state === "ready" || v.state === "not-ready" ? v.state : "offline",
           message: String(v.message),
+          command: String(v.command ?? ""),
+          url: String(v.url ?? ""),
         });
     } catch (e) {
       p.report(e);
@@ -76,9 +85,14 @@ export function useProduction(p: Workspace) {
   useEffect(() => {
     setJobs([]);
     void load();
+  }, [p.current?.id, p.documentKey]);
+  // 只有存在未结束的服务任务时才轮询，避免没有服务时持续请求。
+  const live = jobs.some((j) => !terminal(j.state)) || p.draft.pendingRender !== undefined;
+  useEffect(() => {
+    if (!live) return;
     const t = setInterval(() => void load(), 2500);
     return () => clearInterval(t);
-  }, [p.current?.id, p.documentKey]);
+  }, [live, p.current?.id, p.documentKey]);
   async function run() {
     if (flight.current) return;
     flight.current = true;
@@ -105,7 +119,9 @@ export function useProduction(p: Workspace) {
       } else {
         if (jobs.some((j) => !terminal(j.state)))
           throw new Error("已有制作任务等待确认。");
-        const snapshot = readyMontage(p.data),
+        const plan = servicePlan(p.data);
+        if (!plan.montage) throw new Error(plan.reason);
+        const snapshot = plan.montage,
           saved = await p.save();
         if (!saved || key !== epoch.current) return;
         command = {
@@ -162,7 +178,7 @@ export function useProduction(p: Workspace) {
       const page = await getPageConnection(),
         r = await page.fetch("/api/renders/" + id + "/video");
       if (!r.ok) throw new Error("成片暂不可读，请检查制作服务。");
-      download(await r.blob(), p.title + ".mp4");
+      download(await r.blob(), p.title + " · OpenMontage.mp4");
     } catch (e) {
       p.report(e);
     }
@@ -179,6 +195,15 @@ export function useProduction(p: Workspace) {
     video,
     canLeave,
     transitioning,
+    replace: async (data: Timeline, title: string, extra: Record<string, unknown> = {}) => {
+      if (!canLeave()) return false;
+      setTransitioning(true);
+      try {
+        return await p.replace(data, title, extra);
+      } finally {
+        setTransitioning(false);
+      }
+    },
     open: async (id: string) => {
       if (!canLeave()) return false;
       setTransitioning(true);
