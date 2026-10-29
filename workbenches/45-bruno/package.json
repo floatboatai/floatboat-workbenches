@@ -1,7 +1,7 @@
 {
   "name": "floatboat-bruno",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.9.0",
   "type": "module",
   "packageManager": "pnpm@10.22.0",
   "engines": {

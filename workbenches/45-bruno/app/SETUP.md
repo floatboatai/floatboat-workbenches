@@ -1,9 +1,13 @@
 # HTTP 执行范围
 
-本工作台无需账号或秘密即可运行。HTTP 从工作台 Node 服务发出；可显式输入本机测试服务的 HTTP URL 或授权使用的 HTTPS URL。请求仅点击“发送请求”时产生；不会因刷新、导入、恢复或自动保存重发。
+本工作台无需账号或秘密即可运行。HTTP 从工作台 Node 服务发出，只在点击「发送」（或 ⌘/Ctrl+Enter）时产生；刷新、导入、恢复、自动保存不会发送或重发。
 
-支持完整 HTTP URL、GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS、查询参数、普通请求头与 none/json/text/xml 正文。不执行 pre/post scripts、tests、assertions、变量替换、认证继承、集合/文件夹规则、代理、文件体和证书配置。这些文件原文保留，执行被阻止；可新建仅含受支持请求的集合进行明确发送。无 eval、无系统环境秘密读取、无浏览器 Cookie 转发。
+工作台进程同时在 127.0.0.1 的随机端口启动一个本机回声服务，示例环境「本机回声」的 `baseUrl` 为 `{{$localEcho}}`。它只回显收到的请求，不转发、不存储。导出到 Bruno 桌面版时该变量无法解析，把环境里的 `baseUrl` 改成你的服务地址即可。
 
-全部手动输入的源文件、请求和响应正文会进入工作稿及工程导出，原生集合 ZIP 包含全部源文件。请不要把秘密放进示例或共享工程；本版本不提供秘密管理或环境绑定。源工作台安装包默认不包含工作稿或 HTTP 操作数据库。
+支持：GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS；Query 与 `/:path` 参数；请求头；none/json/text/xml/form-urlencoded/multipart 文本字段/GraphQL 正文；none/inherit/Bearer/Basic/API Key 认证；集合、文件夹与请求级 headers/vars/auth 继承；环境变量与秘密变量；vars:post-response；声明式 assert。
 
-网络预算：10 秒超时、64 KiB 响应正文、最多 4 个响应快照，重定向不跟随。取消或超时表示回执未知，不能保证远端未执行。读取回执只查询持久化操作记录；重复同一操作 ID 不再次发送。对未知 POST/PUT/PATCH/DELETE，核对远端后才手动发起新操作。
+不执行：pre/post-request 脚本、tests、其他认证模式、multipart 文件、代理与客户端证书（bruno.json 中的这些设置原样保留并提示）、gRPC/WebSocket。无 eval、不读取系统环境变量、不转发浏览器 Cookie。
+
+秘密：环境里标为「秘密」的值只留在页面内存，刷新后需重新填写；不写入 .bru、自动保存、导出或执行记录。其他手动输入（含直接写在 Auth 里的明文 token）与响应历史属于工作稿和完整工程导出范围；请把凭据写成 `{{变量}}` 并标为秘密。
+
+网络预算：30 秒超时（`settings { timeout: … }` 1–120 秒）、响应正文 2 MiB、重定向不跟随。连接被拒绝/DNS/连接超时/TLS 失败表示未送达，可直接重试；POST/PATCH 在等待响应时超时、断开或取消时回执未知，需核对后手动确认才会再次发送。

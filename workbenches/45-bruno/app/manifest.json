@@ -3,9 +3,9 @@
   "appId": "workbench.e29331f3-1d57-4d5b-95ce-b98e4ed11f18",
   "registryName": "bruno-studio",
   "name": "Bruno 工作台",
-  "description": "原生 Bru 集合编辑、显式 HTTP 调试与响应快照",
-  "version": "0.6.0",
-  "changelog": "官方 Bru 解析与导出、请求编辑、持久化执行记录与完整工作稿。",
+  "description": "Bruno 原生集合：环境变量、认证、断言与显式 HTTP 调试",
+  "version": "0.9.0",
+  "changelog": "0.9.0：结构化编辑与 .bru 源双向自动同步、环境与秘密变量、Bearer/Basic/API Key、表单/multipart/GraphQL 正文、断言评估、请求历史、本机回声示例、连接失败明确分类、集合树/请求编辑器/响应控制台三栏与集合菜单。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

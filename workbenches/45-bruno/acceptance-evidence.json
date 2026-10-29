@@ -1,6 +1,7 @@
 {
-  "version": "0.6.0",
+  "version": "0.9.0",
   "status": "local-verified",
+  "structuralReview": "pending",
   "hostImport": "unverified",
   "template": "3b55d46f7ae25e939ce3299073c37ed334d69c02",
   "nativeEngine": {
@@ -8,103 +9,235 @@
     "nativeConverters": [
       "bruToJsonV2",
       "jsonToBruV2",
-      "collectionBruToJson"
+      "collectionBruToJson",
+      "bruToEnvJsonV2",
+      "envJsonToBruV2"
     ],
     "fflate": "0.8.2"
   },
-  "unitTests": 16,
-  "previewUrl": "http://127.0.0.1:59349/",
-  "browser": {
-    "checks": [
-      "official native parse/compose edits method URL headers query and body without network",
-      "real loopback POST / status body timing and header snapshot",
-      "refresh and receipt reconciliation never resend HTTP",
-      "native Bru and collection ZIP preserve exact source bytes",
-      "invalid native editor persists through refresh",
-      "actual snapshot recovery imports a new copy without replay",
-      "lost HTTP response reconciles persisted record without repeating POST",
-      "real HTTP cancellation remains unknown and is never retried",
-      "cancel during persistence prevents later HTTP dispatch",
-      "typing survives delayed autosave",
-      "committed autosave lost receipt idempotent retry",
-      "two-window optimistic conflict",
-      "new document synchronous lock",
-      "unsupported scripts are preserved byte-for-byte and block execution",
-      "375px keyboard reduced-motion and no overflow"
-    ],
-    "fixture": {
-      "binding": "127.0.0.1",
-      "port": 59784,
-      "requests": 3,
-      "externalCredentials": false
-    },
-    "errors": [
-      "Failed to load resource: net::ERR_FAILED",
-      "Failed to load resource: net::ERR_FAILED"
-    ],
-    "unexpected": []
+  "unitTests": 23,
+  "commands": {
+    "check": "passed (only shared autosave-client.ts size warning)",
+    "test": "23/23 passed",
+    "package": "passed"
   },
-  "additionalBrowserChecks": [
-    "native ZIP extraction/folder import preserves paths and bytes",
-    "file rename refresh",
-    "unfinished URL refresh",
-    "sidebar collapse",
-    "375px no overflow",
-    "offline IndexedDB restore and confirmed retry"
-  ],
+  "browser": {
+    "engine": "Chrome for Testing 1243 via playwright-core, fresh .local data dir, no Floatboat Host required",
+    "firstOpen": "sample collection 订单服务 API; 健康检查 sends to the local echo service: 200, assertions 2/2",
+    "viewports": [
+      "1440x900",
+      "375x812"
+    ],
+    "checks": [
+      "URL query mirrored into params table",
+      "edited URL sends without an apply step",
+      "failing assertion opens 断言 tab",
+      "echo saw edited path and query",
+      "Bru source updated automatically",
+      "params",
+      "source edit flowed back into URL bar",
+      "deleting param rewrites URL",
+      "create order assertions 4/4",
+      "inherited bearer + collection var in actual request",
+      "post-response var captured",
+      "提交联系表单 sent",
+      "提交联系表单 echo contains 发票抬头",
+      "上传备注 sent",
+      "上传备注 echo contains 周五下午送达",
+      "GraphQL 查询 sent",
+      "GraphQL 查询 echo contains SO-2026-0412",
+      "form mode selected",
+      "failing assertion is reported",
+      "assertion table shows failure",
+      "refused POST is a definite failure",
+      "no unknown-receipt confirm after refused",
+      "history keeps all three create-order sends",
+      "missing variable explained before dispatch",
+      "autosave POST stored the edit on the server",
+      "reload restores edited URL",
+      "restored source contains params",
+      "typing during delayed save kept newer text",
+      "newer text persisted after reload",
+      "lost autosave response did not create a duplicate project",
+      "invalid source restored after reload",
+      "parse error shown for restored invalid draft",
+      "send button stays available (blocked inline)",
+      "fixing source clears the error",
+      "secret value moved to session memory",
+      "env dialog closed",
+      "send with session secret",
+      "actual request masks secret header",
+      "response body redacts secret",
+      "autosaved working copy has no secret value",
+      "saved env file declares the secret",
+      "ZIP keeps Bruno layout",
+      "exported env omits secret value",
+      "exported request carries docs edit",
+      "project JSON has history, no secret",
+      "Escape closes menu and returns focus",
+      "after reload the secret is absent",
+      "missing secret message",
+      "cancelled POST is an unknown receipt",
+      "second send shows inline unknown-receipt guard",
+      "explicit override sends again",
+      "lost run response reconciled from ledger",
+      "project JSON imported",
+      "ZIP imported",
+      "imported ZIP selects its environment",
+      "imported collection sends immediately",
+      "imports created new projects",
+      "no horizontal overflow at 375px",
+      "drawer closes after picking a request",
+      "send works at 375px",
+      "no overflow with response visible",
+      "menu dialog fits",
+      "Ctrl+Enter sends from the URL field"
+    ],
+    "publicApi": "JSONPlaceholder GET /users/1 on explicit send: 200, assertions 3/3",
+    "errors": [
+      "net::ERR_FAILED x2 (intentional: aborted autosave response and aborted /api/http/run response)"
+    ],
+    "unexpected": [],
+    "observations": [
+      "Shared autosave leave() may show its 'cache not repaired' confirm when a collection switch happens while a just-reconciled receipt is still being saved (seen when a previous tab closed before the final receipt autosave); shared blueprint code was not modified."
+    ]
+  },
   "package": {
-    "file": "bruno-0.6.0-release.fbworkbench",
-    "sha256": "952b84d2e0dd227ae4a7d5bccd136bb9e999d4488f84bd92a61b1776d8251e52",
+    "file": "bruno-studio-0.9.0.fbworkbench",
+    "sha256": "0508d2880026fed8f2166e5b89662bf4f693f90923bbafb3c752e755ba9b9f51",
+    "bytes": 120675,
+    "files": 62,
     "crc": "passed",
-    "files": 41,
-    "sourceAndResourceFilesCompared": 39,
-    "manifest": "verified normalized resource mapping",
-    "transferHashes": "all verified",
     "dataIncluded": false
   },
   "limits": {
-    "timeoutMs": 10000,
-    "responseBytes": 65536,
-    "snapshotCount": 4,
-    "fileCount": 20
+    "timeoutMs": 30000,
+    "timeoutOverrideMs": [
+      1000,
+      120000
+    ],
+    "responseBytes": 2097152,
+    "snapshotBodyChars": 65536,
+    "historyPerRequest": 12,
+    "historyBudgetBytes": 320000,
+    "fileCount": 400,
+    "sourceChars": 200000,
+    "importBytes": 20971520
   },
   "limitations": [
-    "No script/test/assertion execution",
-    "No variables/auth inheritance or environment secrets",
-    "No automatic redirects/retries",
-    "Unknown receipts require manual reconciliation",
-    "Host import unverified",
-    "Loopback fixture is not production service verification"
+    "Scripts (pre/post-request) and tests blocks are preserved but not executed",
+    "Auth modes other than none/inherit/bearer/basic/apikey block sending",
+    "Multipart file fields, SPARQL and file bodies block sending",
+    "Assertion LHS is a property path only (no JavaScript expressions)",
+    "Proxy and client certificate settings in bruno.json are not applied",
+    "Secret values live in page memory only and must be re-entered after reload",
+    "{{$localEcho}} is a workbench-only dynamic variable",
+    "Host import unverified"
   ],
-  "integratedPackage": {
-    "directory": "workbenches/45-bruno",
-    "version": "0.6.0",
-    "appId": "workbench.e29331f3-1d57-4d5b-95ce-b98e4ed11f18",
-    "filename": "45-bruno-0.6.0.fbworkbench",
-    "bytes": 58951,
-    "sha256": "724cb1df95e0199780d996b9a3faa1cff0d51ca88aa9abc0ce7b6cd7c790f1f6",
-    "crc": "passed",
-    "sourceFilesMatched": 36,
-    "assetFilesMatched": 3,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-bruno/bruno-studio-0.6.0.fbworkbench",
-    "introductionFile": "workbench-bruno/presentation.json"
-  },
-  "integratedApplicationTests": 16,
-  "exportedSourceLinuxTests": {
-    "passed": 16,
-    "environment": "node:22-bookworm / Node22.23.3",
-    "network": "none",
-    "resourceMapping": "passed",
-    "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
-  },
   "screenshot": {
     "path": "../../docs/screenshots/bruno.png",
     "dimensions": [
-      1500,
-      1100
+      1440,
+      900
     ],
-    "sha256": "7c7e969560e4b77e5fa4e2039e3e6c64f11e962b6eb9e0cf56afc43e8eccf18b"
+    "sha256": "8a15070f2739a9bc7254f99a4d21c321e9e5268548a30d908f2575b2ba7cc07a"
+  },
+  "previousRelease": {
+    "version": "0.6.0",
+    "unitTests": 16,
+    "previewUrl": "http://127.0.0.1:59349/",
+    "browser": {
+      "checks": [
+        "official native parse/compose edits method URL headers query and body without network",
+        "real loopback POST / status body timing and header snapshot",
+        "refresh and receipt reconciliation never resend HTTP",
+        "native Bru and collection ZIP preserve exact source bytes",
+        "invalid native editor persists through refresh",
+        "actual snapshot recovery imports a new copy without replay",
+        "lost HTTP response reconciles persisted record without repeating POST",
+        "real HTTP cancellation remains unknown and is never retried",
+        "cancel during persistence prevents later HTTP dispatch",
+        "typing survives delayed autosave",
+        "committed autosave lost receipt idempotent retry",
+        "two-window optimistic conflict",
+        "new document synchronous lock",
+        "unsupported scripts are preserved byte-for-byte and block execution",
+        "375px keyboard reduced-motion and no overflow"
+      ],
+      "fixture": {
+        "binding": "127.0.0.1",
+        "port": 59784,
+        "requests": 3,
+        "externalCredentials": false
+      },
+      "errors": [
+        "Failed to load resource: net::ERR_FAILED",
+        "Failed to load resource: net::ERR_FAILED"
+      ],
+      "unexpected": []
+    },
+    "additionalBrowserChecks": [
+      "native ZIP extraction/folder import preserves paths and bytes",
+      "file rename refresh",
+      "unfinished URL refresh",
+      "sidebar collapse",
+      "375px no overflow",
+      "offline IndexedDB restore and confirmed retry"
+    ],
+    "package": {
+      "file": "bruno-0.6.0-release.fbworkbench",
+      "sha256": "952b84d2e0dd227ae4a7d5bccd136bb9e999d4488f84bd92a61b1776d8251e52",
+      "crc": "passed",
+      "files": 41,
+      "sourceAndResourceFilesCompared": 39,
+      "manifest": "verified normalized resource mapping",
+      "transferHashes": "all verified",
+      "dataIncluded": false
+    },
+    "limits": {
+      "timeoutMs": 10000,
+      "responseBytes": 65536,
+      "snapshotCount": 4,
+      "fileCount": 20
+    },
+    "limitations": [
+      "No script/test/assertion execution",
+      "No variables/auth inheritance or environment secrets",
+      "No automatic redirects/retries",
+      "Unknown receipts require manual reconciliation",
+      "Host import unverified",
+      "Loopback fixture is not production service verification"
+    ],
+    "integratedPackage": {
+      "directory": "workbenches/45-bruno",
+      "version": "0.6.0",
+      "appId": "workbench.e29331f3-1d57-4d5b-95ce-b98e4ed11f18",
+      "filename": "45-bruno-0.6.0.fbworkbench",
+      "bytes": 58951,
+      "sha256": "724cb1df95e0199780d996b9a3faa1cff0d51ca88aa9abc0ce7b6cd7c790f1f6",
+      "crc": "passed",
+      "sourceFilesMatched": 36,
+      "assetFilesMatched": 3,
+      "businessData": "excluded",
+      "hostImport": "unverified",
+      "deliveryPath": "workbench-bruno/bruno-studio-0.6.0.fbworkbench",
+      "introductionFile": "workbench-bruno/presentation.json"
+    },
+    "integratedApplicationTests": 16,
+    "exportedSourceLinuxTests": {
+      "passed": 16,
+      "environment": "node:22-bookworm / Node22.23.3",
+      "network": "none",
+      "resourceMapping": "passed",
+      "dependencies": "prepared locked pure-JS dependencies, mounted read-only"
+    },
+    "screenshot": {
+      "path": "../../docs/screenshots/bruno.png",
+      "dimensions": [
+        1500,
+        1100
+      ],
+      "sha256": "7c7e969560e4b77e5fa4e2039e3e6c64f11e962b6eb9e0cf56afc43e8eccf18b"
+    }
   }
 }
