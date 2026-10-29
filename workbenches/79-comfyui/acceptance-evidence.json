@@ -1,0 +1,53 @@
+{
+  "version": "0.9.0",
+  "date": "2026-10-29",
+  "baseCommit": "b99f239",
+  "check": "passed",
+  "applicationTests": {
+    "passed": 24,
+    "failed": 0,
+    "files": ["tests/formats.test.ts", "tests/session.test.ts", "tests/snapshot.test.ts"]
+  },
+  "functionalAcceptance": "local-verified",
+  "structuralReview": "passed-with-limitations",
+  "realGeneration": "unverified",
+  "hostImport": "unverified",
+  "browser": {
+    "engine": "Chrome for Testing (Playwright)",
+    "dataDirectory": "fresh per flow",
+    "server": "mock ComfyUI (tests/support/mock-comfy.ts), protocol checked against a real ComfyUI v0.43.0 (CPU, no models)",
+    "flows": [
+      "first open without any service: full SDXL graph, offline validation, edit via inspector, autosave, reload restores, double-click search, undo/redo, missing-input problem on node and list, UI JSON and API JSON export",
+      "connect (207 node definitions incl. custom node), run with live per-node progress, gallery cell, output image inside Save Image node, exact seed/params, PNG with embedded workflow, ZIP, reload restores runs, PNG import creates a new document",
+      "server node_errors mapped onto nodes (stale model list), runtime execution_error on VAEDecode, unreachable server message with start command",
+      "autosave: newer edit survives a delayed save, lost response retried idempotently (one project), unfinished import JSON restored after reload, invalid JSON import leaves the document unchanged, API JSON import creates a new document and the old one reopens from the menu",
+      "editing: library click and drag, copy/paste, bypass, collapse, group, link-release search filtered by type with auto-connect, Primitive resolved in API export, muted node skipped, image upload into LoadImage",
+      "3 runs compared side by side with differing parameters highlighted; load a run's workflow as a new document with the exact seed",
+      "375px: no horizontal overflow, run/gallery tabs, menu Escape returns focus, toolbar node search"
+    ],
+    "pageErrors": 0,
+    "consoleErrors": "only expected ones: 502 for the unreachable address, the injected abort of the lost-response drill, the test's own cross-origin probe (CSP), 404 for the default example.png on the mock"
+  },
+  "fixedDuringAcceptance": [
+    "server returned normalised definitions that the page normalised again (all widgets vanished after connect)",
+    "early WebSocket messages (before POST /prompt returned) were dropped; now buffered and replayed",
+    "cached runs finishing between slow polls left the gallery cell on 'running'",
+    "page CSP blocks blob: images; outputs use data URLs",
+    "programmatic link changes did not reach autosave; graph version polling added",
+    "litegraph missed double clicks with identical event timestamps; native dblclick fallback",
+    "queue_pending arrives in heap order; sorted by number"
+  ],
+  "knownIssues": [
+    "real generation not exercised (no models, no real sampling)",
+    "subgraphs preserved but not converted",
+    "shared autosave-client confirm after switching documents (blueprint code, not touched)"
+  ],
+  "dependencies": {
+    "@comfyorg/litegraph": "0.17.2 MIT (deprecated on npm, pinned)",
+    "fflate": "0.8.2 MIT",
+    "react / react-dom": "19.2.3 MIT",
+    "lucide-react": "0.562.0 ISC"
+  },
+  "upstream": "@comfyorg/litegraph 0.17.2 · MIT; node definitions from ComfyUI v0.43.0 426f5eea52a7ece1dd599fff4cb6cd1f352ddd24 (interface metadata only)",
+  "screenshot": "docs/screenshots/comfyui.png"
+}
