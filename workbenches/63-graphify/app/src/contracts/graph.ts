@@ -1,5 +1,7 @@
+// ABOUTME: Graphify 原生 node-link 图谱的校验与查询；额外字段与并行关系原样保留。
+
 import { boundedText, isRecord } from "./project.ts";
-import { example } from "./example-graph.ts";
+
 export type Node = Record<string, unknown> & { id: string };
 export type Link = Record<string, unknown> & { source: string; target: string };
 export type Graph = Record<string, unknown> & {
@@ -7,165 +9,145 @@ export type Graph = Record<string, unknown> & {
   nodes: Node[];
   links: Link[];
 };
-export type Point = { x: number; y: number };
-export type MapProject = {
-  name: string;
-  source: string;
-  graph: Graph;
-  notes: Record<string, string>;
-  positions: Record<string, Point>;
-  selected: string;
-  from: string;
-  to: string;
-};
+
+export const GRAPH_LIMITS = { nodes: 8000, links: 40000 };
+const UNSAFE = new Set(["__proto__", "constructor", "prototype"]);
+
+/** networkx/Graphify node-link：source/target 可能是编号字符串或数字，统一为字符串。 */
+const endpoint = (value: unknown) =>
+  typeof value === "number" && Number.isFinite(value) ? String(value) : boundedText(value, 300);
+
 export function graphValue(value: unknown): Graph {
-  if (
-    !isRecord(value) ||
-    !Array.isArray(value.nodes) ||
-    !Array.isArray(value.links) ||
-    typeof value.directed !== "boolean"
-  )
-    throw new Error("请导入Graphify原生graph.json（nodes、links和directed）。");
-  if (
-    value.nodes.length > 400 ||
-    value.links.length > 1600 ||
-    new TextEncoder().encode(JSON.stringify(value)).length > 350000
-  )
-    throw new Error("图谱超过400节点、1600关系或350KB，请拆分后导入。");
+  if (!isRecord(value)) throw new Error("请导入 Graphify 原生 graph.json（nodes、links）。");
+  const linksRaw = Array.isArray(value.links) ? value.links : Array.isArray(value.edges) ? value.edges : null;
+  if (!Array.isArray(value.nodes) || !linksRaw)
+    throw new Error("请导入 Graphify 原生 graph.json（nodes、links）。");
+  if (value.directed !== undefined && typeof value.directed !== "boolean")
+    throw new Error("directed 字段必须是布尔值。");
+  if (value.nodes.length > GRAPH_LIMITS.nodes || linksRaw.length > GRAPH_LIMITS.links)
+    throw new Error(`图谱有 ${value.nodes.length} 个节点、${linksRaw.length} 条关系，超过 ${GRAPH_LIMITS.nodes} / ${GRAPH_LIMITS.links} 的浏览上限。请按目录拆分资料后分别建图。`);
   const ids = new Set<string>();
-  const nodes = value.nodes.map((n) => {
-    if (!isRecord(n)) throw new Error("节点格式无效。");
-    const id = boundedText(n.id, 300);
-    if (
-      !id ||
-      ["__proto__", "constructor", "prototype"].includes(id) ||
-      ids.has(id)
-    )
-      throw new Error("节点编号为空或重复。");
+  const nodes = value.nodes.map((n, i) => {
+    if (!isRecord(n)) throw new Error(`第 ${i + 1} 个节点格式无效。`);
+    const id = endpoint(n.id);
+    if (!id || UNSAFE.has(id)) throw new Error(`第 ${i + 1} 个节点编号无效。`);
+    if (ids.has(id)) throw new Error(`节点编号重复：${id.slice(0, 60)}`);
     ids.add(id);
     return { ...n, id };
   });
-  const links = value.links.map((l) => {
-    if (!isRecord(l)) throw new Error("关系格式无效。");
-    const source = boundedText(l.source, 300),
-      target = boundedText(l.target, 300);
+  const links = linksRaw.map((l, i) => {
+    if (!isRecord(l)) throw new Error(`第 ${i + 1} 条关系格式无效。`);
+    const source = endpoint(l.source), target = endpoint(l.target);
     if (!ids.has(source) || !ids.has(target))
-      throw new Error("关系引用了不存在的节点。");
+      throw new Error(`第 ${i + 1} 条关系引用了不存在的节点（${(ids.has(source) ? target : source).slice(0, 60)}）。`);
     return { ...l, source, target };
   });
-  return { ...value, directed: value.directed, nodes, links };
-}
-function decodeProject(value: unknown, working: boolean): MapProject {
-  if (
-    !isRecord(value) ||
-    !isRecord(value.notes) ||
-    !isRecord(value.positions) ||
-    new TextEncoder().encode(JSON.stringify(value)).length >
-      (working ? 1500000 : 550000)
-  )
-    throw new Error("项目格式或大小无效。");
-  const graph = graphValue(value.graph),
-    ids = new Set(graph.nodes.map((n) => n.id));
-  const notes: Record<string, string> = {},
-    positions: Record<string, Point> = {};
-  if (
-    Object.keys(value.notes).length > 400 ||
-    Object.keys(value.positions).length > 400
-  )
-    throw new Error("笔记或布局超限。");
-  for (const [id, note] of Object.entries(value.notes)) {
-    if (!ids.has(id)) throw new Error("笔记引用不存在的节点。");
-    notes[id] = boundedText(note, 5000);
+  const out: Graph = { ...value, directed: value.directed ?? true, nodes, links };
+  if (!Array.isArray(value.links)) {
+    delete out.edges;
   }
-  for (const [id, p] of Object.entries(value.positions)) {
-    if (
-      !ids.has(id) ||
-      !isRecord(p) ||
-      typeof p.x !== "number" ||
-      typeof p.y !== "number" ||
-      !Number.isFinite(p.x) ||
-      !Number.isFinite(p.y) ||
-      p.x < 40 ||
-      p.x > 1560 ||
-      p.y < 40 ||
-      p.y > 960
-    )
-      throw new Error("节点位置无效。");
-    positions[id] = { x: p.x, y: p.y };
-  }
-  return {
-    name: boundedText(value.name, 100),
-    source: boundedText(value.source, 80000),
-    graph,
-    notes,
-    positions,
-    selected: boundedText(value.selected, 300),
-    from: boundedText(value.from, 300),
-    to: boundedText(value.to, 300),
-  };
-}
-export function label(node: Node) {
-  return typeof node.label === "string" ? node.label : node.id;
-}
-export function field(node: Record<string, unknown>, key: string) {
-  return typeof node[key] === "string" ? String(node[key]) : "";
-}
-export function shortestPath(graph: Graph, from: string, to: string): string[] {
-  const next = new Map(graph.nodes.map((n) => [n.id, [] as string[]]));
-  if (!next.has(from) || !next.has(to)) return [];
-  for (const l of graph.links) {
-    next.get(l.source)?.push(l.target);
-    if (!graph.directed) next.get(l.target)?.push(l.source);
-  }
-  const previous = new Map<string, string | null>([[from, null]]),
-    queue = [from];
-  for (let i = 0; i < queue.length; i++) {
-    const id = queue[i];
-    if (id === to) {
-      const path: string[] = [];
-      let at: string | null = id;
-      while (at !== null) {
-        path.unshift(at);
-        at = previous.get(at) ?? null;
-      }
-      return path;
-    }
-    for (const target of next.get(id) ?? []) {
-      if (!previous.has(target)) {
-        previous.set(target, id);
-        queue.push(target);
-      }
-    }
-  }
-  return [];
-}
-export const exampleSource =
-  "class Catalog:\n    def search(self, query):\n        return normalize(query)\n\ndef normalize(query):\n    return query.strip().lower()\n\ndef serve(query):\n    catalog = Catalog()\n    return catalog.search(query)\n";
-export const seed: MapProject = {
-  name: "catalog.py",
-  source: exampleSource,
-  graph: graphValue(example),
-  notes: { catalog_catalog: "目录服务的入口对象；核对查询路径与调用者。" },
-  positions: {},
-  selected: "catalog_catalog",
-  from: "catalog_serve",
-  to: "catalog_normalize",
-};
-export function fromGraph(graph: Graph): MapProject {
-  return {
-    ...seed,
-    source: "",
-    name: "import.py",
-    graph,
-    notes: {},
-    positions: {},
-    selected: graph.nodes[0]?.id ?? "",
-    from: "",
-    to: "",
-  };
+  return out;
 }
 
-export const projectValue = (value: unknown): MapProject =>
-  decodeProject(value, false);
-export const restoreDraftData = (value: unknown): MapProject =>
-  decodeProject(value, true);
+export function label(node: Node | undefined) {
+  if (!node) return "";
+  return typeof node.label === "string" && node.label ? node.label : node.id;
+}
+export function field(node: Record<string, unknown> | undefined, key: string) {
+  if (!node) return "";
+  const v = node[key];
+  return typeof v === "string" ? v : typeof v === "number" ? String(v) : "";
+}
+export function communityOf(node: Node | undefined): number | null {
+  const c = node?.community;
+  return typeof c === "number" && Number.isInteger(c) && c >= 0 ? c : null;
+}
+export function lineOf(node: Node | undefined): [number, number] | null {
+  const loc = field(node, "source_location");
+  const m = /^L(\d+)(?:[-–]L?(\d+))?/.exec(loc);
+  if (!m) return null;
+  const start = Number(m[1]);
+  const endRaw = node?.source_end;
+  const end = m[2] ? Number(m[2]) : typeof endRaw === "number" && endRaw >= start ? endRaw : start;
+  return [start, end];
+}
+
+export type PathStep = { id: string; via: Link | null; reversed: boolean };
+/** BFS 最短路径；directed 图可选择忽略方向。返回每步与经由的关系。 */
+export function shortestPath(graph: Graph, from: string, to: string, ignoreDirection = false): PathStep[] {
+  const next = new Map<string, { id: string; link: Link; reversed: boolean }[]>(graph.nodes.map((n) => [n.id, []]));
+  if (!next.has(from) || !next.has(to)) return [];
+  if (from === to) return [{ id: from, via: null, reversed: false }];
+  for (const l of graph.links) {
+    next.get(l.source)?.push({ id: l.target, link: l, reversed: false });
+    if (!graph.directed || ignoreDirection) next.get(l.target)?.push({ id: l.source, link: l, reversed: true });
+  }
+  const previous = new Map<string, { from: string; link: Link; reversed: boolean } | null>([[from, null]]);
+  const queue = [from];
+  for (let i = 0; i < queue.length; i++) {
+    const id = queue[i];
+    if (id === to) break;
+    for (const step of next.get(id) ?? []) {
+      if (previous.has(step.id)) continue;
+      previous.set(step.id, { from: id, link: step.link, reversed: step.reversed });
+      queue.push(step.id);
+    }
+  }
+  if (!previous.has(to)) return [];
+  const path: PathStep[] = [];
+  let at: string | undefined = to;
+  while (at !== undefined) {
+    const p = previous.get(at);
+    path.unshift({ id: at, via: p?.link ?? null, reversed: p?.reversed ?? false });
+    at = p?.from;
+  }
+  return path;
+}
+
+export function degreeMap(graph: Graph) {
+  const d = new Map<string, number>(graph.nodes.map((n) => [n.id, 0]));
+  for (const l of graph.links) {
+    d.set(l.source, (d.get(l.source) ?? 0) + 1);
+    d.set(l.target, (d.get(l.target) ?? 0) + 1);
+  }
+  return d;
+}
+
+export const RELATION_NAMES: Record<string, string> = {
+  contains: "包含",
+  method: "方法",
+  calls: "调用",
+  imports: "导入",
+  imports_from: "导入",
+  inherits: "继承",
+  implements: "实现",
+  renders: "渲染",
+  references: "引用",
+  mentions: "提及",
+  related_to: "共现",
+  rationale_for: "设计理由",
+  uses: "使用",
+  defines: "定义",
+};
+export const KIND_NAMES: Record<string, string> = {
+  file: "文件",
+  class: "类",
+  function: "函数",
+  method: "方法",
+  interface: "接口",
+  type: "类型",
+  enum: "枚举",
+  variable: "变量",
+  module: "外部模块",
+  section: "章节",
+  concept: "术语",
+  rationale: "设计理由",
+};
+export function nodeKind(node: Node | undefined): string {
+  if (!node) return "";
+  if (typeof node.kind === "string") return node.kind;
+  if (node._callable_class) return "class";
+  if (node._callable) return label(node).startsWith(".") ? "method" : "function";
+  if (node.file_type === "document") return "section";
+  return "file";
+}
