@@ -1,4 +1,5 @@
 import { boundedText, isRecord } from "./project.ts";
+import { channelLabel } from "./channels.ts";
 export type Item = Record<string, unknown> & {
   title: string | null;
   url: string | null;
@@ -18,6 +19,7 @@ export type Envelope = Record<string, unknown> & {
   error: (Record<string, unknown> & { code: string; message: string }) | null;
 };
 export type Query = { channel: string; action: string; query: string };
+
 export type Capture = {
   id: string;
   input: Query;
@@ -40,7 +42,8 @@ export type Collection = {
   selected: string;
   brief: string;
 };
-function size(v: unknown) {
+export const PROJECT_BYTES = 880000;
+export function size(v: unknown) {
   return new TextEncoder().encode(JSON.stringify(v)).length;
 }
 export function idValue(v: unknown) {
@@ -149,9 +152,11 @@ function decodeProject(v: unknown, working: boolean): Collection {
     v.captures.length > 50 ||
     !Array.isArray(v.sources) ||
     v.sources.length > 100 ||
-    size(v) > (working ? 1500000 : 700000)
+    size(v) > (working ? 1500000 : PROJECT_BYTES)
   )
-    throw new Error("资料项目格式无效，或超过100来源/700KB");
+    throw new Error(
+      "资料项目格式无效，或超过100来源/880KB。可导出归档后开始新调研。",
+    );
   const captures = v.captures.map(captureValue),
     byId = new Map(captures.map((c) => [c.id, c]));
   if (byId.size !== captures.length) throw new Error("采集编号重复");
@@ -203,8 +208,8 @@ function decodeProject(v: unknown, working: boolean): Collection {
     brief: boundedText(v.brief, 20000),
   };
 }
-export const seed: Collection = {
-  input: { channel: "github", action: "read", query: "octocat/Hello-World" },
+export const empty: Collection = {
+  input: { channel: "web", action: "read", query: "" },
   captures: [],
   sources: [],
   selected: "",
@@ -251,31 +256,44 @@ export function mergeCapture(
   });
   return { data: next, added: added.length, skipped };
 }
-export function report(data: Collection, title: string) {
-  return (
-    "# " +
-    title +
-    "\n\n" +
-    data.brief +
-    "\n\n" +
-    data.sources
-      .map((s, i) => {
-        const item = sourceItem(data, s),
-          capture = data.captures.find((c) => c.id === s.captureId)!;
-        return `## ${i + 1}. ${(item.title ?? item.url ?? "未命名来源").replace(/\n/g, " ")}\n\n来源：${item.url ?? "未提供链接"}\n渠道：${capture.envelope.channel ?? "导入"} · 采集：${capture.at}\n审阅：${{ unreviewed: "未核对", verified: "已核对", followup: "待跟进" }[s.status]}\n\n${s.note}\n\n${s.clips
-          .map(
-            (c) =>
-              c.text
-                .split("\n")
-                .map((line) => "> " + line)
-                .join("\n") +
-              "\n\n备注：" +
-              c.note,
-          )
-          .join("\n\n")}\n`;
-      })
-      .join("\n")
-  );
+const STATUS = { unreviewed: "未核对", verified: "已核对", followup: "待跟进" };
+export function report(data: Collection, title: string, at = new Date()) {
+  const count = (k: Source["status"]) =>
+    data.sources.filter((s) => s.status === k).length;
+  const head =
+    `# ${title}\n\n` +
+    `导出：${at.toISOString().slice(0, 10)} · ${data.sources.length} 条来源` +
+    `（已核对 ${count("verified")} · 待跟进 ${count("followup")} · 未核对 ${count("unreviewed")}）\n\n`;
+  const brief = data.brief.trim() ? `## 研究小结\n\n${data.brief.trim()}\n\n` : "";
+  const body = data.sources
+    .map((s, i) => {
+      const item = sourceItem(data, s),
+        capture = data.captures.find((c) => c.id === s.captureId)!;
+      const name = (item.title ?? item.url ?? "未命名来源").replace(/\n/g, " ");
+      const meta = [
+        `- 来源：${item.url ?? "未提供链接"}`,
+        item.author ? `- 作者：${item.author}` : "",
+        item.published_at ? `- 发布：${item.published_at}` : "",
+        `- 渠道：${channelLabel(capture.envelope.channel)} / ${capture.envelope.backend ?? "原生结果"} · 采集于 ${capture.at}`,
+        `- 审阅：${STATUS[s.status]}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+      const clips = s.clips
+        .map(
+          (c, n) =>
+            `[${i + 1}.${n + 1}]\n` +
+            c.text
+              .split("\n")
+              .map((line) => "> " + line)
+              .join("\n") +
+            (c.note.trim() ? `\n\n说明：${c.note.trim()}` : ""),
+        )
+        .join("\n\n");
+      return `### ${i + 1}. ${name}\n\n${meta}\n\n${s.note.trim() ? s.note.trim() + "\n\n" : ""}${clips ? clips + "\n" : ""}`;
+    })
+    .join("\n");
+  return head + brief + (data.sources.length ? `## 来源与证据\n\n${body}` : "");
 }
 
 export const projectValue = (value: unknown): Collection =>

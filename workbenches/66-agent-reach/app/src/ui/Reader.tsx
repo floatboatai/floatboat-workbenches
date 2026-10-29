@@ -1,178 +1,114 @@
-import { ExternalLink, Quote, Trash2 } from "lucide-react";
-import type { useResearchDesk } from "./useResearchDesk.ts";
-export function Reader({ d }: { d: ReturnType<typeof useResearchDesk> }) {
-  const { p, selected, item, capture } = d;
+// ABOUTME: 原文阅读：来源头部、摘录选中文字、审阅状态、保留的采集正文与来源判断笔记。
+
+import { ExternalLink, Quote, Trash2, FileJson } from "lucide-react";
+import { channelLabel } from "../contracts/channels.ts";
+import { STATES } from "./SourceList.tsx";
+import type { Desk } from "./useResearchDesk.ts";
+import type { Clip } from "../contracts/research.ts";
+import { memo, type ReactNode } from "react";
+
+/** Source text with each saved excerpt highlighted at its first occurrence. */
+const Marked = memo(function Marked({ text, clips }: { text: string; clips: Clip[] }) {
+  const ranges = clips
+    .map((c) => ({ id: c.id, start: text.indexOf(c.text), length: c.text.length }))
+    .filter((r) => r.start >= 0)
+    .sort((a, b) => a.start - b.start);
+  const out: ReactNode[] = [];
+  let pos = 0;
+  for (const r of ranges) {
+    if (r.start < pos) continue;
+    if (r.start > pos) out.push(text.slice(pos, r.start));
+    out.push(
+      <mark key={r.id} id={"mark-" + r.id}>
+        {text.slice(r.start, r.start + r.length)}
+      </mark>,
+    );
+    pos = r.start + r.length;
+  }
+  out.push(text.slice(pos));
+  return <>{out}</>;
+});
+
+const timeFormat = new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium", timeStyle: "short" });
+const published = (v: string | null) => {
+  if (!v) return null;
+  const t = Date.parse(v);
+  return Number.isFinite(t) ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" }).format(new Date(t)) : v;
+};
+
+export function Reader({ d }: { d: Desk }) {
+  const { selected, item, capture } = d;
   if (!selected || !item || !capture)
     return (
-      <section className="reader-empty">
-        <Quote size={28} aria-hidden="true" />
-        <h2>选一条来源，开始整理证据</h2>
-        <p>收藏的资料会保留采集时的原文。摘录和你的判断分开保存。</p>
+      <section className="reader empty-reader" aria-label="原文阅读">
+        <Quote size={26} aria-hidden="true" />
+        <h2>选一条来源开始阅读</h2>
+        <p>收藏的来源保留采集时的原文。选中正文中的句子即可摘录为证据，摘录与你的判断分开保存。</p>
       </section>
     );
+  const truncated = typeof item.raw === "object" && item.raw !== null && (item.raw as Record<string, unknown>).truncated === true;
   return (
-    <section className="reader" aria-label="来源阅读与证据">
-      <article className="document">
-        <header>
-          <div>
-            <span>
-              {capture.envelope.channel ?? "导入"} /{" "}
-              {capture.envelope.backend ?? "原生结果"}
-            </span>
-            <h2>{item.title ?? item.url ?? "未命名来源"}</h2>
-            <p>
-              {item.author ?? "未提供作者"} · 采集于{" "}
-              {new Intl.DateTimeFormat(undefined, {
-                dateStyle: "medium",
-                timeStyle: "short",
-              }).format(new Date(capture.at))}
-            </p>
-          </div>
+    <article className="reader" aria-labelledby="reader-title">
+      <header className="reader-head">
+        <p className="kicker">
+          {channelLabel(capture.envelope.channel)} / {capture.envelope.backend ?? "原生结果"} · 采集于{" "}
+          {timeFormat.format(new Date(capture.at))}
+        </p>
+        <h2 id="reader-title">{item.title ?? item.url ?? "未命名来源"}</h2>
+        <p className="byline">
+          {[item.author, published(item.published_at)].filter(Boolean).join(" · ") || "未提供作者与日期"}
           {item.url ? (
             <a href={item.url} target="_blank" rel="noopener noreferrer">
-              打开来源
-              <ExternalLink size={13} aria-hidden="true" />
+              打开原链接
+              <ExternalLink size={12} aria-hidden="true" />
             </a>
           ) : null}
-        </header>
-        <div className="reader-tools">
-          <span>来源原文</span>
-          <button onClick={d.quoteSelection}>
-            <Quote size={14} aria-hidden="true" />
-            选中文字到摘录框
-          </button>
-          <button onClick={() => d.exportNative(capture)}>导出原生结果</button>
-        </div>
-        <pre
-          className="source-body"
-          ref={d.body}
-          tabIndex={0}
-          aria-label="来源正文"
-        >
-          {item.text ?? "该条目没有提供正文，可从原始链接查看。"}
-        </pre>
-        <div className="source-review">
-          <label>
-            审阅状态
-            <select
-              aria-label="来源审阅状态"
-              value={selected.status}
-              onChange={(e) =>
-                d.updateSource({
-                  status: e.target.value as typeof selected.status,
-                })
-              }
-            >
-              <option value="unreviewed">未核对</option>
-              <option value="verified">已核对</option>
-              <option value="followup">待跟进</option>
-            </select>
-          </label>
-          <button className="remove" onClick={d.removeSource}>
-            <Trash2 size={13} aria-hidden="true" />
-            移除来源
-          </button>
-        </div>
-        <label className="source-notes">
-          关于这条来源的判断
-          <textarea
-            id="source-note"
-            name="sourceNote"
-            maxLength={5000}
-            placeholder="记录可靠性、适用范围和待验证的问题…"
-            value={selected.note}
-            onChange={(e) => d.updateSource({ note: e.target.value })}
-          />
-        </label>
-      </article>
-      <aside className="evidence">
-        <header>
-          <span>EVIDENCE NOTES</span>
-          <h3>
-            证据摘录 <b>{selected.clips.length}</b>
-          </h3>
-        </header>
-        <label>
-          摘录原文
-          <textarea
-            id="clip-text"
-            name="clipText"
-            maxLength={4000}
-            placeholder="选择正文，或粘贴一段原文…"
-            value={d.clipText}
-            onChange={(e) => d.setClipDraft({ text: e.target.value })}
-          />
-        </label>
-        <label>
-          这段证据说明了什么
-          <textarea
-            id="clip-note"
-            name="clipNote"
-            maxLength={2000}
-            placeholder="写下你的解释…"
-            value={d.clipNote}
-            onChange={(e) => d.setClipDraft({ note: e.target.value })}
-          />
-        </label>
+        </p>
+      </header>
+      <div className="reader-tools" role="toolbar" aria-label="来源操作">
         <button
           className="primary"
-          onClick={d.addClip}
-          disabled={!d.clipText.trim()}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={d.quoteSelection}
         >
-          添加摘录
+          <Quote size={14} aria-hidden="true" />
+          摘录选中文字
         </button>
-        <div className="clip-list">
-          {selected.clips.map((clip, i) => (
-            <section className="clip" key={clip.id}>
-              <span>{String(i + 1).padStart(2, "0")} / 原文</span>
-              <blockquote>{clip.text}</blockquote>
-              <label>
-                摘录备注
-                <textarea
-                  aria-label={`摘录${i + 1}备注`}
-                  name={`clip-${i}`}
-                  maxLength={2000}
-                  value={clip.note}
-                  onChange={(e) => {
-                    const note = e.target.value;
-                    p.setData((data) => ({
-                      ...data,
-                      sources: data.sources.map((s) =>
-                        s.id === selected.id
-                          ? {
-                              ...s,
-                              clips: s.clips.map((c) =>
-                                c.id === clip.id ? { ...c, note } : c,
-                              ),
-                            }
-                          : s,
-                      ),
-                    }));
-                  }}
-                />
-              </label>
-              <button
-                onClick={() => {
-                  if (confirm("删除这条摘录？"))
-                    p.setData((data) => ({
-                      ...data,
-                      sources: data.sources.map((s) =>
-                        s.id === selected.id
-                          ? {
-                              ...s,
-                              clips: s.clips.filter((c) => c.id !== clip.id),
-                            }
-                          : s,
-                      ),
-                    }));
-                }}
-              >
-                删除摘录
-              </button>
-            </section>
+        <div className="segmented status" role="group" aria-label="审阅状态">
+          {(Object.keys(STATES) as Array<keyof typeof STATES>).map((k) => (
+            <button
+              key={k}
+                            aria-pressed={selected.status === k}
+              className={k}
+              onClick={() => d.updateSource({ status: k })}
+            >
+              {STATES[k]}
+            </button>
           ))}
         </div>
-      </aside>
-    </section>
+        <span className="spacer" />
+        <button className="icon" aria-label="导出这条来源的原生结果" title="导出原生结果" onClick={() => d.exportNative(capture)}>
+          <FileJson size={15} aria-hidden="true" />
+        </button>
+        <button className="icon danger" aria-label="移除这条来源" title="移除来源" onClick={d.removeSource}>
+          <Trash2 size={15} aria-hidden="true" />
+        </button>
+      </div>
+      <pre className="source-body" ref={d.body} tabIndex={0} aria-label="来源正文">
+        {item.text ? <Marked text={item.text} clips={selected.clips} /> : "该条目没有提供正文，可打开原链接查看。"}
+      </pre>
+      {truncated ? <p className="muted note-line">正文较长，已保留前 80,000 字符；完整内容请打开原链接。</p> : null}
+      <label className="source-note">
+        <span>对这条来源的判断</span>
+        <textarea
+          id="source-note"
+          name="sourceNote"
+          maxLength={5000}
+          placeholder="可靠性、适用范围、与其它来源是否一致、还要核对什么…"
+          value={selected.note}
+          onChange={(e) => d.updateSource({ note: e.target.value })}
+        />
+      </label>
+    </article>
   );
 }

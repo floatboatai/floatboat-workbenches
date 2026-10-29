@@ -12,7 +12,7 @@ import {
   restoreDraftData,
   sourceItem,
   report,
-  seed,
+  empty,
 } from "../src/contracts/research.ts";
 import { createStore } from "../src/server/store.ts";
 const env = {
@@ -36,7 +36,7 @@ const env = {
 };
 const capture = captureValue({
   id: "00000000-0000-4000-8000-000000000001",
-  input: seed.input,
+  input: empty.input,
   at: "2026-10-28T04:00:00Z",
   envelope: env,
 });
@@ -64,7 +64,7 @@ test("source URLs reject active schemes and embedded credentials", () => {
     );
 });
 test("URL dedup preserves existing evidence and does not repeat a capture", () => {
-  const first = mergeCapture(seed, capture, [0]);
+  const first = mergeCapture(empty, capture, [0]);
   first.data.sources[0].note = "已有的审阅";
   const second = mergeCapture(first.data, capture, [0]);
   assert.equal(second.added, 0);
@@ -73,7 +73,7 @@ test("URL dedup preserves existing evidence and does not repeat a capture", () =
   assert.equal(second.data.captures.length, 1);
 });
 test("tracking parameters and fragments do not duplicate the same source", () => {
-  const first = mergeCapture(seed, capture, [0]).data;
+  const first = mergeCapture(empty, capture, [0]).data;
   const other = captureValue({
     ...capture,
     id: "00000000-0000-4000-8000-000000000002",
@@ -90,7 +90,7 @@ test("tracking parameters and fragments do not duplicate the same source", () =>
   assert.equal(mergeCapture(first, other, [0]).added, 0);
 });
 test("clippings must be exact text from the referenced source and retain their notes", () => {
-  const data = mergeCapture(seed, capture, [0]).data;
+  const data = mergeCapture(empty, capture, [0]).data;
   data.sources[0].clips = [
     {
       id: "00000000-0000-4000-8000-000000000003",
@@ -103,7 +103,7 @@ test("clippings must be exact text from the referenced source and retain their n
   assert.throws(() => projectValue(data));
 });
 test("missing capture references and invalid source indices reject whole imports", () => {
-  const data = mergeCapture(seed, capture, [0]).data;
+  const data = mergeCapture(empty, capture, [0]).data;
   assert.throws(() => projectValue({ ...data, captures: [] }));
   assert.throws(() =>
     projectValue({ ...data, sources: [{ ...data.sources[0], index: 9 }] }),
@@ -120,7 +120,7 @@ test("complete collection persists across SQLite close/reopen", () => {
         "utf8",
       ),
     );
-    const data = mergeCapture(seed, capture, [0]).data;
+    const data = mergeCapture(empty, capture, [0]).data;
     data.brief = "未完成的小结";
     const saved = createStore(db, projectValue).create("调研", data);
     db.close();
@@ -132,7 +132,7 @@ test("complete collection persists across SQLite close/reopen", () => {
   }
 });
 test("report keeps source links, review state and attributed quotations", () => {
-  const data = mergeCapture(seed, capture, [0]).data;
+  const data = mergeCapture(empty, capture, [0]).data;
   data.sources[0].status = "verified";
   data.sources[0].clips = [
     {

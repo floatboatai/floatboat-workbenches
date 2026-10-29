@@ -3,9 +3,9 @@
   "appId": "workbench.659dd703-061a-42e9-8c32-5f9ba3847ac5",
   "registryName": "agent-reach-studio",
   "name": "调研资料台 · Agent-Reach",
-  "description": "公开来源采集、证据摘录与审阅报告",
-  "version": "0.5.0",
-  "changelog": "接入Agent-Reach公开渠道，原生结果导入导出、去重收藏、来源摘录和完整工作稿自动保存。",
+  "description": "公开来源采集、原文阅读、证据摘录与带出处的调研报告",
+  "version": "0.9.0",
+  "changelog": "采集移入工作台Node服务（GitHub、网页阅读/直接读取/搜索、V2EX），含SSRF防护与代理支持；首次打开即有真实示例调研；资料桌三栏布局与调研文件菜单；可选Floatboat模型概括。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,7 +16,9 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [],
+  "capabilities": [
+    "llm"
+  ],
   "contributions": [],
   "dependencies": [],
   "resources": [

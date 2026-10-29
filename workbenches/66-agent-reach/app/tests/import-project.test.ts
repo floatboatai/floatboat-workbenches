@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { seed } from "../src/contracts/research.ts";
+import { empty } from "../src/contracts/research.ts";
 import { decodeProjectImport } from "../src/contracts/import-project.ts";
 test("cache snapshot restores the latest complete work, including an unfinished title", () => {
   const extra = {
@@ -9,7 +9,7 @@ test("cache snapshot restores the latest complete work, including an unfinished 
     clipDrafts: { demo: { text: "draft", note: "keep" } },
   };
   const raw = {
-    snapshot: { title: "", data: seed, extra },
+    snapshot: { title: "", data: empty, extra },
     current: { title: "older", data: { old: true } },
     pending: {
       documentId: "old-doc",
@@ -19,7 +19,7 @@ test("cache snapshot restores the latest complete work, including an unfinished 
   };
   const imported = decodeProjectImport(raw)!;
   assert.equal(imported.title, "");
-  assert.deepEqual(imported.data, seed);
+  assert.deepEqual(imported.data, empty);
   assert.equal(imported.recovered, true);
   const history = imported.extra.importHistory as Array<
     Record<string, unknown>
@@ -50,11 +50,11 @@ test("malformed recovery snapshots fail without falling back to an older saved m
   assert.throws(() =>
     decodeProjectImport({
       snapshot: { title: "x", data: [], extra: {} },
-      current: { data: seed },
+      current: { data: empty },
     }),
   );
   assert.throws(() =>
-    decodeProjectImport({ snapshot: { title: "x", data: seed, extra: [] } }),
+    decodeProjectImport({ snapshot: { title: "x", data: empty, extra: [] } }),
   );
 });
 import {
@@ -65,7 +65,7 @@ import {
 test("working-copy restore preserves long source notes beyond the formal model budget", () => {
   const capture = captureValue({
     id: "00000000-0000-4000-8000-000000000001",
-    input: seed.input,
+    input: empty.input,
     at: "2026-10-28T04:00:00Z",
     envelope: {
       schema_version: 1,
@@ -78,7 +78,7 @@ test("working-copy restore preserves long source notes beyond the formal model b
         url: "https://example.com/" + i,
         author: null,
         published_at: null,
-        text: "x".repeat(2000),
+        text: "x".repeat(4000),
         raw: {},
       })),
       meta: {},
@@ -94,7 +94,7 @@ test("working-copy restore preserves long source notes beyond the formal model b
     clips: [],
   }));
   const data = {
-    ...seed,
+    ...empty,
     captures: [capture],
     sources,
     selected: sources[0].id,

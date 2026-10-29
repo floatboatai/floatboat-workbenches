@@ -1,120 +1,72 @@
 {
-  "version": "0.5.0",
-  "verifiedAt": "2026-10-28",
-  "timezone": "America/New_York",
-  "applicationTests": 13,
-  "serviceTests": 5,
-  "browserChecks": 19,
-  "upstreamCommit": "14c213405669414492bda0f8d52cc6531d062c45",
-  "engine": "Agent-Reach@1.6.0",
-  "hostLlm": "not-used",
+  "version": "0.9.0",
+  "verifiedAt": "2026-10-29",
+  "runtime": { "node": "22.22.2", "pnpm": "10.22.0", "browser": "Chrome for Testing (playwright-core 1.56.1, headless)" },
+  "functionalAcceptance": "local-verified",
+  "structuralReview": "passed",
+  "applicationTests": 34,
+  "serviceTests": 0,
+  "externalService": "none (Python service removed; collection runs in the workbench Node server)",
+  "upstream": { "engine": "Agent-Reach@1.6.0", "commit": "14c213405669414492bda0f8d52cc6531d062c45", "ported": ["runtime/result.py", "utils/url.py", "channels/github.py", "channels/web.py", "channels/v2ex.py"] },
+  "dependencies": [
+    { "name": "@mozilla/readability", "version": "0.6.0", "license": "Apache-2.0" },
+    { "name": "linkedom", "version": "0.18.13", "license": "ISC" }
+  ],
+  "hostLlm": { "status": "real-call-verified", "model": "gemini-2.5-flash-lite", "offlineState": "verified with FLOATBOAT_HOST_MODE=offline (503 + status card)" },
   "hostImport": "unverified",
   "sourceDataCommitted": false,
+  "firstOpen": {
+    "emptyDataDir": true,
+    "sampleSources": 4,
+    "sampleClips": 6,
+    "apiCallsOnLoad": ["GET /api/projects", "GET /api/autosave/list", "GET /api/autosave/recent"],
+    "externalRequestsOnLoad": 0
+  },
   "primary": {
     "checks": [
-      "real upstream GitHub read and candidate refresh recovery",
-      "evidence capture, review and URL dedup preserve notes",
-      "native result export is exact",
-      "real web read and per-source unfinished clipping recovery",
-      "invented quote rejected then successful correction clears error",
-      "unfinished result JSON restored",
-      "portable project import creates a new collection and keeps extra drafts",
-      "report exports attributed evidence and review state",
-      "375px layout and keyboard export",
-      "desktop screenshot from real sources without page errors"
+      "sample report export content verified (counts, quotation)",
+      "source note autosaved and restored after reload",
+      "real GitHub repository search into inbox, adopt 1",
+      "duplicate GitHub read flagged 已在目录, unchecked, adopt keeps existing note",
+      "direct read of loopback preview refused with BLOCKED_ADDRESS message",
+      "real web read through Jina adopted",
+      "selection quoted into excerpt folder; invented quote rejected then corrected",
+      "review status and filter",
+      "real Host summary draft generated and inserted into brief",
+      "complete project, Markdown report and native result exports validated by content",
+      "0 pageerror / console error"
     ],
-    "errors": [],
-    "liveChannels": [
-      "github",
-      "web"
-    ]
+    "liveChannels": ["github.search", "github.read", "web.read(jina)", "web.fetch(direct-readability)", "web.search(exa)", "v2ex.hot"]
   },
   "persistence": {
     "checks": [
-      "typing during delayed save retained",
-      "lost save acknowledgement retried without losing input",
-      "cross-window conflict protects committed data with explicit server reload",
-      "late real collection response does not overwrite new research project"
+      "typing during held autosave kept newer text after reload",
+      "lost receipt after server commit retried without duplicate project",
+      "unfinished excerpt draft, collector query and invalid JSON working copy restored after reload",
+      "project import creates a new collection",
+      "native Agent-Reach JSON import creates a new collection",
+      "new research empty state, rename autosaved, reopen from recent list",
+      "file menu Escape returns focus"
     ],
     "errors": []
   },
-  "recoveryImportAndNavigation": {
-    "checks": [
-      "navigation locks all fields while old save completes and preserves old input",
-      "real recovery download imports as new project retaining incomplete extra",
-      "old pending operations preserved as history without replay",
-      "imported working draft survives another refresh"
-    ],
-    "errors": []
+  "failureStates": {
+    "hostOffline": "summary disabled with start hint; brief still autosaves; /api/summarize 503",
+    "networkUnreachable": "NETWORK · 对方拒绝连接（ECONNREFUSED）, Jina and direct attempts recorded",
+    "ssrf": "BLOCKED_ADDRESS for loopback, 169.254.169.254, private DNS results and redirects"
   },
-  "disconnected": {
-    "actualServiceDisconnected": true,
-    "collectDisabled": true,
-    "notesSaved": true,
-    "errors": []
-  },
-  "actualLiveServices": [
-    {
-      "channel": "github",
-      "action": "read",
-      "backend": "github-public-api",
-      "ok": true,
-      "items": 1,
-      "inputHash": "9061fa18c4ae0b45a4c1f0452040d3d00aee80f97d3c6b307310f4c00c2317bf"
-    },
-    {
-      "channel": "web",
-      "action": "read",
-      "backend": "jina",
-      "ok": true,
-      "items": 1,
-      "inputHash": "dae647750c52739c7962dd98e31a3b3a6cf2573e82fa0944e709695328aafe12"
-    },
-    {
-      "channel": "v2ex",
-      "action": "hot",
-      "backend": "v2ex-api",
-      "ok": true,
-      "items": 5,
-      "inputHash": "aba0cce82eff6f6e7f14db06b67c757ab82f6bf6ed62fbeb1e396681ebdc7697"
-    },
-    {
-      "channel": "github",
-      "action": "search",
-      "ok": true,
-      "items": 5,
-      "inputHash": "9f0fca2f4a0daadff2a5592c6779aeccee6ed1ef46c02c0a34dfbf9e34c0e19a",
-      "error": null
-    }
-  ],
+  "narrow": { "width": 375, "horizontalOverflow": false, "views": ["目录", "原文", "摘录夹"], "menu": "full-width dialog" },
   "screenshot": {
     "path": "../../docs/screenshots/agent-reach.png",
-    "dimensions": [
-      1440,
-      1851
-    ],
-    "sha256": "0b68fceee763277ec63918b3c663107bb4593492c310f2d711d32c3f48d98fa4"
+    "dimensions": [1440, 900],
+    "sha256": "a363ba029896dc2de954a34b6ce89a8e751ef0211b2b8618355f3cde282e2326"
   },
   "package": {
-    "name": "agent-reach-studio-0.5.0.fbworkbench",
-    "sha256": "587618caa619ffc44a1f8384ffac27796f756b3eca59107df15f52c7a7990134",
-    "crc": true,
-    "sourceResourcesMatch": true
-  },
-  "integratedPackage": {
-    "directory": "workbenches/66-agent-reach",
-    "version": "0.5.0",
-    "appId": "workbench.659dd703-061a-42e9-8c32-5f9ba3847ac5",
-    "filename": "66-agent-reach-0.5.0.fbworkbench",
-    "bytes": 59883,
-    "sha256": "29cce51010ef01790fcd96b30372f1c9beee7247db5416680aa3681bb09bcdaf",
-    "crc": "passed",
-    "sourceFilesMatched": 35,
-    "assetFilesMatched": 2,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-agent-reach/agent-reach-studio-0.5.0.fbworkbench",
-    "introductionFile": "workbench-agent-reach/presentation.json",
-    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
+    "name": "agent-reach-studio-0.9.0.fbworkbench",
+    "files": 57,
+    "bytes": 133879,
+    "sha256": "7a08c196a4ac7f00708e4f4f004c9bdeb90c4b8d470026e11599b85bf8f6524e",
+    "zipIntegrity": "passed",
+    "businessData": "excluded"
   }
 }

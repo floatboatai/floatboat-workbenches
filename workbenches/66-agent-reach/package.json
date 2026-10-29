@@ -1,7 +1,7 @@
 {
   "name": "floatboat-agent-reach",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.9.0",
   "type": "module",
   "packageManager": "pnpm@10.22.0",
   "engines": {
@@ -22,6 +22,8 @@
     "workbench:catalog": "node tooling/catalog.mjs"
   },
   "dependencies": {
+    "@mozilla/readability": "0.6.0",
+    "linkedom": "0.18.13",
     "lucide-react": "0.562.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
