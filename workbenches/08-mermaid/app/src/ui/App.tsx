@@ -1,79 +1,196 @@
+// ABOUTME: Mermaid 图形工坊主界面：源码 IDE 与图形预览双窗，文件菜单、模板库、导入导出与 AI 起草。
+import { useEffect, useRef, useState } from "react";
+import { blankSource, restoreDraftData, type Model } from "../contracts/model";
+import { templates, type DiagramTemplate } from "../contracts/templates";
+import { AiPanel } from "./AiPanel";
 import { AutosaveStatus } from "./AutosaveStatus";
-import { lazy, Suspense, useState, useRef } from "react";
-import { seed, validate, restoreDraftData } from "../contracts/model";
-import {
-  download,
-  useProjects,
-  ProjectPicker,
-  Notice,
-  RenderBoundary,
-} from "./workspace";
-const Diagram = lazy(() =>
-  import("./Diagram").then((module) => ({ default: module.Diagram })),
-);
-export function App() {
-  const project = useProjects(seed, validate, "需求处理流程", {
-    storageKey: "mermaid-studio",
-    restoreDraftData,
-  });
-  const prompt =
-    typeof project.draft.aiPrompt === "string" ? project.draft.aiPrompt : "";
-  const setPrompt = (text: string) =>
-    project.setDraft((old) => ({ ...old, aiPrompt: text }));
-  const ai = project.draft.aiPanel === true;
-  const setAi = (value: boolean | ((current: boolean) => boolean)) =>
-    project.setDraft((old) => ({
-      ...old,
-      aiPanel:
-        typeof value === "function" ? value(old.aiPanel === true) : value,
-    }));
+import { BlockChooser, FileMenu, Modal, TemplateGallery } from "./Dialogs";
+import { diagramLabel } from "./engine";
+import { ExportControl, downloadSource } from "./ExportControl";
+import { IMPORT_ACCEPT, readDiagramFile, type ImportCandidate } from "./files";
+import { AppearanceControls } from "./AppearanceControls";
+import { Preview, type PreviewHandle } from "./Preview";
+import { readWorkingCopy } from "./recovery";
+import { ErrorBanner, StatusBar } from "./RenderStatus";
+import { SourceEditor, type EditorHandle } from "./SourceEditor";
+import { useDiagramRender } from "./useRender";
+import { RenderBoundary, useDiagramFiles } from "./workspace";
 
-  const [svg, setSvg] = useState(""),
-    [status, setStatus] = useState("正在渲染…");
-  const ready = status === "预览已更新";
-  const gutter = useRef<HTMLPreElement>(null);
-  const lines = project.data.source.split("\n").length;
+type Dialog = "file" | "templates" | "chooser" | null;
+export function App() {
+  const project = useDiagramFiles();
+  const { source, theme, look } = project.data;
+  const [dialog, setDialog] = useState<Dialog>(null);
+  const [candidates, setCandidates] = useState<ImportCandidate[]>([]);
+  const [switching, setSwitching] = useState(false);
+  const navigation = useRef(false);
+  const [pane, setPane] = useState<"source" | "preview">("preview");
+  const [zoom, setZoom] = useState(1);
+  const fileButton = useRef<HTMLButtonElement>(null);
+  const importInput = useRef<HTMLInputElement>(null);
+  const recoveryInput = useRef<HTMLInputElement>(null);
+  const editor = useRef<EditorHandle>(null);
+  const preview = useRef<PreviewHandle>(null);
+
+  const {
+    rendered,
+    failure,
+    ready,
+    pending,
+    problems,
+    problemSource,
+    external,
+  } = useDiagramRender(source, theme, look, project.documentKey);
+
+  // ---- 文件生命周期 ----
+  async function navigate(action: () => Promise<boolean>): Promise<boolean> {
+    if (navigation.current) return false;
+    navigation.current = true;
+    setSwitching(true);
+    try {
+      return await action();
+    } catch (error) {
+      project.report(error);
+      return false;
+    } finally {
+      navigation.current = false;
+      setSwitching(false);
+    }
+  }
+  const closeDialog = () => setDialog(null);
+  async function createFrom(model: Model, title: string, notice: string) {
+    if (await navigate(() => project.replace(model, title, {}))) {
+      setDialog(null);
+      setPane("preview");
+      project.setNotice(notice);
+    }
+  }
+  const newBlank = () =>
+    void createFrom(
+      { source: blankSource, theme: "default", look: "classic" },
+      "未命名图形",
+      "已新建空白图形，编辑后自动保存。",
+    );
+  const fromTemplate = (template: DiagramTemplate) =>
+    void createFrom(
+      {
+        source: template.source,
+        theme: template.theme ?? "default",
+        look: template.look ?? "classic",
+      },
+      template.title,
+      `已从「${template.kind}」模板新建，编辑后自动保存。`,
+    );
+  const importCandidate = (candidate: ImportCandidate) =>
+    void createFrom(
+      { source: candidate.source, theme: "default", look: "classic" },
+      candidate.title,
+      `已导入为新图形「${candidate.title}」。`,
+    );
+  async function importFile(file: File) {
+    try {
+      const found = await readDiagramFile(file);
+      if (found.length === 1) importCandidate(found[0]);
+      else {
+        setCandidates(found);
+        setDialog("chooser");
+      }
+    } catch (error) {
+      project.report(error);
+    }
+  }
+  async function importRecovery(file: File) {
+    await navigate(async () => {
+      const copy = await readWorkingCopy(file, restoreDraftData);
+      const done = await project.replace(copy.data, copy.title, copy.extra);
+      if (done) {
+        setDialog(null);
+        project.setNotice(`已把恢复稿导入为新图形「${copy.title}」。`);
+      }
+      return done;
+    });
+  }
+
+  const name = project.title.trim() || "未命名图形";
+
+  // ⌘/Ctrl+S 立即保存
+  const save = project.save;
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void save();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [save]);
+
+  const ai = project.draft.aiPanel === true;
+  const setAi = (value: boolean) =>
+    project.setDraft((old) => ({ ...old, aiPanel: value }));
+
+  const directiveTheme = /%%\{[\s\S]*?theme[\s\S]*?\}%%|^\s*theme\s*:/m.test(
+    source,
+  );
+  const locate = (line: number, column: number) => {
+    setPane("source");
+    editor.current?.focusLine(line, column);
+  };
+
   return (
-    <main className="mermaid-shell">
-      <a className="skip" href="#source">
+    <main
+      className="studio"
+      inert={switching}
+      aria-busy={switching}
+      onDragOver={(event) => {
+        if (event.dataTransfer.types.includes("Files")) event.preventDefault();
+      }}
+      onDrop={(event) => {
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
+        event.preventDefault();
+        void importFile(file);
+      }}
+    >
+      <a
+        className="skip"
+        href="#source"
+        onClick={(event) => {
+          event.preventDefault();
+          setPane("source");
+          editor.current?.focus();
+        }}
+      >
         跳到源码
       </a>
+      <h1 className="sr-only">Mermaid 图形工坊：{name}</h1>
       <header className="topbar">
-        <a className="wordmark" href="#source" translate="no">
-          MERMAID<span>图形工坊</span>
-        </a>
-        <ProjectPicker
-          items={project.items}
-          id={project.current?.id}
-          disabled={project.busy}
-          onOpen={(id) => void project.open(id)}
-        />
-        <div className="actions">
-          <button onClick={project.fresh} disabled={project.busy}>
-            新建
-          </button>
-          <button
-            className="accent"
-            onClick={() => void project.save()}
-            disabled={project.busy}
-          >
-            {project.busy ? "保存中…" : "立即保存"}
-          </button>
-          <button onClick={() => setAi((value) => !value)} aria-expanded={ai}>
-            AI 起草
-          </button>
-        </div>
-      </header>
-      <section className="document-strip">
+        <button
+          ref={fileButton}
+          type="button"
+          className="file-button"
+          aria-haspopup="dialog"
+          aria-expanded={dialog === "file"}
+          onClick={() => {
+            setDialog("file");
+            void project.refresh().catch(() => undefined);
+          }}
+        >
+          <span className="glyph" aria-hidden="true">
+            ◇
+          </span>
+          文件
+        </button>
         <label className="title-field">
-          <span className="sr-only">项目名称</span>
+          <span className="sr-only">图形名称</span>
           <input
-            aria-label="项目名称"
             name="title"
             autoComplete="off"
+            spellCheck={false}
             value={project.title}
             maxLength={120}
-            onChange={(e) => project.setTitle(e.target.value)}
+            onChange={(event) => project.setTitle(event.target.value)}
           />
         </label>
         <AutosaveStatus
@@ -82,140 +199,232 @@ export function App() {
           onExport={project.exportDraft}
           onReload={
             project.current
-              ? () => void project.open(project.current!.id)
+              ? () => void navigate(() => project.open(project.current!.id))
               : undefined
           }
         />
-        <div className="exports">
-          <button
-            onClick={() =>
-              download(
-                new Blob([project.data.source], { type: "text/plain" }),
-                project.title + ".mmd",
-              )
-            }
-          >
-            导出源码
+        <div className="topbar-actions">
+          <button type="button" onClick={() => setDialog("templates")}>
+            模板库
           </button>
           <button
-            disabled={!ready || !svg}
-            onClick={() =>
-              download(
-                new Blob([svg], { type: "image/svg+xml" }),
-                project.title + ".svg",
-              )
-            }
+            type="button"
+            className={ai ? "on" : ""}
+            aria-expanded={ai}
+            aria-controls="ai-panel"
+            onClick={() => setAi(!ai)}
           >
-            导出 SVG
-          </button>
-          <button
-            className="delete"
-            disabled={!project.current || project.busy}
-            onClick={() => void project.remove()}
-          >
-            删除
+            AI 起草
           </button>
         </div>
-      </section>
-      <Notice error={project.error} notice={project.notice} />
-      {ai ? (
-        <section className="ai-drawer">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void project.generate(prompt);
-            }}
+      </header>
+      {project.error ? (
+        <p className="notice error" role="alert">
+          {project.error}
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => project.setError("")}
           >
-            <label htmlFor="prompt">想画什么？</label>
-            <input
-              id="prompt"
-              name="prompt"
-              maxLength={12000}
-              autoComplete="off"
-              required
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="例如：客户反馈的分派与处理流程…"
-            />
-            <button disabled={project.aiBusy}>
-              {project.aiBusy ? "正在起草…" : "生成候选稿"}
-            </button>
-          </form>
-          {project.suggestion ? (
-            <div className="candidate">
-              <pre>{project.suggestion.source}</pre>
-              <button onClick={project.applySuggestion}>采用生成稿</button>
-              <p>采用后会替换当前源码，保存前仍可继续编辑。</p>
-            </div>
-          ) : (
-            <p>生成内容会先显示为候选稿，不会自动覆盖当前源码。</p>
-          )}
-        </section>
+            知道了
+          </button>
+        </p>
+      ) : project.notice ? (
+        <p className="notice" role="status">
+          {project.notice}
+        </p>
       ) : null}
-      <div className="editor-grid">
-        <section className="source-panel">
-          <div className="panel-heading">
-            <h1 title={project.title + ".mmd"}>
-              {project.title || "untitled"}.mmd
-            </h1>
-            <span>{project.data.source.split("\n").length} 行</span>
+      {ai ? <AiPanel project={project} /> : null}
+      <div className="pane-tabs" role="tablist" aria-label="视图">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={pane === "source"}
+          aria-controls="source"
+          onClick={() => setPane("source")}
+        >
+          源码
+          {failure ? <span className="dot" aria-label="有错误" /> : null}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={pane === "preview"}
+          aria-controls="preview"
+          onClick={() => setPane("preview")}
+        >
+          图形
+        </button>
+      </div>
+      <div className="workspace" data-pane={pane}>
+        <section
+          className="source-pane"
+          aria-labelledby="source-heading"
+          id="source"
+        >
+          <div className="pane-head">
+            <h2 id="source-heading">源码</h2>
+            <span className="lang" translate="no">
+              Mermaid
+            </span>
           </div>
-          <label className="sr-only" htmlFor="source">
-            Mermaid 源码
-          </label>
-          <div className="code-editor">
-            <pre ref={gutter} className="line-numbers" aria-hidden="true">
-              {Array.from({ length: lines }, (_, i) => i + 1).join("\n")}
-            </pre>
-            <textarea
-              id="source"
-              name="mermaidSource"
-              spellCheck={false}
-              autoComplete="off"
-              wrap="off"
-              onScroll={(event) => {
-                if (gutter.current)
-                  gutter.current.scrollTop = event.currentTarget.scrollTop;
-              }}
-              value={project.data.source}
-              onChange={(e) => project.setData({ source: e.target.value })}
+          <RenderBoundary label="源码编辑器">
+            <SourceEditor
+              value={source}
+              resetKey={project.documentKey}
+              problems={problems}
+              problemSource={problemSource}
+              onChange={(value) =>
+                project.setData((old) => ({ ...old, source: value }))
+              }
+              handle={editor}
+              label="Mermaid 源码"
+            />
+          </RenderBoundary>
+          <StatusBar
+            source={source}
+            pending={pending}
+            failure={failure}
+            external={external}
+            onLocate={locate}
+          />
+        </section>
+        <section
+          className="preview-pane"
+          id="preview"
+          aria-labelledby="preview-heading"
+        >
+          <div className="preview-toolbar">
+            <h2 id="preview-heading" className="sr-only">
+              图形预览
+            </h2>
+            <AppearanceControls
+              type={rendered ? diagramLabel(rendered.diagramType) : "图形"}
+              theme={theme}
+              look={look}
+              directiveTheme={directiveTheme}
+              zoom={zoom}
+              onTheme={(value) =>
+                project.setData((old) => ({ ...old, theme: value }))
+              }
+              onLook={(value) =>
+                project.setData((old) => ({ ...old, look: value }))
+              }
+              preview={preview}
+            />
+            <ExportControl
+              rendered={rendered}
+              ready={ready}
+              failure={failure}
+              source={source}
+              name={name}
+              draft={project.draft}
+              setDraft={project.setDraft}
+              notify={project.setNotice}
+              fail={project.setError}
             />
           </div>
-          <footer>
-            <span>Mermaid · UTF-8</span>
-            <span>
-              {lines} 行 / {project.data.source.length} 字符
-            </span>
-          </footer>
-        </section>
-        <section className="preview-panel">
-          <div className="panel-heading">
-            <h2>图形预览</h2>
-            <span className={ready ? "ready" : "pending"} role="status">
-              {ready ? "已同步" : "待更新"}
-            </span>
-          </div>
-          <p
-            className={
-              "render-status " +
-              (status.startsWith("预览未更新") ? "error" : "")
-            }
-            role={status.startsWith("预览未更新") ? "alert" : "status"}
-          >
-            {status}
-          </p>
-          <RenderBoundary>
-            <Suspense fallback={<p role="status">正在加载图形引擎…</p>}>
-              <Diagram
-                source={project.data.source}
-                onSvg={setSvg}
-                onStatus={setStatus}
-              />
-            </Suspense>
+          {failure ? (
+            <ErrorBanner
+              failure={failure}
+              hasPrevious={rendered !== null}
+              onLocate={locate}
+            />
+          ) : null}
+          <RenderBoundary label="图形预览">
+            <Preview
+              rendered={rendered}
+              stale={!!failure}
+              fitKey={project.documentKey}
+              handle={preview}
+              onScale={setZoom}
+            />
           </RenderBoundary>
-          <footer>源码编辑后自动更新预览 · 错误时保留上一版图形</footer>
+          {!rendered && !failure ? (
+            <p className="stage-loading" role="status">
+              正在加载图形引擎…
+            </p>
+          ) : null}
         </section>
       </div>
+
+      <Modal
+        open={dialog === "file"}
+        onClose={closeDialog}
+        fallbackFocus={fileButton}
+        title="图形文件"
+        eyebrow="MERMAID"
+        className="file-sheet"
+      >
+        <FileMenu
+          items={project.items}
+          currentId={project.current?.id}
+          title={name}
+          locked={switching || project.busy}
+          onNew={newBlank}
+          onTemplates={() => setDialog("templates")}
+          onImport={() => importInput.current?.click()}
+          onOpen={(id) =>
+            void navigate(() => project.open(id)).then((done) => {
+              if (done) setDialog(null);
+            })
+          }
+          onDownloadSource={() => downloadSource(source, name)}
+          onRecoveryDownload={project.exportDraft}
+          onRecoveryImport={() => recoveryInput.current?.click()}
+          onRefresh={() => void project.refresh().catch(project.report)}
+          onRemove={() =>
+            void navigate(() => project.remove()).then((done) => {
+              if (!done) return;
+              setDialog(null);
+              project.setNotice("已删除图形。");
+            })
+          }
+        />
+      </Modal>
+      <Modal
+        open={dialog === "templates"}
+        onClose={closeDialog}
+        fallbackFocus={fileButton}
+        title="从模板新建"
+        eyebrow={`${templates.length} 个模板`}
+        className="template-sheet"
+      >
+        <TemplateGallery onPick={fromTemplate} locked={switching} />
+      </Modal>
+      <Modal
+        open={dialog === "chooser"}
+        onClose={closeDialog}
+        fallbackFocus={fileButton}
+        title="选择要导入的图形"
+        className="chooser-sheet"
+      >
+        <BlockChooser candidates={candidates} onPick={importCandidate} />
+      </Modal>
+      <input
+        ref={importInput}
+        hidden
+        type="file"
+        accept={IMPORT_ACCEPT}
+        aria-label="导入 Mermaid 或 Markdown 文件"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (file) void importFile(file);
+        }}
+      />
+      <input
+        ref={recoveryInput}
+        hidden
+        type="file"
+        accept=".json,application/json"
+        aria-label="导入恢复稿"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (file) void importRecovery(file);
+        }}
+      />
     </main>
   );
 }

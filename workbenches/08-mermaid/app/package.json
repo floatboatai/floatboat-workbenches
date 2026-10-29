@@ -1,7 +1,7 @@
 {
   "name": "local-workbench",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "start": "node --enable-source-maps dist/server/index.mjs",
@@ -11,6 +11,14 @@
     "node": ">=22.16.0"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "6.20.4",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/lint": "6.9.7",
+    "@codemirror/search": "6.7.2",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.15",
+    "@lezer/highlight": "1.2.5",
     "lucide-react": "0.562.0",
     "mermaid": "12.2.0",
     "react": "19.2.3",

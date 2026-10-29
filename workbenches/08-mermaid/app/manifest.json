@@ -3,9 +3,9 @@
   "appId": "workbench.2ebaf4fa-c0dc-4c6a-81c9-f66b262540b2",
   "registryName": "mermaid-studio",
   "name": "Mermaid 图形工坊",
-  "description": "文字生成图表工作台：自然语言生成流程图、时序图并保存版本",
-  "version": "0.3.0",
-  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
+  "description": "Mermaid 源码 IDE：语法高亮与错误定位、17 个图类型模板、主题/手绘风格、缩放预览，导出 SVG/PNG 并自动保存",
+  "version": "0.9.0",
+  "changelog": "0.9.0：CodeMirror 源码编辑器（高亮、补全、行内错误标记）；修正误拦截“image:”文字；导入 .mmd/.md；17 种模板；主题与手绘风格按文件保存；预览缩放平移；PNG 1×/2×/4×、透明背景与剪贴板；安全文件名；文件菜单替代页头项目组合。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
