@@ -148,6 +148,31 @@ test("store columns are written only with a store export", () => {
   });
 });
 
+test("a store-only sync keeps branch progress in repository columns and appends nothing", () => {
+  const sheet = line(
+    row("a", { version: "0.9.0（本地分支）", changelog: "分支进度" }),
+  );
+  const states = new Map([
+    ["a-studio", { visibility: "unlisted", version: "1.0.0" }],
+  ]);
+  const plan = planLedger([header, sheet], [row("a"), row("b")], {
+    sheet: "S",
+    states,
+    storeOnly: true,
+  });
+  assert.deepEqual(
+    plan.writes.map((w) => w.range),
+    ["F2", "G2"],
+  );
+  assert.deepEqual(plan.appended, []);
+  assert.deepEqual(plan.missing, ["b"]);
+  assert.throws(
+    () =>
+      planLedger([header, sheet], [row("a")], { sheet: "S", storeOnly: true }),
+    /store export/,
+  );
+});
+
 test("a missing owned header stops the sync", () => {
   assert.throws(
     () => planLedger([header.slice(0, 5)], [row("a")], { sheet: "S" }),

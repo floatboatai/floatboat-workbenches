@@ -130,12 +130,24 @@ export const columnName = (index) => {
 /**
  * Plans cell writes against the current grid (array of rows of strings, header first).
  * Existing rows only get changed owned cells; unknown slugs are appended as styled rows.
+ * With storeOnly, only the store columns are written and unknown slugs are reported as
+ * missing: repository columns may hold progress from branches main has not merged yet.
  */
-export function planLedger(grid, rows, { sheet, states } = {}) {
+export function planLedger(
+  grid,
+  rows,
+  { sheet, states, storeOnly = false } = {},
+) {
+  if (storeOnly && !states)
+    throw new Error("A store-only sync needs a store export.");
   const header = (grid[0] ?? []).map(text);
-  const owned = states ? [...REPO_KEYS, ...STORE_KEYS] : REPO_KEYS;
+  const owned = storeOnly
+    ? STORE_KEYS
+    : states
+      ? [...REPO_KEYS, ...STORE_KEYS]
+      : REPO_KEYS;
   const column = {};
-  for (const key of owned) {
+  for (const key of new Set(["slug", ...owned])) {
     // A header may carry a note, e.g. "测试结论（Sheet1）"; match on its leading name.
     const index = header.findIndex(
       (cell) => cell === HEADERS[key] || cell.startsWith(`${HEADERS[key]}（`),
@@ -159,9 +171,14 @@ export function planLedger(grid, rows, { sheet, states } = {}) {
   const writes = [];
   const changes = [];
   const appended = [];
+  const missing = [];
   for (const row of rows) {
     const values = { ...row, ...(states ? storeColumns(row, states) : {}) };
     const index = existing.get(row.slug);
+    if (index === undefined && storeOnly) {
+      missing.push(row.slug);
+      continue;
+    }
     if (index === undefined) {
       lastRow += 1;
       const cells = Array.from({ length: width }, () => ({ ...ROW_STYLE }));
@@ -191,7 +208,7 @@ export function planLedger(grid, rows, { sheet, states } = {}) {
       });
     }
   }
-  return { writes, changes, appended };
+  return { writes, changes, appended, missing };
 }
 
 function lark(args, input) {
@@ -246,11 +263,14 @@ async function main() {
   };
   if (args[0] !== "sync")
     throw new Error(
-      "Usage: node scripts/ledger.mjs sync [--apply] [--store STATES.json] [--url URL] [--sheet 工作台总览]",
+      "Usage: node scripts/ledger.mjs sync [--apply] [--store STATES.json [--store-only]] [--url URL] [--sheet 工作台总览]",
     );
   const url = await ledgerUrl(repository, option("--url"));
   const sheet = option("--sheet") ?? "工作台总览";
   const storePath = option("--store");
+  const storeOnly = args.includes("--store-only");
+  if (storeOnly && !storePath)
+    throw new Error("--store-only needs --store STATES.json.");
   const states = storePath
     ? new Map(
         JSON.parse(await readFile(resolve(storePath), "utf8")).map((item) => [
@@ -274,12 +294,18 @@ async function main() {
   const grid = (data.ranges?.[0]?.cells ?? []).map((cells) =>
     cells.map((cell) => text(cell?.value)),
   );
-  const plan = planLedger(grid, await ledgerRows(), { sheet, states });
+  const plan = planLedger(grid, await ledgerRows(), {
+    sheet,
+    states,
+    storeOnly,
+  });
   for (const change of plan.changes)
     console.log(
       `${change.slug} · ${change.column}: ${change.before || "（空）"} → ${change.after || "（空）"}`,
     );
   for (const slug of plan.appended) console.log(`${slug} · 新增行`);
+  for (const slug of plan.missing)
+    console.log(`${slug} · 台账无此行（仅商店同步不新增行）`);
   console.log(
     `${plan.changes.length} cell(s) changed, ${plan.appended.length} row(s) appended.`,
   );

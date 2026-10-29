@@ -55,6 +55,15 @@ node scripts/ledger.mjs sync --store states.json          # 预览
 node scripts/ledger.mjs sync --store states.json --apply
 ```
 
+仓库列可能写着尚未合入 main 的分支进度（例如「0.9.0（本地分支）」、其他会话手写的变更摘要）。这时完整同步会把它们改回 main 的旧值。只想更新商店列时加 `--store-only`：只写商店状态、商店版本两列，台账里没有的工作台只列出、不新增行。
+
+```sh
+node scripts/ledger.mjs sync --store states.json --store-only          # 预览
+node scripts/ledger.mjs sync --store states.json --store-only --apply
+```
+
+预览里出现预期之外的仓库列改动时，先确认对应分支是否已合入；未合入就用 `--store-only`，合入后再做完整同步。
+
 `states.json` 是工作台商品数组：`[{"name": "<registryName>", "visibility": "listed" | "unlisted", "version": "<当前版本>"}]`。映射规则：
 
 - `listed` → 已上架，并填写商店版本。
