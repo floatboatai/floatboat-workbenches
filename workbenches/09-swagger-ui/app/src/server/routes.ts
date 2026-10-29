@@ -6,6 +6,7 @@ export function registerRoutes<T>(
   app: WorkbenchServer,
   validate: (value: unknown) => T,
   instructions: string,
+  generated: (value: unknown) => T = validate,
 ) {
   const store = createStore(app.database, validate);
   const fail = (error: unknown) =>
@@ -78,9 +79,9 @@ export function registerRoutes<T>(
           system:
             instructions +
             " 只返回一个完整 JSON 对象，不要附加 Markdown 围栏或解释文字。",
-          maxOutputTokens: 6000,
+          maxOutputTokens: 12000,
         },
-        { timeoutMs: 90000 },
+        { timeoutMs: 120000 },
       );
       const text = result.text
         .trim()
@@ -92,7 +93,7 @@ export function registerRoutes<T>(
       } catch {
         throw new Error("模型返回的内容不是完整 JSON，请调整要求重试。");
       }
-      return validate(value);
+      return generated(value);
     } catch (error) {
       return fail(error);
     }

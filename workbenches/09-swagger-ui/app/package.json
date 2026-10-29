@@ -1,7 +1,7 @@
 {
   "name": "local-workbench",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "start": "node --enable-source-maps dist/server/index.mjs",
@@ -14,7 +14,8 @@
     "lucide-react": "0.562.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "swagger-ui-dist": "5.34.0"
+    "swagger-ui-dist": "5.34.0",
+    "yaml": "2.8.2"
   },
   "devDependencies": {
     "@types/node": "22.20.2",

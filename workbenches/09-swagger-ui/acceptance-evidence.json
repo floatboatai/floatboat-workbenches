@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "workbench": "swagger-ui",
+  "version": "0.9.0",
+  "checkedAt": "2026-10-29",
+  "scope": "Real OpenAPI/Swagger YAML+JSON import, side-by-side source with line diagnostics, server-side try-it-out proxy, built-in sample API, structural redesign",
+  "identityPreserved": {
+    "appId": "workbench.09b09ca0-5e7c-4a2f-b695-341d89f45953",
+    "registryName": "swagger-ui-studio",
+    "storageKey": "swagger-ui-studio",
+    "migrations": ["0001_initial.sql", "0002_projects.sql", "0003_autosave.sql"],
+    "newMigrations": 0,
+    "legacySpecUpgrade": "tested"
+  },
+  "dependencies": {
+    "swagger-ui-dist": "5.34.0 (Apache-2.0)",
+    "yaml": "2.8.2 (ISC, new runtime dependency)"
+  },
+  "checks": {
+    "templateCheck": "passed (shared autosave-client large-module warning only)",
+    "tests": { "passed": 26, "failed": 0 },
+    "frozenLockfile": "passed (root and app)",
+    "package": {
+      "file": "artifacts/swagger-ui-studio-0.9.0.fbworkbench",
+      "files": 56,
+      "bytes": 110436,
+      "sha256": "0c275c4e1167a287ada79d4c6389db309776c44813751211c3a54f10217c3cba",
+      "businessData": false
+    }
+  },
+  "browser": {
+    "engine": "Chrome for Testing via playwright-core, preview --no-watch, empty data directory",
+    "flows": [
+      { "name": "First open: Authorize + POST /books on built-in sample", "result": "401 without token, 201 with token; no credentials in web storage" },
+      { "name": "External server via proxy", "result": "real target in curl/Request URL; DNS failure explained in status card" },
+      { "name": "Private target", "result": "blocked by default with allow action; after allow 200 from local HTTP server" },
+      { "name": "Source edit autosave", "result": "pause -> POST /api/autosave -> saved; preview title updated" },
+      { "name": "Invalid YAML draft", "result": "line diagnostics (first line 132), draft phase, preview kept; reload restores draft + diagnostics; fix -> saved" },
+      { "name": "Typing during delayed save", "result": "editable while saving; newer text persisted after reload" },
+      { "name": "Lost response after commit", "result": "offline -> retry -> saved; project count unchanged (1 -> 1)" },
+      { "name": "Import Swagger 2.0 YAML", "result": "new document; original export byte-identical; JSON save-as parsed and checked" },
+      { "name": "Import broken YAML", "result": "first error line 9 shown; opened as source draft" },
+      { "name": "400-endpoint spec", "result": "rendered in 0.13 s; directory focus works through Swagger virtual list; autosave 200" },
+      { "name": "Draft panel", "result": "connected: enabled; simulated not-connected: start instructions card, generate disabled" },
+      { "name": "Layouts", "result": "1440/1100/375 no horizontal overflow; 375 tabs and directory-to-doc focus; Escape returns focus" }
+    ],
+    "consoleErrors": "0 in normal flows; intentional cases log sample-API 401 and test-induced ERR_CONNECTION_RESET"
+  },
+  "structuralReview": "self-review passed against oasis-editor/gltf-transform/bruno screenshots; final status to be recorded by integrator",
+  "notVerified": ["Floatboat client import of package", "real LLM drafting call this round", "OAuth2 browser redirect flows", "third-party public API success through proxy"],
+  "screenshot": "docs/screenshots/swagger-ui.png"
+}

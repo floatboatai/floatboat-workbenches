@@ -3,9 +3,9 @@
   "appId": "workbench.09b09ca0-5e7c-4a2f-b695-341d89f45953",
   "registryName": "swagger-ui-studio",
   "name": "API 参考台",
-  "description": "OpenAPI工作台：导入接口定义、浏览调用、Agent生成请求示例",
-  "version": "0.3.0",
-  "changelog": "修复编辑后快速撤回时的自动保存状态与本机草稿恢复。",
+  "description": "OpenAPI/Swagger 参考台：导入 YAML/JSON 规格、按端点阅读原生文档、经代理试调、并排编辑原文",
+  "version": "0.9.0",
+  "changelog": "接受 OpenAPI 3.x 与 Swagger 2.0 的 YAML/JSON 原文；并排源码与行号诊断；全部方法经服务端代理试调（默认阻止内网）；内置图书馆示例服务；端点目录与规格菜单取代顶部项目栏。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
