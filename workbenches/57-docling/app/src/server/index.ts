@@ -3,11 +3,16 @@
 import { createWorkbenchServer } from "../../sdk/runtime.mjs";
 import { registerAppRoute } from "./app-route";
 import { registerRoutes } from "./routes";
-import { validateReview } from "../contracts/document";
+import { assertMatches, validateReview, type Review } from "../contracts/review";
 import { registerDocling } from "./docling";
+import { registerSources } from "./sources";
 
 const app = await createWorkbenchServer(import.meta.url);
 registerAppRoute(app);
-registerRoutes(app, validateReview);
-registerDocling(app);
+const blobs = await registerSources(app);
+// Saved corrections must point at items of the stored document they reference.
+registerRoutes(app, validateReview, async (data: Review) => {
+  if (data.document) assertMatches(data, await blobs.document(data.document.id));
+});
+registerDocling(app, blobs);
 await app.listen();
