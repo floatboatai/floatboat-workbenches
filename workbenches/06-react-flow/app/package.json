@@ -1,7 +1,7 @@
 {
   "name": "local-workbench",
   "private": true,
-  "version": "0.3.1",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "start": "node --enable-source-maps dist/server/index.mjs",
@@ -11,6 +11,7 @@
     "node": ">=22.16.0"
   },
   "dependencies": {
+    "@dagrejs/dagre": "3.1.1",
     "@xyflow/react": "12.12.0",
     "lucide-react": "0.562.0",
     "react": "19.2.3",

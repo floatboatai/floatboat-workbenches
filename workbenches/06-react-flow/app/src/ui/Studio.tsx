@@ -1,512 +1,417 @@
-import { AutoStatus, AutoFeedback } from "./AutosaveStatus";
-import { lazy, Suspense, useState } from "react";
-import {
-  Activity,
-  Download,
-  Play,
-  Plus,
-  Save,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
-import {
-  executeFlow,
-  seed,
-  signature,
-  validateFlow,
-  restoreFlowDraft,
-  type Operation,
-  type RunResult,
-} from "../contracts/flow";
-import {
-  download,
-  Notice,
-  ProjectPicker,
-  RenderBoundary,
-  request,
-  useProjects,
-} from "./workspace";
-const FlowCanvas = lazy(() =>
-  import("./FlowCanvas").then((module) => ({ default: module.FlowCanvas })),
-);
-const operationLabels: Record<Operation, string> = {
-  input: "输入文本",
-  uppercase: "转为大写",
-  prefix: "添加前缀",
-  output: "输出",
+// ABOUTME: 数据流水线工作台主界面：顶栏（文件/名称/运行）、节点架、画布、检查器与运行控制台的组合与快捷键。
+import { useReactFlow, type Connection } from "@xyflow/react";
+import { ChevronDown, LayoutGrid, Play, Plus, Sparkles, Workflow } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { nodeSignatures, toRunRecord } from "../contracts/engine";
+import { emptyFlow, type FlowDocument } from "../contracts/flow";
+import type { OpKind } from "../contracts/ops";
+import type { PipelineTemplate } from "../contracts/templates";
+import { AutoFeedback, AutoStatus } from "./AutosaveStatus";
+import { AiDraft, FileMenu, Modal, TemplateGallery } from "./Dialogs";
+import { downloadValue, exportPipeline, pickFile, readDataFile, readPipelineFile } from "./files";
+import { addNode, autoLayout, connect, copySelection, createNode, disconnect, pasteClip, removeElements, type Clip } from "./graph-edit";
+import { Inspector, type InspectorTab } from "./Inspector";
+import { Palette } from "./Palette";
+import { PipelineCanvas, type Selection } from "./PipelineCanvas";
+import { RunConsole } from "./RunConsole";
+import { CancelledRun, runInWorker } from "./runner";
+import { useHistory } from "./useHistory";
+import { ActionsContext, nodeView, shownValue, type LiveRun, type NodeView } from "./view";
+import { Notice, RenderBoundary, usePipelineFiles } from "./workspace";
+
+type Dialog = null | "file" | "templates" | "ai";
+type Progress = { running: boolean; current: string | null; results: LiveRun["results"] };
+const AUTO_KEY = "react-flow:auto-run";
+const readAuto = () => {
+  try {
+    return localStorage.getItem(AUTO_KEY) !== "off";
+  } catch {
+    return true;
+  }
 };
+
 export function Studio() {
-  const p = useProjects(seed, validateFlow, "文本处理流程", {
-    storageKey: "react-flow",
-    restoreDraftData: restoreFlowDraft,
-  });
-  const [selected, setSelected] = useState("input"),
-    [operation, setOperation] = useState<Operation>("uppercase"),
-    [from, setFrom] = useState("input"),
-    [to, setTo] = useState("output"),
-    [running, setRunning] = useState(false),
-    [showAi, setShowAi] = useState(false);
-  const [inspectorOpen, setInspectorOpen] = useState(true),
-    [consoleOpen, setConsoleOpen] = useState(true);
-  const prompt = typeof p.draft.prompt === "string" ? p.draft.prompt : "";
-  const setPrompt = (value: string) =>
-    p.setDraft((previous) => ({ ...previous, prompt: value }));
-  const locked = p.busy || p.aiBusy || running,
-    node =
-      p.data.nodes.find((value) => value.id === selected) || p.data.nodes[0];
-  const run = p.data.lastRun,
-    stale = run && run.signature !== signature(p.data);
-  function updateNode(patch: Partial<typeof node.data>) {
-    p.setData({
-      ...p.data,
-      nodes: p.data.nodes.map((value) =>
-        value.id === node.id
-          ? { ...value, data: { ...value.data, ...patch } }
-          : value,
-      ),
-    });
+  const p = usePipelineFiles();
+  const flow = useReactFlow();
+  const dataRef = useRef(p.data);
+  dataRef.current = p.data;
+  const setDataRef = useRef(p.setData);
+  setDataRef.current = p.setData;
+  const get = useCallback(() => dataRef.current, []);
+  const set = useCallback((next: FlowDocument) => {
+    dataRef.current = next;
+    setDataRef.current(next);
+  }, []);
+  const history = useHistory(get, set, p.documentKey);
+  const commit = history.commit;
+
+  const [selection, setSelection] = useState<Selection>({ nodes: [], edges: [] });
+  const [tab, setTab] = useState<InspectorTab>("config");
+  const [sizes, setSizes] = useState<Record<string, { width: number; height: number }>>({});
+  const [live, setLive] = useState<LiveRun | null>(null);
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [autoRun, setAutoRun] = useState(readAuto);
+  const [consoleOpen, setConsoleOpen] = useState(false);
+  const [dialog, setDialog] = useState<Dialog>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [flash, setFlash] = useState("");
+  const clip = useRef<Clip | null>(null);
+
+  useEffect(() => {
+    setSelection({ nodes: [], edges: [] });
+    setLive(null);
+    setProgress(null);
+  }, [p.documentKey]);
+  useEffect(() => {
+    if (!flash) return;
+    const timer = setTimeout(() => setFlash(""), 4500);
+    return () => clearTimeout(timer);
+  }, [flash]);
+
+  const doc = p.data;
+  const sigs = useMemo(() => nodeSignatures(doc), [doc.nodes, doc.edges]);
+  const views = useMemo(() => {
+    const out: Record<string, NodeView> = {};
+    for (const node of doc.nodes) out[node.id] = nodeView(node.id, sigs[node.id], live, progress, doc.lastRun?.nodes[node.id]);
+    return out;
+  }, [doc.nodes, doc.lastRun, sigs, live, progress]);
+
+  const fail = useCallback((error: unknown) => setFlash(error instanceof Error ? error.message : String(error)), []);
+
+  const run = useCallback(
+    async (record: boolean) => {
+      const snapshot = dataRef.current;
+      setProgress({ running: true, current: null, results: {} });
+      try {
+        const report = await runInWorker(snapshot, (step) => setProgress({ running: true, ...step }));
+        setLive({ at: report.at, ms: report.ms, results: report.results, sigs: report.sigs, order: report.order });
+        setProgress(null);
+        if (record) setDataRef.current((current) => ({ ...current, lastRun: toRunRecord(report) }));
+      } catch (error) {
+        if (error instanceof CancelledRun) return;
+        setProgress(null);
+        fail(error);
+      }
+    },
+    [fail],
+  );
+
+  const hasLive = useRef(false);
+  hasLive.current = live !== null;
+  // 自动运行：结构或配置变化 400ms 后在 Worker 中重算（不写入运行记录）。
+  const graphKey = useMemo(() => p.documentKey + "|" + Object.entries(sigs).map(([id, sig]) => id + sig).join(","), [p.documentKey, sigs]);
+  useEffect(() => {
+    if (!autoRun || p.loading) return;
+    // 首次打开立即计算，之后的编辑去抖。
+    const timer = setTimeout(() => void run(false), hasLive.current ? 400 : 0);
+    return () => clearTimeout(timer);
+  }, [graphKey, autoRun, p.loading, run]);
+
+  const primary = selection.nodes.length ? doc.nodes.find((node) => node.id === selection.nodes.at(-1)) ?? null : null;
+
+  function focusNode(id: string, output = false) {
+    setSelection({ nodes: [id], edges: [] });
+    if (output) setTab("output");
+    void flow.fitView({ nodes: [{ id }], maxZoom: 1, duration: 250, padding: 0.4 });
   }
-  function addStep() {
-    const id = crypto.randomUUID(),
-      output = p.data.nodes.find((value) => value.data.operation === "output"),
-      incoming = output
-        ? p.data.edges.find((edge) => edge.target === output.id)
-        : undefined;
-    const next = {
-      id,
-      type: "step" as const,
-      position: { x: 240 + p.data.nodes.length * 65, y: 340 },
-      data: {
-        label: operationLabels[operation],
-        operation,
-        value: operation === "prefix" ? "前缀：" : "",
-      },
-    };
-    p.setData({
-      ...p.data,
-      nodes: [...p.data.nodes, next],
-      edges:
-        incoming && output
-          ? [
-              ...p.data.edges.filter((edge) => edge.id !== incoming.id),
-              { id: crypto.randomUUID(), source: incoming.source, target: id },
-              { id: crypto.randomUUID(), source: id, target: output.id },
-            ]
-          : p.data.edges,
-    });
-    setSelected(id);
+  function placeAtCenter(): { x: number; y: number } {
+    const rect = document.querySelector(".pipeline-canvas")?.getBoundingClientRect();
+    const jitter = (doc.nodes.length % 5) * 24;
+    return rect
+      ? flow.screenToFlowPosition({ x: rect.left + rect.width / 2 - 112 + jitter, y: rect.top + rect.height / 2 - 70 + jitter })
+      : { x: jitter, y: jitter };
   }
-  function removeNode() {
-    if (node.data.operation === "input" || node.data.operation === "output") {
-      p.setError("保留输入与输出步骤。可以修改其内容。");
-      return;
-    }
-    const before = p.data.edges.filter((edge) => edge.target === node.id),
-      after = p.data.edges.filter((edge) => edge.source === node.id);
-    const edges = p.data.edges.filter(
-      (edge) => edge.source !== node.id && edge.target !== node.id,
-    );
-    if (before.length === 1 && after.length === 1)
-      edges.push({
-        id: crypto.randomUUID(),
-        source: before[0].source,
-        target: after[0].target,
-      });
-    p.setData({
-      ...p.data,
-      nodes: p.data.nodes.filter((value) => value.id !== node.id),
-      edges,
-    });
-    setSelected(p.data.nodes[0].id);
-  }
-  function connect() {
-    if (from === to) {
-      p.setError("不能连接到步骤自身。");
-      return;
-    }
-    p.setData({
-      ...p.data,
-      edges: [
-        ...p.data.edges,
-        { id: crypto.randomUUID(), source: from, target: to },
-      ],
-    });
-  }
-  async function runFlow() {
-    setRunning(true);
-    setConsoleOpen(true);
-    p.setError("");
+  function add(op: OpKind, position = placeAtCenter(), config: Record<string, unknown> = {}, label?: string) {
     try {
-      const value = await request("/api/run", {
-        method: "POST",
-        body: JSON.stringify({ data: p.data }),
-      });
-      const checked = validateFlow({ ...p.data, lastRun: value });
-      p.setData(checked);
-      await p.save(checked);
+      const node = createNode(op, position, config, label);
+      commit(addNode(get(), node));
+      setSelection({ nodes: [node.id], edges: [] });
+      setTab("config");
+      setPaletteOpen(false);
     } catch (error) {
-      p.report(error);
-    } finally {
-      setRunning(false);
+      fail(error);
     }
   }
-  const safeName = p.title.replace(/[\\/:*?"<>|]/g, "_") || "流程";
+  async function dropFile(file: File, position: { x: number; y: number }) {
+    try {
+      const data = await readDataFile(file);
+      add(data.op, position, data.config, data.label);
+    } catch (error) {
+      fail(error);
+    }
+  }
+  function duplicate(ids: string[]) {
+    const copied = copySelection(get(), ids);
+    if (!copied) return;
+    try {
+      const pasted = pasteClip(get(), copied);
+      commit(pasted.doc);
+      setSelection({ nodes: pasted.ids, edges: [] });
+    } catch (error) {
+      fail(error);
+    }
+  }
+  function remove(nodes: string[], edges: string[]) {
+    if (!nodes.length && !edges.length) return;
+    commit(removeElements(get(), nodes, edges));
+    setSelection({ nodes: [], edges: [] });
+  }
+  function onConnect(c: Connection) {
+    try {
+      commit(connect(get(), c));
+    } catch (error) {
+      fail(error);
+    }
+  }
+  function updateNode(id: string, change: (node: FlowDocument["nodes"][number]) => FlowDocument["nodes"][number], key: string) {
+    const current = get();
+    commit({ ...current, nodes: current.nodes.map((node) => (node.id === id ? change(node) : node)) }, key);
+  }
+  async function loadInto(id: string) {
+    const node = get().nodes.find((item) => item.id === id);
+    if (!node) return;
+    const accept = node.data.op === "csvInput" ? ".csv,.tsv,text/csv" : node.data.op === "jsonInput" ? ".json,application/json" : ".txt,.log,.md,.csv,text/plain";
+    const file = await pickFile(accept);
+    if (!file) return;
+    try {
+      const data = await readDataFile(file);
+      const field = node.data.op === "csvInput" ? "csv" : node.data.op === "jsonInput" ? "json" : "text";
+      const content = String(data.config.csv ?? data.config.json ?? data.config.text ?? "");
+      updateNode(id, (n) => ({ ...n, data: { ...n.data, config: { ...n.data.config, [field]: content, fileName: file.name.slice(0, 200) } } }), "file:" + id);
+      setFlash(`已载入 ${file.name}`);
+    } catch (error) {
+      fail(error);
+    }
+  }
+  function downloadNode(id: string) {
+    const node = get().nodes.find((item) => item.id === id);
+    const result = views[id]?.live;
+    const value = result && shownValue(result);
+    if (!node || !value) return fail(new Error("请先运行流水线。"));
+    try {
+      const format = node.data.op === "fileOutput" ? (node.data.config.format as "csv" | "json" | "txt") : value.type === "table" ? "csv" : "txt";
+      downloadValue(value, format, String(node.data.config.fileName || node.data.label));
+    } catch (error) {
+      fail(error);
+    }
+  }
+  function layout() {
+    commit({ ...get(), nodes: autoLayout(get(), sizes) });
+    requestAnimationFrame(() => void flow.fitView({ padding: 0.12, maxZoom: 1.1, duration: 250 }));
+  }
+  async function applyTemplate(template: PipelineTemplate) {
+    if (await p.replace(structuredClone(template.doc), template.title)) setDialog(null);
+  }
+  async function importPipeline() {
+    const file = await pickFile(".json,application/json");
+    if (!file) return;
+    try {
+      const imported = await readPipelineFile(file);
+      if (await p.replace(imported.doc, imported.title)) {
+        setDialog(null);
+        setFlash(imported.draft ? `已导入为新流水线「${imported.title}」（有待完善的内容，保存为草稿）` : `已导入为新流水线「${imported.title}」`);
+      }
+    } catch (error) {
+      fail(error);
+    }
+  }
+
+  const keys = useRef<(event: KeyboardEvent) => void>(() => {});
+  keys.current = (event) => {
+    const mod = event.metaKey || event.ctrlKey;
+    const target = event.target as HTMLElement | null;
+    const editable = !!target?.closest("input, textarea, select, [contenteditable=true]");
+    if (mod && event.key.toLowerCase() === "s") {
+      event.preventDefault();
+      void p.save();
+    } else if (mod && event.key === "Enter") {
+      event.preventDefault();
+      void run(true);
+    }
+    if (editable || dialog || !mod) return;
+    const key = event.key.toLowerCase();
+    if (key === "z" && !event.shiftKey) history.undo();
+    else if ((key === "z" && event.shiftKey) || key === "y") history.redo();
+    else if (key === "c" && selection.nodes.length) {
+      clip.current = copySelection(get(), selection.nodes);
+      setFlash(`已复制 ${selection.nodes.length} 个节点`);
+    } else if (key === "v" && clip.current) {
+      try {
+        const pasted = pasteClip(get(), clip.current);
+        commit(pasted.doc);
+        setSelection({ nodes: pasted.ids, edges: [] });
+      } catch (error) {
+        fail(error);
+      }
+    } else if (key === "d" && selection.nodes.length) duplicate(selection.nodes);
+    else if (key === "a") setSelection({ nodes: get().nodes.map((node) => node.id), edges: [] });
+    else return;
+    event.preventDefault();
+  };
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => keys.current(event);
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, []);
+
+  const running = !!progress?.running;
+  const locked = p.busy || p.loading;
+  const actions = useMemo(
+    () => ({ select: (id: string) => focusNode(id), duplicate: (id: string) => duplicate([id]), remove: (id: string) => remove([id], []), showOutput: (id: string) => focusNode(id, true), download: downloadNode }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [views, doc],
+  );
+
   return (
-    <main className="flow-studio">
+    <main className="studio" data-palette={paletteOpen || undefined}>
       <a className="skip-link" href="#inspector">
-        跳到步骤参数
+        跳到检查器
       </a>
-      <header className="command-bar">
-        <div className="flow-brand">
-          <Activity aria-hidden="true" size={25} />
-          <div>
-            <h1>流程实验室</h1>
-            <span>TEXT FLOW</span>
-          </div>
-        </div>
-        <ProjectPicker
-          items={p.items}
-          id={p.current?.id}
-          disabled={locked}
-          onOpen={(id) => void p.open(id)}
-        />
-        <div className="command-actions">
-          <button onClick={p.fresh} disabled={locked}>
-            <Plus aria-hidden="true" size={15} />
-            新建
-          </button>
-          <button onClick={() => void p.save()} disabled={locked}>
-            <Save aria-hidden="true" size={15} />
-            立即保存
-          </button>
-          <button
-            onClick={() =>
-              download(
-                new Blob([JSON.stringify(p.data, null, 2)], {
-                  type: "application/json",
-                }),
-                safeName + ".json",
-              )
-            }
-          >
-            <Download aria-hidden="true" size={15} />
-            配置
-          </button>
-          <button
-            aria-expanded={showAi}
-            onClick={() => setShowAi((value) => !value)}
-          >
-            <Sparkles aria-hidden="true" size={15} />
-            生成配置
-          </button>
-          <button
-            aria-expanded={inspectorOpen}
-            aria-controls="inspector"
-            onClick={() => setInspectorOpen((value) => !value)}
-          >
-            {inspectorOpen ? "收起参数" : "步骤参数"}
-          </button>
-          <button
-            aria-expanded={consoleOpen}
-            onClick={() => setConsoleOpen((value) => !value)}
-          >
-            {consoleOpen ? "收起控制台" : "运行控制台"}
-          </button>
-          <button
-            className="run-button"
-            onClick={() => void runFlow()}
-            disabled={locked}
-          >
-            <Play aria-hidden="true" size={15} />
-            {running ? "运行中…" : "运行并保存"}
-          </button>
-        </div>
-      </header>
-      <div className="flow-title">
-        <label className="sr-only" htmlFor="title">
-          流程名称
+      <header className="topbar">
+        <button type="button" className="file-button" aria-haspopup="dialog" onClick={() => setDialog("file")}>
+          <Workflow aria-hidden="true" size={16} />
+          文件
+          <ChevronDown aria-hidden="true" size={13} />
+        </button>
+        <label className="sr-only" htmlFor="pipeline-title">
+          流水线名称
         </label>
-        <input
-          id="title"
-          name="title"
-          autoComplete="off"
-          value={p.title}
-          maxLength={120}
-          disabled={locked}
-          onChange={(event) => p.setTitle(event.target.value)}
-        />
+        <input id="pipeline-title" className="title-input" value={p.title} maxLength={120} autoComplete="off" onChange={(event) => p.setTitle(event.target.value)} />
         <AutoStatus state={p.autoState} loading={p.loading} />
-        <span className="flow-count">
-          {p.data.nodes.length} 个步骤 / {p.data.edges.length} 条连接
-        </span>
-      </div>
-      <Notice error={p.error} notice={p.notice} />
-      <AutoFeedback
-        state={p.autoState}
-        onRetry={() => void p.save()}
-        onExport={p.exportDraft}
-        onReload={p.current ? () => void p.open(p.current!.id) : undefined}
-      />
-      {showAi ? (
-        <section className="ai-flow">
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              void p.generate(prompt);
-            }}
-          >
-            <label htmlFor="prompt">描述文本处理步骤</label>
-            <textarea
-              id="prompt"
-              name="prompt"
-              autoComplete="off"
-              required
-              maxLength={12000}
-              value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              placeholder="例如：把 hello 转为大写，并加上「通知：」前缀…"
-            />
-            <button disabled={locked}>
-              {p.aiBusy ? "正在生成…" : "生成建议"}
-            </button>
-          </form>
-          {p.suggestion ? (
-            <div>
-              <h2>配置建议</h2>
-              <ol>
-                {p.suggestion.nodes.map((step) => (
-                  <li key={step.id}>
-                    {step.data.label} · {operationLabels[step.data.operation]}{" "}
-                    {step.data.value}
-                  </li>
-                ))}
-              </ol>
-              <button className="run-button" onClick={p.applySuggestion}>
-                采用配置
-              </button>
-              <button onClick={p.discardSuggestion}>放弃建议</button>
-              <p>采用后检查连接，再运行。</p>
-            </div>
-          ) : null}
-        </section>
-      ) : null}
-      <div
-        className={`flow-layout ${inspectorOpen ? "" : "without-inspector"}`}
-      >
-        <section className="canvas-region" aria-label="流程画布">
-          <RenderBoundary>
-            <Suspense
-              fallback={
-                <p role="status" className="loading">
-                  正在加载流程画布…
-                </p>
-              }
-            >
-              <FlowCanvas
-                key={p.documentKey}
-                data={p.data}
-                onChange={p.setData}
-                onSelect={(id) => {
-                  setSelected(id);
-                  setInspectorOpen(true);
-                }}
-                locked={locked}
-              />
-            </Suspense>
-          </RenderBoundary>
-          <div className="canvas-caption">
-            拖动步骤调整位置 · 使用参数面板也可创建连接
-          </div>
-        </section>
-        <aside className="inspector" id="inspector">
-          <div className="section-label">步骤参数</div>
-          <label htmlFor="selected">选中步骤</label>
-          <select
-            id="selected"
-            value={node.id}
-            onChange={(event) => setSelected(event.target.value)}
-          >
-            {p.data.nodes.map((value) => (
-              <option key={value.id} value={value.id}>
-                {value.data.label}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="node-name">步骤名称</label>
+        <span className="spacer" />
+        <button type="button" className="mobile-only" aria-expanded={paletteOpen} aria-controls="palette" onClick={() => setPaletteOpen((open) => !open)}>
+          <Plus aria-hidden="true" size={14} />
+          节点
+        </button>
+        <button type="button" className="desktop-label" aria-label="模板库" title="模板库" onClick={() => setDialog("templates")}>
+          <LayoutGrid aria-hidden="true" size={14} />
+          <span>模板库</span>
+        </button>
+        <button type="button" className="desktop-label" aria-label="AI 起草" title="AI 起草" onClick={() => setDialog("ai")}>
+          <Sparkles aria-hidden="true" size={14} />
+          <span>AI 起草</span>
+        </button>
+        <label className="auto-toggle" title="改动后自动在本机重新计算">
           <input
-            id="node-name"
-            name="nodeName"
-            autoComplete="off"
-            value={node.data.label}
-            maxLength={80}
-            disabled={locked}
-            onChange={(event) => updateNode({ label: event.target.value })}
+            type="checkbox"
+            checked={autoRun}
+            onChange={(event) => {
+              setAutoRun(event.target.checked);
+              try {
+                localStorage.setItem(AUTO_KEY, event.target.checked ? "on" : "off");
+              } catch {
+                /* 仅是偏好 */
+              }
+            }}
           />
-          <div className="operation-tag">
-            {operationLabels[node.data.operation]}
-          </div>
-          {node.data.operation === "input" ||
-          node.data.operation === "prefix" ? (
-            <>
-              <label htmlFor="node-value">
-                {node.data.operation === "input" ? "输入内容" : "前缀内容"}
-              </label>
-              <textarea
-                id="node-value"
-                name="nodeValue"
-                autoComplete="off"
-                value={node.data.value}
-                maxLength={10000}
-                disabled={locked}
-                onChange={(event) => updateNode({ value: event.target.value })}
+          <span>自动运行</span>
+        </label>
+        <button type="button" className="run-button" onClick={() => void run(true)} disabled={!doc.nodes.length} title="运行并把结果记录到流水线（⌘/Ctrl+Enter）">
+          <Play aria-hidden="true" size={14} />
+          {running ? "运行中…" : "运行"}
+        </button>
+      </header>
+      <AutoFeedback state={p.autoState} onRetry={() => void p.save()} onExport={p.exportDraft} onReload={p.current ? () => void p.open(p.current!.id) : undefined} />
+      <Notice error={p.error} notice={flash || p.notice} onDismiss={() => (p.error ? p.setError("") : flash ? setFlash("") : p.setNotice(""))} />
+      <div className="workspace">
+        <aside id="palette" className="palette-region">
+          <Palette onAdd={(op) => add(op)} disabled={locked} />
+        </aside>
+        <section className="canvas-region" aria-label="流水线画布">
+          <RenderBoundary>
+            <ActionsProvider value={actions}>
+              <PipelineCanvas
+                key={p.documentKey}
+                doc={doc}
+                views={views}
+                selection={selection}
+                onSelection={setSelection}
+                onMove={(positions) => commit({ ...get(), nodes: get().nodes.map((node) => (positions[node.id] ? { ...node, position: { x: Math.round(positions[node.id].x), y: Math.round(positions[node.id].y) } } : node)) })}
+                onConnect={onConnect}
+                onDelete={remove}
+                onDropOp={(op, position) => add(op, position)}
+                onDropFile={(file, position) => void dropFile(file, position)}
+                onLayout={layout}
+                onReject={(reason) => setFlash(reason)}
+                undo={{ run: history.undo, enabled: history.canUndo }}
+                redo={{ run: history.redo, enabled: history.canRedo }}
+                sizes={sizes}
+                onSizes={setSizes}
               />
-            </>
-          ) : (
-            <p className="muted">
-              {node.data.operation === "uppercase"
-                ? "把上一节点的文本转为大写。"
-                : "返回前一步的文本作为最终结果。"}
-            </p>
-          )}
-          <button
-            className="danger"
-            onClick={removeNode}
-            disabled={
-              locked ||
-              node.data.operation === "input" ||
-              node.data.operation === "output"
-            }
-          >
-            <Trash2 aria-hidden="true" size={14} />
-            删除此步骤
-          </button>
-          <div className="section-label">添加步骤</div>
-          <label className="sr-only" htmlFor="operation">
-            步骤类型
-          </label>
-          <select
-            id="operation"
-            value={operation}
-            onChange={(event) => setOperation(event.target.value as Operation)}
-          >
-            <option value="uppercase">转为大写</option>
-            <option value="prefix">添加前缀</option>
-          </select>
-          <button
-            onClick={addStep}
-            disabled={locked || p.data.nodes.length >= 30}
-          >
-            <Plus aria-hidden="true" size={14} />
-            插入到输出前
-          </button>
-          <div className="section-label">连接管理</div>
-          <label htmlFor="from">从</label>
-          <select
-            id="from"
-            value={from}
-            onChange={(event) => setFrom(event.target.value)}
-          >
-            {p.data.nodes.map((value) => (
-              <option key={value.id} value={value.id}>
-                {value.data.label}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="to">到</label>
-          <select
-            id="to"
-            value={to}
-            onChange={(event) => setTo(event.target.value)}
-          >
-            {p.data.nodes.map((value) => (
-              <option key={value.id} value={value.id}>
-                {value.data.label}
-              </option>
-            ))}
-          </select>
-          <button onClick={connect} disabled={locked}>
-            添加连接
-          </button>
-          <ul className="edge-list">
-            {p.data.edges.map((edge) => (
-              <li key={edge.id}>
-                <span>
-                  {
-                    p.data.nodes.find((value) => value.id === edge.source)?.data
-                      .label
-                  }{" "}
-                  →{" "}
-                  {
-                    p.data.nodes.find((value) => value.id === edge.target)?.data
-                      .label
-                  }
-                </span>
-                <button
-                  aria-label="删除此连接"
-                  disabled={locked}
-                  onClick={() =>
-                    p.setData({
-                      ...p.data,
-                      edges: p.data.edges.filter(
-                        (value) => value.id !== edge.id,
-                      ),
-                    })
-                  }
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
+            </ActionsProvider>
+          </RenderBoundary>
+        </section>
+        <aside id="inspector" className="inspector" tabIndex={-1} aria-label="检查器">
+          <Inspector
+            doc={doc}
+            node={primary}
+            views={views}
+            tab={tab}
+            onTab={setTab}
+            onLabel={(label) => primary && updateNode(primary.id, (n) => ({ ...n, data: { ...n.data, label } }), "label:" + primary.id)}
+            onConfig={(key, value) => primary && updateNode(primary.id, (n) => ({ ...n, data: { ...n.data, config: { ...n.data.config, [key]: value } } }), `config:${primary.id}:${key}`)}
+            onConnect={(port, source, handle) => primary && onConnect({ source, sourceHandle: handle, target: primary.id, targetHandle: port })}
+            onDisconnect={(port) => primary && commit(disconnect(get(), primary.id, port))}
+            onLoadFile={() => primary && void loadInto(primary.id)}
+            onDuplicate={() => primary && duplicate([primary.id])}
+            onRemove={() => primary && remove([primary.id], [])}
+            onSelect={(id) => focusNode(id)}
+          />
         </aside>
       </div>
-      <section className="run-log" hidden={!consoleOpen}>
-        <header>
-          <h2>运行控制台</h2>
-          {run ? (
-            <span>
-              {stale
-                ? "配置已变化，请重新运行"
-                : new Date(run.at).toLocaleString()}
-            </span>
-          ) : null}
-          {run ? (
-            <button
-              onClick={() =>
-                download(
-                  new Blob([run.output], { type: "text/plain" }),
-                  safeName + "-结果.txt",
-                )
-              }
-            >
-              导出上次结果
-            </button>
-          ) : null}
-        </header>
-        {run ? (
-          <>
-            <output className="run-output">{run.output || "（空文本）"}</output>
-            <div className="step-results">
-              {run.steps.map((step, index) => (
-                <details key={step.id}>
-                  <summary>
-                    <span>{index + 1}</span>
-                    {step.label}
-                  </summary>
-                  <label>输入</label>
-                  <pre>{step.input || "（空）"}</pre>
-                  <label>输出</label>
-                  <pre>{step.output || "（空）"}</pre>
-                </details>
-              ))}
-            </div>
-          </>
-        ) : (
-          <p className="muted">
-            运行后，这里显示每个步骤真实接收和输出的文本。
-          </p>
-        )}
-      </section>
+      <RunConsole
+        doc={doc}
+        views={views}
+        order={live?.order ?? []}
+        open={consoleOpen}
+        onToggle={() => setConsoleOpen((open) => !open)}
+        running={running}
+        savedAt={doc.lastRun?.at}
+        totalMs={live?.ms ?? doc.lastRun?.ms}
+        onSelect={(id) => focusNode(id)}
+      />
+      <Modal open={dialog === "file"} onClose={() => setDialog(null)} title="文件" className="file-sheet">
+        <FileMenu
+          items={p.items}
+          currentId={p.current?.id}
+          title={p.title}
+          locked={locked}
+          onNew={() => void p.replace(emptyFlow(), "未命名流水线").then((ok) => ok && setDialog(null))}
+          onTemplates={() => setDialog("templates")}
+          onImport={() => void importPipeline()}
+          onOpen={(id) => void p.open(id).then((ok) => ok && setDialog(null))}
+          onExport={() => exportPipeline(doc, p.title)}
+          onRecoveryDownload={p.exportDraft}
+          onRefresh={() => void p.refresh()}
+          onRemove={() => void p.remove().then((ok) => ok && setDialog(null))}
+        />
+      </Modal>
+      <Modal open={dialog === "templates"} onClose={() => setDialog(null)} title="模板库" className="template-sheet">
+        <TemplateGallery locked={locked} onPick={(template) => void applyTemplate(template)} />
+      </Modal>
+      <Modal open={dialog === "ai"} onClose={() => setDialog(null)} title="AI 起草流水线">
+        <AiDraft
+          prompt={typeof p.draft.aiPrompt === "string" ? p.draft.aiPrompt : ""}
+          onPrompt={(value) => p.setDraft((extra) => ({ ...extra, aiPrompt: value }))}
+          busy={p.aiBusy}
+          error={p.aiError}
+          suggestion={p.suggestion}
+          onGenerate={() => void p.generate(typeof p.draft.aiPrompt === "string" ? p.draft.aiPrompt : "")}
+          onApply={() => {
+            if (!p.suggestion) return;
+            commit({ version: 2, nodes: p.suggestion.nodes, edges: p.suggestion.edges });
+            p.discardSuggestion();
+            setDialog(null);
+            requestAnimationFrame(() => void flow.fitView({ padding: 0.12, maxZoom: 1.1 }));
+          }}
+          onDiscard={p.discardSuggestion}
+        />
+      </Modal>
+      <span className="sr-only" role="status">
+        {running ? `正在运行${progress?.current ? "：" + (doc.nodes.find((n) => n.id === progress.current)?.data.label ?? "") : ""}` : ""}
+      </span>
     </main>
   );
 }
+
+const ActionsProvider = ActionsContext.Provider;
