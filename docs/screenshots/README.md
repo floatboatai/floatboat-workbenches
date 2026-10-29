@@ -1,8 +1,8 @@
 # 工作台实景截图
 
-真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-28。
+真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-29。
 
-其余53项保留历史采集版本；本轮更新3项0.8.1界面。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
+0.9.0 第1波更新8项；其余保留历史采集版本。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -13,8 +13,8 @@
 | [pptxgenjs.png](pptxgenjs.png) | 0.2.0 | 1440 × 1000 | 102.4 KiB | `a889f17df1faf4f813cfe58dd49f184bd57296a149ea3ffc865c6882f9f92898` |
 | [react-flow.png](react-flow.png) | 0.2.0 | 1440 × 980 | 95.8 KiB | `a910a45124e15062cc74269060f01115f3ed61bf1c2146304724fc74e8efaf47` |
 | [surveyjs.png](surveyjs.png) | 0.2.0 | 1440 × 980 | 76.8 KiB | `9a4365a2e989deef5ae61fa8eff84a5eb29a669e7cc20246eb2065002e1fa109` |
-| [mermaid.png](mermaid.png) | 0.2.0 | 1440 × 1000 | 58.3 KiB | `bbba269ca95e943ccd1018c8f6b20f7439c6fb2df51f5df9e55df8a60d814e13` |
-| [swagger-ui.png](swagger-ui.png) | 0.2.0 | 1440 × 1000 | 92.1 KiB | `b33de9f7d6e549937e14a2b53d0f5f982ca2f33197fdeea81fd4640f99b29c03` |
+| [mermaid.png](mermaid.png) | 0.9.0 | 1440 × 900 | 132.4 KiB | `3773907a83943e2db2981a900369df9cb916c23fc13f4f23943a327d134beab3` |
+| [swagger-ui.png](swagger-ui.png) | 0.9.0 | 1440 × 900 | 153.8 KiB | `f0b0a68eea874b4b180c70ea6581a392e6e2491a00b87bedd87b8cc0c1b2caea` |
 | [vega-lite.png](vega-lite.png) | 0.2.0 | 1440 × 1000 | 90.3 KiB | `f801114306626c20bfadefa3b35376f586b19e7d289e36fe507e592d99c5f166` |
 | [observable-plot.png](observable-plot.png) | 0.2.0 | 1440 × 1000 | 66.3 KiB | `b35af99e6d7d5ecc01777c8984c9042f9fdc7cef880f95af4aa6e5c325443b74` |
 | [blocknote.png](blocknote.png) | 0.3.0 | 1440 × 1182 | 151.4 KiB | `ce920003409834892a9013263a5eac492ac5df74a04bb99a30e50912c81b4a7e` |
@@ -41,26 +41,26 @@
 | [penpot.png](penpot.png) | 0.5.0 | 1440 × 1000 | 72.0 KiB | `6fa3f9dfe034acc01869d8f4cd8b40b057ee3e2f454ae52bba161db7b9c79412` |
 | [hyperframes.png](hyperframes.png) | 0.5.0 | 1440 × 1149 | 128.0 KiB | `c24389c51798d7e300f9bf2d37625f31c691628ddadf15705c2e7912f62258a4` |
 | [graphify.png](graphify.png) | 0.5.0 | 1440 × 1100 | 115.8 KiB | `d75280a48fe240d3e3187471d2670897a25630726ca7c16b95bfb1c9b2975ee1` |
-| [pageindex.png](pageindex.png) | 0.5.0 | 1440 × 1518 | 163.1 KiB | `2dc1c47f5b2419e6b8fefdc236d76efd24f5e5b00a1577b63b7314b63caa7964` |
-| [deeptutor.png](deeptutor.png) | 0.5.0 | 1440 × 1551 | 207.0 KiB | `bb937f5a98f7188afa384a77b6114e362b167c28cad7538d8fa85d91e31b587b` |
-| [agent-reach.png](agent-reach.png) | 0.5.0 | 1440 × 1851 | 248.6 KiB | `0b68fceee763277ec63918b3c663107bb4593492c310f2d711d32c3f48d98fa4` |
+| [pageindex.png](pageindex.png) | 0.9.0 | 1440 × 900 | 240.6 KiB | `ec0ec8c1d009e8cff2ee2fa79786d26c89773932dac1fea1c093f12582f141b3` |
+| [deeptutor.png](deeptutor.png) | 0.9.0 | 1440 × 900 | 239.2 KiB | `359a289a06965c0dd2358cc514c3be731c81195bc3573cff89c8d65212ecc568` |
+| [agent-reach.png](agent-reach.png) | 0.9.0 | 1440 × 900 | 321.3 KiB | `a363ba029896dc2de954a34b6ce89a8e751ef0211b2b8618355f3cde282e2326` |
 | [openmontage.png](openmontage.png) | 0.5.0 | 1440 × 1100 | 122.7 KiB | `5a11fac21433b61856c62cdb9707fe5e08be448d4d83669376aa534489050bbe` |
 | [deerflow.png](deerflow.png) | 0.5.0 | 1440 × 1337 | 155.1 KiB | `afe240962bb7b23a5cf75ce632210058acb93c9d4b001036cfdee1b568955e69` |
 | [mirofish.png](mirofish.png) | 0.5.0 | 1440 × 1393 | 225.9 KiB | `e09aeb3bc89814586761cfc908366a7c98f501e092cd919b5552856ba58b0b32` |
 | [geoinflow.png](geoinflow.png) | 0.5.0 | 1440 × 1941 | 176.0 KiB | `64f321a6fed1bfd363a50f9cfd80eed256bbf6474f2e99e1eba0415c2d5d9ce7` |
 | [openpencil.png](openpencil.png) | 0.5.0 | 1440 × 1000 | 108.4 KiB | `4d4471197e9fee67c626b9a80cfe34f6ae57b3dc824c662c416b7937ed9e51bc` |
-| [figcraft.png](figcraft.png) | 0.5.0 | 1440 × 1140 | 411.2 KiB | `0db8e7c7efa021dd91a04723e88f74f2dee83e9e0b79dcfe1ca6487f397d167f` |
+| [figcraft.png](figcraft.png) | 0.9.0 | 1440 × 900 | 326.2 KiB | `8b2b7f2ec622b0a536cf905451594274f6c8b9f4fcaa4874deaa024ed9d442fb` |
 | [konva.png](konva.png) | 0.6.0 | 1440 × 1014 | 94.3 KiB | `a1c5bee232cb3fd9e88087dbeb5592c1e3734256c980ca73026eafc9d16a9a99` |
 | [logicflow.png](logicflow.png) | 0.6.0 | 1440 × 1299 | 218.5 KiB | `ac63caecf9f84a43a07320a18c481ed42cb8b834f3968068dc6b07bdcbe4a5b9` |
 | [simplemindmap.png](simplemindmap.png) | 0.6.0 | 1440 × 1035 | 89.5 KiB | `0bccc1cf9a597c5bb35656f4b70157c345bf8075bbb7beb210ea8021d167d587` |
 | [wavesurfer-js.png](wavesurfer-js.png) | 0.6.0 | 1440 × 1283 | 109.5 KiB | `7a45335e7282f92e8268d9d8490b3b1bebc3409b7d628aa325c49ed7aeb87d9e` |
 | [react-email.png](react-email.png) | 0.6.0 | 1440 × 1364 | 184.8 KiB | `e81cf86316d05d9a30743b7d19e420cb575bc883393fd0c7bcf226201b9c94e8` |
-| [bruno.png](bruno.png) | 0.6.0 | 1500 × 1100 | 123.6 KiB | `7c7e969560e4b77e5fa4e2039e3e6c64f11e962b6eb9e0cf56afc43e8eccf18b` |
+| [bruno.png](bruno.png) | 0.9.0 | 1440 × 900 | 191.9 KiB | `8a15070f2739a9bc7254f99a4d21c321e9e5268548a30d908f2575b2ba7cc07a` |
 | [ray-optics.png](ray-optics.png) | 0.7.0 | 1440 × 1144 | 189.2 KiB | `21241c612929679ee5557c5d4d8345a05164733b4cdb45f1bb0e638b529c1d7c` |
 | [invoice-builder.png](invoice-builder.png) | 0.7.0 | 1440 × 1050 | 117.9 KiB | `64edaf214cdfb14730442e43d2c55335da906b1b630dfe45c849f187f9b7bbc2` |
 | [mesh2motion.png](mesh2motion.png) | 0.7.0 | 1440 × 1041 | 188.8 KiB | `5d7d47bcba4b11bc2149d7407a0de3189a703195d1e5007b833085b8cec5b125` |
 | [oasis-editor.png](oasis-editor.png) | 0.8.1 | 1440 × 1000 | 127.1 KiB | `99ce02c4c5584f6d9c7ea299f2954f5384261b373298954585e7a540b255eff6` |
 | [circuitjs.png](circuitjs.png) | 0.8.1 | 1440 × 1000 | 66.5 KiB | `f67fe6093c863fb35d161d6b53ed80a62ec3f8ae4758e7d0afca7a4ca17c7cf0` |
-| [gltf-transform.png](gltf-transform.png) | 0.8.1 | 1440 × 980 | 199.3 KiB | `636c8589a5b1ca389d66d26f0437d6e3628d62fb07ac6155edfeb2ea67963241` |
+| [gltf-transform.png](gltf-transform.png) | 0.9.0 | 1440 × 900 | 143.7 KiB | `e1f5b5a1a8520c4204e8acc28e4f420043e4941dd329a27feeaf9a3f9fdd5aed` |
 
 共56张，合计 8.04 MiB。

@@ -6,9 +6,11 @@
 
 ## 当前进度
 
-当前版本 **0.8.1** · **56 / 78 个工作台已完成本地功能验收**。本轮重做Oasis、CircuitJS和glTF的页面结构，工作台数量不变。Floatboat客户端导入尚未实测。
+当前版本 **0.9.0**（进行中）· **56 / 78 个工作台已完成本地功能验收**。Floatboat客户端导入尚未实测。
 
-此前对独立布局的判断不足：源码扫描有28项复用页头项目选择与新建组合。本轮3项以文稿、电路和模型为中心完成结构改版；其余26项待结构整改、27项待进一步视觉与任务审查，详见[结构审计](docs/layout-audit-2026-10-28.md)。[0.8.1改版对照与验收](docs/release-0.8.1.md)包含真实截图、主任务变化和自动保存回归结果。
+0.9.0 针对“缺乏深度、部分不能使用”做全量整改。[可用性与深度审计](docs/depth-audit-2026-10-29.md)在空数据目录下逐项实际运行全部56项：构建与测试全部通过，但14项核心功能依赖未打包的外部服务、多项校验上限拒绝真实文件、多数只露出上游库很小一部分能力。整改分波推进，进度与验收见[0.9.0 发布记录](docs/release-0.9.0.md)。
+
+第1波已完成8项（首开即可用、接住真实输入、补齐核心能力并重排页面）：Mermaid、Swagger UI、Bruno、PageIndex、DeepTutor、Agent-Reach、FigCraft、glTF Transform。0.8.1结构审计见[结构审计](docs/layout-audit-2026-10-28.md)。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
@@ -19,8 +21,8 @@
 | [PptxGenJS](workbenches/05-pptxgenjs/) | 幻灯片编排、主题、演讲备注、PPTX 导出 | 黑色舞台、缩略图与备注 |
 | [React Flow](workbenches/06-react-flow/) | 节点编辑、单链文本变换、实际运行结果 | 节点 IDE 与运行控制台 |
 | [SurveyJS Form Library](workbenches/07-surveyjs-form-library/) | 问卷设计、填写、答卷保存与导出 | 分阶段表单 |
-| [Mermaid](workbenches/08-mermaid/) | 源码绘图、错误恢复、源码/SVG 导出 | 源码 IDE 与图形预览 |
-| [Swagger UI](workbenches/09-swagger-ui/) | OpenAPI 文档、JSON 编辑、同源 GET 试调 | 端点目录与 API 参考台 |
+| [Mermaid](workbenches/08-mermaid/) | 源码 IDE（高亮、逐行错误）、17 类模板、主题/手绘、.mmd/.md 导入、PNG/SVG/剪贴板导出 | 源码 IDE 与可缩放图形预览 |
+| [Swagger UI](workbenches/09-swagger-ui/) | YAML/JSON 原文导入导出、并排源码与行号诊断、经代理的全方法试调、内置示例服务 | 端点目录、原生文档与按需源码 |
 | [Vega-Lite](workbenches/10-vega-lite/) | JSON 规格、内嵌数据绘图、SVG 导出 | 图表实验台与规格检查器 |
 | [Observable Plot](workbenches/11-observable-plot/) | CSV/JSON 数据、字段映射、三种图表、SVG 导出 | 数据观察报告 |
 | [BlockNote](workbenches/18-blocknote/) | 知识页、嵌套块/任务/表格、Markdown/HTML/JSON 导出 | 知识夹、页面目录与块式正文 |
@@ -47,27 +49,27 @@
 | [Penpot](workbenches/44-penpot/) | 颜色、字体、组件样本与交付说明，原生Penpot归档及CSS导出 | 设计资产样本册与色彩、字体分页 |
 | [HyperFrames](workbenches/62-hyperframes/) | 镜头文字与构图、时间线、HyperFrames HTML和真实MP4渲染 | 暗色动效舞台、镜头轨与输出队列 |
 | [Graphify](workbenches/63-graphify/) | 真实AST抽取、原生图谱、关系路径、布局与审阅笔记 | 知识地图、符号目录与关系检查器 |
-| [PageIndex](workbenches/64-pageindex/) | PDF章节与原页、便笺、Gemini 3.8问答和逐字页码引用 | 章节目录、纸张原页与审阅便笺 |
-| [DeepTutor](workbenches/65-deeptutor/) | 讲义、真实Host出题、上游批改与复习排程、课程导出 | 对页练习本、答题区与复习清单 |
-| [Agent-Reach](workbenches/66-agent-reach/) | GitHub、网页、V2EX来源采集、去重收藏、摘录与审阅导出 | 来源采集台、阅读正文与摘录夹 |
+| [PageIndex](workbenches/64-pageindex/) | 浏览器 PDF.js 阅读（无需服务）、章节树、字符级摘录/引用高亮、检索与 Host 原页问答 | 章节目录、PDF 原页与审阅问答 |
+| [DeepTutor](workbenches/65-deeptutor/) | 离线判题/排程/题库导入、错题解析与 Host 导师、可控出题与间隔复习 | 对页练习本与题号状态条 |
+| [Agent-Reach](workbenches/66-agent-reach/) | 内置 GitHub/网页/搜索/V2EX 采集、首开示例调研、原文摘录高亮、可选 Host 概括与报告 | 来源目录、原文阅读与摘录夹 |
 | [OpenMontage](workbenches/67-openmontage/) | 上传原片、入出点、镜头复核、上游组接和MP4交付 | 分镜制作单、原片预览与成片架 |
 | [DeerFlow](workbenches/68-deerflow/) | 研究提交、原生线程运行查询、来源复核和报告交付 | 研究进度、交付纸张与来源证据页 |
 | [MiroFish](workbenches/69-mirofish/) | 已准备模拟的启动/停止、状态核对、原生动作与人工复核 | 角色目录、轮次时间线与动作复核 |
 | [GEOInflow](workbenches/70-geoinflow/) | 日志与内容清单、原生UA/引荐分类、覆盖分析和审阅导出 | 宽幅访问账本、范围筛选与逐页调查 |
 | [OpenPencil](workbenches/71-openpencil/) | 图层与属性、原生SceneGraph、FIG/SVG及完整项目导出 | 全幅组件画板、图层与属性工具 |
-| [FigCraft](workbenches/72-figcraft/) | 原生设计画板、文案校订、交付状态和PNG/SVG/PDF导出 | 暗色原型校样、画板序列与文案复核 |
+| [FigCraft](workbenches/72-figcraft/) | 无需引擎的近似校样、文案/图层/填色/交付状态写回、SVG/PNG/交付说明导出；原生 PNG/PDF 可选 | 画板胶片、校样舞台与审阅检查器 |
 | [Konva](workbenches/28-konva/) | 原生Konva画板、对象变换、图片与PNG/完整工程 | 标注画板、对象工具与图层 |
 | [LogicFlow](workbenches/29-logicflow/) | 原生流程图编辑、规则检查、路径审阅与原生数据导出 | 流程图纸、条件连线与结构检查 |
 | [SimpleMindMap](workbenches/31-simplemindmap/) | 原生可编辑脑图、结构/主题与导出 | 导图主屏、分支导航与上下文工具 |
 | [wavesurfer.js](workbenches/33-wavesurfer-js/) | 真实音频与波形、区间编辑/循环回听、审阅及工程导出 | 波形、时间尺、区间与听审记录 |
 | [React Email](workbenches/42-react-email/) | 官方邮件组件编排与渲染、HTML/纯文本/项目导出 | 邮件稿件、收件人变量与多尺寸校样 |
-| [Bruno](workbenches/45-bruno/) | 原生Bru请求、显式HTTP执行、结果检查与导出 | 请求集合、编辑器与响应控制台 |
+| [Bruno](workbenches/45-bruno/) | 编辑即发送、环境与秘密变量、认证、全部常用请求体、断言与请求历史 | 集合树、请求编辑器与响应控制台 |
 | [Ray Optics Simulation](workbenches/73-ray-optics/) | 原生光路编辑、CPU模拟、探测器与PNG/场景/工程导出 | 光路主屏、器材架与实验读数 |
 | [Invoice Builder](workbenches/74-invoice-builder/) | 原生计价与PDF模板、报价/发票、图片及工程恢复 | 明细填写、纸张校样与PDF预览 |
 | [Mesh2Motion](workbenches/75-mesh2motion/) | 原生人形绑定、87动作预览、动画GLB与完整工程 | 三维舞台、骨架树、关节参数与动作轨 |
 | [Oasis Editor](workbenches/76-oasis-editor/) | 分页DOCX编辑、原始文档保留、表格/图片校样、中文PDF与DOCX及完整工程导出 | 居中纸张、文稿菜单与按需页边工具 |
 | [CircuitJS1](workbenches/77-circuitjs/) | 基础RLC电路编辑、原生求解与示波器、参数草稿、原生电路与读数导出 | 电路与示波器、纵向元件架与底部仪表 |
-| [glTF Transform](workbenches/78-gltf-transform/) | 自包含GLB检查、节点与PBR材质修改、JSON元数据、保留蒙皮/动画/贴图的结果与工程导出 | 模型空间、底部材质带与浮动检查器 |
+| [glTF Transform](workbenches/78-gltf-transform/) | GLB/glTF/ZIP（Draco/Meshopt/扩展）导入、逐步优化流水线与前后报告、贴图/节点/动画、压缩 GLB 导出 | 模型空间、优化阶段条与浮动检查器 |
 
 0.4.0批次统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
 
@@ -94,8 +96,8 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[Excalidraw · 白板](workbenches/01-excalidraw/)**<br>[<img src="docs/screenshots/excalidraw.png" alt="Excalidraw · 白板工作台实景" width="440">](workbenches/01-excalidraw/) | **[Markmap · 脑图](workbenches/02-markmap/)**<br>[<img src="docs/screenshots/markmap.png" alt="Markmap · 脑图工作台实景" width="440">](workbenches/02-markmap/) |
 | **[pdfme · 排版台](workbenches/03-pdfme/)**<br>[<img src="docs/screenshots/pdfme.png" alt="pdfme · 排版台工作台实景" width="440">](workbenches/03-pdfme/) | **[Tiptap · 写作](workbenches/04-tiptap/)**<br>[<img src="docs/screenshots/tiptap.png" alt="Tiptap · 写作工作台实景" width="440">](workbenches/04-tiptap/) |
 | **[PptxGenJS · 演示](workbenches/05-pptxgenjs/)**<br>[<img src="docs/screenshots/pptxgenjs.png" alt="PptxGenJS · 演示工作台实景" width="440">](workbenches/05-pptxgenjs/) | **[React Flow · 工作流](workbenches/06-react-flow/)**<br>[<img src="docs/screenshots/react-flow.png" alt="React Flow · 工作流工作台实景" width="440">](workbenches/06-react-flow/) |
-| **[SurveyJS Form Library · 问卷](workbenches/07-surveyjs-form-library/)**<br>[<img src="docs/screenshots/surveyjs.png" alt="SurveyJS Form Library · 问卷工作台实景" width="440">](workbenches/07-surveyjs-form-library/) | **[Mermaid · 图解](workbenches/08-mermaid/)**<br>[<img src="docs/screenshots/mermaid.png" alt="Mermaid · 图解工作台实景" width="440">](workbenches/08-mermaid/) |
-| **[Swagger UI · API 文档](workbenches/09-swagger-ui/)**<br>[<img src="docs/screenshots/swagger-ui.png" alt="Swagger UI · API 文档工作台实景" width="440">](workbenches/09-swagger-ui/) | **[Vega-Lite · 图表规格](workbenches/10-vega-lite/)**<br>[<img src="docs/screenshots/vega-lite.png" alt="Vega-Lite · 图表规格工作台实景" width="440">](workbenches/10-vega-lite/) |
+| **[SurveyJS Form Library · 问卷](workbenches/07-surveyjs-form-library/)**<br>[<img src="docs/screenshots/surveyjs.png" alt="SurveyJS Form Library · 问卷工作台实景" width="440">](workbenches/07-surveyjs-form-library/) | **[Mermaid · 源码 IDE 与可缩放图形预览](workbenches/08-mermaid/)**<br>[<img src="docs/screenshots/mermaid.png" alt="Mermaid · 图解工作台实景" width="440">](workbenches/08-mermaid/) |
+| **[Swagger UI · 端点目录、原生文档与按需源码](workbenches/09-swagger-ui/)**<br>[<img src="docs/screenshots/swagger-ui.png" alt="Swagger UI · API 文档工作台实景" width="440">](workbenches/09-swagger-ui/) | **[Vega-Lite · 图表规格](workbenches/10-vega-lite/)**<br>[<img src="docs/screenshots/vega-lite.png" alt="Vega-Lite · 图表规格工作台实景" width="440">](workbenches/10-vega-lite/) |
 | **[Observable Plot · 数据](workbenches/11-observable-plot/)**<br>[<img src="docs/screenshots/observable-plot.png" alt="Observable Plot · 数据工作台实景" width="440">](workbenches/11-observable-plot/) | **[BlockNote · 知识夹](workbenches/18-blocknote/)**<br>[<img src="docs/screenshots/blocknote.png" alt="BlockNote · 知识夹工作台实景" width="440">](workbenches/18-blocknote/) |
 | **[MDXEditor · 文档审阅](workbenches/19-mdxeditor/)**<br>[<img src="docs/screenshots/mdxeditor.png" alt="MDXEditor · 文档审阅工作台实景" width="440">](workbenches/19-mdxeditor/) | **[Milkdown · 写作笔记](workbenches/20-milkdown/)**<br>[<img src="docs/screenshots/milkdown.png" alt="Milkdown · 写作笔记工作台实景" width="440">](workbenches/20-milkdown/) |
 | **[PDF.js · PDF 阅读](workbenches/21-pdf-js/)**<br>[<img src="docs/screenshots/pdf-js.png" alt="PDF.js · PDF 阅读工作台实景" width="440">](workbenches/21-pdf-js/) | **[reveal.js · 演示排练](workbenches/22-reveal-js/)**<br>[<img src="docs/screenshots/reveal-js.png" alt="reveal.js · 演示排练工作台实景" width="440">](workbenches/22-reveal-js/) |
@@ -108,18 +110,18 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[LangGraph.js · 三站复核流程与运行账本](workbenches/58-langgraph/)**<br>[<img src="docs/screenshots/langgraph.png" alt="LangGraph.js 工作台实景" width="440">](workbenches/58-langgraph/) | **[Promptfoo · 用例×版本矩阵与结果对照](workbenches/59-promptfoo/)**<br>[<img src="docs/screenshots/promptfoo.png" alt="Promptfoo 工作台实景" width="440">](workbenches/59-promptfoo/) |
 | **[faster-whisper · 暗色波形、字幕行与任务队列](workbenches/60-faster-whisper/)**<br>[<img src="docs/screenshots/faster-whisper.png" alt="faster-whisper 工作台实景" width="440">](workbenches/60-faster-whisper/) | **[Presenton · 逐页缩略轨、演示舞台与资料简报](workbenches/61-presenton/)**<br>[<img src="docs/screenshots/presenton.png" alt="Presenton 工作台实景" width="440">](workbenches/61-presenton/) |
 | **[Penpot · 设计资产样本册与色彩、字体分页](workbenches/44-penpot/)**<br>[<img src="docs/screenshots/penpot.png" alt="Penpot 工作台实景" width="440">](workbenches/44-penpot/) | **[HyperFrames · 暗色动效舞台、镜头轨与输出队列](workbenches/62-hyperframes/)**<br>[<img src="docs/screenshots/hyperframes.png" alt="HyperFrames 工作台实景" width="440">](workbenches/62-hyperframes/) |
-| **[Graphify · 知识地图、符号目录与关系检查器](workbenches/63-graphify/)**<br>[<img src="docs/screenshots/graphify.png" alt="Graphify 工作台实景" width="440">](workbenches/63-graphify/) | **[PageIndex · 章节目录、纸张原页与审阅便笺](workbenches/64-pageindex/)**<br>[<img src="docs/screenshots/pageindex.png" alt="PageIndex 工作台实景" width="440">](workbenches/64-pageindex/) |
-| **[DeepTutor · 对页练习本、答题区与复习清单](workbenches/65-deeptutor/)**<br>[<img src="docs/screenshots/deeptutor.png" alt="DeepTutor 工作台实景" width="440">](workbenches/65-deeptutor/) | **[Agent-Reach · 来源采集台、阅读正文与摘录夹](workbenches/66-agent-reach/)**<br>[<img src="docs/screenshots/agent-reach.png" alt="Agent-Reach 工作台实景" width="440">](workbenches/66-agent-reach/) |
+| **[Graphify · 知识地图、符号目录与关系检查器](workbenches/63-graphify/)**<br>[<img src="docs/screenshots/graphify.png" alt="Graphify 工作台实景" width="440">](workbenches/63-graphify/) | **[PageIndex · 章节目录、PDF 原页与审阅问答](workbenches/64-pageindex/)**<br>[<img src="docs/screenshots/pageindex.png" alt="PageIndex 工作台实景" width="440">](workbenches/64-pageindex/) |
+| **[DeepTutor · 对页练习本与题号状态条](workbenches/65-deeptutor/)**<br>[<img src="docs/screenshots/deeptutor.png" alt="DeepTutor 工作台实景" width="440">](workbenches/65-deeptutor/) | **[Agent-Reach · 来源目录、原文阅读与摘录夹](workbenches/66-agent-reach/)**<br>[<img src="docs/screenshots/agent-reach.png" alt="Agent-Reach 工作台实景" width="440">](workbenches/66-agent-reach/) |
 | **[OpenMontage · 分镜制作单、原片预览与成片架](workbenches/67-openmontage/)**<br>[<img src="docs/screenshots/openmontage.png" alt="OpenMontage 工作台实景" width="440">](workbenches/67-openmontage/) | **[DeerFlow · 研究进度、交付纸张与来源证据页](workbenches/68-deerflow/)**<br>[<img src="docs/screenshots/deerflow.png" alt="DeerFlow 工作台实景" width="440">](workbenches/68-deerflow/) |
 | **[MiroFish · 角色目录、轮次时间线与动作复核](workbenches/69-mirofish/)**<br>[<img src="docs/screenshots/mirofish.png" alt="MiroFish 工作台实景" width="440">](workbenches/69-mirofish/) | **[GEOInflow · 宽幅访问账本、范围筛选与逐页调查](workbenches/70-geoinflow/)**<br>[<img src="docs/screenshots/geoinflow.png" alt="GEOInflow 工作台实景" width="440">](workbenches/70-geoinflow/) |
-| **[OpenPencil · 全幅组件画板、图层与属性工具](workbenches/71-openpencil/)**<br>[<img src="docs/screenshots/openpencil.png" alt="OpenPencil 工作台实景" width="440">](workbenches/71-openpencil/) | **[FigCraft · 暗色原型校样、画板序列与文案复核](workbenches/72-figcraft/)**<br>[<img src="docs/screenshots/figcraft.png" alt="FigCraft 工作台实景" width="440">](workbenches/72-figcraft/) |
+| **[OpenPencil · 全幅组件画板、图层与属性工具](workbenches/71-openpencil/)**<br>[<img src="docs/screenshots/openpencil.png" alt="OpenPencil 工作台实景" width="440">](workbenches/71-openpencil/) | **[FigCraft · 画板胶片、校样舞台与审阅检查器](workbenches/72-figcraft/)**<br>[<img src="docs/screenshots/figcraft.png" alt="FigCraft 工作台实景" width="440">](workbenches/72-figcraft/) |
 | **[Konva · 标注画板、对象工具与图层](workbenches/28-konva/)**<br>[<img src="docs/screenshots/konva.png" alt="Konva 工作台实景" width="440">](workbenches/28-konva/) | **[LogicFlow · 流程图纸、条件连线与结构检查](workbenches/29-logicflow/)**<br>[<img src="docs/screenshots/logicflow.png" alt="LogicFlow 工作台实景" width="440">](workbenches/29-logicflow/) |
 | **[SimpleMindMap · 导图主屏、分支导航与上下文工具](workbenches/31-simplemindmap/)**<br>[<img src="docs/screenshots/simplemindmap.png" alt="SimpleMindMap 工作台实景" width="440">](workbenches/31-simplemindmap/) | **[wavesurfer.js · 波形、时间尺、区间与听审记录](workbenches/33-wavesurfer-js/)**<br>[<img src="docs/screenshots/wavesurfer-js.png" alt="wavesurfer.js 工作台实景" width="440">](workbenches/33-wavesurfer-js/) |
-| **[React Email · 邮件稿件、收件人变量与多尺寸校样](workbenches/42-react-email/)**<br>[<img src="docs/screenshots/react-email.png" alt="React Email 工作台实景" width="440">](workbenches/42-react-email/) | **[Bruno · 请求集合、编辑器与响应控制台](workbenches/45-bruno/)**<br>[<img src="docs/screenshots/bruno.png" alt="Bruno 工作台实景" width="440">](workbenches/45-bruno/) |
+| **[React Email · 邮件稿件、收件人变量与多尺寸校样](workbenches/42-react-email/)**<br>[<img src="docs/screenshots/react-email.png" alt="React Email 工作台实景" width="440">](workbenches/42-react-email/) | **[Bruno · 集合树、请求编辑器与响应控制台](workbenches/45-bruno/)**<br>[<img src="docs/screenshots/bruno.png" alt="Bruno 工作台实景" width="440">](workbenches/45-bruno/) |
 | **[Ray Optics Simulation · 光路主屏、器材架与实验读数](workbenches/73-ray-optics/)**<br>[<img src="docs/screenshots/ray-optics.png" alt="Ray Optics Simulation 工作台实景" width="440">](workbenches/73-ray-optics/) | **[Invoice Builder · 明细填写、纸张校样与PDF预览](workbenches/74-invoice-builder/)**<br>[<img src="docs/screenshots/invoice-builder.png" alt="Invoice Builder 工作台实景" width="440">](workbenches/74-invoice-builder/) |
 | **[Mesh2Motion · 三维舞台、骨架树、关节参数与动作轨](workbenches/75-mesh2motion/)**<br>[<img src="docs/screenshots/mesh2motion.png" alt="Mesh2Motion 工作台实景" width="440">](workbenches/75-mesh2motion/) |  |
 | **[Oasis Editor · 居中纸张、文稿菜单与按需页边工具](workbenches/76-oasis-editor/)**<br>[<img src="docs/screenshots/oasis-editor.png" alt="Oasis Editor 工作台实景" width="440">](workbenches/76-oasis-editor/) | **[CircuitJS1 · 电路与示波器、纵向元件架与底部仪表](workbenches/77-circuitjs/)**<br>[<img src="docs/screenshots/circuitjs.png" alt="CircuitJS1 工作台实景" width="440">](workbenches/77-circuitjs/) |
-| **[glTF Transform · 模型空间、底部材质带与浮动检查器](workbenches/78-gltf-transform/)**<br>[<img src="docs/screenshots/gltf-transform.png" alt="glTF Transform 工作台实景" width="440">](workbenches/78-gltf-transform/) |  |
+| **[glTF Transform · 模型空间、优化阶段条与浮动检查器](workbenches/78-gltf-transform/)**<br>[<img src="docs/screenshots/gltf-transform.png" alt="glTF Transform 工作台实景" width="440">](workbenches/78-gltf-transform/) |  |
 
 自动保存区分待保存、同步中、已保存、待完善草稿、离线和版本冲突。后台保存时仍可编辑；项目导入创建独立项目，未完成输入可恢复。浏览器本机缓存限定同一来源。
 

@@ -430,8 +430,8 @@
     "repo": "mermaid-js/mermaid",
     "category": "流程与节点编辑",
     "kind": "基础引擎",
-    "workbench": "文字生成图表工作台：自然语言生成流程图、时序图并保存版本",
-    "core_features": "将类似 Markdown 的文本定义渲染为图表，提供 JavaScript 渲染接口。",
+    "workbench": "Mermaid 源码绘图、逐行错误定位、模板与多格式导出",
+    "core_features": "CodeMirror 源码高亮与逐行错误、17 类模板、主题/手绘风格、.mmd/.md 导入、预览缩放平移、PNG/SVG/剪贴板导出",
     "integration": "React 页面调用 mermaid 渲染；Floatboat LLM 生成图表文本，服务端保存源码、版本和导出结果。",
     "effort": "低",
     "priority": "A",
@@ -449,38 +449,36 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 4,
+      "tests": 14,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
-      "screenshot": "README.md#工作台实景",
-      "hostLlm": "not-retested",
+      "productLayout": "restructured",
+      "screenshot": "docs/screenshots/mermaid.png",
+      "hostLlm": "passed (one real call)",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
-      "priorHostLlm": "passed in earlier batch",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
-      "sharedAutosaveRevert": "passed",
-      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "acceptance": "workbenches/08-mermaid/app/ACCEPTANCE.md",
+      "firstOpen": "usable without external services"
     },
     "id": 8,
     "slug": "mermaid",
     "directory": "workbenches/08-mermaid",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/mermaid.png",
-          "caption": "Mermaid 工作台实景"
+          "caption": "Mermaid · 源码 IDE 与可缩放图形预览"
         }
       ]
     }
@@ -491,8 +489,8 @@
     "url": "https://github.com/swagger-api/swagger-ui",
     "category": "API文档与调试",
     "kind": "编辑器组件",
-    "workbench": "OpenAPI工作台：导入接口定义、浏览调用、Agent生成请求示例",
-    "core_features": "从OpenAPI规格生成交互式接口文档；提供JS、独立静态包和React包",
+    "workbench": "OpenAPI/Swagger 规格编辑、原生文档与全方法试调",
+    "core_features": "YAML/JSON 原文导入导出（OAS 3.x/Swagger 2.0）、并排源码与行号诊断、模型/筛选/深链、经代理的全方法试调与内置示例服务",
     "integration": "嵌入发布的JS/CSS或React组件，SQLite保存规格，Node层处理必要的请求代理",
     "effort": "低",
     "priority": "A",
@@ -508,27 +506,25 @@
     "checked_at": "2026-10-26",
     "verification": {
       "build": "passed",
-      "tests": 4,
+      "tests": 26,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
-      "screenshot": "README.md#工作台实景",
+      "productLayout": "restructured",
+      "screenshot": "docs/screenshots/swagger-ui.png",
       "hostLlm": "not-retested",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-27",
-      "record": "docs/release-0.3.0.md",
-      "priorHostLlm": "passed in earlier batch",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "package": "passed",
-      "sharedAutosaveRevert": "passed",
-      "sharedClientSha256": "b96ed468ebc08b93410a8693b892fc5a14aa1a48bef3a1d329628d449f8c8376",
-      "browserScope": "沿用 0.2.0 业务界面验收；0.3.0 共同保存代码经独立 Chrome/SQLite 回归，全部重新构建/测试/打包。",
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "acceptance": "workbenches/09-swagger-ui/ACCEPTANCE.md",
+      "firstOpen": "usable without external services"
     },
     "group": "数据开发",
     "mode": "组件嵌入",
@@ -536,12 +532,12 @@
     "slug": "swagger-ui",
     "directory": "workbenches/09-swagger-ui",
     "status": "local-verified",
-    "version": "0.3.0",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/swagger-ui.png",
-          "caption": "Swagger UI 工作台实景"
+          "caption": "Swagger UI · 端点目录、原生 API 文档与按需并排源码"
         }
       ]
     }
@@ -2151,8 +2147,8 @@
     "url": "https://github.com/usebruno/bruno",
     "category": "API回归测试",
     "kind": "完整应用",
-    "workbench": "接口回归工作台：保存Bru集合、批量执行、展示失败与AI诊断",
-    "core_features": "原生Bru请求、显式HTTP执行、结果检查与导出",
+    "workbench": "Bruno 原生请求编辑、环境变量、认证、断言与请求历史",
+    "core_features": "编辑即发送、Bru 源双向同步、环境与秘密变量、Bearer/Basic/API Key、全部常用请求体、声明式断言、请求历史、集合 ZIP 导入导出",
     "integration": "固定官方原生JS/Node引擎或组件，使用官方模板独立打包",
     "effort": "高",
     "priority": "C",
@@ -2168,25 +2164,26 @@
     "checked_at": "2026-10-28",
     "verification": {
       "build": "passed",
-      "tests": 16,
+      "tests": 23,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "pending",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/bruno.png",
       "hostImport": "unverified",
       "hostLlm": "not-used",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.6.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/45-bruno/ACCEPTANCE.md",
       "upstream": "@usebruno/lang0.41.0原生Bru解析/生成与真实HTTP",
       "structuralLayout": {
         "status": "pending",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source scan only; visual/task review pending"
-      }
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "firstOpen": "usable without external services"
     },
     "group": "数据开发",
     "mode": "源码/构建适配",
@@ -2194,12 +2191,12 @@
     "slug": "bruno",
     "directory": "workbenches/45-bruno",
     "status": "local-verified",
-    "version": "0.6.0",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/bruno.png",
-          "caption": "Bruno · 请求集合、编辑器与响应控制台"
+          "caption": "Bruno · 集合树、请求编辑器与响应控制台"
         }
       ]
     }
@@ -3075,8 +3072,8 @@
     "url": "https://github.com/VectifyAI/PageIndex",
     "category": "AI 工作台",
     "kind": "引擎/应用",
-    "workbench": "长报告阅读、章节树与页码证据审校",
-    "core_features": "PDF章节与原页、便笺、Gemini 3.8问答和逐字页码引用",
+    "workbench": "PDF 章节目录、原页摘录与逐字引用问答",
+    "core_features": "浏览器 PDF.js 阅读（无需服务）、书签/标题章节树、字符级摘录与引用高亮、全文检索、Host 原页问答；PageIndex 章节树服务可选",
     "integration": "独立Python解析服务8784；问答使用Floatboat Host",
     "effort": "中–高",
     "priority": "A",
@@ -3091,35 +3088,36 @@
     "slug": "pageindex",
     "directory": "workbenches/64-pageindex",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 9,
+      "tests": 21,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/pageindex.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/64-pageindex/ACCEPTANCE.md",
       "upstream": "真实PageIndex 0.2.10 Flash、PDFium及Gemini 3.8问答",
-      "hostLlm": "passed: gemini-3.8-flash",
+      "hostLlm": "passed (gemini-3.8-flash)",
       "serviceTests": 4,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "firstOpen": "usable without external services"
     },
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/pageindex.png",
-          "caption": "PageIndex 工作台实景 · 长报告阅读、章节树与页码证据审校"
+          "caption": "PageIndex · 章节目录/检索、PDF 原页与审阅问答"
         }
       ]
     }
@@ -3131,8 +3129,8 @@
     "url": "https://github.com/HKUDS/DeepTutor",
     "category": "AI 工作台",
     "kind": "引擎/应用",
-    "workbench": "课程学习、练习与错题复习",
-    "core_features": "讲义、真实Host出题、上游批改与复习排程、课程导出",
+    "workbench": "讲义对页练习：离线判题、错题讲解与导师追问、按讲义出题与间隔复习",
+    "core_features": "讲义与题目对页、Node 内置判题/排程/题库导入（无需 Python 服务）、错题解析与 Host 导师、可控出题、GB18030 CSV 题库",
     "integration": "独立Python服务8786；出题使用Floatboat Host",
     "effort": "中–高",
     "priority": "A",
@@ -3147,35 +3145,36 @@
     "slug": "deeptutor",
     "directory": "workbenches/65-deeptutor",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 13,
+      "tests": 55,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/deeptutor.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/65-deeptutor/ACCEPTANCE.md",
       "upstream": "真实DeepTutor批改/排程及Gemini 3.8出题",
-      "hostLlm": "passed: gemini-3.8-flash",
+      "hostLlm": "passed (gemini-3.8-flash)",
       "serviceTests": 8,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "firstOpen": "usable without external services"
     },
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/deeptutor.png",
-          "caption": "DeepTutor 工作台实景 · 课程学习、练习与错题复习"
+          "caption": "DeepTutor · 对页练习本、题号状态条与课程书架"
         }
       ]
     }
@@ -3187,8 +3186,8 @@
     "url": "https://github.com/Panniantong/Agent-Reach",
     "category": "AI 工作台",
     "kind": "引擎/应用",
-    "workbench": "跨平台来源采集与调研资料台",
-    "core_features": "GitHub、网页、V2EX来源采集、去重收藏、摘录与审阅导出",
+    "workbench": "公开来源采集、原文阅读、证据摘录与带出处的调研报告",
+    "core_features": "工作台 Node 内置采集（GitHub、网页阅读/直读、网页搜索、V2EX，SSRF 防护）、首开示例调研、原文摘录高亮、可选 Host 概括与报告导出",
     "integration": "独立Python采集服务8783；登录渠道只做结果导入",
     "effort": "中–高",
     "priority": "A",
@@ -3203,35 +3202,36 @@
     "slug": "agent-reach",
     "directory": "workbenches/66-agent-reach",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 13,
+      "tests": 34,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/agent-reach.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/66-agent-reach/ACCEPTANCE.md",
       "upstream": "真实Agent-Reach 1.6.0 GitHub读取/搜索、Jina网页和V2EX热门",
-      "hostLlm": "not-used",
+      "hostLlm": "passed (gemini-2.5-flash-lite)",
       "serviceTests": 5,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "firstOpen": "usable without external services"
     },
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/agent-reach.png",
-          "caption": "Agent-Reach 工作台实景 · 跨平台来源采集与调研资料台"
+          "caption": "Agent-Reach · 来源目录、原文阅读与摘录夹三栏"
         }
       ]
     }
@@ -3523,8 +3523,8 @@
     "url": "https://github.com/storytold/figcraft",
     "category": "设计工具",
     "kind": "引擎/应用",
-    "workbench": "界面设计、原型与设计资产管理",
-    "core_features": "原生设计画板、文案校订、交付状态和PNG/SVG/PDF导出",
+    "workbench": "逐屏审阅 FigCraft 原型并直接写回文案、名称、填色与交付状态",
+    "core_features": "内置近似校样（无需引擎）、文案/图层/填色/交付状态直接写回 .figcraft、SVG/PNG/交付说明导出；原生引擎可选用于 PNG/PDF",
     "integration": "独立Node桥接服务8796及官方FigCraft CLI",
     "effort": "中–高",
     "priority": "A",
@@ -3539,35 +3539,36 @@
     "slug": "figcraft",
     "directory": "workbenches/72-figcraft",
     "status": "local-verified",
-    "version": "0.5.0",
+    "version": "0.9.0",
     "verification": {
       "build": "passed",
-      "tests": 5,
+      "tests": 14,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "needs-redesign",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/figcraft.png",
       "hostImport": "unverified",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.5.0.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/72-figcraft/ACCEPTANCE.md",
       "upstream": "真实FigCraft CLI 0.11.2 CPU渲染及原生文档",
       "hostLlm": "not-used",
       "serviceTests": 4,
       "structuralLayout": {
-        "status": "needs-redesign",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "source header cluster; task redesign queued"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "firstOpen": "usable without external services"
     },
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/figcraft.png",
-          "caption": "FigCraft 工作台实景 · 界面设计、原型与设计资产管理"
+          "caption": "FigCraft · 画板胶片、近似校样舞台与文案/图层/交付检查器"
         }
       ]
     }
@@ -3858,8 +3859,8 @@
     "repo": "donmccurdy/glTF-Transform",
     "category": "三维资产",
     "kind": "原生工具/组件",
-    "workbench": "模型材质检查、修整和GLB交付",
-    "core_features": "自包含GLB检查、节点与PBR材质修改、JSON元数据、保留蒙皮/动画/贴图的结果与工程导出",
+    "workbench": "glTF/GLB 导入、glTF Transform 优化流水线与交付",
+    "core_features": "GLB/glTF/ZIP（含 Draco/Meshopt 与扩展）导入、prune/dedup/weld/simplify 等逐步流水线与前后报告、贴图/节点/动画面板、Meshopt/Draco GLB 导出",
     "integration": "固定原生核心，适配官方模板和完整工作副本",
     "effort": "中–高",
     "priority": "A",
@@ -3877,36 +3878,37 @@
     "slug": "gltf-transform",
     "directory": "workbenches/78-gltf-transform",
     "status": "local-verified",
-    "version": "0.8.1",
+    "version": "0.9.0",
     "presentation": {
       "screenshots": [
         {
           "path": "docs/screenshots/gltf-transform.png",
-          "caption": "glTF Transform · 模型空间、底部材质带与浮动检查器"
+          "caption": "glTF Transform · 模型空间、优化阶段条与浮动检查器"
         }
       ]
     },
     "verification": {
       "build": "passed",
-      "tests": 11,
+      "tests": 22,
       "browser": "passed",
       "autosave": "passed",
       "workingDraftRecovery": "passed",
-      "productLayout": "passed",
+      "productLayout": "restructured",
       "package": "passed",
       "screenshot": "docs/screenshots/gltf-transform.png",
       "hostImport": "unverified",
       "hostLlm": "not-used",
-      "verifiedAt": "2026-10-28",
-      "record": "docs/release-0.8.1.md",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
       "acceptance": "workbenches/78-gltf-transform/ACCEPTANCE.md",
       "upstream": "@gltf-transform/core 4.5.1 · 895b70777fda68aa321358d17dab2105e8564d08；Three 0.185.0 · MIT",
       "structuralLayout": {
-        "status": "passed",
-        "reviewedAt": "2026-10-28",
-        "record": "docs/layout-audit-2026-10-28.md",
-        "basis": "real screenshots and task flow"
-      }
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "0.9.0 rebuild with real screenshot; neighbour comparison pending"
+      },
+      "firstOpen": "usable without external services"
     }
   }
 ]
