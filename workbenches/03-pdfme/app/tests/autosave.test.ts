@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import {test} from "node:test";
 import {DatabaseSync} from "node:sqlite";
 import {readFileSync} from "node:fs";
-import {seed, validatePdf, restorePdfDraft} from "../src/contracts/domain.ts";
+import {validatePdf, restorePdfDraft} from "../src/contracts/domain.ts";
+import {seed} from "../src/contracts/samples.ts";
 import {createAutosaveStore} from "../src/server/autosave.ts";
 import {createStore} from "../src/server/store.ts";
 

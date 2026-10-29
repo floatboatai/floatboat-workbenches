@@ -4,8 +4,8 @@
   "registryName": "pdfme-studio",
   "name": "纸张工坊",
   "description": "报价单、证书、标签与合同模板批量生成工作台",
-  "version": "0.3.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "version": "0.9.0",
+  "changelog": "注册 @pdfme/schemas 全部 26 种字段（表格、图片、二维码与各类条码、变量文本、日期时间、选择与勾选、图形）且统一嵌入中文字体；可导入现有 PDF 作底图（40 MB / 100 页）并以真实渲染的缩略图翻页；填写与预览改用原生 Form/Viewer；批量数据导入 CSV/JSON、逐行校验、合并 PDF 或 ZIP；字段中文命名与改名；报价单、发货标签、结业证书三个示例；模板菜单收纳文件操作。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -1,19 +1,31 @@
-# 纸张工坊工程
+# 纸张工坊工程（0.9.0）
 
-@pdfme/{ui,common,schemas,generator,converter,pdf-lib} 六包精确 5.4.6，React 19.2.3 + Node 22，遵循模板严格 TypeScript 与固定 Vite 编译。root/app 两份清单与锁一致，无运行时原生扩展。
+@pdfme/{ui,common,schemas,generator,converter,pdf-lib} 六包精确 5.4.6，React 19.2.3 + Node 22，遵循模板严格 TypeScript 与固定 Vite 编译；root/app 两份清单与锁一致，本轮未新增依赖。
 
-DesignerPane 挂载独立上游 Designer，回调更新模板、卸载 destroy。初始快照只在项目/导入/模式更换时更新，输入不会重建。版式预览用真实纸张尺寸和页选择。字体从同源 OTF 获取 ArrayBuffer；生成器嵌入中文字形，CSS 使用同源字体。
+## 浏览器引擎
 
-上游 common/schemas 的 ESM 保留裸 buffer 导入，固定模板会拒绝该 Node 名称。因此 scripts/build-browser-vendor.mjs 用 esbuild platform=browser 将锁定依赖生成浏览器 IIFE，buffer 显式解析为浏览器 buffer/index.js。产物 app/src/vendor/pdfme-browser.js 通过 ?url 按需同源加载，不修改模板、Vite 或 CSP。UI 内部 React 16 与外层 React 19 通过 DOM 容器隔离。converter/pdfjs-dist 的两个可选 canvas 依赖边以及 path2d-polyfill 均从 root/app 锁中移除。
+上游 common/schemas 的 ESM 含裸 `buffer` 导入，固定模板会拒绝该 Node 名称，因此 `scripts/build-browser-vendor.mjs` 用 esbuild（platform=browser）把 `scripts/pdfme-entry.mjs` 打成 IIFE：Designer/Form/Viewer、generate、全部字段插件、`pdf2img`/`pdf2size`、pdf-lib `PDFDocument`。产物 `src/vendor/pdfme-browser.js` 以 `?url` 同源按需加载，不修改模板、Vite 或 CSP。pdfjs 3.11 的 worker 以主线程方式随包内置。`browser-engine.ts` 把插件按中文标签注册（Designer 元素栏与类型选择显示键名，渲染按 schema type 查找）。
 
-contracts/domain 验证外部 JSON；server/store 用参数化 SQLite 和 revision 乐观并发，409 保留当前内容。ui/workspace 通过 SDK page.fetch 调 /api/projects，Node/SQL/Host 仅在服务端。测试使用内存数据库，不接触预览数据。数据、凭据、SDK 和生成输出不提交源码。
+- 字体：`fonts.ts` 读取同源 OTF，作为唯一且 fallback 的字体；`contracts/domain.ts` 在校验时把任意深度的 `fontName`（表格样式、日期、下拉等）统一改为 NotoSansSC。
+- 缩略图：`PageRail` 防抖后用生成器渲染当前数据再 `pdf2img`（scale 0.32，最多 40 页），输出 data URL（CSP 不允许 blob: 图片）。
+- Viewer：pdfme 5.4.6 在 Viewer 构造时打印弃用提示；`surface.tsx` 只过滤这一条已知提示。
 
-验证顺序：pnpm workbench:check → pnpm test → pnpm dev 实际浏览器 → pnpm package。Chrome 1500px/375px 中文填值与保存刷新恢复；Designer 的 customer X 坐标从 22 改为 28，填写→设计往返及保存刷新后仍为 28；148×210 mm 双页 JSON 导入、按真实尺寸和选定页预览。下载 PDF 解析确认 2 页、中文可提取，栅格图检查正常。 PDF 主流程无需模型或外部服务。
+## 数据与资源
 
-## 自动保存与工作草稿
+- `PdfProject = { template, values, dataset? }`。`dataset` 保存原始 CSV/JSON（`source`）、格式、字段→列映射、ZIP 文件名列与所选行；行在页面中解析（`contracts/dataset.ts`）。
+- 二进制槽位（PDF 底图、图片内容与填写值、数据源）为 ≤ 96 KB 的 data URL 或 `fbasset:<sha256>`。`0004_assets.sql` 新增 `assets` 与 `asset_parts`；`server/assets.ts` 接收 1 MiB base64 分块（低于 SDK 2 MB 请求上限）、校验 SHA-256、大小上限与文件头后入库，`GET /api/assets/:id` 以原 MIME 返回。`registerAutosaveRoutes` 的 `verify` 在事务前核对引用都在，缺失时只存草稿。
+- `ui/assets.ts`：`hydrate` 把引用换成 data URL 交给 pdfme；`dehydrate` 把回传的已知 data URL 映射回引用，新出现的大文件（Designer 中上传的照片）先上传再进入模型。Designer 的 `onChangeTemplate` 经串行泵处理，文档切换后丢弃迟到结果。
+- 导入：`importDocument` 识别本工作台导出（`kind: floatboat-pdfme`）、0.3 项目 JSON 与 pdfme 模板（含旧版键值 schemas），先上传大文件再完整校验，经 `replace` 创建新项目。导出把引用内联。
+- 迁移 0001–0003 保持不变。
 
-新增 0003_autosave.sql，旧迁移保持不变。autosave-server 在事务中保存完整工作副本，并仅将通过业务验证的内容写入 projects；documentId/mutationId 支持丢失响应后的幂等重试。客户端串行提交、防抖、IndexedDB 回退，documentKey/loadEpoch 仅在文档切换时更新。保存返回时不覆盖期间继续输入的内容。草稿状态与正式内容状态明确区分。
+## 生成
 
-未完成业务输入由结构受限的恢复器处理；正文或设计器初始快照不依赖自动保存生成的项目 ID。
+`ui/pdf.ts`：单份 `generate`；合并 PDF 每 25 行一批生成后用 pdf-lib `copyPages` 合并，期间让出主线程、可取消；ZIP 逐行生成后由 `contracts/zip.ts`（STORE、UTF-8 文件名、CRC32）打包。PDF 元数据标题为模板名或文件名。
 
-pdfme 的属性表单仅在值通过其内部校验后触发 onChangeTemplate；DesignerPane 因此捕获同源容器内受支持属性框的原始 input，存入 working-copy.extra.designerInputs。模型回调只清除值已吻合的输入，不能清除未应用内容。恢复面板以原字段名称为锚点，字段删除后拒绝套用到其它字段；数值和名称再次经过业务校验后才应用。实例仅在主动应用/丢弃草稿时重建。
+## 自动保存
+
+共享 `autosave-client.ts`/`autosave-cache.ts`/`requests.ts` 与服务端 `autosave.ts` 未修改。设计器属性框的未完成输入仍以 `extra.designerInputs` 保存（`designer-draft.ts`），在“待应用的属性输入”中修正或丢弃。
+
+## 测试
+
+`tests/support/pdf.ts` 在 Node 中用同一插件集与字体生成 PDF，并用 pdf.js（legacy build，仅读取文字）检查页数与文字；见 `../ACCEPTANCE.md`。`scripts/make-samples.mjs` 可复现示例标志 PNG 与证书底图 PDF。

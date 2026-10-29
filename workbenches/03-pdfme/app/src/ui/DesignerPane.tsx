@@ -1,19 +1,24 @@
+// ABOUTME: 挂载 pdfme 原生 Designer（全部字段插件、中文界面与字体），并保留属性框中未完成的输入草稿。
 import { memo, useEffect, useRef, useState } from "react";
 import { isDesignerProperty, designerDraftApplied, type DesignerDraft } from "../contracts/designer-draft";
 import type { Template } from "@pdfme/common";
-import { loadFont } from "./fonts";
-import { loadPdfEngine } from "./browser-engine";
+import { engineWithFont } from "./pdf";
+import { PDFME_THEME, scrollToPage, type PageRequest } from "./surface";
+
 export const DesignerPane = memo(function DesignerPane({
   initial,
   onChange,
   onDraft,
+  pageRequest,
 }: {
   initial: Template;
   onChange: (template: Template) => void;
   onDraft: (draft: DesignerDraft, applied: boolean) => void;
+  pageRequest: PageRequest | null;
 }) {
   const container = useRef<HTMLDivElement>(null),
-    callback = useRef(onChange), draftCallback = useRef(onDraft);
+    callback = useRef(onChange),
+    draftCallback = useRef(onDraft);
   callback.current = onChange;
   draftCallback.current = onDraft;
   const [error, setError] = useState(""),
@@ -21,28 +26,44 @@ export const DesignerPane = memo(function DesignerPane({
   useEffect(() => {
     let active = true;
     let destroy: (() => void) | undefined;
-    void Promise.all([loadPdfEngine(), loadFont()])
-      .then(([ui, font]) => {
+    void engineWithFont()
+      .then(({ engine, font, plugins }) => {
         if (!active || !container.current) return;
-        const instance = new ui.Designer({
+        const instance = new engine.Designer({
           domContainer: container.current,
           template: initial,
-          options: { lang: "zh", font, zoomLevel: 0.8, sidebarOpen: true },
-          plugins: { text: ui.text, rectangle: ui.rectangle },
+          options: { lang: "zh", font, zoomLevel: 1, sidebarOpen: window.innerWidth > 900, theme: PDFME_THEME },
+          plugins,
         });
         instance.onChangeTemplate((template) => callback.current(template));
         const node = container.current;
         let selectedField = "";
-        const select = () => {const name = node.querySelector<HTMLInputElement>("#name")?.value; if(name && instance.getTemplate().schemas.flat().some(field => field.name === name)) selectedField = name;};
+        const select = () => {
+          const name = node.querySelector<HTMLInputElement>("#name")?.value;
+          if (name && instance.getTemplate().schemas.flat().some((field) => field.name === name)) selectedField = name;
+        };
         const capture = (event: Event) => {
           const input = event.target;
-          if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) || input.readOnly || !isDesignerProperty(input.id) || !selectedField || input.value.length > 5000) return;
-          const draft: DesignerDraft = {field: selectedField, property: input.id, value: input.value};
-          queueMicrotask(() => {if(active) draftCallback.current(draft, designerDraftApplied(instance.getTemplate(), draft));});
+          if (
+            !(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) ||
+            input.readOnly ||
+            !isDesignerProperty(input.id) ||
+            !selectedField ||
+            input.value.length > 5000
+          )
+            return;
+          const draft: DesignerDraft = { field: selectedField, property: input.id, value: input.value };
+          queueMicrotask(() => {
+            if (active) draftCallback.current(draft, designerDraftApplied(instance.getTemplate(), draft));
+          });
         };
         node.addEventListener("focusin", select);
         node.addEventListener("input", capture);
-        destroy = () => {node.removeEventListener("focusin", select);node.removeEventListener("input", capture);instance.destroy();};
+        destroy = () => {
+          node.removeEventListener("focusin", select);
+          node.removeEventListener("input", capture);
+          instance.destroy();
+        };
         setLoading(false);
       })
       .catch((reason) => {
@@ -56,8 +77,11 @@ export const DesignerPane = memo(function DesignerPane({
       destroy?.();
     };
   }, [initial]);
+  useEffect(() => {
+    if (pageRequest && container.current) scrollToPage(container.current, pageRequest.page);
+  }, [pageRequest]);
   return (
-    <section className="designer-shell" aria-label="模板版式设计器">
+    <section className="surface designer-shell" aria-label="模板版式设计器">
       {loading ? (
         <p className="engine-state" role="status">
           正在准备纸张与字体…
@@ -68,9 +92,7 @@ export const DesignerPane = memo(function DesignerPane({
           {error}
         </p>
       ) : null}
-      <div className="designer-viewport">
-        <div ref={container} className="designer-root" />
-      </div>
+      <div ref={container} className="pdfme-root" />
     </section>
   );
 });

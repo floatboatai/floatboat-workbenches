@@ -1,426 +1,450 @@
-import { readDesignerDrafts, designerDraftApplied, applyDesignerDrafts, designerProperties, type DesignerDraft } from "../contracts/designer-draft";
-import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
+// ABOUTME: 纸张工坊主界面：模板菜单 + 版式/填写/批量三视图，左侧页面轨、中间纸张、右侧字段或数据栏。
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import type { Template } from "@pdfme/common";
-import {
-  seed,
-  validatePdf,
-  restorePdfDraft,
-  pdfInput,
-  type PdfProject,
-} from "../contracts/domain";
-import {
-  download,
-  Notice,
-  ProjectPicker,
-  RenderBoundary,
-  useProjects,
-} from "./workspace";
-import { loadFont } from "./fonts";
-import { loadPdfEngine } from "./browser-engine";
-const DesignerPane = lazy(() =>
-  import("./DesignerPane").then((module) => ({ default: module.DesignerPane })),
-);
+import { readDesignerDrafts, designerDraftApplied, applyDesignerDrafts, type DesignerDraft } from "../contracts/designer-draft";
+import { paperLabel, pdfInput, renameField, restorePdfDraft, validatePdf, type Dataset, type PdfProject } from "../contracts/domain";
+import { seed } from "../contracts/samples";
+import { fileNameFor, parseDataset, rowInput, uniqueNames, validateInput, validateRows, type Table } from "../contracts/dataset";
+import { INLINE_LIMIT } from "../contracts/assets";
+import { download, Notice, RenderBoundary, useProjects } from "./workspace";
+import { dataUrlText, dehydrate, hydrate, resolveBlob } from "./assets";
+import { renderMerged, renderPdf, renderZip } from "./pdf";
+import { preloadPdfEngine } from "./browser-engine";
+import { PreviewPane, type PageRequest } from "./surface";
+import { PageRail } from "./PageRail";
+import { TemplateMenu } from "./TemplateMenu";
+import { FieldPanel } from "./FieldPanel";
+import { DataPanel, type BatchState } from "./DataPanel";
+import { DesignerDrafts } from "./DesignerDrafts";
+import { fileSafe, PAPERS, useTemplateFiles, type Mode } from "./useTemplateFiles";
+
+const DesignerPane = lazy(() => import("./DesignerPane").then((module) => ({ default: module.DesignerPane })));
+
+const MODES: { id: Mode; label: string }[] = [
+  { id: "design", label: "版式" },
+  { id: "fill", label: "填写" },
+  { id: "data", label: "批量数据" },
+];
 export function PdfApp() {
-  const p = useProjects<PdfProject>(seed, validatePdf, "项目报价单", {storageKey: "pdfme", restoreDraftData: restorePdfDraft});
-  const [mode, setMode] = useState<"fill" | "design">(() =>
-      window.innerWidth < 600 ? "fill" : "design",
-    ),
-    [exporting, setExporting] = useState(false),
-    [designerEpoch, setDesignerEpoch] = useState(0),
-    [previewPage, setPreviewPage] = useState(0);
-  const copies = typeof p.draft.copies === "number" && Number.isInteger(p.draft.copies) && p.draft.copies >= 1 && p.draft.copies <= 20 ? p.draft.copies : 1;
-  const setCopies = (value: number) => p.setDraft(draft => ({ ...draft, copies: value }));
-  const file = useRef<HTMLInputElement>(null);
-  const snapshot = useMemo(
-    () => structuredClone(p.data.template),
-    [p.loadEpoch, mode, designerEpoch],
+  const p = useProjects<PdfProject>(seed, validatePdf, "报价单", { storageKey: "pdfme", restoreDraftData: restorePdfDraft });
+  const live = useRef(p);
+  live.current = p;
+  const [mode, setModeState] = useState<Mode>(() => (window.innerWidth < 700 ? "fill" : "design"));
+  const [designerEpoch, setDesignerEpoch] = useState(0);
+  const [pageRequest, setPageRequest] = useState<PageRequest | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [working, setWorking] = useState("");
+  const [batch, setBatch] = useState<BatchState | null>(null);
+  const abort = useRef<AbortController | null>(null);
+  const jsonFile = useRef<HTMLInputElement>(null),
+    pdfFile = useRef<HTMLInputElement>(null),
+    baseFile = useRef<HTMLInputElement>(null),
+    dataFile = useRef<HTMLInputElement>(null);
+  const busy = p.busy || p.loading || !!working;
+
+  const setMode = useCallback((next: Mode) => {
+    setModeState(next);
+    if (next === "design") setDesignerEpoch((value) => value + 1);
+  }, []);
+
+  /* Persisted data holds references; pdfme needs renderable data. Hydrate template and values separately so typing does not re-create the template. */
+  const templateJson = useMemo(() => JSON.stringify(p.data.template), [p.data.template]);
+  const valuesJson = useMemo(() => JSON.stringify(p.data.values), [p.data.values]);
+  const [hydratedTemplate, setHydratedTemplate] = useState<{ json: string; template: Template } | null>(null);
+  const [hydratedValues, setHydratedValues] = useState<{ json: string; values: Record<string, string> }>({ json: "", values: {} });
+  useEffect(() => {
+    let active = true;
+    const data = live.current.data;
+    hydrate({ template: data.template, values: {} })
+      .then((next) => active && setHydratedTemplate({ json: templateJson, template: next.template }))
+      .catch((error) => active && live.current.report(error));
+    return () => {
+      active = false;
+    };
+  }, [templateJson]);
+  useEffect(() => {
+    let active = true;
+    const data = live.current.data;
+    hydrate({ template: data.template, values: data.values })
+      .then((next) => active && setHydratedValues({ json: valuesJson, values: next.values }))
+      .catch((error) => active && live.current.report(error));
+    return () => {
+      active = false;
+    };
+  }, [valuesJson, templateJson]);
+  const ready = hydratedTemplate?.json === templateJson ? hydratedTemplate.template : null;
+  const values = hydratedValues.json === valuesJson ? hydratedValues.values : p.data.values;
+  const input = useMemo(() => (ready ? pdfInput({ template: ready, values }) : {}), [ready, values]);
+  const issues = useMemo(() => (ready ? validateInput(ready, input) : []), [ready, input]);
+
+  /* Dataset: parse the stored CSV/JSON once per source. */
+  const dataset = p.data.dataset ?? null;
+  const [parsed, setParsed] = useState<{ source: string; table: Table | null; error: string } | null>(null);
+  useEffect(() => {
+    if (!dataset?.source) return;
+    let active = true;
+    const { source, format } = dataset;
+    resolveBlob(source)
+      .then((data) => parseDataset(dataUrlText(data), format))
+      .then((table) => active && setParsed({ source, table, error: "" }))
+      .catch((error) => active && setParsed({ source, table: null, error: error instanceof Error ? error.message : "数据读取失败。" }));
+    return () => {
+      active = false;
+    };
+  }, [dataset?.source, dataset?.format]); // eslint-disable-line react-hooks/exhaustive-deps
+  const table = dataset && parsed?.source === dataset.source ? parsed.table : null;
+  const tableError = dataset && parsed?.source === dataset.source ? parsed.error : "";
+  const mapping = dataset?.mapping ?? {};
+  const mappingJson = JSON.stringify(mapping);
+  const hydratedProject = useMemo(() => (ready ? { template: ready, values } : null), [ready, values]);
+  const reports = useMemo(
+    () => (hydratedProject && table ? validateRows(hydratedProject, table, mapping) : []),
+    [hydratedProject, table, mappingJson], // eslint-disable-line react-hooks/exhaustive-deps
   );
-  const onChange = useCallback(
-    (template: Template) => {
+  const selectedRow = dataset && table ? Math.min(dataset.selected, Math.max(0, table.rows.length - 1)) : 0;
+  const rowValues = useMemo(
+    () => (hydratedProject && table ? rowInput(hydratedProject, table, mapping, selectedRow) : input),
+    [hydratedProject, table, mappingJson, selectedRow, input], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const previewInput = mode === "data" && table ? rowValues : input;
+
+  /* Designer: mount once per entry with the template at that moment; later changes flow out through onChange only. */
+  const designerKey = `${p.documentKey}:${designerEpoch}`;
+  const designerSeed = useRef<{ key: string; template: Template } | null>(null);
+  if (mode === "design" && ready && designerSeed.current?.key !== designerKey) designerSeed.current = { key: designerKey, template: ready };
+  const designerInitial = designerSeed.current?.key === designerKey ? designerSeed.current.template : null;
+  const pump = useRef<{ latest: Template | null; running: boolean }>({ latest: null, running: false });
+  const onDesignerChange = useCallback((template: Template) => {
+    pump.current.latest = template;
+    if (pump.current.running) return;
+    pump.current.running = true;
+    const documentKey = live.current.documentKey;
+    void (async () => {
       try {
-        const checked = restorePdfDraft({ template, values: {} }).template;
-        p.setData((data) => ({ ...data, template: checked }));
-        p.setDraft(draft => ({...draft, designerInputs: readDesignerDrafts(draft.designerInputs).filter(input => !designerDraftApplied(checked, input))}));
+        while (pump.current.latest) {
+          const next = pump.current.latest;
+          pump.current.latest = null;
+          // New large images dropped into the Designer are uploaded before they reach the saved model.
+          const stored = await dehydrate({ template: next, values: {} });
+          if (live.current.documentKey !== documentKey) return;
+          const checked = restorePdfDraft({ template: stored.template, values: {} }).template;
+          live.current.setData((data) => ({ ...data, template: checked }));
+          live.current.setDraft((draft) => ({
+            ...draft,
+            designerInputs: readDesignerDrafts(draft.designerInputs).filter((item) => !designerDraftApplied(checked, item)),
+          }));
+        }
       } catch (error) {
-        p.report(error);
+        live.current.report(error);
+      } finally {
+        pump.current.running = false;
       }
-    },
-    [p.setData, p.report],
+    })();
+  }, []);
+  const captureDraft = useCallback(
+    (item: DesignerDraft, applied: boolean) =>
+      live.current.setDraft((draft) => {
+        const remaining = readDesignerDrafts(draft.designerInputs).filter((entry) => entry.field !== item.field || entry.property !== item.property);
+        return { ...draft, designerInputs: applied ? remaining : [...remaining, item] };
+      }),
+    [],
   );
   const designerInputs = readDesignerDrafts(p.draft.designerInputs);
-  const captureDraft = (input: DesignerDraft, applied: boolean) => p.setDraft(draft => {const remaining = readDesignerDrafts(draft.designerInputs).filter(item => item.field !== input.field || item.property !== input.property);return {...draft, designerInputs: applied ? remaining : [...remaining, input]};});
   const pendingProperties = designerInputs.length > 0;
-  const displayPhase = pendingProperties && p.autoState.phase === "saved" ? "draft" : p.autoState.phase;
-  const displayStatus = pendingProperties && p.autoState.phase === "saved" ? "属性草稿已保存，待应用" : p.autoState.message;
-  const resetDesignerInputs = () => {p.setDraft(draft => ({...draft, designerInputs: []}));setDesignerEpoch(value => value + 1);};
-  const fields = p.data.template.schemas
-    .flat()
-    .filter((field) => field.type === "text" && !field.readOnly);
-  const base = p.data.template.basePdf;
-  const size =
-    typeof base === "object" && "width" in base
-      ? base
-      : { width: 210, height: 297 };
-  const pageIndex = Math.min(previewPage, p.data.template.schemas.length - 1);
-  async function fresh() {
-    if (await p.fresh()) setPreviewPage(0);
-  }
-  async function exportPdf() {
-    setExporting(true);
+  const resetDesignerInputs = () => {
+    p.setDraft((draft) => ({ ...draft, designerInputs: [] }));
+    setDesignerEpoch((value) => value + 1);
+  };
+
+  const onFormInput = useCallback((name: string, value: string) => {
+    const documentKey = live.current.documentKey;
+    const apply = (stored: string) => {
+      if (live.current.documentKey === documentKey) live.current.setData((data) => ({ ...data, values: { ...data.values, [name]: stored } }));
+    };
+    if (value.startsWith("data:") && value.length > INLINE_LIMIT) {
+      setWorking("正在保存图片…");
+      dehydrate({ template: live.current.data.template, values: { [name]: value } })
+        .then((next) => apply(next.values[name] ?? ""))
+        .catch((error) => live.current.report(error))
+        .finally(() => setWorking(""));
+    } else apply(value);
+  }, []);
+  const onRename = useCallback((from: string, to: string) => {
+    try {
+      live.current.setData(renameField(live.current.data, from, to));
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : "无法改名。";
+    }
+  }, []);
+  const onRequired = useCallback((name: string, required: boolean) => {
+    live.current.setData((data) => {
+      const next = structuredClone(data);
+      for (const page of next.template.schemas) for (const field of page) if (field.name === name) field.required = required;
+      return next;
+    });
+  }, []);
+  const selectPage = useCallback((page: number) => {
+    setCurrentPage(page);
+    setPageRequest({ page, nonce: Date.now() });
+  }, []);
+
+  const setDataset = (update: (dataset: Dataset) => Dataset) =>
+    p.setData((data) => (data.dataset ? { ...data, dataset: update(data.dataset) } : data));
+
+  async function guarded(label: string, work: () => Promise<void>) {
+    setWorking(label);
     p.setError("");
     try {
-      const [engine, font] = await Promise.all([loadPdfEngine(), loadFont()]);
-      const document = validatePdf(p.data);
-      const inputs = Array.from({ length: copies }, () => ({
-        ...pdfInput(document),
-      }));
-      const bytes = await engine.generate({
-        template: document.template,
-        inputs,
-        plugins: { text: engine.text, rectangle: engine.rectangle },
-        options: { font },
-      });
-      download(
-        new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
-        `${p.title || "单据"}.pdf`,
-      );
+      await work();
     } catch (error) {
       p.report(error);
     } finally {
-      setExporting(false);
+      setWorking("");
     }
   }
-  async function importJson(input: File) {
+  const files = useTemplateFiles({
+    live,
+    guarded,
+    setWorking,
+    opened: (next) => {
+      setModeState(next);
+      setDesignerEpoch((value) => value + 1);
+      setCurrentPage(0);
+    },
+    remount: () => setDesignerEpoch((value) => value + 1),
+    setParsed,
+    input,
+  });
+
+  async function exportPdf() {
+    if (!ready) return;
+    const target = mode === "data" && table ? rowValues : input;
+    const problems = validateInput(ready, target);
+    if (problems.length) {
+      p.setError(`还有 ${problems.length} 处需要修正：${problems.slice(0, 3).map((issue) => issue.message).join("；")}`);
+      if (mode === "design") setMode("fill");
+      return;
+    }
+    await guarded("正在生成 PDF…", async () => {
+      const name = mode === "data" && table ? fileNameFor(table, dataset?.fileColumn ?? "", selectedRow, fileSafe(p.title)) : `${fileSafe(p.title)}.pdf`;
+      const bytes = await renderPdf(ready, [target], p.title);
+      download(new Blob([bytes as BlobPart], { type: "application/pdf" }), name);
+      p.setNotice(`已生成 ${name}`);
+    });
+  }
+
+  async function runBatch(kind: "merged" | "zip") {
+    if (!ready || !table || !dataset || !hydratedProject) return;
+    const good = reports.filter((report) => !report.issues.length);
+    const skipped = reports.filter((report) => report.issues.length).map((report) => report.index + 1);
+    const inputs = good.map((report) => rowInput(hydratedProject, table, mapping, report.index));
+    const controller = new AbortController();
+    abort.current = controller;
+    setBatch({ kind, done: 0, total: inputs.length });
     p.setError("");
+    const progress = ({ done, total }: { done: number; total: number }) => setBatch({ kind, done, total });
     try {
-      if (input.size > 900000) throw new Error("模板文件超过 900 KB。");
-      const next = validatePdf(JSON.parse(await input.text()));
-      if (await p.replace(next, input.name.replace(/\.json$/i, "").slice(0, 120))) setPreviewPage(0);
+      const title = fileSafe(p.title);
+      if (kind === "merged") {
+        const bytes = await renderMerged(ready, inputs, p.title, progress, controller.signal);
+        download(new Blob([bytes as BlobPart], { type: "application/pdf" }), `${title}-${inputs.length}份.pdf`);
+      } else {
+        const names = uniqueNames(good.map((report) => fileNameFor(table, dataset.fileColumn, report.index, title)));
+        const bytes = await renderZip(ready, inputs, names, progress, controller.signal);
+        download(new Blob([bytes as BlobPart], { type: "application/zip" }), `${title}-${inputs.length}份.zip`);
+      }
+      p.setNotice(`已生成 ${inputs.length} 份${skipped.length ? `，跳过有问题的第 ${skipped.slice(0, 8).join("、")}${skipped.length > 8 ? " 等" : ""} 行` : ""}。`);
     } catch (error) {
-      p.report(error);
+      if (controller.signal.aborted) p.setNotice("已取消批量生成。");
+      else p.report(error);
+    } finally {
+      abort.current = null;
+      setBatch(null);
     }
   }
+
+  const pickFile = (input: { current: HTMLInputElement | null }) => () => input.current?.click();
+  const onTabKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    const index = MODES.findIndex((entry) => entry.id === mode);
+    const next =
+      event.key === "ArrowRight" ? (index + 1) % MODES.length : event.key === "ArrowLeft" ? (index - 1 + MODES.length) % MODES.length : event.key === "Home" ? 0 : event.key === "End" ? MODES.length - 1 : -1;
+    if (next < 0) return;
+    event.preventDefault();
+    setMode(MODES[next].id);
+    event.currentTarget.querySelectorAll<HTMLButtonElement>("[role=tab]")[next]?.focus();
+  };
+
+  const phase = pendingProperties && p.autoState.phase === "saved" ? "draft" : p.autoState.phase;
+  const status = pendingProperties && p.autoState.phase === "saved" ? "属性草稿已保存，待应用" : p.autoState.message;
+  const isPdfBase = typeof p.data.template.basePdf === "string";
+  const blankBase = !isPdfBase ? (p.data.template.basePdf as { width: number; height: number }) : null;
+  const paperIndex = blankBase ? PAPERS.findIndex((paper) => paper.width === blankBase.width && paper.height === blankBase.height) : -1;
+  const thumbVersion = `${templateJson.length}:${templateJson.slice(-400)}|${mode === "data" ? `${selectedRow}:${mappingJson}:${dataset?.source.length}` : valuesJson}|${ready ? 1 : 0}`;
+  const primaryLabel = mode === "data" && table ? "生成本行 PDF" : "生成 PDF";
+
   return (
-    <main className="paper-app">
-      <a className="skip" href="#paper-main">
-        跳到模板内容
+    <div className="paper-app">
+      <a className="skip" href="#paper-stage">
+        跳到纸张
       </a>
-      <header className="paper-header">
-        <div className="paper-brand">
-          <span aria-hidden="true">PDF</span>
-          <div>
-            <h1>版式编辑器</h1>
-          </div>
-        </div>
-        <label>
+      <header className="topbar">
+        <TemplateMenu
+          items={p.items}
+          currentId={p.current?.id}
+          disabled={busy || !!batch}
+          conflict={p.autoState.phase === "conflict" && !!p.current}
+          canDelete={!!p.current}
+          onSample={(kind) => void files.createSample(kind)}
+          onOpen={(id) => void p.open(id).then((ok) => ok && setDesignerEpoch((value) => value + 1))}
+          onImportJson={pickFile(jsonFile)}
+          onImportPdf={pickFile(pdfFile)}
+          onExportJson={() => void files.exportJson()}
+          onExportDraft={p.exportDraft}
+          onSave={() => void p.save()}
+          onOpenServer={() => p.current && void p.open(p.current.id)}
+          onDelete={() => void p.remove()}
+          onWarm={preloadPdfEngine}
+        />
+        <label className="title-field">
           <span className="sr-only">模板名称</span>
           <input
-            disabled={p.loading || p.busy}
-            aria-label="模板名称"
             name="templateTitle"
             autoComplete="off"
             value={p.title}
             maxLength={120}
+            disabled={p.loading}
             onChange={(event) => p.setTitle(event.target.value)}
           />
         </label>
-        <span className="save-state" role="status" data-autosave-phase={displayPhase}>
-          {displayStatus}
-        </span>
-        <details className="project-controls">
-          <summary>文件</summary>
-          <div className="project-menu">
-            <button onClick={p.exportDraft}>导出恢复草稿</button>
-            {p.autoState.phase === "conflict" && p.current ? <button onClick={() => void p.open(p.current!.id)}>打开服务器版本</button> : null}
-            <ProjectPicker
-              items={p.items}
-              id={p.current?.id}
-              disabled={p.busy || exporting}
-              onOpen={(id) => void p.open(id)}
-            />
-            <button onClick={() => void fresh()} disabled={p.busy}>
-              新建模板
-            </button>
+        <div className="mode-tabs" role="tablist" aria-label="工作视图" onKeyDown={onTabKey}>
+          {MODES.map((entry) => (
             <button
-              onClick={() => void p.remove()}
-              disabled={!p.current || p.busy}
+              key={entry.id}
+              type="button"
+              role="tab"
+              id={`tab-${entry.id}`}
+              aria-controls="paper-stage"
+              aria-selected={mode === entry.id}
+              tabIndex={mode === entry.id ? 0 : -1}
+              onClick={() => setMode(entry.id)}
             >
-              删除
+              {entry.label}
+              {entry.id === "data" && table ? <span className="tab-count">{table.rows.length}</span> : null}
             </button>
-          </div>
-        </details>
+          ))}
+        </div>
+        <p className="save-state" role="status" data-autosave-phase={phase}>
+          {working || status}
+        </p>
+        <button type="button" className="primary" onClick={() => void exportPdf()} onPointerEnter={preloadPdfEngine} disabled={busy || !!batch || pendingProperties || !ready}>
+          {primaryLabel}
+        </button>
       </header>
-      <section className="document-bar">
-        <div className="mode-bar">
-          <div
-            role="tablist"
-            aria-label="工作模式"
-            onKeyDown={(event) => {
-              if (
-                !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
-              )
-                return;
-              event.preventDefault();
-              const next =
-                event.key === "Home"
-                  ? "fill"
-                  : event.key === "End"
-                    ? "design"
-                    : mode === "fill"
-                      ? "design"
-                      : "fill";
-              setMode(next);
-              event.currentTarget
-                .querySelectorAll("button")
-                [next === "fill" ? 0 : 1]?.focus();
-            }}
-          >
-            <button
-              role="tab"
-              id="fill-tab"
-              aria-controls="paper-main"
-              tabIndex={mode === "fill" ? 0 : -1}
-              aria-selected={mode === "fill"}
-              onClick={() => setMode("fill")}
-            >
-              填写字段
-            </button>
-            <button
-              role="tab"
-              id="design-tab"
-              aria-controls="paper-main"
-              tabIndex={mode === "design" ? 0 : -1}
-              aria-selected={mode === "design"}
-              onClick={() => setMode("design")}
-            >
-              设计版式
-            </button>
-          </div>
-          <p>
-            {p.data.template.schemas.length} 页模板 · {fields.length}{" "}
-            个可填写字段
-          </p>
-        </div>
-        <div className="document-actions">
-          <button onClick={() => void p.save()} disabled={p.busy || exporting}>
-            立即保存
-          </button>
-          <button onClick={() => file.current?.click()} disabled={p.busy}>
-            导入 JSON
-          </button>
-          <button
-            disabled={pendingProperties}
-            onClick={() =>
-              download(
-                new Blob([JSON.stringify(p.data, null, 2)], {
-                  type: "application/json",
-                }),
-                `${p.title}.json`,
-              )
-            }
-          >
-            导出 JSON
-          </button>
-          <button
-            className="primary"
-            onClick={() => void exportPdf()}
-            disabled={exporting || p.busy || pendingProperties}
-          >
-            {exporting ? "正在生成…" : "生成 PDF"}
-          </button>
-        </div>
-      </section>
       <Notice error={p.error} notice={p.notice} />
-      {pendingProperties ? <section className="designer-drafts" aria-label="待应用的设计器属性">
-        <div><strong>待应用的属性输入</strong><p>这些输入已作为草稿保留，尚未改变模板。修正后应用，或丢弃并回到当前版式。</p></div>
-        {designerInputs.map((input, index) => <label key={`${input.field}-${input.property}`}>{input.field} · {designerProperties[input.property]}<input aria-label={`待应用 ${input.field} ${designerProperties[input.property]}`} value={input.value} maxLength={5000} onChange={event => p.setDraft(draft => ({...draft,designerInputs:readDesignerDrafts(draft.designerInputs).map((item,i) => i === index ? {...item,value:event.target.value} : item)}))}/></label>)}
-        <button onClick={() => {try {p.setData(applyDesignerDrafts(p.data, designerInputs));resetDesignerInputs();p.setError("");} catch(error) {p.report(error);}}}>应用属性草稿</button><button onClick={resetDesignerInputs}>丢弃属性草稿</button>
-      </section> : null}
-      <section
-        inert={p.loading || p.busy}
-        id="paper-main"
-        role="tabpanel"
-        aria-labelledby={mode === "fill" ? "fill-tab" : "design-tab"}
-        tabIndex={-1}
-      >
-        {mode === "design" ? (
-          <RenderBoundary key={`${p.documentKey}-${designerEpoch}`}>
-            <Suspense
-              fallback={<p className="engine-state">正在加载设计器…</p>}
-            >
-              <DesignerPane initial={snapshot} onChange={onChange} onDraft={captureDraft} />
-            </Suspense>
-          </RenderBoundary>
-        ) : (
-          <div className="fill-layout">
-            <nav className="page-rail" aria-label="模板页面">
-              <h2>页面</h2>
-              {p.data.template.schemas.map((page, index) => (
-                <button
-                  key={index}
-                  aria-label={`显示第 ${index + 1} 页`}
-                  aria-current={pageIndex === index ? "page" : undefined}
-                  onClick={() => setPreviewPage(index)}
-                >
-                  <span
-                    className="mini-page"
-                    style={{ aspectRatio: `${size.width}/${size.height}` }}
-                  >
-                    {page.map((field) => (
-                      <i
-                        key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`}
-                        style={{
-                          left: `${(field.position.x / size.width) * 100}%`,
-                          top: `${(field.position.y / size.height) * 100}%`,
-                          width: `${(field.width / size.width) * 100}%`,
-                          height: `${Math.max(1, (field.height / size.height) * 100)}%`,
-                        }}
-                      />
-                    ))}
-                  </span>
-                  <strong>{index + 1}</strong>
-                </button>
-              ))}
-            </nav>
-            <aside className="field-panel">
-              <p className="eyebrow">第 {pageIndex + 1} 页</p>
-              <h2>数据字段</h2>
-              <p className="hint">
-                修改字段内容，或切换到设计版式调整位置与样式。
-              </p>
-              {p.data.template.schemas[pageIndex]
-                .filter((field) => field.type === "text" && !field.readOnly)
-                .map((field) => (
-                  <label key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`} className="field">
-                    <span>{field.name}</span>
-                    <textarea
-                      aria-label={`字段 ${field.name}`}
-                      name={field.name}
-                      autoComplete="off"
-                      rows={2}
-                      value={p.data.values[field.name] ?? field.content ?? ""}
-                      maxLength={5000}
-                      onChange={(event) =>
-                        p.setData((data) => ({
-                          ...data,
-                          values: {
-                            ...data.values,
-                            [field.name]: event.target.value,
-                          },
-                        }))
-                      }
-                    />
-                  </label>
-                ))}
-              <label className="copy-count">
-                <span>生成份数</span>
-                <input
-                  aria-label="生成份数"
-                  type="number"
-                  min={1}
-                  max={20}
-                  value={copies}
-                  onChange={(event) =>
-                    setCopies(
-                      Math.min(
-                        20,
-                        Math.max(1, Number(event.target.value) || 1),
-                      ),
-                    )
-                  }
-                />
-              </label>
-            </aside>
-            <div className="paper-desk">
-              <div className="page-caption">
-                <span>
-                  {size.width} × {size.height} mm · 版式预览
-                </span>
-                <label>
-                  预览页{" "}
-                  <select
-                    aria-label="预览页"
-                    value={pageIndex}
-                    onChange={(event) =>
-                      setPreviewPage(Number(event.target.value))
-                    }
-                  >
-                    {p.data.template.schemas.map((_, index) => (
-                      <option key={index} value={index}>
-                        第 {index + 1} 页
+      {pendingProperties ? (
+        <DesignerDrafts
+          inputs={designerInputs}
+          onEdit={(index, value) =>
+            p.setDraft((draft) => ({
+              ...draft,
+              designerInputs: readDesignerDrafts(draft.designerInputs).map((entry, i) => (i === index ? { ...entry, value } : entry)),
+            }))
+          }
+          onApply={() => {
+            try {
+              p.setData(applyDesignerDrafts(p.data, designerInputs));
+              resetDesignerInputs();
+              p.setError("");
+            } catch (error) {
+              p.report(error);
+            }
+          }}
+          onDiscard={resetDesignerInputs}
+        />
+      ) : null}
+      <div className={`workspace mode-${mode}`} inert={p.loading || undefined}>
+        <PageRail template={ready} input={previewInput} version={thumbVersion} current={currentPage} onSelect={selectPage}>
+          {mode === "design" ? (
+            <section className="paper-card" aria-label="纸张与底图">
+              <p className="paper-kind">{paperLabel(p.data.template)}</p>
+              {blankBase ? (
+                <label className="paper-size">
+                  <span className="sr-only">纸张尺寸</span>
+                  <select value={paperIndex} onChange={(event) => files.setPaper(Number(event.target.value))} disabled={busy}>
+                    {paperIndex < 0 ? <option value={-1}>自定义 {blankBase.width}×{blankBase.height}</option> : null}
+                    {PAPERS.map((paper, index) => (
+                      <option key={paper.label} value={index}>
+                        {paper.label}
                       </option>
                     ))}
                   </select>
                 </label>
-              </div>
-              <div
-                className="paper-page"
-                style={{
-                  aspectRatio: `${size.width}/${size.height}`,
-                }}
-              >
-                {p.data.template.schemas[pageIndex].map((field) =>
-                  field.type === "text" ? (
-                    <div
-                      key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`}
-                      className="preview-text"
-                      style={{
-                        left: `${(field.position.x / size.width) * 100}%`,
-                        top: `${(field.position.y / size.height) * 100}%`,
-                        width: `${(field.width / size.width) * 100}%`,
-                        height: `${(field.height / size.height) * 100}%`,
-                        fontSize: `${(((Number(field.fontSize) || 14) * 0.352778) / size.width) * 100}cqw`,
-                        color: String(field.fontColor || "#26313B"),
-                        textAlign:
-                          field.alignment === "center"
-                            ? "center"
-                            : field.alignment === "right"
-                              ? "right"
-                              : "left",
-                        alignContent:
-                          field.verticalAlignment === "middle"
-                            ? "center"
-                            : field.verticalAlignment === "bottom"
-                              ? "end"
-                              : "start",
-                        lineHeight: Number(field.lineHeight) || 1.2,
-                      }}
-                    >
-                      {field.readOnly
-                        ? field.content
-                        : (p.data.values[field.name] ?? field.content)}
-                    </div>
-                  ) : (
-                    <div
-                      key={`${field.name}-${p.data.template.schemas.flat().indexOf(field)}`}
-                      className="preview-rule"
-                      style={{
-                        left: `${(field.position.x / size.width) * 100}%`,
-                        top: `${(field.position.y / size.height) * 100}%`,
-                        width: `${(field.width / size.width) * 100}%`,
-                        height: `${(field.height / size.height) * 100}%`,
-                        background: String(field.color || "transparent"),
-                      }}
-                    />
-                  ),
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </section>
-      <input
-        className="sr-only"
-        ref={file}
-        type="file"
-        accept="application/json,.json"
-        aria-label="导入模板文件"
-        onChange={(event) => {
-          const selected = event.target.files?.[0];
-          event.target.value = "";
-          if (selected) void importJson(selected);
-        }}
-      />
-    </main>
+              ) : null}
+              <button type="button" onClick={pickFile(baseFile)} disabled={busy}>
+                {isPdfBase ? "更换 PDF 底图…" : "导入 PDF 底图…"}
+              </button>
+              {isPdfBase ? (
+                <button type="button" className="quiet" onClick={() => void files.removeBase()} disabled={busy}>
+                  改回空白纸
+                </button>
+              ) : null}
+            </section>
+          ) : null}
+        </PageRail>
+        <main className="stage" id="paper-stage" role="tabpanel" aria-labelledby={`tab-${mode}`} tabIndex={-1}>
+          <RenderBoundary key={`${p.documentKey}-${mode}`}>
+            {!ready ? (
+              <p className="engine-state" role="status">
+                正在打开模板…
+              </p>
+            ) : mode === "design" ? (
+              designerInitial ? (
+                <Suspense fallback={<p className="engine-state">正在加载设计器…</p>}>
+                  <DesignerPane key={designerKey} initial={designerInitial} onChange={onDesignerChange} onDraft={captureDraft} pageRequest={pageRequest} />
+                </Suspense>
+              ) : null
+            ) : mode === "fill" ? (
+              <PreviewPane kind="form" label="填写纸张" template={ready} inputs={input} inputsKey={p.documentKey} onInput={onFormInput} pageRequest={pageRequest} />
+            ) : (
+              <PreviewPane
+                kind="viewer"
+                label={table ? `第 ${selectedRow + 1} 行预览` : "当前填写预览"}
+                template={ready}
+                inputs={previewInput}
+                inputsKey={`${p.documentKey}|${selectedRow}|${mappingJson}|${dataset?.source.length ?? 0}|${valuesJson.length}`}
+                pageRequest={pageRequest}
+              />
+            )}
+          </RenderBoundary>
+        </main>
+        {mode === "fill" && ready ? (
+          <FieldPanel template={ready} issues={issues} onRename={onRename} onRequired={onRequired} onPage={selectPage} />
+        ) : null}
+        {mode === "data" && ready ? (
+          <DataPanel
+            template={ready}
+            dataset={dataset}
+            table={table}
+            tableError={tableError}
+            reports={reports}
+            busy={busy}
+            batch={batch}
+            onImport={pickFile(dataFile)}
+            onTemplateCsv={files.downloadCsvTemplate}
+            onClear={() => p.setData((data) => ({ ...data, dataset: null }))}
+            onMapping={(field, column) => setDataset((current) => ({ ...current, mapping: { ...current.mapping, [field]: column } }))}
+            onFileColumn={(column) => setDataset((current) => ({ ...current, fileColumn: column }))}
+            onSelect={(row) => setDataset((current) => ({ ...current, selected: row }))}
+            onGenerate={(kind) => void runBatch(kind)}
+            onCancel={() => abort.current?.abort()}
+          />
+        ) : null}
+      </div>
+      <input hidden ref={jsonFile} type="file" accept="application/json,.json" aria-label="导入模板 JSON" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void files.importJson(file); }} />
+      <input hidden ref={pdfFile} type="file" accept="application/pdf,.pdf" aria-label="以 PDF 新建模板" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void files.newFromPdf(file); }} />
+      <input hidden ref={baseFile} type="file" accept="application/pdf,.pdf" aria-label="选择 PDF 底图" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void files.replaceBase(file); }} />
+      <input hidden ref={dataFile} type="file" accept=".csv,.json,.txt,text/csv,application/json" aria-label="导入批量数据" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void files.importData(file); }} />
+    </div>
   );
 }
