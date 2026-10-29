@@ -78,6 +78,16 @@
 | Oasis Editor | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/oasis-editor.png" alt="Oasis Editor 改版前" width="360"> | <img src="screenshots/oasis-editor.png" alt="Oasis Editor 0.9.0" width="360"> |
 | CircuitJS | <img src="https://raw.githubusercontent.com/floatboatai/floatboat-workbenches/7a0e4ee6f2d0c22bc3bc70ee53fc4cc9115ab5ac/docs/screenshots/circuitjs.png" alt="CircuitJS 改版前" width="360"> | <img src="screenshots/circuitjs.png" alt="CircuitJS 0.9.0" width="360"> |
 
+## 新增 · ComfyUI（#79）
+
+基于 MIT 的 `@comfyorg/litegraph` 0.17.2 节点画布，经 ComfyUI 官方 HTTP/WebSocket API 连接用户自有服务；工作台为 MIT，不含 ComfyUI 或 ComfyUI_frontend 的 GPL 代码与模型权重。
+
+- 首开离线可用：内置 ComfyUI v0.43.0 的 213 个核心节点接口元数据，可搜索、连线、编辑全部控件类型、分组、静音/绕过、复制粘贴、撤销与校验；连接服务后改用服务端节点定义（含自定义节点），未知节点保留数据。
+- 格式：UI 工作流 JSON、API prompt JSON 与 PNG 内嵌工作流导入；UI/API 导出时解析 Reroute/Primitive 并跳过静音/绕过节点；导入总是新建。
+- 运行：应用自身服务代理到用户配置的 ComfyUI（无需 `--enable-cors-header`），WebSocket 进度落在执行中的节点上，队列取消/中断，服务端 `node_errors` 映射回节点；令牌默认只在内存。
+- 印样带：每次运行保存产物与确切参数，可“载入该次工作流”、2–4 张对比、PNG（含元数据）与 ZIP 下载。模板含 SDXL 文生图、图生图、放大、LoRA、局部重绘与 ControlNet。
+- 验收：check、24 项测试、打包通过；7 组浏览器流程针对按官方协议编写的模拟服务（与真实 ComfyUI v0.43.0 CPU 无模型实例核对过消息顺序与错误格式）。**真实生成未验证**；截图中的产物图片来自模拟服务。
+
 ## 发布通道
 
 CI 的上传接口只暂存回执，不进入商店审核。后端 PR [AOE-HQ/aoe-backend#414](https://github.com/AOE-HQ/aoe-backend/pull/414) 新增 `POST /api/workbenches/publish`；已部署并启用 `FLOATBOAT_PUBLISH_ENABLED=true`：2026-10-29 的重跑中 56 个包全部上传，54 个提交为待审核版本，CircuitJS（GPL）按规则跳过，Oasis 因包内缺少 `LICENSE` 被拒，已补齐。说明见[自动打包与官方上传](ci-packages.md#提交商店审核)。

@@ -6,11 +6,11 @@
 
 ## 当前进度
 
-当前版本 **0.9.0**（进行中）· **56 / 78 个工作台已完成本地功能验收**。Floatboat客户端导入尚未实测。
+当前版本 **0.9.0**（进行中）· **57 / 79 个工作台已完成本地功能验收**。Floatboat客户端导入尚未实测。
 
 0.9.0 针对“缺乏深度、部分不能使用”做全量整改。[可用性与深度审计](docs/depth-audit-2026-10-29.md)在空数据目录下逐项实际运行全部56项：构建与测试全部通过，但14项核心功能依赖未打包的外部服务、多项校验上限拒绝真实文件、多数只露出上游库很小一部分能力。整改分波推进，进度与验收见[0.9.0 发布记录](docs/release-0.9.0.md)。
 
-第1波已完成8项（首开即可用、接住真实输入、补齐核心能力并重排页面）：Mermaid、Swagger UI、Bruno、PageIndex、DeepTutor、Agent-Reach、FigCraft、glTF Transform。第2波已完成8项（知名库核心能力补齐）：pdfme、Tiptap、PptxGenJS、React Flow、Vega-Lite、Ray Optics、CircuitJS、Oasis Editor。0.8.1结构审计见[结构审计](docs/layout-audit-2026-10-28.md)。
+第1波已完成8项（首开即可用、接住真实输入、补齐核心能力并重排页面）：Mermaid、Swagger UI、Bruno、PageIndex、DeepTutor、Agent-Reach、FigCraft、glTF Transform。第2波已完成8项（知名库核心能力补齐）：pdfme、Tiptap、PptxGenJS、React Flow、Vega-Lite、Ray Optics、CircuitJS、Oasis Editor。新增 ComfyUI 节点工作流工作台（#79，MIT 客户端，真实生成待用户自有服务验证）。0.8.1结构审计见[结构审计](docs/layout-audit-2026-10-28.md)。
 
 | 项目 | 已实现流程 | 界面方向 |
 | --- | --- | --- |
@@ -70,6 +70,7 @@
 | [Oasis Editor](workbenches/76-oasis-editor/) | 开始/插入/表格/审阅/布局功能区、样式与编号、图片/表格/脚注/公式、修订显示与接受拒绝、批注、页面设置、查找替换、中文原生菜单、DOCX/PDF 导出与重新打开 | 居中纸张、功能区与审阅批注 |
 | [CircuitJS1](workbenches/77-circuitjs/) | 可搜索元件库（晶体管/555/逻辑/数字芯片…）、366 个官方示例、速度/单步/参数滑块、编辑时持续仿真、原生电路与读数导出 | 电路与示波器、纵向元件架与底部仪表 |
 | [glTF Transform](workbenches/78-gltf-transform/) | GLB/glTF/ZIP（Draco/Meshopt/扩展）导入、逐步优化流水线与前后报告、贴图/节点/动画、压缩 GLB 导出 | 模型空间、优化阶段条与浮动检查器 |
+| [ComfyUI](workbenches/79-comfyui/) | MIT litegraph 节点画布（213 个核心节点离线可编辑）、UI/API/PNG 工作流导入导出、校验、连接自有 ComfyUI 运行与实时进度、产物图库与可复现记录 | 节点画布、检查器与运行印样带 |
 
 0.4.0批次统一验证：**6项构建、106项应用测试、14项独立服务测试、3项工具测试和6个源码包**通过。真实上游执行包含LangGraph流程恢复、Promptfoo回显评测、Docling HTML转换和faster-whisper英语CPU转写；其他模型/服务条件见发布验收。
 
@@ -89,7 +90,7 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 
 ## 工作台实景
 
-以下为 56 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
+以下为 57 个已验收本地工作台的真实 Chrome 界面，使用普通示例资料。点击预览进入项目说明；图片未经过界面合成或像素修饰。采集版本、原始尺寸与哈希见 [截图说明](docs/screenshots/README.md)。
 
 | | |
 | --- | --- |
@@ -121,7 +122,7 @@ AI 补充调研：[32 个 AI 项目与工作台选型](docs/research/ai-workbenc
 | **[Ray Optics Simulation · 光路主屏、器材架与实验读数条](workbenches/73-ray-optics/)**<br>[<img src="docs/screenshots/ray-optics.png" alt="Ray Optics Simulation 工作台实景" width="440">](workbenches/73-ray-optics/) | **[Invoice Builder · 明细填写、纸张校样与PDF预览](workbenches/74-invoice-builder/)**<br>[<img src="docs/screenshots/invoice-builder.png" alt="Invoice Builder 工作台实景" width="440">](workbenches/74-invoice-builder/) |
 | **[Mesh2Motion · 三维舞台、骨架树、关节参数与动作轨](workbenches/75-mesh2motion/)**<br>[<img src="docs/screenshots/mesh2motion.png" alt="Mesh2Motion 工作台实景" width="440">](workbenches/75-mesh2motion/) |  |
 | **[Oasis Editor · 居中纸张、功能区与审阅批注](workbenches/76-oasis-editor/)**<br>[<img src="docs/screenshots/oasis-editor.png" alt="Oasis Editor 工作台实景" width="440">](workbenches/76-oasis-editor/) | **[CircuitJS1 · 电路与示波器、纵向元件架与底部仪表](workbenches/77-circuitjs/)**<br>[<img src="docs/screenshots/circuitjs.png" alt="CircuitJS1 工作台实景" width="440">](workbenches/77-circuitjs/) |
-| **[glTF Transform · 模型空间、优化阶段条与浮动检查器](workbenches/78-gltf-transform/)**<br>[<img src="docs/screenshots/gltf-transform.png" alt="glTF Transform 工作台实景" width="440">](workbenches/78-gltf-transform/) |  |
+| **[glTF Transform · 模型空间、优化阶段条与浮动检查器](workbenches/78-gltf-transform/)**<br>[<img src="docs/screenshots/gltf-transform.png" alt="glTF Transform 工作台实景" width="440">](workbenches/78-gltf-transform/) | **[ComfyUI · 节点画布、检查器与运行印样带](workbenches/79-comfyui/)**<br>[<img src="docs/screenshots/comfyui.png" alt="ComfyUI 工作台实景（模拟服务输出）" width="440">](workbenches/79-comfyui/) |
 
 自动保存区分待保存、同步中、已保存、待完善草稿、离线和版本冲突。后台保存时仍可编辑；项目导入创建独立项目，未完成输入可恢复。浏览器本机缓存限定同一来源。
 
@@ -154,4 +155,4 @@ GitHub CI 会自动检查、测试并打包全部已验收工作台，产物同�
 
 ## 许可
 
-56个已验收工作台中，55个应用的原创集成与封装代码采用 MIT；CircuitJS 衍生工作台整体采用 GPL-2.0-or-later，完整对应源码与重建说明随包交付。范围及完整文本见各应用的 `app/LICENSE`。第三方源码、资源、字体、依赖、商业扩展和模板 SDK 保留各自许可；这不是覆盖整个仓库或候选项目清单的统一 MIT 授权。参考各工作台 README、`notices/` 与[许可边界](docs/licensing.md)。
+57个已验收工作台中，56个应用的原创集成与封装代码采用 MIT；CircuitJS 衍生工作台整体采用 GPL-2.0-or-later，完整对应源码与重建说明随包交付。范围及完整文本见各应用的 `app/LICENSE`。第三方源码、资源、字体、依赖、商业扩展和模板 SDK 保留各自许可；这不是覆盖整个仓库或候选项目清单的统一 MIT 授权。参考各工作台 README、`notices/` 与[许可边界](docs/licensing.md)。

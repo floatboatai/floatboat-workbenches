@@ -1,6 +1,6 @@
 # 许可证边界
 
-仓库公开可读不等于所有文件使用同一许可证。当前56个已验收工作台中，55个应用的原创集成与封装代码采用 [MIT 许可证](https://opensource.org/license/mit)，版权声明为 `Copyright (c) 2026 Floatboat contributors`。CircuitJS 衍生工作台整体按 GPL-2.0-or-later 提供，原生源码、适配器、完整对应源码与重建说明随包交付。各应用的完整许可文本及范围说明保存在其 `app/LICENSE`。
+仓库公开可读不等于所有文件使用同一许可证。当前57个已验收工作台中，56个应用的原创集成与封装代码采用 [MIT 许可证](https://opensource.org/license/mit)，版权声明为 `Copyright (c) 2026 Floatboat contributors`。CircuitJS 衍生工作台整体按 GPL-2.0-or-later 提供，原生源码、适配器、完整对应源码与重建说明随包交付。各应用的完整许可文本及范围说明保存在其 `app/LICENSE`。
 
 上述MIT授权仅覆盖对应应用中 Floatboat contributors 为相应应用编写的原创工作台代码，不把整个仓库、候选项目清单或应用内第三方材料统一改为 MIT。计划项目、仓库其他目录，以及来自 Floatboat 模板或 SDK 的代码不因这项授权而改变许可。
 

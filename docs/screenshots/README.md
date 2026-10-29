@@ -2,7 +2,7 @@
 
 真实Chrome运行界面，使用普通示例资料。图片为浏览器原生PNG，未合成界面或修改像素。最近采集日期：2026-10-29。
 
-0.9.0 第1波更新8项、第2波更新8项；其余保留历史采集版本。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
+0.9.0 第1波更新8项、第2波更新8项、新增 ComfyUI；其余保留历史采集版本。ComfyUI 印样带中的图片来自模拟服务，不是真实生成结果。示例、真实引擎输出、真实Host回答和服务未连接状态按各项目验收记录区分。
 
 | 图片 | 采集版本 | 原始尺寸 | 大小 | SHA-256 |
 | --- | --- | --- | --- | --- |
@@ -62,5 +62,6 @@
 | [oasis-editor.png](oasis-editor.png) | 0.9.0 | 1440 × 900 | 171.1 KiB | `b64f3ccec04a84ad83bf5dd0f5600c1b34d3300d656d261d8107c0214838fbc2` |
 | [circuitjs.png](circuitjs.png) | 0.9.0 | 1440 × 900 | 103.2 KiB | `6126c3bdf62496c8bb43a4f4228cc3da6063fe77073eff05f76192cd476f613e` |
 | [gltf-transform.png](gltf-transform.png) | 0.9.0 | 1440 × 900 | 143.7 KiB | `e1f5b5a1a8520c4204e8acc28e4f420043e4941dd329a27feeaf9a3f9fdd5aed` |
+| [comfyui.png](comfyui.png) | 0.9.0 | 1440 × 900 | 153.9 KiB | `d3ba181c4efe1c4f97aa3dc4c9604c9514be39d093a040f2bb84b41dffddeb58` |
 
-共56张，合计 8.04 MiB。
+共57张，合计 8.95 MiB。

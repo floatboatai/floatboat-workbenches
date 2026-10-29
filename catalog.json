@@ -3920,7 +3920,7 @@
     "effort": "高",
     "priority": "A",
     "license": "MIT（工作台）；ComfyUI 服务 GPL-3.0 独立运行",
-    "caveat": "生成需用户自有 ComfyUI 服务与模型；首版以官方 API 模拟服务验收，真实生成未验证；模型权重许可由用户自行核查。",
+    "caveat": "生成需用户自有 ComfyUI 服务与模型；首版以官方 API 模拟服务验收，真实生成未验证；工作流 JSON 超过 880 KB 不能保存为文档；模型权重许可由用户自行核查；Floatboat客户端导入未验证。",
     "url": "https://github.com/Comfy-Org/ComfyUI",
     "archived": false,
     "sources": [
@@ -3934,6 +3934,40 @@
     "id": 79,
     "slug": "comfyui",
     "directory": "workbenches/79-comfyui",
-    "status": "planned"
+    "status": "local-verified",
+    "version": "0.9.0",
+    "verification": {
+      "build": "passed",
+      "tests": 24,
+      "browser": "passed",
+      "autosave": "passed",
+      "workingDraftRecovery": "passed",
+      "productLayout": "restructured",
+      "package": "passed",
+      "screenshot": "docs/screenshots/comfyui.png",
+      "hostImport": "unverified",
+      "hostLlm": "not-used",
+      "verifiedAt": "2026-10-29",
+      "record": "docs/release-0.9.0.md",
+      "acceptance": "workbenches/79-comfyui/ACCEPTANCE.md",
+      "upstream": "@comfyorg/litegraph 0.17.2 · MIT；ComfyUI v0.43.0 节点接口元数据",
+      "firstOpen": "usable without external services",
+      "realGeneration": "unverified",
+      "sharedClientSha256": "1663f8bb8ffa9a79d016180b7e98ee229b02683e246767f5146c9e1eac50312d",
+      "structuralLayout": {
+        "status": "pending",
+        "reviewedAt": "2026-10-29",
+        "record": "docs/release-0.9.0.md",
+        "basis": "new workbench with real screenshot; neighbour comparison pending"
+      }
+    },
+    "presentation": {
+      "screenshots": [
+        {
+          "path": "docs/screenshots/comfyui.png",
+          "caption": "ComfyUI · 节点画布、检查器与运行印样带（模拟服务输出）"
+        }
+      ]
+    }
   }
 ]
