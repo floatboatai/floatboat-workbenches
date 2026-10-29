@@ -136,4 +136,3 @@ export function buildScore(spec: ScoreSpec): string {
     `<part-list>${partList}</part-list>${parts.join("")}</score-partwise>\n`
   );
 }
-
