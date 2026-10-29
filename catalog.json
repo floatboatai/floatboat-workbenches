@@ -3910,5 +3910,32 @@
       },
       "firstOpen": "usable without external services"
     }
+  },
+  {
+    "name": "ComfyUI",
+    "repo": "Comfy-Org/ComfyUI",
+    "category": "AI 视觉生成",
+    "kind": "服务接入",
+    "workbench": "ComfyUI 节点工作流编辑、运行队列与产物图库",
+    "core_features": "完整节点画布（MIT litegraph）、UI/API 工作流导入导出、离线节点定义与校验、连接用户自有 ComfyUI 服务运行、实时进度、产物图库与可复现记录",
+    "integration": "自建 MIT 客户端，经官方 HTTP/WebSocket API 对接用户自有服务；不分发 ComfyUI GPL 代码与模型权重",
+    "effort": "高",
+    "priority": "A",
+    "license": "MIT（工作台）；ComfyUI 服务 GPL-3.0 独立运行",
+    "caveat": "生成需用户自有 ComfyUI 服务与模型；首版以官方 API 模拟服务验收，真实生成未验证；模型权重许可由用户自行核查。",
+    "url": "https://github.com/Comfy-Org/ComfyUI",
+    "archived": false,
+    "sources": [
+      "https://github.com/Comfy-Org/ComfyUI",
+      "https://github.com/Comfy-Org/litegraph.js",
+      "docs/research/ai-creative-candidates.md"
+    ],
+    "group": "AI 工作台",
+    "mode": "服务接入",
+    "checked_at": "2026-10-29",
+    "id": 79,
+    "slug": "comfyui",
+    "directory": "workbenches/79-comfyui",
+    "status": "planned"
   }
 ]
