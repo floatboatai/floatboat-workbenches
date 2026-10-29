@@ -21,7 +21,7 @@ export function createAutosaveStore<T>(db:WorkbenchServer['database'],validate:(
   const projects:AutosaveAdapter<T>=adapter??{
     get:standard.get,
     create(title,data,id){
-      const payload=JSON.stringify(validate(data));if(Buffer.byteLength(payload)>900000)throw new StoreError(413,'项目超过900KB，草稿仍会保留。');
+      const payload=JSON.stringify(validate(data));if(Buffer.byteLength(payload)>1_950_000)throw new StoreError(413,'校样超过1.95MB，草稿仍会保留。');
       db.prepare('INSERT INTO projects(id,title,payload,revision,updated_at) VALUES(?,?,?,1,?)').run(id,titleValue(title),payload,new Date().toISOString());return standard.get(id);
     },
     update:(id,title,data,revision)=>standard.update(id,title,data,revision),

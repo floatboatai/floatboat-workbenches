@@ -33,8 +33,8 @@ export function createStore<T>(
   };
   const serialize = (value: unknown) => {
     const payload = JSON.stringify(validate(value));
-    if (Buffer.byteLength(payload) > 900000)
-      throw new StoreError(413, "项目超过 900 KB，请减少内容后重试。");
+    if (Buffer.byteLength(payload) > 1_950_000)
+      throw new StoreError(413, "校样超过 1.95 MB 保存上限，请拆分设计后重试。");
     return payload;
   };
   return {

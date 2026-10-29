@@ -6,9 +6,10 @@ import { createStore, StoreError } from "./store";
 export function registerRoutes<T>(
   app: WorkbenchServer,
   validate: (value: unknown) => T,
+  verify?: (data: T) => Promise<void>,
 ) {
   const store = createStore(app.database, validate);
-  registerAutosaveRoutes(app, validate);
+  registerAutosaveRoutes(app, validate, undefined, verify ? { verify } : {});
   const fail = (error: unknown) =>
     Response.json(
       {

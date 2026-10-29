@@ -1,65 +1,60 @@
 {
-  "version": "0.5.0",
+  "version": "0.9.0",
+  "date": "2026-10-29",
   "build": "passed",
-  "tests": 5,
-  "serviceTests": 4,
-  "nativeEngine": "FigCraft CLI 0.11.2, official macOS universal archive SHA256 verified",
+  "tests": 14,
+  "serviceTests": 5,
+  "nativeEngine": "optional; FigCraft CLI 0.11.2 official macOS universal archive (SHA256 verified in 0.5.0)",
+  "firstOpenWithoutEngine": {
+    "passed": true,
+    "demo": "Calm Studio, 4 screens + 3 components, 224 nodes",
+    "rawFetchFailed": false
+  },
+  "builtinRenderer": {
+    "nodesCompared": 175,
+    "within2px": 152,
+    "mismatchCause": "hug-width text measured with system font instead of Inter"
+  },
+  "builtinEdits": ["characters", "name", "fill", "dev_status", "frame order"],
+  "cliSemanticsMatched": ["overrides", "styles.fill unlink", "dev_changed", "other zip entries byte-identical"],
   "browser": "passed",
-  "autosave": "passed",
-  "workingDraftRecovery": "passed",
-  "nativeExports": [
-    "figcraft",
-    "png",
-    "svg",
-    "pdf"
-  ],
+  "autosave": {
+    "pauseSaveReload": "passed",
+    "typingDuringDelayedSave": "passed",
+    "lostResponseRetry": "passed (project count 1 -> 1)",
+    "invalidDraftRestore": "passed (fill #zz, partial project JSON)",
+    "importAsNewDocument": "passed (.figcraft and project JSON)"
+  },
+  "exportsValidated": {
+    "svg": "XML parse, 392x846, edited copy and fill present",
+    "pngApprox": "PNG signature, 784x1692",
+    "handoffMarkdown": "order, status, note, copy table",
+    "figcraft": "edited fields present, thumbnail.png sha256 unchanged",
+    "nativePng": "PNG signature (engine online)",
+    "nativePdf": "%PDF (engine online)"
+  },
+  "engineStatusCard": "passed (commands, address, re-check; fallback to builtin when engine stops)",
+  "narrow375": "passed (scrollWidth 375)",
+  "consoleErrors": "0 in normal flows; only injected-fault resource errors",
+  "structuralReview": "pending primary review (header combo removed, file dialog, stage-adjacent status/export)",
   "hostLlm": "not-used",
   "hostImport": "unverified",
   "package": "passed",
-  "service": "Independent Node adapter, localhost:8796; CLI excluded from source package",
+  "packageFile": "figcraft-studio-0.9.0.fbworkbench",
   "screenshot": {
     "path": "../../docs/screenshots/figcraft.png",
-    "dimensions": [
-      1440,
-      1140
-    ],
-    "sha256": "0db8e7c7efa021dd91a04723e88f74f2dee83e9e0b79dcfe1ca6487f397d167f"
+    "dimensions": [1440, 900],
+    "sha256": "8b2b7f2ec622b0a536cf905451594274f6c8b9f4fcaa4874deaa024ed9d442fb"
+  },
+  "limits": {
+    "fileBytes": 1350000,
+    "nodes": 60000,
+    "expandedBytes": 80000000
   },
   "limitations": [
-    "Scoped prototype proofing, not full desktop GUI",
-    "Native GUI re-open and Floatboat import not separately verified"
-  ],
-  "recoveryExportImportReload": {
-    "passed": true,
-    "schema": "snapshot:{title,data,extra}",
-    "newDocumentId": true,
-    "unappliedDraftsRetained": true,
-    "pendingOperationsReplayed": false
-  },
-  "navigationDuringDelayedSave": {
-    "passed": true,
-    "allVisibleEditFieldsDisabled": true,
-    "oldAndNewDocumentsPreserved": true,
-    "sharedAutosaveChanged": false
-  },
-  "packagedSetupGuide": [
-    "application/workbench-assets/assets/setup-guide/file"
-  ],
-  "packageSha256": "4985d5632bd8bc848ba0bc7b66384be148ee07d4dfd3fc881c4b7ddd1a592add",
-  "integratedPackage": {
-    "directory": "workbenches/72-figcraft",
-    "version": "0.5.0",
-    "appId": "workbench.15953789-9544-4762-bda6-2d9a501293fe",
-    "filename": "72-figcraft-0.5.0.fbworkbench",
-    "bytes": 90809,
-    "sha256": "8802cf2c027ed7decd7717db325525d2560c66788a4948ed01f3248b68d68f2e",
-    "crc": "passed",
-    "sourceFilesMatched": 33,
-    "assetFilesMatched": 4,
-    "businessData": "excluded",
-    "hostImport": "unverified",
-    "deliveryPath": "workbench-figcraft/figcraft-studio-0.5.0.fbworkbench",
-    "introductionFile": "workbench-figcraft/presentation.json",
-    "originalIntegrationLicense": "MIT; third-party materials retain their licenses"
-  }
+    "Approximate proof uses system fonts and image-fill placeholders",
+    "Native PNG/PDF require the optional engine service",
+    "Styled text runs untested with builtin character edits",
+    "Floatboat client import and FigCraft GUI re-open not separately verified"
+  ]
 }

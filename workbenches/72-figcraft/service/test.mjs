@@ -58,3 +58,18 @@ test("native rename and handoff status survive saved archive roundtrip", async (
   const doc = unpack(b.file).doc;
   assert.match(JSON.stringify(doc.nodes["50"]), /readyForDev|ready_for_dev/);
 });
+test("text edited without the engine is refitted before native render and on the next native edit", async () => {
+  const { unzipSync, zipSync, strFromU8, strToU8 } = await import("fflate");
+  const entries = unzipSync(Buffer.from(seed.file, "base64"));
+  const doc = JSON.parse(strFromU8(entries["document.json"]));
+  doc.nodes["58"].characters = "Find a quieter trail for this weekend and beyond";
+  entries["document.json"] = strToU8(JSON.stringify(doc));
+  const file = Buffer.from(zipSync(entries)).toString("base64");
+  const view = await execute({ file });
+  assert.equal(view.file, file, "render-only keeps the stored file");
+  assert.ok(view.layers.find((x) => x.id === 58).height > 38, "native render uses refitted text box");
+  const edited = await execute({ file, action: { kind: "rename", id: 57, name: "Eyebrow" } });
+  const after = unpack(edited.file).doc;
+  assert.ok(after.nodes["58"].height > 38);
+  assert.ok(after.nodes["59"].transform[5] > 78, "following auto-layout sibling moved down");
+});

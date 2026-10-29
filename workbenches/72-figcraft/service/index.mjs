@@ -11,14 +11,14 @@ const exec = promisify(execFile),
 export function unpack(file) {
   if (
     typeof file !== "string" ||
-    file.length > 800000 ||
+    file.length > 1800000 ||
     !/^[A-Za-z0-9+/]+={0,2}$/.test(file)
   )
     throw new Error("设计文件编码或容量无效。");
   const bytes = Buffer.from(file, "base64");
   const zip = unzipSync(bytes, {
     filter: (e) => {
-      if (e.originalSize > 3000000) throw new Error("设计展开内容过大。");
+      if (e.originalSize > 80000000) throw new Error("设计展开内容过大。");
       return e.name === "document.json";
     },
   });
@@ -33,16 +33,16 @@ export function unpack(file) {
   )
     throw new Error("FigCraft文档格式无效。");
   const nodes = Object.values(doc.nodes);
-  if (nodes.length > 1200 || doc.pages.length > 30)
-    throw new Error("设计超过1200图层或30页。");
+  if (nodes.length > 60000 || doc.pages.length > 500)
+    throw new Error("设计超过60000图层或500页。");
   for (const n of nodes)
     if (
       typeof n.id !== "number" ||
       typeof n.name !== "string" ||
       !Number.isFinite(n.width) ||
       !Number.isFinite(n.height) ||
-      n.width > 6000 ||
-      n.height > 6000
+      Math.abs(n.width) > 100000 ||
+      Math.abs(n.height) > 100000
     )
       throw new Error("图层尺寸无效或过大。");
   return { bytes, doc };
@@ -56,17 +56,17 @@ export function commands(action, doc) {
       !node ||
       typeof action.name !== "string" ||
       !action.name.trim() ||
-      action.name.length > 100
+      action.name.trim().length > 100
     )
       throw new Error("图层名称无效。");
-    return [{ command: "node.set", params: { ids: [id], name: action.name } }];
+    return [{ command: "node.set", params: { ids: [id], name: action.name.trim() } }];
   }
   if (action.kind === "text") {
     if (
       !node ||
       node.type !== "text" ||
       typeof action.text !== "string" ||
-      action.text.length > 4000
+      action.text.length > 20000
     )
       throw new Error("文字内容无效。");
     return [
@@ -112,10 +112,22 @@ export async function execute(input) {
   try {
     await writeFile(source, bytes);
     let current = source;
+    // 无引擎写入的文案保留旧文字框尺寸；原生渲染前先让引擎按真实字体重排（text.refit）。
+    const refit = { command: "text.refit", params: {} };
+    if (!input.action) {
+      await writeFile(join(dir, "refit.json"), JSON.stringify([refit]));
+      const fitted = join(dir, "fitted.figcraft");
+      const result = await exec(
+        binary,
+        ["run", join(dir, "refit.json"), "--in", source, "--out", fitted, ...flags],
+        { timeout: 20000, maxBuffer: 3000000 },
+      );
+      if (!result.stdout.includes('"ok":false')) current = fitted;
+    }
     if (input.action) {
       await writeFile(
         join(dir, "commands.json"),
-        JSON.stringify(commands(input.action, doc)),
+        JSON.stringify([refit, ...commands(input.action, doc)]),
       );
       const result = await exec(
         binary,
@@ -138,9 +150,10 @@ export async function execute(input) {
         throw new Error("原生引擎拒绝修改。");
       current = out;
     }
-    const file = await readFile(current);
-    if (file.length > 600000) throw new Error("设计文件超过600KB。");
-    const actual = unpack(file.toString("base64")).doc;
+    // 只读渲染返回原文件（重排结果仅用于本次图像）；带修改的请求返回引擎写出的文件。
+    const file = await readFile(input.action ? current : source);
+    if (file.length > 1350000) throw new Error("设计文件超过1.35MB。");
+    const actual = unpack((await readFile(current)).toString("base64")).doc;
     const pages = actual.pages
       .map((id) => actual.nodes[String(id)])
       .filter(Boolean);
@@ -148,7 +161,9 @@ export async function execute(input) {
       (p.children || [])
         .map((id) => actual.nodes[String(id)])
         .filter(
-          (n) => n && ["frame", "component", "component_set"].includes(n.type),
+          (n) =>
+            n &&
+            ["frame", "component", "componentSet", "component_set"].includes(n.type),
         )
         .map((n) => ({
           id: n.id,
@@ -293,7 +308,7 @@ export function server() {
       let size = 0;
       for await (const chunk of req) {
         size += chunk.length;
-        if (size > 1100000) throw new Error("请求过大。");
+        if (size > 2100000) throw new Error("请求过大。");
         chunks.push(chunk);
       }
       const input = JSON.parse(Buffer.concat(chunks).toString());

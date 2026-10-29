@@ -17,7 +17,7 @@ test("malformed documents, notes and capacities are rejected", () => {
     { ...seed, file: "bad!" },
     { ...seed, notes: { bad: "x" } },
     { ...seed, notes: { 50: 3 } },
-    { ...seed, file: "A".repeat(800004) },
+    { ...seed, file: "A".repeat(1_800_004) },
   ])
     assert.throws(() => designValue(value));
 });
