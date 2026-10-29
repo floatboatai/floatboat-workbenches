@@ -2,7 +2,7 @@ import hashlib
 from pathlib import Path
 import tempfile
 import unittest
-from server import Jobs
+from server import Jobs, normalize_options
 
 class DurableJobsTest(unittest.TestCase):
     def setUp(self):
@@ -34,6 +34,28 @@ class DurableJobsTest(unittest.TestCase):
     def test_reject_invalid_digest(self):
         with self.assertRaises(ValueError):
             self.store.create(self.id, self.audio, 'bad', 'en')
+
+    def test_options_are_part_of_the_immutable_input(self):
+        multi = Jobs(Path(self.tmp.name) / 'multi', 'small', 'int8', None)
+        options = {'task': 'translate', 'word_timestamps': True, 'vad_filter': False, 'beam_size': 2,
+                   'initial_prompt': '  梧桐路  ', 'hotwords': '', 'min_silence_duration_ms': 800,
+                   'condition_on_previous_text': False}
+        job = multi.create(self.id, self.audio, self.digest, 'zh', options)
+        self.assertEqual(job['options']['initial_prompt'], '梧桐路')
+        self.assertIsNone(job['options']['hotwords'])
+        self.assertEqual(multi.create(self.id, self.audio, self.digest, 'zh', options)['options']['beam_size'], 2)
+        with self.assertRaises(FileExistsError):
+            multi.create(self.id, self.audio, self.digest, 'zh', {**options, 'beam_size': 5})
+        self.assertEqual(multi.create('33333333-3333-4333-8333-333333333333', self.audio, self.digest, 'yue')['options'],
+                         normalize_options(None))
+    def test_options_reject_unknown_and_out_of_range_values(self):
+        for bad in ({'temperature': 0}, {'beam_size': 0}, {'beam_size': True}, {'task': 'summarize'},
+                    {'initial_prompt': 'x' * 801}, {'vad_filter': 'yes'}, {'min_silence_duration_ms': 50}):
+            with self.assertRaises(ValueError):
+                normalize_options(bad)
+    def test_english_only_model_rejects_translation(self):
+        with self.assertRaises(ValueError):
+            self.store.create(self.id, self.audio, self.digest, 'en', {'task': 'translate'})
 
 if __name__ == '__main__':
     unittest.main()

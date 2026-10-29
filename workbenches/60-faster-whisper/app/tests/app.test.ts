@@ -6,16 +6,29 @@ import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import {
   emptyTranscript,
-  exampleTranscript,
-  exportSubtitles,
-  importTranscript,
   validateTranscript,
   restoreTranscript,
   transcriptDraft,
   seconds,
   clock,
-  splitCue,
+  type Cue,
+  type Transcript,
 } from "../src/contracts/transcript.ts";
+import { splitCue } from "../src/contracts/edit.ts";
+import { exportSubtitles, importSubtitles } from "../src/contracts/subtitles.ts";
+import { defaultOptions, wireOptions } from "../src/contracts/options.ts";
+const importTranscript = (text: string, name: string) => importSubtitles(text, name).cues;
+const cue = (c: Partial<Cue> & Pick<Cue, "id" | "start" | "end" | "text">): Cue => ({ reviewed: false, speaker: "", words: [], ...c });
+const exampleTranscript: Transcript = {
+  ...emptyTranscript,
+  cues: [
+    cue({ id: "example-1", start: "00:00:00.000", end: "00:00:04.200", text: "今天，我们聊聊如何为一段访谈制作清晰的字幕。", reviewed: true }),
+    cue({ id: "example-2", start: "00:00:04.200", end: "00:00:09.600", text: "先听完整段录音，再检查专有名词、停顿与语气。" }),
+    cue({ id: "example-3", start: "00:00:09.600", end: "00:00:14.500", text: "每一次修订都保留下来，\n交付时就能更从容。" }),
+  ],
+};
+/** What the companion service echoes for a job submitted with default options. */
+const echo = { options: wireOptions(defaultOptions) };
 import { jobInput, parseJob } from "../src/contracts/job.ts";
 import { createAudioFiles, digest, detectMime } from "../src/server/files.ts";
 import { configuredService, createJobs } from "../src/server/jobs.ts";
@@ -40,12 +53,8 @@ async function database() {
   db.exec(
     "CREATE TABLE projects(id TEXT PRIMARY KEY,title TEXT NOT NULL,payload TEXT NOT NULL,revision INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL)",
   );
-  db.exec(
-    await readFile(
-      new URL("../migrations/0004_transcriptions.sql", import.meta.url),
-      "utf8",
-    ),
-  );
+  for (const file of ["0004_transcriptions.sql", "0005_job_info.sql"])
+    db.exec(await readFile(new URL(`../migrations/${file}`, import.meta.url), "utf8"));
   return db;
 }
 
@@ -108,28 +117,16 @@ test("time parsing rejects reversed or unbounded timestamps and rounds correctly
     validateTranscript({
       ...emptyTranscript,
       cues: [
-        {
-          id: "a",
-          start: "00:00:02.000",
-          end: "00:00:01.000",
-          text: "x",
-          reviewed: false,
-        },
+        cue({ id: "a", start: "00:00:02.000", end: "00:00:01.000", text: "x" }),
       ],
     }),
   );
 });
 test("splitting uses codepoints and creates a distinct unreviewed cue", () => {
-  const cue = {
-    id: "old",
-    start: "00:00:00.000",
-    end: "00:00:04.000",
-    text: "你好😀世",
-    reviewed: true,
-  };
-  const pair = splitCue(cue);
+  const old = cue({ id: "old", start: "00:00:00.000", end: "00:00:04.000", text: "你好😀世", reviewed: true });
+  const pair = splitCue(old);
   assert.equal(pair[0].end, pair[1].start);
-  assert.equal(pair[0].text + pair[1].text, cue.text);
+  assert.equal(pair[0].text + pair[1].text, old.text);
   assert.notEqual(pair[0].id, pair[1].id);
   assert.equal(pair[0].reviewed, false);
 });
@@ -179,6 +176,7 @@ test("job records exist before external submit; duplicate request does not submi
         db.prepare("SELECT id FROM transcription_jobs WHERE id=?").get(id),
       );
       return Response.json({
+        ...echo,
         id,
         audioSha256: source.id,
         language: "en",
@@ -218,6 +216,7 @@ test("lost response is unknown and reconciles original job without duplicate sub
         throw new Error("response lost");
       }
       return Response.json({
+        ...echo,
         id,
         audioSha256: source.id,
         language: "en",
@@ -254,6 +253,7 @@ test("cancel and invalid upstream responses never produce completed fake results
       if (String(url).endsWith("/cancel")) {
         cancel = true;
         return Response.json({
+          ...echo,
           id,
           audioSha256: source.id,
           language: "en",
@@ -263,12 +263,14 @@ test("cancel and invalid upstream responses never produce completed fake results
       }
       if (options?.method === "PUT")
         return Response.json({
+          ...echo,
           id,
           audioSha256: source.id,
           language: "en",
           status: "queued",
         });
       return Response.json({
+        ...echo,
         id,
         audioSha256: source.id,
         language: "en",
@@ -312,6 +314,7 @@ test("concurrent duplicate job requests share one durable operation", async () =
     const fake: typeof fetch = async () => {
       calls++;
       return Response.json({
+        ...echo,
         id,
         audioSha256: source.id,
         language: "en",
@@ -348,6 +351,7 @@ test("late poll cannot resurrect cancelled transcription and remote cleartext is
     let resolvePoll: ((response: Response) => void) | undefined;
     const reply = (status: string) =>
       Response.json({
+        ...echo,
         id,
         audioSha256: source.id,
         language: "en",
@@ -382,18 +386,14 @@ test("late poll cannot resurrect cancelled transcription and remote cleartext is
 });
 
 test("oversized subtitle notes and incomplete long cues survive draft storage", async () => {
-  const cues = Array.from({ length: 200 }, (_, i) => ({
-    id: "cue-" + i,
-    start: "00:00:00.000",
-    end: "00:00:01.000",
-    text: "x".repeat(3600),
-    reviewed: false,
-  }));
+  const cues = Array.from({ length: 200 }, (_, i) =>
+    cue({ id: "cue-" + i, start: "00:00:00.000", end: "00:00:01.000", text: "x".repeat(3600) }),
+  );
   const initial = { ...emptyTranscript, cues };
   const baseBytes = Buffer.byteLength(JSON.stringify(initial));
   const base = validateTranscript({
     ...initial,
-    notes: "x".repeat(749000 - baseBytes),
+    notes: "x".repeat(Math.min(20000, 879000 - baseBytes)),
   });
   const edited = {
     ...base,

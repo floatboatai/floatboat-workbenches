@@ -5,10 +5,11 @@ This optional process is independent from the Node workbench package. It runs th
 ## Contract
 
 - `GET /health` returns `{engine:"faster-whisper",model}`. This confirms the job service is reachable; the first model load can still fail and is reported on the job.
-- `PUT /v1/jobs/<uuid>?language=auto|en|zh|...` submits raw audio bytes, maximum 40 MB, with `X-Audio-Sha256`. A fixed ID plus identical audio and language returns the same job. Different input for an existing ID returns 409.
-- `GET /v1/jobs/<uuid>` reads its durable status and completed `segments` with `start`, `end`, `text`.
+- `GET /health` also returns `protocol: 2`, `multilingual` and the engine version. The workbench treats a service without `protocol: 2` as outdated.
+- `PUT /v1/jobs/<uuid>?language=auto|zh|yue|en|...&options=<json>` submits raw audio bytes, maximum 200 MB, with `X-Audio-Sha256`. `options` may contain only `task` (`transcribe`/`translate`), `word_timestamps`, `vad_filter`, `min_silence_duration_ms` (100–5000), `beam_size` (1–10), `initial_prompt` (≤800 chars), `hotwords` (≤400 chars) and `condition_on_previous_text`; anything else is rejected. They are passed to `WhisperModel.transcribe()` unchanged (VAD silence via `vad_parameters`). A fixed ID plus identical audio, language and normalised options returns the same job. Different input for an existing ID returns 409.
+- `GET /v1/jobs/<uuid>` reads its durable status, the normalised `options`, and for completed jobs `segments` with `start`, `end`, `text` and, when requested, `words` (`start`, `end`, `word`, `probability`), plus `info` (`language`, `language_probability`, `duration`, `duration_after_vad`).
 - `POST /v1/jobs/<uuid>/cancel` cancels queued work or requests cooperative cancellation for running work. A terminal result is not changed.
-- Job responses include `id`, `audioSha256` and `language`; the Node connector verifies all three against its captured input before accepting a result.
+- Job responses include `id`, `audioSha256`, `language` and `options`; the Node connector verifies all four against its captured input before accepting a result.
 
 `queued → running → completed|failed|cancelled`; a service restart converts `running` to `interrupted`. Each job captures its model, compute mode and engine version; queued work is rejected if the configuration changes before execution. Existing results retain their original model identity. The queue has no public endpoint for arbitrary URLs or local file paths. It persists input audio under generated IDs; imports are decoded by PyAV, not shell commands. The model is selected by the administrator at service startup, not by arbitrary browser requests.
 
@@ -28,4 +29,4 @@ Cancellation does not force-stop a CTranslate2 call or model download. It preven
 .local/whisper-service/bin/python -m unittest discover -s service -p 'test_*.py'
 ```
 
-These tests cover durable submission, duplicates, conflicts, cancellation and restart. They do not invoke models. The separate real tiny.en model/browser acceptance is recorded in the workbench ACCEPTANCE.md.
+These 7 tests cover durable submission, duplicates, conflicts (including different options), option validation, English-only model limits, cancellation and restart. They do not invoke models. The separate real model (small, 0.9.0; tiny.en, 0.4.0) browser acceptance is recorded in the workbench ACCEPTANCE.md.

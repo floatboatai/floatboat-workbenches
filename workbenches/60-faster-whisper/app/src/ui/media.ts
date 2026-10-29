@@ -2,6 +2,7 @@ import {
   CHUNK_BYTES,
   MAX_AUDIO_BYTES,
   audioSource,
+  sniffAudio,
   type AudioSource,
 } from "../contracts/transcript";
 import { getPageConnection } from "./connection";
@@ -14,7 +15,7 @@ export function base64(bytes: Uint8Array) {
 }
 export function unbase64(value: string) {
   if (value.length > Math.ceil(MAX_AUDIO_BYTES / 3) * 4)
-    throw new Error("音频超过 40 MB。");
+    throw new Error("音频超过 200 MB。");
   return Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
 }
 export async function audioBytes(id: string) {
@@ -50,24 +51,15 @@ export async function sourceFor(
   file: File,
   bytes: Uint8Array,
 ): Promise<AudioSource> {
-  if (bytes.length > MAX_AUDIO_BYTES) throw new Error("音频不能超过 40 MB。");
+  if (bytes.length > MAX_AUDIO_BYTES) throw new Error("音频不能超过 200 MB。");
+  const mime = sniffAudio(bytes);
   const hash = await crypto.subtle.digest("SHA-256", new Uint8Array(bytes));
-  const extension = file.name.split(".").at(-1)?.toLowerCase() ?? "";
-  const mimes: Record<string, string> = {
-    wav: "audio/wav",
-    mp3: "audio/mpeg",
-    m4a: "audio/mp4",
-    mp4: "audio/mp4",
-    ogg: "audio/ogg",
-    webm: "audio/webm",
-    flac: "audio/flac",
-  };
   return audioSource({
     id: Array.from(new Uint8Array(hash))
       .map((x) => x.toString(16).padStart(2, "0"))
       .join(""),
-    name: file.name,
+    name: file.name.slice(0, 180),
     bytes: bytes.length,
-    mime: mimes[extension] ?? file.type,
+    mime,
   });
 }

@@ -3,9 +3,9 @@
   "appId": "workbench.d9568fee-aafb-425f-9660-19fee57a71c1",
   "registryName": "faster-whisper-studio",
   "name": "字幕剪辑室",
-  "description": "音频转写、逐句回听与字幕时间轴审校",
-  "version": "0.4.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "description": "音频转写、逐词对齐的字幕校对与说话人标注",
+  "version": "0.9.0",
+  "changelog": "0.9.0：首屏自带原创双人访谈与真实转写稿；逐词时间与置信、可缩放波形与拖动入出点、拆分/合并、查找替换、说话人标注；SRT/VTT/TXT/JSON 导出；转写服务状态、启动命令与 transcribe() 参数（语言、翻译、逐词、VAD、提示词、热词、beam）就在转写按钮旁；音频上限 200 MB。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
