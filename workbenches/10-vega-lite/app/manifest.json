@@ -3,9 +3,9 @@
   "appId": "workbench.36399f8d-8c23-4259-86f1-0e18d8087b51",
   "registryName": "vega-lite-studio",
   "name": "图表规格实验台",
-  "description": "AI图表制作：输入数据和意图，生成可编辑图表规格",
-  "version": "0.3.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "description": "Vega-Lite 图表实验台：导入 CSV/TSV/JSON 数据，按官方 schema 编辑完整规格（图层、拼接、分面、重复、交互参数），导出 SVG/PNG 与项目包",
+  "version": "0.9.0",
+  "changelog": "0.9.0：接受完整 Vega-Lite 6 语法并按官方 JSON Schema 校验；数据窗导入 CSV/TSV/JSON（20 MiB）、类型推断与字段芯片；CodeMirror 规格编辑器（高亮、补全、悬停说明、行内错误）；13 个示例；SVG/PNG/项目包导出；容器自适应宽度；文件菜单取代页头项目组合。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

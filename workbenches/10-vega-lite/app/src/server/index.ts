@@ -1,9 +1,13 @@
 import { registerAutosaveRoutes } from "./autosave";
 import { createWorkbenchServer } from "../../sdk/runtime.mjs";
 import { registerRoutes } from "./routes";
-import { validate, instructions } from "../contracts/model";
+import { registerAppRoute } from "./app-route";
+import { verifyModel } from "./schema";
+import { validate } from "../contracts/model";
 const app = await createWorkbenchServer(import.meta.url);
-registerRoutes(app, validate, instructions);
-
-registerAutosaveRoutes(app, validate);
+const datasets = registerRoutes(app);
+registerAppRoute(app);
+registerAutosaveRoutes(app, validate, undefined, {
+  verify: async (model) => verifyModel(model, datasets),
+});
 await app.listen();
