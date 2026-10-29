@@ -1,863 +1,754 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
-import {
-  Check,
-  FileInput,
-  FlaskConical,
-  Play,
-  Settings2,
-  X,
-  Download,
-  Plus,
-  ArrowRight,
-} from "lucide-react";
-import {
-  useProjects,
-  ProjectPicker,
-  Notice,
-  request,
-  download,
-} from "./workspace";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { FlaskConical, Play, Square, Settings2, ChevronDown, FileText, Gauge, Server, Search } from "lucide-react";
+import { useProjects, Notice, request, download } from "./workspace";
 import { isRecord } from "../contracts/project";
 import {
+  blankConfig,
   emptyProject,
-  parseEvaluation,
-  reviewCsv,
-  reviewKey,
   validateProject,
   restoreProjectDraft,
-  validateSuite,
-  type Cell,
-  type Decision,
-  type Report,
+  reviewKey,
+  releaseKey,
+  type EvalProject,
+  type RunRef,
+  type Review,
+  type ReleaseDecision,
 } from "../contracts/evaluation";
-interface Job {
-  id: string;
-  state: string;
-  error: string;
-  report: string | null;
+import { ConfigError, parseSuite, testsFromCsv, appendTestsToConfig, configToYaml, type Suite } from "../contracts/config";
+import { columnStats, defaultGate, pct, type Baseline } from "../contracts/compare";
+import type { RunView } from "../contracts/results";
+import { reportCsv, reportHtml } from "../contracts/reports";
+import { Matrix, visibleTests, type Filter } from "./Matrix";
+import { Inspector } from "./Inspector";
+import { ConfigPanel } from "./ConfigPanel";
+import { FileMenu } from "./FileMenu";
+import { cachedRun, exportProject, importProject, loadRun, MAX_IMPORT_BYTES, newProjectFromConfig, safeName, sniff, uploadResult } from "./files";
+import { useEnvironment, useTask } from "./useEvaluation";
+import { usePopover } from "./usePopover";
+
+type Pending = { id: string; kind: "local" | "official"; name: string; input?: Record<string, unknown> };
+function pendingOf(v: unknown): Pending | null {
+  return isRecord(v) && typeof v.id === "string" && (v.kind === "local" || v.kind === "official") && typeof v.name === "string"
+    ? { id: v.id, kind: v.kind, name: v.name, ...(isRecord(v.input) ? { input: v.input } : {}) } : null;
 }
-function jobValue(v: unknown): Job {
-  if (
-    !isRecord(v) ||
-    typeof v.id !== "string" ||
-    typeof v.state !== "string" ||
-    typeof v.error !== "string" ||
-    !(v.report === null || typeof v.report === "string")
-  )
-    throw new Error("任务响应无效。");
-  return { id: v.id, state: v.state, error: v.error, report: v.report };
+function suiteOf(text: string): { suite: Suite | null; error: string; line: number | null } {
+  try {
+    return { suite: parseSuite(text), error: "", line: null };
+  } catch (e) {
+    return { suite: null, error: e instanceof Error ? e.message : "配置无效。", line: e instanceof ConfigError ? e.line : null };
+  }
 }
-const phases: Record<string, string> = {
-  submitting: "提交中",
-  uncertain: "等待确认",
+const phaseText: Record<string, string> = {
   queued: "排队中",
   running: "评测中",
+  submitting: "提交中",
+  uncertain: "回执未确认",
   completed: "已完成",
-  failed: "执行失败",
-  interrupted: "执行已中断",
-  "not-submitted": "尚未提交",
+  failed: "失败",
+  cancelled: "已停止",
+  interrupted: "已中断",
+  "not-submitted": "未提交",
 };
-const formatNumber = (v: number | null, suffix = "") =>
-  v === null
-    ? "—"
-    : new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 3 }).format(v) +
-      suffix;
+const SAMPLE_BASELINE = "v1 现网";
+
 export function App() {
   const p = useProjects(emptyProject, validateProject, "发布评测", {
-    storageKey: "promptfoo-evaluation-v1",
+    storageKey: "promptfoo-evaluation-v2",
     restoreDraftData: restoreProjectDraft,
   });
-  const [selected, setSelected] = useState(""),
-    [filter, setFilter] = useState("all"),
-    [mobileColumn, setMobileColumn] = useState(0),
-    [configOpen, setConfigOpen] = useState(false),
-    [working, setWorking] = useState(false),
-    [job, setJob] = useState<Job | null>(null),
-    [connection, setConnection] = useState({
-      connected: false,
-      modelConfigured: false,
-      message: "正在检查执行器…",
-    });
-  const importRef = useRef<HTMLInputElement>(null),
-    projectRef = useRef<HTMLInputElement>(null);
-  const submittingDocument = useRef<string | null>(null);
+  const env = useEnvironment();
+  const [selected, setSelected] = useState("");
+  const [side, setSide] = useState<"inspector" | "config" | null>("inspector");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [search, setSearch] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [envOpen, setEnvOpen] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [confirmHost, setConfirmHost] = useState<{ calls: number; labels: string[] } | null>(null);
+  const [busyText, setBusyText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [views, setViews] = useState<Record<string, RunView>>({});
+  const [missing, setMissing] = useState<Record<string, string>>({});
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const configButton = useRef<HTMLButtonElement>(null);
+  const submittingRef = useRef(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const csvInput = useRef<HTMLInputElement>(null);
   const epoch = useRef(p.documentKey);
   epoch.current = p.documentKey;
-  const report = p.data.reports.find((r) => r.id === p.data.activeId) ?? null;
-  const evaluation = useMemo(
-    () => (report ? parseEvaluation(report.raw) : null),
-    [report],
-  );
-  const cell =
-    evaluation?.cells.find((c) => c.key === selected) ??
-    evaluation?.cells[0] ??
-    null;
-  const baseline =
-    evaluation?.cells.find(
-      (c) => c.test === cell?.test && c.column === p.data.baseline,
-    ) ?? null;
-  const review =
-    report && cell
-      ? (p.data.reviews[reviewKey(report.id, cell)] ?? {
-          decision: "pending" as Decision,
-          note: "",
-        })
-      : null;
-  const suiteDraft =
-    typeof p.draft.suite === "string" ? p.draft.suite : p.data.suite;
-  const jobId = typeof p.draft.jobId === "string" ? p.draft.jobId : "";
-  const tests =
-    evaluation?.tests.filter(
-      (t) =>
-        filter !== "fail" ||
-        evaluation.cells.some((c) => c.test === t && !c.pass),
-    ) ?? [];
-  async function health() {
-    try {
-      const v = await request("/api/runner");
-      if (!isRecord(v) || typeof v.message !== "string")
-        throw new Error("执行器状态无效。");
-      setConnection({
-        connected: v.connected === true,
-        modelConfigured: v.modelConfigured === true,
-        message: v.message,
-      });
-    } catch {
-      setConnection({
-        connected: false,
-        modelConfigured: false,
-        message: "执行器暂不可达；可以继续导入和复核。",
-      });
-    }
-  }
+  const sampleTried = useRef(false);
+  const envWrap = useRef<HTMLDivElement>(null);
+  const gateWrap = useRef<HTMLDivElement>(null);
+  const closeEnv = useCallback(() => setEnvOpen(false), []);
+  const closeGate = useCallback(() => setGateOpen(false), []);
+  usePopover(envOpen, closeEnv, envWrap);
+  usePopover(gateOpen, closeGate, gateWrap);
+
+  const data = p.data;
+  const configText = typeof p.draft.config === "string" ? p.draft.config : data.config;
+  const deferredConfig = useDeferredValue(configText);
+  const draftCheck = useMemo(() => suiteOf(deferredConfig), [deferredConfig]);
+  const applied = useMemo(() => suiteOf(data.config), [data.config]);
+  const suite = applied.suite;
+  const pending = pendingOf(p.draft.task);
+
+  // 编辑中的配置一旦能通过检查就生效；无效输入只作为草稿保存
   useEffect(() => {
-    void health();
-  }, []);
+    if (draftCheck.suite && deferredConfig !== data.config) p.setData((prev) => ({ ...prev, config: deferredConfig }));
+    if (draftCheck.suite && typeof p.draft.config === "string" && p.draft.config === deferredConfig)
+      p.setDraft((prev) => {
+        if (prev.config !== deferredConfig) return prev;
+        const next = { ...prev };
+        delete next.config;
+        return next;
+      });
+  }, [draftCheck.suite, deferredConfig]);
+
+  const runRef = data.runs.find((r) => r.id === data.current) ?? null;
+  const run = runRef ? (views[runRef.id] ?? cachedRun(runRef.id)?.view ?? null) : null;
+  const baselineRunId = data.baseline.kind === "run" ? data.baseline.runId : "";
+  const baselineRun = baselineRunId ? (views[baselineRunId] ?? cachedRun(baselineRunId)?.view ?? null) : null;
+
+  useEffect(() => {
+    for (const id of [data.current, baselineRunId])
+      if (id && !views[id] && !missing[id])
+        loadRun(id)
+          .then((e) => setViews((v) => ({ ...v, [id]: e.view })))
+          .catch((e) => setMissing((m) => ({ ...m, [id]: e instanceof Error ? e.message : "运行结果无法读取。" })));
+  }, [data.current, baselineRunId, views, missing]);
+
+  const stats = useMemo(() => (run ? columnStats(run, data.baseline, baselineRun) : []), [run, data.baseline, baselineRun]);
+  useEffect(() => {
+    if (!run) return;
+    p.setData((prev) => {
+      if (prev.current !== runRef?.id) return prev;
+      const b = prev.baseline;
+      if ((b.kind === "prompt" && !run.columns.some((c) => c.prompt === b.prompt)) || (b.kind === "run" && b.runId === prev.current))
+        return { ...prev, baseline: { kind: "none" } };
+      return prev;
+    });
+  }, [run, runRef?.id]);
+
+  // 新运行载入后选中第一处退步或失败，详情栏首屏就有内容
+  useEffect(() => {
+    if (!run || (selected && run.byKey.has(selected))) return;
+    const firstBad = run.cells.find((c) => !c.pass && run.columns[c.column]?.prompt !== (data.baseline.kind === "prompt" ? data.baseline.prompt : "")) ?? run.cells.find((c) => !c.pass) ?? run.cells[0];
+    if (firstBad) setSelected(firstBad.key);
+  }, [run]);
   useEffect(() => {
     setSelected("");
-    setJob(null);
-    setWorking(false);
+    setConfirmHost(null);
+    setSearch("");
   }, [p.documentKey]);
-  useEffect(() => {
-    if (!jobId) return;
-    let active = true,
-      timer: ReturnType<typeof setTimeout> | undefined;
-    const key = p.documentKey;
-    const poll = async () => {
-      try {
-        const next = jobValue(await request(`/api/jobs/${jobId}`));
-        if (!active || epoch.current !== key) return;
-        setJob(next);
-        if (next.state === "completed" && next.report) {
-          try {
-            const candidate: Report = {
-              id: next.id,
-              name: `评测 ${new Date().toLocaleTimeString("zh-CN")}`,
-              raw: next.report,
-            };
-            const parsed = parseEvaluation(candidate.raw);
-            p.setData((previous) =>
-              previous.reports.some((r) => r.id === candidate.id)
-                ? previous
-                : validateProject({
-                    ...previous,
-                    reports: [...previous.reports, candidate],
-                    activeId: candidate.id,
-                    baseline: parsed.columns[0].index,
-                  }),
-            );
-          } catch (e) {
-            p.report(e);
-          }
-        } else if (!["failed", "interrupted"].includes(next.state))
-          timer = setTimeout(poll, 1800);
-      } catch (e) {
-        if (active) {
-          if (isRecord(e) && e.status === 404)
-            setJob({
-              id: jobId,
-              state: "not-submitted",
-              report: null,
-              error: "提交尚未确认，可重试原任务。",
-            });
-          else p.report(e);
-          timer = setTimeout(poll, 6000);
-        }
-      }
-    };
-    timer = setTimeout(poll, 1800);
-    return () => {
-      active = false;
-      if (timer) clearTimeout(timer);
-    };
-  }, [jobId, p.documentKey]);
-  function mark(decision: Decision, note = review?.note ?? "") {
-    if (!report || !cell) return;
-    const key = reviewKey(report.id, cell);
+
+  const loadSample = useCallback(async () => {
+    const key = epoch.current;
+    setBusyText("正在载入示例评测…");
     try {
-      p.setData((previous) =>
-        restoreProjectDraft({
-          ...previous,
-          reviews: { ...previous.reviews, [key]: { decision, note } },
-        }),
-      );
-    } catch (e) {
-      p.report(e);
-    }
-  }
-  async function addReport(raw: string, name: string) {
-    const parsed = parseEvaluation(raw);
-    const r = { id: crypto.randomUUID(), name: name.slice(0, 120), raw };
-    p.setData((previous) =>
-      validateProject({
-        ...previous,
-        reports: [...previous.reports, r],
-        activeId: r.id,
-        baseline: parsed.columns[0].index,
-      }),
-    );
-    setSelected("");
-    p.setNotice("评测报告已加入，复核记录会自动保存。");
-  }
-  async function importResult(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    const key = p.documentKey;
-    try {
-      if (file.size > 600000) throw new Error("单份报告不能超过600KB。");
-      const raw = await file.text();
-      if (epoch.current === key)
-        await addReport(raw, file.name.replace(/\.json$/i, ""));
-    } catch (err) {
-      p.report(err);
-    }
-  }
-  async function example() {
-    const key = p.documentKey;
-    try {
-      const raw = await request("/api/example");
-      if (epoch.current === key)
-        await addReport(JSON.stringify(raw), "回显评测示例");
-    } catch (e) {
-      p.report(e);
-    }
-  }
-  async function importProject(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    const key = p.documentKey;
-    try {
-      if (file.size > 1800000) throw new Error("项目文件过大。");
-      const v: unknown = JSON.parse(await file.text());
-      if (!isRecord(v) || v.kind !== "promptfoo-workbench" || v.version !== 1)
-        throw new Error("需要评测台导出的项目文件。");
-      const data = restoreProjectDraft(v.data);
-      if (
-        isRecord(v.draft) &&
-        typeof v.draft.suite === "string" &&
-        v.draft.suite.length > 60000
-      )
-        throw new Error("配置草稿超过容量。");
+      const res = await request("/api/sample", { method: "POST", body: JSON.stringify({ runId: `smp-${crypto.randomUUID()}` }) });
+      if (!isRecord(res) || typeof res.config !== "string" || !isRecord(res.run)) throw new Error("示例响应无效。");
       if (epoch.current !== key) return;
-      await p.replace(
-        data,
-        typeof v.title === "string" ? v.title : "导入的评测项目",
-        isRecord(v.draft)
-          ? {
-              suite:
-                typeof v.draft.suite === "string" ? v.draft.suite : data.suite,
-            }
-          : {},
+      const ref = res.run as unknown as RunRef;
+      const replaced = await p.replace(
+        { ...structuredClone(emptyProject), config: res.config, runs: [ref], current: ref.id, baseline: { kind: "prompt", prompt: SAMPLE_BASELINE } },
+        "售后助手发布评测",
+        {},
       );
-    } catch (err) {
-      p.report(err);
-    }
-  }
-  function exportProject() {
-    download(
-      new Blob(
-        [
-          JSON.stringify(
-            {
-              kind: "promptfoo-workbench",
-              version: 1,
-              title: p.title,
-              data: p.data,
-              draft: { suite: suiteDraft },
-            },
-            null,
-            2,
-          ),
-        ],
-        { type: "application/json" },
-      ),
-      "evaluation-project.json",
-    );
-  }
-  function applySuite() {
-    try {
-      validateSuite(JSON.parse(suiteDraft));
-      p.setData((previous) => ({ ...previous, suite: suiteDraft }));
-      p.setNotice("测试配置已应用。");
+      if (!replaced) return;
+      p.setNotice("已载入示例：36 个售后工单 × 3 个提示版本。回放录制输出与规则脚本都在本机运行，点“运行评测”重新评分。");
     } catch (e) {
       p.report(e);
-    }
-  }
-  async function start(retry = false) {
-    if (
-      working ||
-      submittingDocument.current === p.documentKey ||
-      (!retry && running)
-    )
-      return;
-    let suite: unknown;
-    try {
-      suite = validateSuite(
-        JSON.parse(
-          retry && typeof p.draft.jobSuite === "string"
-            ? p.draft.jobSuite
-            : suiteDraft,
-        ),
-      );
-    } catch (e) {
-      p.report(e);
-      return;
-    }
-    if (
-      isRecord(suite) &&
-      suite.mode === "model" &&
-      !connection.modelConfigured
-    ) {
-      p.report(
-        new Error("执行器尚未配置模型，请先配置服务或选择 echo 模板检查。"),
-      );
-      return;
-    }
-    const key = p.documentKey,
-      id = retry && jobId ? jobId : `eval-${crypto.randomUUID()}`;
-    submittingDocument.current = key;
-    setWorking(true);
-    setJob({ id, state: "submitting", error: "", report: null });
-    p.setError("");
-    p.setDraft((previous) => ({
-      ...previous,
-      jobId: id,
-      jobSuite: JSON.stringify(suite),
-    }));
-    try {
-      const saved = await p.save();
-      if (!saved) throw new Error("请先解决保存状态，再开始评测。");
-      const next = jobValue(
-        await request("/api/jobs", {
-          method: "POST",
-          body: JSON.stringify({ id, suite }),
-        }),
-      );
-      if (epoch.current === key) setJob(next);
-    } catch (e) {
-      if (epoch.current === key) p.report(e);
     } finally {
-      if (submittingDocument.current === key) submittingDocument.current = null;
-      if (epoch.current === key) setWorking(false);
+      setBusyText("");
+    }
+  }, [p]);
+  useEffect(() => {
+    if (p.loading || sampleTried.current) return;
+    sampleTried.current = true;
+    if (!p.items.length && !p.current && !data.runs.length && data.config === blankConfig && typeof p.draft.config !== "string") void loadSample();
+  }, [p.loading]);
+
+  const addRun = useCallback(
+    (ref: RunRef, kind: "local" | "official" | "import") => {
+      p.setData((prev): EvalProject => {
+        if (prev.runs.some((r) => r.id === ref.id)) return { ...prev, current: ref.id };
+        const previous = prev.current;
+        const runs = [ref, ...prev.runs].slice(0, 60);
+        const view = cachedRun(ref.id)?.view;
+        let baseline: Baseline = prev.baseline;
+        if (kind === "official" && previous) baseline = { kind: "run", runId: previous };
+        else if (baseline.kind === "none" && view?.columns.length) baseline = { kind: "prompt", prompt: view.columns[0].prompt };
+        else if (baseline.kind === "run" && !runs.some((r) => r.id === (baseline as { runId: string }).runId)) baseline = { kind: "none" };
+        return { ...prev, runs, current: ref.id, baseline };
+      });
+    },
+    [p],
+  );
+  const clearTask = useCallback(() => p.setDraft((prev) => {
+    const next = { ...prev };
+    delete next.task;
+    return next;
+  }), [p]);
+  const task = useTask({
+    pending,
+    documentKey: p.documentKey,
+    onDone(ref, kind) {
+      addRun(ref, kind);
+      clearTask();
+      p.setNotice(
+        kind === "official"
+          ? "官方 promptfoo 0.125.1 核对完成：已与上一次运行对照，退步/修复列显示两者差异（本机脚本与模型列不参与）。"
+          : `运行完成：${ref.stats.pass}/${ref.stats.total} 通过${ref.stats.error ? `，${ref.stats.error} 格执行错误` : ""}。`,
+      );
+    },
+    onEnd(message) {
+      clearTask();
+      p.setError(message);
+    },
+  });
+  const running = Boolean(pending) || submitting;
+
+  async function submitTask(next: Pending) {
+    if (submittingRef.current || !next.input) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    const key = epoch.current;
+    p.setDraft((prev) => ({ ...prev, task: next }));
+    try {
+      // Persist the immutable request before sending it. A retry uses this ID and input.
+      if (!(await p.save())) {
+        if (epoch.current === key) {
+          clearTask();
+          p.setError("任务尚未提交：请先恢复自动保存，再运行评测。");
+        }
+        return;
+      }
+      if (epoch.current !== key) return;
+      await request(next.kind === "local" ? "/api/evaluations" : "/api/official-jobs", {
+        method: "POST",
+        body: JSON.stringify(next.input),
+      });
+    } catch (e) {
+      if (epoch.current !== key) return;
+      if (isRecord(e) && typeof e.status === "number" && e.status >= 400 && e.status < 500) {
+        clearTask();
+        p.report(e);
+      } else {
+        p.setError("提交回执未确认，正在按原任务编号查询；可重试原任务，不会新建运行。");
+      }
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
     }
   }
-  const running =
-    working ||
-    Boolean(
-      jobId &&
-        (!job ||
-          job.id !== jobId ||
-          !["completed", "failed", "interrupted"].includes(job.state)),
-    );
+
+  async function startRun(allowHost = false) {
+    if (running) return;
+    const check = suiteOf(configText);
+    if (!check.suite) {
+      setSide("config");
+      p.setError(`配置未生效，无法运行：${check.error}`);
+      return;
+    }
+    const host = check.suite.columns.filter((c) => c.provider.kind === "host");
+    if (host.length && !allowHost) {
+      setConfirmHost({ calls: host.length * check.suite.tests.length, labels: [...new Set(host.map((c) => c.provider.label))] });
+      return;
+    }
+    setConfirmHost(null);
+    const id = crypto.randomUUID();
+    const name = `运行 ${data.runs.filter((r) => r.origin === "local").length + 1} · ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`;
+    p.setError("");
+    await submitTask({ id, kind: "local", name, input: { id, config: configText, sources: data.runs.map((r) => r.id), allowHost, name } });
+  }
+  async function startOfficial() {
+    if (running) return;
+    setEnvOpen(false);
+    const id = `eval-${crypto.randomUUID()}`;
+    await submitTask({ id, kind: "official", name: "官方核对", input: { id, config: data.config, sources: data.runs.map((x) => x.id) } });
+  }
+  async function stopRun() {
+    if (!pending) return;
+    if (pending.kind === "local") await request(`/api/evaluations/${pending.id}/cancel`, { method: "POST", body: "{}" }).catch(p.report);
+  }
+
+  async function importFile(file: File) {
+    const key = epoch.current;
+    if (file.size > MAX_IMPORT_BYTES) {
+      p.setError("文件超过 40MB，请分批导出。");
+      return;
+    }
+    try {
+      const text = await file.text();
+      const s = sniff(file.name, text);
+      if (epoch.current !== key) return;
+      if (s.kind === "csv") return appendCsv(text);
+      if (s.kind === "draft") {
+        if (await p.replace(s.data, s.title, s.extra)) {
+          setSide("config");
+          p.setNotice("工作草稿已恢复为新的评测。运行结果引用仍指向原本机资料。");
+        }
+        return;
+      }
+      if (s.kind === "config") {
+        const check = suiteOf(s.text);
+        if (!(await p.replace(newProjectFromConfig(s.text), check.suite?.description.slice(0, 80) || s.title, {}))) return;
+        if (!check.suite) {
+          setSide("config");
+          p.setError(`配置已导入为新评测，但还不能运行：${check.error}`);
+        } else p.setNotice(`已导入配置：${check.suite.tests.length} 个用例 × ${check.suite.columns.length} 列。录制输出可从 Promptfoo 结果 JSON 导入。`);
+        return;
+      }
+      if (s.kind === "project") {
+        setBusyText("正在导入评测项目…");
+        const res = await importProject(s.value, setBusyText);
+        if (epoch.current !== key) return;
+        if (!(await p.replace(res.data, res.title, res.draft !== undefined ? { config: res.draft } : {}))) return;
+        p.setNotice("评测项目已导入为新的评测，原评测保持不变。");
+        return;
+      }
+      setBusyText("正在上传结果…");
+      const ref = await uploadResult(s.text, s.title, (d, t) => setBusyText(`正在上传结果 ${d}/${t}…`));
+      await loadRun(ref.id);
+      if (epoch.current !== key) return;
+      const adoptConfig = data.config === blankConfig && !data.runs.length && s.config && typeof s.config === "object";
+      addRun(ref, "import");
+      if (adoptConfig) {
+        const yaml = configToYaml(s.config);
+        if (suiteOf(yaml).suite) p.setData((prev) => ({ ...prev, config: yaml }));
+      }
+      p.setNotice(`已加入运行“${ref.name}”：${ref.stats.pass}/${ref.stats.total} 通过。其中的输出可作为录制供回放 provider 使用。`);
+    } catch (e) {
+      p.report(e);
+    } finally {
+      setBusyText("");
+    }
+  }
+  async function appendCsv(text: string) {
+    try {
+      const tests = testsFromCsv(text);
+      const next = appendTestsToConfig(configText, tests);
+      p.setDraft((prev) => ({ ...prev, config: next }));
+      setSide("config");
+      p.setNotice(`已追加 ${tests.length} 个用例到配置。`);
+    } catch (e) {
+      p.report(e);
+    }
+  }
+  const onFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) void importFile(f);
+  };
+  const onCsv = async (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) {
+      if (f.size > MAX_IMPORT_BYTES) return p.setError("文件超过 40MB，请分批导出。");
+      const key = epoch.current;
+      const text = await f.text();
+      if (epoch.current === key) await appendCsv(text);
+    }
+  };
+  const onDrop = (e: DragEvent) => {
+    const f = e.dataTransfer.files?.[0];
+    if (!f) return;
+    e.preventDefault();
+    void importFile(f);
+  };
+
+  const baselineLabel =
+    data.baseline.kind === "prompt" ? data.baseline.prompt : data.baseline.kind === "run" ? (data.runs.find((r) => r.id === baselineRunId)?.name ?? "另一运行") : "无";
+  const reportInput = () =>
+    run && runRef
+      ? {
+          title: p.title,
+          runId: runRef.id,
+          runName: runRef.name,
+          run,
+          baseline: data.baseline,
+          baselineRun,
+          baselineName: baselineLabel,
+          reviews: data.reviews,
+          releases: data.releases,
+          gate: data.gate,
+        }
+      : null;
+  const exportHtml = () => {
+    const i = reportInput();
+    if (i) download(new Blob([reportHtml(i)], { type: "text/html;charset=utf-8" }), `${safeName(p.title)}-报告.html`);
+  };
+  const exportCsv = () => {
+    const i = reportInput();
+    if (i) download(new Blob([reportCsv(i)], { type: "text/csv;charset=utf-8" }), `${safeName(p.title)}-明细.csv`);
+  };
+  const exportResults = async () => {
+    if (!runRef) return;
+    try {
+      const raw = (await loadRun(runRef.id)).raw;
+      download(new Blob([JSON.stringify(raw, null, 2)], { type: "application/json" }), `${safeName(runRef.name)}.results.json`);
+    } catch (e) {
+      p.report(e);
+    }
+  };
+  const addHostColumn = () => {
+    const model = env.host.model || "gemini-3.8-flash";
+    const label = `Floatboat · ${model}`;
+    if (configText.includes(`floatboat:${model}`)) {
+      p.setNotice("配置中已有这个 Floatboat 模型列。");
+      return;
+    }
+    const next = configText.replace(/^providers:\s*\n/m, `providers:\n  - id: floatboat:${model}\n    label: ${label}\n    config:\n      temperature: 0\n`);
+    if (next === configText) {
+      p.setError("没有找到 providers 列表，请手动添加：- id: floatboat:" + model);
+      return;
+    }
+    p.setDraft((prev) => ({ ...prev, config: next }));
+    p.setNotice(`已添加列 ${label}。运行前会提示将发起的真实模型调用次数。`);
+  };
+  const setReview = (key: string, r: Review) =>
+    p.setData((prev) => {
+      try {
+        return restoreProjectDraft({ ...prev, reviews: { ...prev.reviews, [key]: r } });
+      } catch (e) {
+        p.report(e);
+        return prev;
+      }
+    });
+  const setRelease = (colKey: string, decision: ReleaseDecision) =>
+    runRef &&
+    p.setData((prev) => ({
+      ...prev,
+      releases: { ...prev.releases, [releaseKey(runRef.id, colKey)]: { decision, note: prev.releases[releaseKey(runRef.id, colKey)]?.note ?? "" } },
+    }));
+  const removeRun = () => {
+    if (!runRef || !confirm(`从当前评测移除“${runRef.name}”？本机原始结果仍会保留。`)) return;
+    p.setData((prev) => {
+      const runs = prev.runs.filter((r) => r.id !== runRef.id);
+      return {
+        ...prev,
+        runs,
+        current: runs[0]?.id ?? "",
+        baseline: prev.baseline.kind === "run" && prev.baseline.runId === runRef.id ? { kind: "none" } : prev.baseline,
+      };
+    });
+    p.setNotice(`已从项目移除“${runRef.name}”。`);
+  };
+
+  const cell = run?.byKey.get(selected) ?? null;
+  const shown = run ? visibleTests(run, filter, search, data.baseline, baselineRun, data.reviews, runRef?.id ?? "") : [];
+  const totals = run ? { pass: run.cells.filter((c) => c.pass).length, total: run.cells.length } : null;
+  const conflict = p.autoState.phase === "conflict";
+  const progress = task && task.total ? Math.round((task.done / task.total) * 100) : 0;
+
   return (
-    <div className="evaluation-app">
-      <a className="skip" href="#main">
-        跳至评测结果
+    <div className={`app side-${side ?? "none"}`} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
+      <a className="skip" href="#matrix">
+        跳到评测矩阵
       </a>
-      <header className="masthead">
-        <div className="brand">
-          <FlaskConical size={23} aria-hidden="true" />
-          <div>
-            <strong>Promptfoo</strong>
-            <span>评测与发布复核</span>
-          </div>
+      <header className="topbar">
+        <div className="brand" aria-label="Promptfoo 评测台">
+          <FlaskConical size={20} aria-hidden="true" />
+          <h1>Promptfoo</h1>
         </div>
-        <label className="project-title">
-          <span className="sr-only">项目名称</span>
-          <input
-            aria-label="项目名称"
-            name="project-name"
-            autoComplete="off"
-            value={p.title}
-            onChange={(e) => p.setTitle(e.target.value)}
-            maxLength={120}
+        <div className="menu-wrap">
+          <button ref={menuButton} className="menu-button" aria-expanded={menuOpen} aria-haspopup="dialog" onClick={() => setMenuOpen((v) => !v)}>
+            评测 <ChevronDown size={14} aria-hidden="true" />
+          </button>
+          <FileMenu
+            open={menuOpen}
+            close={() => setMenuOpen(false)}
+            trigger={menuButton}
+            locked={p.busy || Boolean(busyText) || running}
+            items={p.items}
+            currentId={p.current?.id}
+            hasRun={Boolean(run)}
+            conflict={conflict}
+            onNew={() => void p.replace(structuredClone(emptyProject), "新的评测", {})}
+            onSample={() => void loadSample()}
+            onOpen={(id) => void p.open(id)}
+            onImport={() => fileInput.current?.click()}
+            onExportYaml={() => download(new Blob([data.config], { type: "text/yaml;charset=utf-8" }), "promptfooconfig.yaml")}
+            onExportResults={() => void exportResults()}
+            onExportCsv={exportCsv}
+            onExportHtml={exportHtml}
+            onExportProject={() => void exportProject(p.title, data, configText).catch(p.report)}
+            onRemoveRun={removeRun}
+            onExportDraft={p.exportDraft}
+            onRetrySave={() => void p.save()}
+            onServerVersion={() => p.current && void p.open(p.current.id)}
           />
-        </label>
-        <span className={`save-state ${p.autoState.phase}`} role="status">
-          {p.autoState.message}
-        </span>
-        <ProjectPicker
-          items={p.items}
-          id={p.current?.id}
-          disabled={p.busy}
-          onOpen={(id) => void p.open(id)}
-        />
-        <button
-          className="icon-button"
-          aria-label="新建评测项目"
-          onClick={() => void p.fresh()}
-          disabled={p.busy}
-        >
-          <Plus size={19} aria-hidden="true" />
-        </button>
-      </header>
-      <nav className="toolbar" aria-label="评测操作">
-        <div className="report-select">
-          <label htmlFor="report">报告</label>
-          <select
-            id="report"
-            name="report"
-            value={report?.id ?? ""}
-            onChange={(e) => {
-              p.setData((previous) => ({
-                ...previous,
-                activeId: e.target.value,
-                baseline: parseEvaluation(
-                  previous.reports.find((r) => r.id === e.target.value)!.raw,
-                ).columns[0].index,
-              }));
-              setSelected("");
-            }}
-          >
-            <option value="" disabled>
-              选择一份评测结果
-            </option>
-            {p.data.reports.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
         </div>
-        <button onClick={() => importRef.current?.click()}>
-          <FileInput size={16} aria-hidden="true" />
-          导入报告
-        </button>
-        <button
-          onClick={() => setConfigOpen((v) => !v)}
-          aria-expanded={configOpen}
-        >
-          <Settings2 size={16} aria-hidden="true" />
-          测试配置
-        </button>
-        <button
-          className="primary"
-          onClick={() => void start()}
-          disabled={!connection.connected || running}
-        >
-          <Play size={15} aria-hidden="true" />
-          {running ? "评测进行中…" : "运行套件"}
-        </button>
-        <div className="spacer" />
-        <button onClick={() => projectRef.current?.click()}>导入项目</button>
-        <button onClick={exportProject}>
-          <Download size={16} aria-hidden="true" />
-          导出项目
-        </button>
-      </nav>
-      <input
-        ref={importRef}
-        className="sr-only"
-        type="file"
-        accept="application/json,.json"
-        aria-label="导入评测结果 JSON"
-        onChange={(e) => void importResult(e)}
-      />
-      <input
-        ref={projectRef}
-        className="sr-only"
-        type="file"
-        accept="application/json,.json"
-        aria-label="导入评测项目 JSON"
-        onChange={(e) => void importProject(e)}
-      />
-      <Notice error={p.error} notice={p.notice} />
-      {(p.autoState.phase === "conflict" ||
-        p.autoState.phase === "offline" ||
-        p.autoState.phase === "draft") && (
-        <div className="recovery">
-          <button onClick={() => void p.save()}>重试保存</button>
-          <button onClick={p.exportDraft}>导出工作草稿</button>
-          {p.current && (
-            <button onClick={() => void p.open(p.current!.id)}>
-              打开服务器版本
+        <label className="title">
+          <span className="sr-only">评测名称</span>
+          <input name="title" autoComplete="off" maxLength={120} value={p.title} onChange={(e) => p.setTitle(e.target.value)} />
+        </label>
+        <span className={`save s-${p.autoState.phase}`} role="status">
+          {p.autoState.message || "已自动保存"}
+        </span>
+      </header>
+
+      <nav className="runbar" aria-label="运行与对照">
+        <div className="run-main">
+          {running ? (
+            <button className="primary" onClick={() => void stopRun()} disabled={submitting || pending?.kind === "official" || task?.state === "not-submitted"}>
+              <Square size={14} aria-hidden="true" /> {pending?.kind === "official" ? "官方核对中…" : "停止"}
+            </button>
+          ) : (
+            <button className="primary" onClick={() => void startRun()}>
+              <Play size={15} aria-hidden="true" /> 运行评测
             </button>
           )}
-        </div>
-      )}
-      <div className="connection">
-        <span className={connection.connected ? "dot connected" : "dot"} />
-        <span>{connection.message}</span>
-        <button onClick={() => void health()}>重新检查</button>
-        {job && (
-          <span className="job-state" role="status">
-            任务 {job.id.slice(-8)} · {phases[job.state] ?? job.state}
-            {job.error ? ` · ${job.error}` : ""}
-          </span>
-        )}
-        {job?.state === "completed" && job.report && (
-          <button
-            onClick={() =>
-              download(
-                new Blob([job.report!], { type: "application/json" }),
-                "completed-evaluation.json",
-              )
-            }
-          >
-            下载本次结果
-          </button>
-        )}
-        {job && ["uncertain", "not-submitted"].includes(job.state) && (
-          <button onClick={() => void start(true)} disabled={working}>
-            重试原任务提交
-          </button>
-        )}
-      </div>
-      {configOpen && (
-        <section
-          className="configuration"
-          aria-label="测试配置"
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setConfigOpen(false);
-          }}
-        >
-          <div className="config-heading">
-            <h2>测试套件</h2>
-            <span>echo 检查模板与断言；model 使用执行器已配置的模型。</span>
-            <button
-              aria-label="关闭测试配置"
-              onClick={() => setConfigOpen(false)}
-            >
-              <X size={16} aria-hidden="true" />
+          {pending?.input && !submitting && (task?.state === "uncertain" || task?.state === "not-submitted") ? (
+            <button onClick={() => void submitTask(pending)}>重试原任务</button>
+          ) : null}
+          <div className="env-wrap" ref={envWrap}>
+            <button className="env-button" aria-expanded={envOpen} onClick={() => setEnvOpen((v) => !v)}>
+              <span className="dot ok" aria-hidden="true" />
+              <span className={`dot ${env.host.available ? "ok" : "off"}`} aria-hidden="true" />
+              <span className={`dot ${env.runner.connected ? "ok" : "off"}`} aria-hidden="true" />
+              执行环境
             </button>
-          </div>
-          <label htmlFor="suite">JSON 配置（未应用的输入也会保存）</label>
-          <textarea
-            id="suite"
-            name="suite"
-            autoComplete="off"
-            maxLength={60000}
-            spellCheck={false}
-            value={suiteDraft}
-            onChange={(e) =>
-              p.setDraft((previous) => ({ ...previous, suite: e.target.value }))
-            }
-          />
-          <div className="config-footer">
-            <p>
-              支持 contains、not-contains、equals、is-json；最多 25 用例 × 4
-              版本。
-            </p>
-            <button onClick={applySuite}>检查并应用配置</button>
-            <button
-              onClick={() => void start()}
-              disabled={!connection.connected || running}
-            >
-              运行此配置
-            </button>
-          </div>
-        </section>
-      )}
-      <main id="main">
-        {!evaluation ? (
-          <section className="empty">
-            <div className="empty-grid" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <p className="eyebrow">EVALUATION DESK</p>
-            <h1>让每次改动都有依据。</h1>
-            <p>
-              导入 Promptfoo
-              的真实评测结果，逐个比较提示版本、失败断言与实际输出，再记录发布判断。
-            </p>
-            <div>
-              <button
-                className="primary"
-                onClick={() => importRef.current?.click()}
-              >
-                导入评测 JSON
-              </button>
-              <button onClick={() => void example()}>查看回显评测示例</button>
-            </div>
-            <small>
-              示例由 Promptfoo 0.125.1 的回显提供者运行，不含模型调用。
-            </small>
-          </section>
-        ) : (
-          <>
-            <section className="matrix-heading">
-              <div>
-                <p className="eyebrow">RESULTS / {report?.name}</p>
-                <h1>
-                  {evaluation.cells.filter((c) => c.pass).length}
-                  <span> / {evaluation.cells.length} 项通过</span>
-                </h1>
-              </div>
-              <div className="matrix-controls">
-                <label>
-                  显示
-                  <select
-                    aria-label="显示"
-                    name="filter"
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                  >
-                    <option value="all">全部用例</option>
-                    <option value="fail">有失败的用例</option>
-                  </select>
-                </label>
-                <label>
-                  比较基线
-                  <select
-                    aria-label="比较基线"
-                    name="baseline"
-                    value={p.data.baseline}
-                    onChange={(e) =>
-                      p.setData((previous) => ({
-                        ...previous,
-                        baseline: Number(e.target.value),
-                      }))
-                    }
-                  >
-                    {evaluation.columns.map((c) => (
-                      <option key={c.index} value={c.index}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  onClick={() => {
-                    if (report)
-                      download(
-                        new Blob([reviewCsv(report, p.data.reviews)], {
-                          type: "text/csv;charset=utf-8",
-                        }),
-                        "evaluation-review.csv",
-                      );
-                  }}
-                >
-                  导出审阅 CSV
-                </button>
-                <button
-                  onClick={() => {
-                    if (report)
-                      download(
-                        new Blob([report.raw], { type: "application/json" }),
-                        "promptfoo-results.json",
-                      );
-                  }}
-                >
-                  原始结果
-                </button>
-              </div>
-            </section>
-            <div className="matrix-scroll">
-              <table className="matrix">
-                <thead>
-                  <tr>
-                    <th scope="col">测试用例</th>
-                    {evaluation.columns.map((c) => (
-                      <th key={c.index} scope="col">
-                        <strong>{c.label}</strong>
-                        <small>{c.provider}</small>
-                        {c.index === p.data.baseline && (
-                          <span className="baseline-label">基线</span>
-                        )}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {tests.map((t) => (
-                    <tr key={t}>
-                      <th scope="row">
-                        <span>CASE {String(t + 1).padStart(2, "0")}</span>
-                        <pre>
-                          {evaluation.cells.find((c) => c.test === t)?.input}
-                        </pre>
-                      </th>
-                      {evaluation.columns.map((column) => {
-                        const c = evaluation.cells.find(
-                          (c) => c.test === t && c.column === column.index,
-                        );
-                        return (
-                          <td key={column.index}>
-                            {c ? (
-                              <button
-                                className={`result-cell ${c.pass ? "pass" : "fail"} ${cell?.key === c.key ? "selected" : ""}`}
-                                aria-label={`用例 ${t + 1}，${column.label}，${c.pass ? "通过" : "失败"}`}
-                                aria-pressed={cell?.key === c.key}
-                                onClick={() => setSelected(c.key)}
-                              >
-                                <strong>
-                                  {c.pass ? (
-                                    <Check size={16} aria-hidden="true" />
-                                  ) : (
-                                    <X size={16} aria-hidden="true" />
-                                  )}{" "}
-                                  {c.pass ? "通过" : "失败"}
-                                </strong>
-                                <span>
-                                  {c.output.slice(0, 160) || "无输出"}
-                                </span>
-                                <small>
-                                  {formatNumber(c.score)} 分 ·{" "}
-                                  {formatNumber(c.latency, " ms")}
-                                </small>
-                              </button>
-                            ) : (
-                              <span>未返回</span>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mobile-results">
-              <label>
-                提示版本
-                <select
-                  aria-label="提示版本"
-                  name="version"
-                  value={
-                    evaluation.columns.some((c) => c.index === mobileColumn)
-                      ? mobileColumn
-                      : evaluation.columns[0]?.index
-                  }
-                  onChange={(e) => setMobileColumn(Number(e.target.value))}
-                >
-                  {evaluation.columns.map((c) => (
-                    <option key={c.index} value={c.index}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {tests.map((t) => {
-                const c = evaluation.cells.find(
-                  (c) =>
-                    c.test === t &&
-                    c.column ===
-                      (evaluation.columns.some(
-                        (col) => col.index === mobileColumn,
-                      )
-                        ? mobileColumn
-                        : evaluation.columns[0]?.index),
-                );
-                return c ? (
-                  <button
-                    key={c.key}
-                    className={`result-cell ${c.pass ? "pass" : "fail"}`}
-                    onClick={() => setSelected(c.key)}
-                  >
-                    <strong>
-                      CASE {t + 1} · {c.pass ? "通过" : "失败"}
-                    </strong>
-                    <span>{c.output.slice(0, 180)}</span>
+            {envOpen ? (
+              <div className="env-pop" role="dialog" aria-label="执行环境">
+                <section>
+                  <h3>
+                    <span className="dot ok" /> 本机评测引擎 · 就绪
+                  </h3>
+                  <p>断言、录制回放、echo 与脚本 provider 在工作台 Node 进程内执行，不需要外部服务。</p>
+                </section>
+                <section>
+                  <h3>
+                    <span className={`dot ${env.host.available ? "ok" : "off"}`} /> Floatboat 模型
+                  </h3>
+                  <p>{env.host.message}</p>
+                  <button className="small" disabled={env.host.checking} onClick={() => void env.checkHost()}>
+                    {env.host.checking ? "检查中…" : "重新检查"}
                   </button>
-                ) : null;
-              })}
-            </div>
-            {!tests.length && (
-              <p className="no-results" role="status">
-                当前筛选没有用例。
-              </p>
-            )}
-            {cell && report && review && (
-              <section className="detail" aria-label="单元格详情">
-                <div className="detail-title">
-                  <h2>
-                    CASE {String(cell.test + 1).padStart(2, "0")}{" "}
-                    <ArrowRight size={15} aria-hidden="true" /> {cell.label}
-                  </h2>
-                  <span className={cell.pass ? "pass-text" : "fail-text"}>
-                    {cell.pass ? "断言通过" : "需要检查"} ·{" "}
-                    {formatNumber(cell.latency, " ms")}
-                  </span>
-                </div>
-                <div className="comparison">
-                  <article>
-                    <h3>基线 · {baseline?.label ?? "未返回"}</h3>
-                    <pre>{baseline?.output ?? "此用例没有基线结果。"}</pre>
-                  </article>
-                  <article>
-                    <h3>当前 · {cell.label}</h3>
-                    <pre>{cell.output || "无输出"}</pre>
-                  </article>
-                  <aside>
-                    <h3>复核决定</h3>
-                    <label>
-                      人工判断
-                      <select
-                        aria-label="人工判断"
-                        name="decision"
-                        value={review.decision}
-                        onChange={(e) => mark(e.target.value as Decision)}
-                      >
-                        <option value="pending">待复核</option>
-                        <option value="accept">接受此结果</option>
-                        <option value="reject">需要修改</option>
-                      </select>
-                    </label>
-                    <label>
-                      复核意见
-                      <textarea
-                        aria-label="复核意见"
-                        name="review-note"
-                        autoComplete="off"
-                        value={review.note}
-                        onChange={(e) => mark(review.decision, e.target.value)}
-                        maxLength={6000}
-                        placeholder="记录原因或下一步修改…"
-                      />
-                    </label>
-                  </aside>
-                </div>
-                <details>
-                  <summary>输入、断言与评分理由</summary>
-                  <div className="raw-details">
-                    <article>
-                      <h3>实际提示</h3>
-                      <pre>{cell.prompt}</pre>
-                    </article>
-                    <article>
-                      <h3>评分理由</h3>
-                      <pre>{cell.reason}</pre>
-                      <h3>断言明细</h3>
-                      <pre>{cell.assertions}</pre>
-                    </article>
+                </section>
+                <section>
+                  <h3>
+                    <Server size={14} aria-hidden="true" /> 官方 promptfoo 0.125.1（可选）
+                  </h3>
+                  <p>{env.runner.message}</p>
+                  {!env.runner.connected ? (
+                    <>
+                      <p className="muted small">在仓库根目录启动执行器，并让工作台带 PROMPTFOO_RUNNER_URL 启动：</p>
+                      <pre className="cmd">{`cd workbenches/59-promptfoo/service\npnpm install --frozen-lockfile --ignore-scripts\nPROMPTFOO_RUNNER_ALLOW_JS=1 pnpm start\n# 另一终端\nPROMPTFOO_RUNNER_URL=http://127.0.0.1:8770 pnpm workbench dev promptfoo`}</pre>
+                    </>
+                  ) : null}
+                  <div className="row">
+                    <button className="small" disabled={env.runner.checking} onClick={() => void env.checkRunner()}>
+                      {env.runner.checking ? "检查中…" : "重新检查"}
+                    </button>
+                    {env.runner.connected ? (
+                      <button className="small" disabled={running} onClick={() => void startOfficial()}>
+                        用官方 promptfoo 交叉核对
+                      </button>
+                    ) : null}
                   </div>
-                </details>
-              </section>
-            )}
-          </>
-        )}
+                </section>
+              </div>
+            ) : null}
+          </div>
+          <span className="task" role="status">
+            {busyText ||
+              (task
+                ? `${phaseText[task.state] ?? task.state}${task.total ? ` ${task.done}/${task.total}` : ""}${task.hostCalls ? ` · 含 ${task.hostCalls} 次模型调用` : ""}`
+                : running
+                  ? "提交中…"
+                  : totals
+                    ? `${totals.pass}/${totals.total} 通过 · ${pct(totals.total ? totals.pass / totals.total : 0)}`
+                    : suite
+                      ? `尚未运行 · ${suite.tests.length} 用例 × ${suite.columns.length} 列`
+                      : "配置未生效")}
+            {task && task.total ? <progress max={100} value={progress} aria-label="评测进度" /> : null}
+          </span>
+        </div>
+        <div className="run-tools">
+          <label className="field inline">
+            <span>运行</span>
+            <select name="run" value={data.current} onChange={(e) => p.setData((prev) => ({ ...prev, current: e.target.value }))} disabled={!data.runs.length}>
+              {!data.runs.length ? <option value="">尚无运行</option> : null}
+              {data.runs.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name} · {r.stats.pass}/{r.stats.total}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field inline">
+            <span>对照</span>
+            <select
+              name="baseline"
+              value={data.baseline.kind === "prompt" ? `p:${data.baseline.prompt}` : data.baseline.kind === "run" ? `r:${data.baseline.runId}` : "none"}
+              onChange={(e) => {
+                const v = e.target.value;
+                const next: Baseline = v.startsWith("p:") ? { kind: "prompt", prompt: v.slice(2) } : v.startsWith("r:") ? { kind: "run", runId: v.slice(2) } : { kind: "none" };
+                p.setData((prev) => ({ ...prev, baseline: next }));
+              }}
+            >
+              <option value="none">不对照</option>
+              {[...new Set((run?.columns ?? []).map((c) => c.prompt))].map((label) => (
+                <option key={label} value={`p:${label}`}>
+                  提示版本：{label.slice(0, 40)}
+                </option>
+              ))}
+              {data.runs
+                .filter((r) => r.id !== data.current)
+                .map((r) => (
+                  <option key={r.id} value={`r:${r.id}`}>
+                    运行：{r.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label className="field inline">
+            <span>显示</span>
+            <select name="filter" value={filter} onChange={(e) => setFilter(e.target.value as Filter)}>
+              <option value="all">全部用例</option>
+              <option value="fail">有未通过</option>
+              <option value="regressed">有退步</option>
+              <option value="changed">输出有变化</option>
+              <option value="unreviewed">未通过且待复核</option>
+            </select>
+          </label>
+          <label className="search">
+            <Search size={14} aria-hidden="true" />
+            <span className="sr-only">搜索用例</span>
+            <input name="search" type="search" placeholder="搜索用例…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </label>
+          <div className="gate-wrap" ref={gateWrap}>
+            <button className="ghost" aria-expanded={gateOpen} onClick={() => setGateOpen((v) => !v)}>
+              <Gauge size={15} aria-hidden="true" /> 门槛 {pct(data.gate.minPassRate)}
+            </button>
+            {gateOpen ? (
+              <div className="gate-pop" role="dialog" aria-label="发布门槛">
+                <label className="field">
+                  <span>最低通过率（%）</span>
+                  <input
+                    type="number"
+                    name="min-pass"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={Math.round(data.gate.minPassRate * 100)}
+                    onChange={(e) => p.setData((prev) => ({ ...prev, gate: { ...prev.gate, minPassRate: Math.min(1, Math.max(0, Number(e.target.value) / 100 || 0)) } }))}
+                  />
+                </label>
+                <label className="field">
+                  <span>允许的退步数</span>
+                  <input
+                    type="number"
+                    name="max-regressions"
+                    min={0}
+                    step={1}
+                    value={data.gate.maxRegressions}
+                    onChange={(e) => p.setData((prev) => ({ ...prev, gate: { ...prev.gate, maxRegressions: Math.max(0, Math.trunc(Number(e.target.value) || 0)) } }))}
+                  />
+                </label>
+                <label className="check">
+                  <input type="checkbox" name="allow-errors" checked={data.gate.allowErrors} onChange={(e) => p.setData((prev) => ({ ...prev, gate: { ...prev.gate, allowErrors: e.target.checked } }))} />
+                  执行错误不阻止发布
+                </label>
+                <button className="small" onClick={() => p.setData((prev) => ({ ...prev, gate: defaultGate }))}>
+                  恢复默认
+                </button>
+              </div>
+            ) : null}
+          </div>
+          <button ref={configButton} className={side === "config" ? "ghost on" : "ghost"} aria-pressed={side === "config"} onClick={() => setSide((s) => (s === "config" ? "inspector" : "config"))}>
+            <Settings2 size={15} aria-hidden="true" /> 配置{draftCheck.error ? <span className="badge">!</span> : null}
+          </button>
+          <button className="ghost" disabled={!run} onClick={exportHtml}>
+            <FileText size={15} aria-hidden="true" /> 报告
+          </button>
+        </div>
+      </nav>
+
+      <Notice error={p.error} notice={p.notice} onClose={() => (p.setError(""), p.setNotice(""))} />
+      {confirmHost ? (
+        <div className="confirm" role="alertdialog" aria-label="确认模型调用">
+          <p>
+            这次运行包含 Floatboat 模型列（{confirmHost.labels.join("、")}），将发起 <strong>{confirmHost.calls}</strong> 次真实模型调用，按 Floatboat 账户计费。录制回放、echo 和脚本列照常在本机执行。
+          </p>
+          <button className="primary" onClick={() => void startRun(true)}>
+            确认并运行
+          </button>
+          <button onClick={() => setConfirmHost(null)}>取消</button>
+        </div>
+      ) : null}
+      {runRef && missing[runRef.id] ? (
+        <p className="notice error" role="alert">
+          {missing[runRef.id]}
+        </p>
+      ) : null}
+
+      <main className="desk" id="matrix">
+        <div className="matrix-pane">
+          {run || !runRef ? (
+            <Matrix
+              run={run}
+              runId={runRef?.id ?? ""}
+              suite={suite ?? draftCheck.suite}
+              baseline={data.baseline}
+              baselineRun={baselineRun}
+              stats={stats}
+              gate={data.gate}
+              reviews={data.reviews}
+              releases={data.releases}
+              selected={selected}
+              filter={filter}
+              search={search}
+              onSelect={(k) => {
+                setSelected(k);
+                setSide("inspector");
+              }}
+              onRelease={setRelease}
+            />
+          ) : (
+            <div className="matrix-empty" role="status">
+              {missing[runRef.id] ? "这次运行的结果不在本机。" : "正在读取运行结果…"}
+            </div>
+          )}
+          {run && shown.length ? <p className="matrix-foot muted small">共 {shown.length} 个用例 · 方向键在单元格间移动 · 拖入文件即可导入</p> : null}
+        </div>
+        {side === "config" ? (
+          <ConfigPanel
+            text={configText}
+            applied={!draftCheck.error && deferredConfig === configText}
+            suite={draftCheck.suite}
+            error={draftCheck.error}
+            errorLine={draftCheck.line}
+            hostModel={env.host.model}
+            onChange={(v) => p.setDraft((prev) => ({ ...prev, config: v }))}
+            onRevert={() =>
+              p.setDraft((prev) => {
+                const next = { ...prev };
+                delete next.config;
+                return next;
+              })
+            }
+            onClose={() => { setSide("inspector"); configButton.current?.focus(); }}
+            onImportCsv={() => csvInput.current?.click()}
+            onAddHost={addHostColumn}
+          />
+        ) : side === "inspector" && run && cell && runRef ? (
+          <Inspector
+            key={cell.key}
+            run={run}
+            cell={cell}
+            baseline={data.baseline}
+            baselineRun={baselineRun}
+            baselineLabel={baselineLabel}
+            review={data.reviews[reviewKey(runRef.id, cell.key)] ?? { decision: "pending", note: "" }}
+            onReview={(r) => setReview(reviewKey(runRef.id, cell.key), r)}
+            onClose={() => setSide(null)}
+          />
+        ) : null}
       </main>
-      <footer>
-        报告与复核记录保存在当前项目。
-        <span>Promptfoo · Evaluation workbench</span>
-      </footer>
+      <input ref={fileInput} className="sr-only" type="file" tabIndex={-1} aria-label="导入文件" accept=".yaml,.yml,.json,.csv,application/json,text/yaml,text/csv" onChange={onFile} />
+      <input ref={csvInput} className="sr-only" type="file" tabIndex={-1} aria-label="导入用例 CSV" accept=".csv,text/csv" onChange={(e) => void onCsv(e)} />
     </div>
   );
 }

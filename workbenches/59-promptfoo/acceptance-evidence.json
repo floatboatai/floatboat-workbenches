@@ -1,22 +1,18 @@
 {
-  "verifiedAt": "2026-10-27",
-  "version": "0.4.0",
-  "applicationTests": 11,
+  "verifiedAt": "2026-10-29",
+  "version": "0.9.0",
+  "branch": "feat/promptfoo-depth",
+  "node": "22.23.4",
+  "pnpm": "10.22.0",
+  "applicationTests": 25,
   "runnerTests": 3,
-  "upstream": {
-    "package": "promptfoo@0.125.1",
-    "executed": "evaluate with deterministic echo provider",
-    "modelInference": "unverified"
-  },
+  "check": "passed",
+  "package": "passed",
+  "warnings": [
+    "WORKBENCH_LARGE_MODULE: template.ts, config.ts, assertions.ts, autosave-client.ts, App.tsx"
+  ],
   "browser": {
-    "primaryFlow": "passed",
-    "saveReload": "passed",
-    "invalidConfigurationRestore": "passed",
-    "delayedSave": "passed",
-    "lostResponseIdempotency": "passed",
-    "optimisticConflict": "passed",
-    "projectImportCreatesNew": "passed",
-    "keyboardCsvExport": "passed",
+    "engine": "149.0.7827.55",
     "desktop": [
       1440,
       1000
@@ -25,25 +21,68 @@
       375,
       812
     ],
+    "primarySteps": [
+      "first-open",
+      "environment",
+      "local-run",
+      "regression-comparison",
+      "invalid-draft-reload",
+      "exports",
+      "imports-create-new",
+      "delayed-save",
+      "lost-autosave-response",
+      "lost-evaluation-response",
+      "delayed-evaluation-submit",
+      "keyboard-focus-return",
+      "host-confirm-cancel",
+      "desktop-screenshot",
+      "mobile-flow",
+      "passed"
+    ],
+    "edgeSteps": [
+      "conflict-fresh-tab",
+      "offline-new-draft",
+      "mobile-csv-pagination",
+      "missing-recording",
+      "invalid-import",
+      "standalone-html",
+      "passed"
+    ],
     "pageErrors": [],
-    "edgeCases": {
-      "unknownSubmitBlocksNewRun": true,
-      "submitted": 1,
-      "baselineRebasedToColumn0": true,
-      "overModelLimitDraftRestored": true,
-      "largePortableBytes": 947342,
-      "configurationDraftCharacters": 60000,
-      "reviewCharacters": 6000,
-      "reimportPreserved": true,
-      "pageErrors": []
-    }
+    "unexpectedConsoleErrors": [],
+    "injectedExpectedNetworkErrors": 9,
+    "externalRequests": 0,
+    "restartProjectsPreserved": 13
+  },
+  "upstream": {
+    "package": "promptfoo@0.125.1",
+    "actualEvaluateParityCells": 216,
+    "localSampleCells": 252,
+    "localSamplePass": 221,
+    "tightenedPass": 209,
+    "regressionRows": 10,
+    "modelInference": "not run"
   },
   "screenshot": {
     "path": "docs/screenshots/promptfoo.png",
     "width": 1440,
-    "height": 1185,
-    "sha256": "5ab982dd8f1ab9830671fbf3ecfbcf76a5b5de9a99608e0c4b20da812134eb65"
+    "height": 1000,
+    "sha256": "dc2fcbba1ade9bbd25f3c36b60f52f0fc3db4cbbec4d377c83d48608d316de1c"
   },
-  "hostImport": "unverified",
-  "externalModel": "unverified"
+  "artifact": {
+    "path": "workbenches/59-promptfoo/artifacts/promptfoo-studio-0.9.0.fbworkbench",
+    "bytes": 229217,
+    "sha256": "08ea44cb9832ae3bc71ced287f3042ea9159fe90b96a76449523d13637e05c0c",
+    "sourceAndResourcesMatched": 55,
+    "manifestNormalization": "only declared resource paths/access/transfer/required defaults",
+    "guidanceDocumentsMatch": true,
+    "acceptanceIncluded": true
+  },
+  "evidenceDirectory": "archive/2026-10-29-workbench-depth/promptfoo/codex",
+  "realHost": "not run; mock contracts only",
+  "externalModel": "not run",
+  "floatboatClientImport": "unverified",
+  "structuralReview": "passed",
+  "sharedChanges": "none",
+  "pushed": false
 }

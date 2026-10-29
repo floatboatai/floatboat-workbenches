@@ -1,0 +1,2118 @@
+{
+ "promptfoo": "0.125.1",
+ "generatedAt": "2026-10-29",
+ "cells": {
+  "346fdac5e0e3dec1|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "346fdac5e0e3dec1|aa9eaad21c2223be": [
+   true,
+   0.931034,
+   0,
+   "1111111011111"
+  ],
+  "346fdac5e0e3dec1|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "346fdac5e0e3dec1|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "346fdac5e0e3dec1|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "346fdac5e0e3dec1|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "14ae72e8a35e60eb|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "14ae72e8a35e60eb|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "14ae72e8a35e60eb|f0e052f2bc54f1fd": [
+   true,
+   0.931034,
+   0,
+   "1111111110111"
+  ],
+  "14ae72e8a35e60eb|c4912821d438be56": [
+   false,
+   0.724138,
+   0,
+   "1110111111001"
+  ],
+  "14ae72e8a35e60eb|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "14ae72e8a35e60eb|0cb61b4b98c7d979": [
+   false,
+   0.793103,
+   0,
+   "1110111111111"
+  ],
+  "20c1e20cafce7639|e988eeb727d8ef23": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "20c1e20cafce7639|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "20c1e20cafce7639|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "20c1e20cafce7639|c4912821d438be56": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "20c1e20cafce7639|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "20c1e20cafce7639|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "2dab40c20699745e|e988eeb727d8ef23": [
+   true,
+   0.939394,
+   0,
+   "111111111100111"
+  ],
+  "2dab40c20699745e|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "2dab40c20699745e|36a8a460f62f157f": [
+   false,
+   0,
+   1,
+   ""
+  ],
+  "2dab40c20699745e|c4912821d438be56": [
+   true,
+   0.939394,
+   0,
+   "111111111100111"
+  ],
+  "2dab40c20699745e|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "2dab40c20699745e|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "3b0a81467ef84e4d|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "3b0a81467ef84e4d|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "3b0a81467ef84e4d|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "3b0a81467ef84e4d|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "3b0a81467ef84e4d|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "3b0a81467ef84e4d|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "99542693a4095886|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "99542693a4095886|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "99542693a4095886|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "99542693a4095886|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "99542693a4095886|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "99542693a4095886|0cb61b4b98c7d979": [
+   true,
+   0.965517,
+   0,
+   "1111111111101"
+  ],
+  "1ab801159fc5ceee|e988eeb727d8ef23": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "1ab801159fc5ceee|aa9eaad21c2223be": [
+   false,
+   0.92,
+   0,
+   "1111111011"
+  ],
+  "1ab801159fc5ceee|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "1ab801159fc5ceee|c4912821d438be56": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "1ab801159fc5ceee|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "1ab801159fc5ceee|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "2d9e60f2b256b66f|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "2d9e60f2b256b66f|aa9eaad21c2223be": [
+   true,
+   0.931034,
+   0,
+   "1111111011111"
+  ],
+  "2d9e60f2b256b66f|f0e052f2bc54f1fd": [
+   false,
+   0.793103,
+   0,
+   "1110111111111"
+  ],
+  "2d9e60f2b256b66f|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "2d9e60f2b256b66f|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "2d9e60f2b256b66f|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "9a017cd267fb7840|e988eeb727d8ef23": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "9a017cd267fb7840|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "9a017cd267fb7840|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "9a017cd267fb7840|c4912821d438be56": [
+   true,
+   0.870968,
+   0,
+   "11111111110010"
+  ],
+  "9a017cd267fb7840|36a8a460f62f157f": [
+   false,
+   0,
+   1,
+   ""
+  ],
+  "9a017cd267fb7840|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "0a9a121215c71574|e988eeb727d8ef23": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "0a9a121215c71574|aa9eaad21c2223be": [
+   true,
+   0.935484,
+   0,
+   "11111110111111"
+  ],
+  "0a9a121215c71574|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "0a9a121215c71574|c4912821d438be56": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "0a9a121215c71574|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "0a9a121215c71574|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "5082ca387de15d89|e988eeb727d8ef23": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "5082ca387de15d89|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "5082ca387de15d89|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "5082ca387de15d89|c4912821d438be56": [
+   false,
+   0.806452,
+   0,
+   "11111101110010"
+  ],
+  "5082ca387de15d89|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "5082ca387de15d89|0cb61b4b98c7d979": [
+   false,
+   0.677419,
+   0,
+   "11101101111110"
+  ],
+  "11904fb70fe0495c|e988eeb727d8ef23": [
+   false,
+   0.724138,
+   0,
+   "1110111111001"
+  ],
+  "11904fb70fe0495c|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "11904fb70fe0495c|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "11904fb70fe0495c|c4912821d438be56": [
+   false,
+   0.793103,
+   0,
+   "1101111111001"
+  ],
+  "11904fb70fe0495c|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "11904fb70fe0495c|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "feb9db67e12c219c|e988eeb727d8ef23": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "feb9db67e12c219c|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "feb9db67e12c219c|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "feb9db67e12c219c|c4912821d438be56": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "feb9db67e12c219c|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "feb9db67e12c219c|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "332891a3d9b8760a|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "332891a3d9b8760a|aa9eaad21c2223be": [
+   true,
+   0.931034,
+   0,
+   "1111111011111"
+  ],
+  "332891a3d9b8760a|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "332891a3d9b8760a|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "332891a3d9b8760a|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "332891a3d9b8760a|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "5ba8c1de096ba622|e988eeb727d8ef23": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "5ba8c1de096ba622|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "5ba8c1de096ba622|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "5ba8c1de096ba622|c4912821d438be56": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "5ba8c1de096ba622|36a8a460f62f157f": [
+   false,
+   0.92,
+   0,
+   "1111101111"
+  ],
+  "5ba8c1de096ba622|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "65e452b91108ebba|e988eeb727d8ef23": [
+   true,
+   0.925926,
+   0,
+   "111111111001"
+  ],
+  "65e452b91108ebba|aa9eaad21c2223be": [
+   false,
+   0.851852,
+   0,
+   "110111111111"
+  ],
+  "65e452b91108ebba|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111"
+  ],
+  "65e452b91108ebba|c4912821d438be56": [
+   true,
+   0.925926,
+   0,
+   "111111111001"
+  ],
+  "65e452b91108ebba|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "111111111111"
+  ],
+  "65e452b91108ebba|0cb61b4b98c7d979": [
+   false,
+   0.851852,
+   0,
+   "110111111111"
+  ],
+  "4bf81935140c8c56|e988eeb727d8ef23": [
+   true,
+   0.939394,
+   0,
+   "111111111100111"
+  ],
+  "4bf81935140c8c56|aa9eaad21c2223be": [
+   true,
+   0.939394,
+   0,
+   "111111101111111"
+  ],
+  "4bf81935140c8c56|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "4bf81935140c8c56|c4912821d438be56": [
+   true,
+   0.939394,
+   0,
+   "111111111100111"
+  ],
+  "4bf81935140c8c56|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "ef796cb8f1eee727|e988eeb727d8ef23": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "4bf81935140c8c56|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "ef796cb8f1eee727|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "ef796cb8f1eee727|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "ef796cb8f1eee727|c4912821d438be56": [
+   false,
+   0.84,
+   0,
+   "1101111111"
+  ],
+  "ef796cb8f1eee727|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "ef796cb8f1eee727|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111"
+  ],
+  "89794ceeed14581f|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "89794ceeed14581f|aa9eaad21c2223be": [
+   true,
+   0.931034,
+   0,
+   "1111111011111"
+  ],
+  "89794ceeed14581f|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "89794ceeed14581f|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "89794ceeed14581f|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "89794ceeed14581f|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "357273c54088a7a7|e988eeb727d8ef23": [
+   true,
+   0.935484,
+   0,
+   "11111111110011"
+  ],
+  "357273c54088a7a7|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "357273c54088a7a7|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "357273c54088a7a7|c4912821d438be56": [
+   true,
+   0.870968,
+   0,
+   "11111111110010"
+  ],
+  "357273c54088a7a7|36a8a460f62f157f": [
+   true,
+   0.870968,
+   0,
+   "11011111111111"
+  ],
+  "357273c54088a7a7|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "560227436fc4b73a|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "560227436fc4b73a|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "560227436fc4b73a|f0e052f2bc54f1fd": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "560227436fc4b73a|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "560227436fc4b73a|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "38b9b97efa14cc8d|e988eeb727d8ef23": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "560227436fc4b73a|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "38b9b97efa14cc8d|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "38b9b97efa14cc8d|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "38b9b97efa14cc8d|c4912821d438be56": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "38b9b97efa14cc8d|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "38b9b97efa14cc8d|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "596bc1b5889242ab|e988eeb727d8ef23": [
+   true,
+   0.925926,
+   0,
+   "111111111001"
+  ],
+  "596bc1b5889242ab|aa9eaad21c2223be": [
+   true,
+   0.925926,
+   0,
+   "111111101111"
+  ],
+  "596bc1b5889242ab|c4912821d438be56": [
+   false,
+   0.703704,
+   0,
+   "111011111001"
+  ],
+  "596bc1b5889242ab|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111"
+  ],
+  "596bc1b5889242ab|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "111111111111"
+  ],
+  "596bc1b5889242ab|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "111111111111"
+  ],
+  "684acb4230d81001|e988eeb727d8ef23": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "684acb4230d81001|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "684acb4230d81001|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "684acb4230d81001|c4912821d438be56": [
+   true,
+   0.931034,
+   0,
+   "1111111111001"
+  ],
+  "684acb4230d81001|36a8a460f62f157f": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "684acb4230d81001|0cb61b4b98c7d979": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "dba80a1cdefff4b0|e988eeb727d8ef23": [
+   true,
+   0.909091,
+   0,
+   "1111111111000111"
+  ],
+  "dba80a1cdefff4b0|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111111"
+  ],
+  "dba80a1cdefff4b0|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111111"
+  ],
+  "dba80a1cdefff4b0|c4912821d438be56": [
+   true,
+   0.880391,
+   0,
+   "1111111111000011"
+  ],
+  "dba80a1cdefff4b0|36a8a460f62f157f": [
+   true,
+   0.96579,
+   0,
+   "1111111111111011"
+  ],
+  "2f58921e5ff786dd|e988eeb727d8ef23": [
+   false,
+   0.833333,
+   0,
+   "11110111110001"
+  ],
+  "dba80a1cdefff4b0|0cb61b4b98c7d979": [
+   true,
+   0.96579,
+   0,
+   "1111111111111011"
+  ],
+  "2f58921e5ff786dd|aa9eaad21c2223be": [
+   true,
+   0.933333,
+   0,
+   "11110111111111"
+  ],
+  "2f58921e5ff786dd|f0e052f2bc54f1fd": [
+   true,
+   0.933333,
+   0,
+   "11110111111111"
+  ],
+  "2f58921e5ff786dd|36a8a460f62f157f": [
+   false,
+   0,
+   1,
+   ""
+  ],
+  "2f58921e5ff786dd|c4912821d438be56": [
+   true,
+   0.9,
+   0,
+   "11111111110001"
+  ],
+  "2f58921e5ff786dd|0cb61b4b98c7d979": [
+   true,
+   0.991667,
+   0,
+   "11111111111111"
+  ],
+  "e4c5d1379d532937|e988eeb727d8ef23": [
+   true,
+   0.903226,
+   0,
+   "111111111100011"
+  ],
+  "e4c5d1379d532937|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "e4c5d1379d532937|c4912821d438be56": [
+   true,
+   0.874075,
+   0,
+   "111111111100001"
+  ],
+  "e4c5d1379d532937|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "e4c5d1379d532937|36a8a460f62f157f": [
+   true,
+   0.966241,
+   0,
+   "111111111111101"
+  ],
+  "e4c5d1379d532937|0cb61b4b98c7d979": [
+   true,
+   0.966241,
+   0,
+   "111111111111101"
+  ],
+  "fd4b9762c27baf89|e988eeb727d8ef23": [
+   true,
+   0.90625,
+   0,
+   "111111111100011"
+  ],
+  "fd4b9762c27baf89|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "fd4b9762c27baf89|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "fd4b9762c27baf89|c4912821d438be56": [
+   true,
+   0.90625,
+   0,
+   "111111111100011"
+  ],
+  "fd4b9762c27baf89|36a8a460f62f157f": [
+   true,
+   0.99125,
+   0,
+   "111111111111111"
+  ],
+  "fd4b9762c27baf89|0cb61b4b98c7d979": [
+   true,
+   0.92875,
+   0,
+   "111111111111101"
+  ],
+  "85f61d6ee28eb71c|e988eeb727d8ef23": [
+   true,
+   0.903226,
+   0,
+   "111111111100011"
+  ],
+  "85f61d6ee28eb71c|aa9eaad21c2223be": [
+   true,
+   0.935484,
+   0,
+   "111111101111111"
+  ],
+  "85f61d6ee28eb71c|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "85f61d6ee28eb71c|c4912821d438be56": [
+   true,
+   0.870969,
+   0,
+   "111111111100001"
+  ],
+  "85f61d6ee28eb71c|36a8a460f62f157f": [
+   true,
+   0.966045,
+   0,
+   "111111111111101"
+  ],
+  "85f61d6ee28eb71c|0cb61b4b98c7d979": [
+   true,
+   0.966045,
+   0,
+   "111111111111101"
+  ],
+  "e9d7926045ace5c2|e988eeb727d8ef23": [
+   true,
+   0.90625,
+   0,
+   "111111111100011"
+  ],
+  "e9d7926045ace5c2|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "e9d7926045ace5c2|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "e9d7926045ace5c2|c4912821d438be56": [
+   false,
+   0.71875,
+   0,
+   "111011111100011"
+  ],
+  "e9d7926045ace5c2|36a8a460f62f157f": [
+   true,
+   0.994485,
+   0,
+   "111111111111111"
+  ],
+  "e9d7926045ace5c2|0cb61b4b98c7d979": [
+   true,
+   0.994485,
+   0,
+   "111111111111111"
+  ],
+  "38cc797305f0c034|e988eeb727d8ef23": [
+   true,
+   0.961538,
+   0,
+   "11111111101"
+  ],
+  "38cc797305f0c034|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "38cc797305f0c034|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "38cc797305f0c034|c4912821d438be56": [
+   true,
+   0.961538,
+   0,
+   "11111111101"
+  ],
+  "38cc797305f0c034|36a8a460f62f157f": [
+   true,
+   0.993007,
+   0,
+   "11111111111"
+  ],
+  "38cc797305f0c034|0cb61b4b98c7d979": [
+   false,
+   0.839161,
+   0,
+   "11011111111"
+  ],
+  "840d7b0d71a740ac|e988eeb727d8ef23": [
+   true,
+   0.9,
+   0,
+   "11111111110001"
+  ],
+  "840d7b0d71a740ac|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "840d7b0d71a740ac|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "840d7b0d71a740ac|c4912821d438be56": [
+   true,
+   0.9,
+   0,
+   "11111111110001"
+  ],
+  "840d7b0d71a740ac|36a8a460f62f157f": [
+   true,
+   0.960784,
+   0,
+   "11111111111011"
+  ],
+  "840d7b0d71a740ac|0cb61b4b98c7d979": [
+   true,
+   0.994118,
+   0,
+   "11111111111111"
+  ],
+  "23a76b9144c39a93|e988eeb727d8ef23": [
+   false,
+   0.678571,
+   0,
+   "1110111110001"
+  ],
+  "23a76b9144c39a93|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "23a76b9144c39a93|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "1111111111111"
+  ],
+  "23a76b9144c39a93|c4912821d438be56": [
+   true,
+   0.892857,
+   0,
+   "1111111110001"
+  ],
+  "23a76b9144c39a93|36a8a460f62f157f": [
+   true,
+   0.996429,
+   0,
+   "1111111111111"
+  ],
+  "23a76b9144c39a93|0cb61b4b98c7d979": [
+   true,
+   0.996429,
+   0,
+   "1111111111111"
+  ],
+  "55a80daf8b899d76|e988eeb727d8ef23": [
+   true,
+   0.961538,
+   0,
+   "11111111101"
+  ],
+  "55a80daf8b899d76|aa9eaad21c2223be": [
+   true,
+   0.923077,
+   0,
+   "11111110111"
+  ],
+  "55a80daf8b899d76|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "11111111111"
+  ],
+  "55a80daf8b899d76|c4912821d438be56": [
+   true,
+   0.961538,
+   0,
+   "11111111101"
+  ],
+  "55a80daf8b899d76|36a8a460f62f157f": [
+   true,
+   0.991124,
+   0,
+   "11111111111"
+  ],
+  "55a80daf8b899d76|0cb61b4b98c7d979": [
+   true,
+   0.991124,
+   0,
+   "11111111111"
+  ],
+  "3e21f49636a15cd6|e988eeb727d8ef23": [
+   true,
+   0.9,
+   0,
+   "11111111110001"
+  ],
+  "3e21f49636a15cd6|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "11111111111111"
+  ],
+  "3e21f49636a15cd6|f0e052f2bc54f1fd": [
+   true,
+   0.933333,
+   0,
+   "11111111110011"
+  ],
+  "3e21f49636a15cd6|c4912821d438be56": [
+   true,
+   0.9,
+   0,
+   "11111111110001"
+  ],
+  "3e21f49636a15cd6|36a8a460f62f157f": [
+   true,
+   0.996667,
+   0,
+   "11111111111111"
+  ],
+  "3e21f49636a15cd6|0cb61b4b98c7d979": [
+   true,
+   0.996667,
+   0,
+   "11111111111111"
+  ],
+  "d9ebe952f6e533a3|e988eeb727d8ef23": [
+   true,
+   0.903226,
+   0,
+   "111111111100011"
+  ],
+  "d9ebe952f6e533a3|aa9eaad21c2223be": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "d9ebe952f6e533a3|f0e052f2bc54f1fd": [
+   true,
+   1,
+   0,
+   "111111111111111"
+  ],
+  "d9ebe952f6e533a3|c4912821d438be56": [
+   true,
+   0.891838,
+   0,
+   "111111111100011"
+  ],
+  "d9ebe952f6e533a3|36a8a460f62f157f": [
+   true,
+   0.986915,
+   0,
+   "111111111111111"
+  ],
+  "d9ebe952f6e533a3|0cb61b4b98c7d979": [
+   true,
+   0.986915,
+   0,
+   "111111111111111"
+  ]
+ },
+ "single": [
+  {
+   "name": "equals",
+   "output": "hello",
+   "assertion": {
+    "type": "equals",
+    "value": "hello"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "equals-object",
+   "output": "{\"a\":1,\"b\":[2]}",
+   "assertion": {
+    "type": "equals",
+    "value": {
+     "b": [
+      2
+     ],
+     "a": 1
+    }
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "not-equals",
+   "output": "hello",
+   "assertion": {
+    "type": "not-equals",
+    "value": "hello"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "contains-number",
+   "output": "共 42 件",
+   "assertion": {
+    "type": "contains",
+    "value": 42
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "icontains",
+   "output": "Refund ISSUED",
+   "assertion": {
+    "type": "icontains",
+    "value": "refund issued"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "contains-any-csv",
+   "output": "已为您换货",
+   "assertion": {
+    "type": "contains-any",
+    "value": "退货, \"换货\", 补发"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "contains-all-miss",
+   "output": "refund for QY1",
+   "assertion": {
+    "type": "contains-all",
+    "value": [
+     "refund",
+     "QY2"
+    ]
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "icontains-all",
+   "output": "REFUND for qy1",
+   "assertion": {
+    "type": "icontains-all",
+    "value": "refund,QY1"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "not-icontains-any",
+   "output": "As an AI model",
+   "assertion": {
+    "type": "not-icontains-any",
+    "value": [
+     "as an ai",
+     "保证"
+    ]
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "regex",
+   "output": "订单 QY20261018 已退款",
+   "assertion": {
+    "type": "regex",
+    "value": "QY\\d{8}"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "not-regex",
+   "output": "电话 13812345678",
+   "assertion": {
+    "type": "not-regex",
+    "value": "1[3-9]\\d{9}"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "starts-with",
+   "output": "```json\n{}",
+   "assertion": {
+    "type": "starts-with",
+    "value": "{"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "is-json-schema-ok",
+   "output": "{\"priority\":\"P1\",\"n\":3}",
+   "assertion": {
+    "type": "is-json",
+    "value": {
+     "type": "object",
+     "required": [
+      "priority"
+     ],
+     "properties": {
+      "priority": {
+       "enum": [
+        "P1",
+        "P2"
+       ]
+      },
+      "n": {
+       "type": "integer",
+       "minimum": 1
+      }
+     }
+    }
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "is-json-schema-bad",
+   "output": "{\"priority\":\"P9\"}",
+   "assertion": {
+    "type": "is-json",
+    "value": {
+     "type": "object",
+     "properties": {
+      "priority": {
+       "enum": [
+        "P1",
+        "P2"
+       ]
+      }
+     }
+    }
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "is-json-yaml-schema",
+   "output": "{\"a\":\"x\"}",
+   "assertion": {
+    "type": "is-json",
+    "value": "type: object\nrequired: [a]\nproperties:\n  a: {type: string}\n"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "not-is-json",
+   "output": "plain text",
+   "assertion": {
+    "type": "not-is-json"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "contains-json-fenced",
+   "output": "Here:\n```json\n{\"category\":\"refund\",\"n\":[1,2]}\n```\nthanks",
+   "assertion": {
+    "type": "contains-json",
+    "value": {
+     "type": "object",
+     "required": [
+      "category"
+     ]
+    }
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "contains-json-none",
+   "output": "no json here {broken",
+   "assertion": {
+    "type": "contains-json"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "tools-ok",
+   "output": [
+    {
+     "id": "c1",
+     "type": "function",
+     "function": {
+      "name": "lookup_order",
+      "arguments": "{\"order_id\":\"QY20261018\"}"
+     }
+    }
+   ],
+   "assertion": {
+    "type": "is-valid-openai-tools-call"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "tools-bad-args",
+   "output": [
+    {
+     "id": "c1",
+     "type": "function",
+     "function": {
+      "name": "lookup_order",
+      "arguments": "{\"order_id\":\"123\"}"
+     }
+    }
+   ],
+   "assertion": {
+    "type": "is-valid-openai-tools-call"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "tools-unknown",
+   "output": [
+    {
+     "id": "c1",
+     "type": "function",
+     "function": {
+      "name": "refund_now",
+      "arguments": "{}"
+     }
+    }
+   ],
+   "assertion": {
+    "type": "is-valid-openai-tools-call"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "tools-string",
+   "output": "lookup_order(QY1)",
+   "assertion": {
+    "type": "is-valid-openai-tools-call"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "not-tools",
+   "output": "plain",
+   "assertion": {
+    "type": "not-is-valid-openai-tools-call"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "js-bool",
+   "output": "hello world",
+   "assertion": {
+    "type": "javascript",
+    "value": "output.includes('world')"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "js-number-threshold",
+   "output": "abc",
+   "assertion": {
+    "type": "javascript",
+    "value": "output.length / 10",
+    "threshold": 0.5
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0.3
+   }
+  },
+  {
+   "name": "js-number-default",
+   "output": "abc",
+   "assertion": {
+    "type": "javascript",
+    "value": "output.length / 10"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 0.3
+   }
+  },
+  {
+   "name": "js-grading",
+   "output": "x",
+   "assertion": {
+    "type": "javascript",
+    "value": "return { pass: false, score: 0.25, reason: 'too short' }"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "js-multiline",
+   "output": "{\"a\":2}",
+   "assertion": {
+    "type": "javascript",
+    "value": "const v = JSON.parse(output);\nreturn v.a > 1;"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "js-const",
+   "output": "{\"a\":2}",
+   "assertion": {
+    "type": "javascript",
+    "value": "const v = JSON.parse(output); v.a === 2"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "js-throw",
+   "output": "x",
+   "assertion": {
+    "type": "javascript",
+    "value": "JSON.parse(output).a"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "js-context",
+   "output": "x",
+   "assertion": {
+    "type": "javascript",
+    "value": "context.vars.lang === 'en'"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "not-js",
+   "output": "x",
+   "assertion": {
+    "type": "not-javascript",
+    "value": "output === 'x'"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "levenshtein",
+   "output": "— Qingyan Home Suport",
+   "assertion": {
+    "type": "levenshtein",
+    "value": "— Qingyan Home Support",
+    "threshold": 2
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "levenshtein-default",
+   "output": "kitten",
+   "assertion": {
+    "type": "levenshtein",
+    "value": "sitting"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "rouge-n",
+   "output": "the refund was issued today to your card",
+   "assertion": {
+    "type": "rouge-n",
+    "value": "your refund was issued today",
+    "threshold": 0.5
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 0.769231
+   }
+  },
+  {
+   "name": "rouge-n-low",
+   "output": "completely different words",
+   "assertion": {
+    "type": "rouge-n",
+    "value": "your refund was issued today"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "not-rouge-n",
+   "output": "the refund was issued today",
+   "assertion": {
+    "type": "not-rouge-n",
+    "value": "your refund was issued today",
+    "threshold": 0.5
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0.2
+   }
+  },
+  {
+   "name": "bleu",
+   "output": "the cat is on the mat today",
+   "assertion": {
+    "type": "bleu",
+    "value": [
+     "the cat is on the mat",
+     "there is a cat on the mat"
+    ],
+    "threshold": 0.4
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 0.809107
+   }
+  },
+  {
+   "name": "bleu-short",
+   "output": "cat",
+   "assertion": {
+    "type": "bleu",
+    "value": "the cat is on the mat"
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0.006738
+   }
+  },
+  {
+   "name": "latency-ok",
+   "output": "x",
+   "assertion": {
+    "type": "latency",
+    "threshold": 1000
+   },
+   "extra": {
+    "latencyMs": 640
+   },
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "latency-slow",
+   "output": "x",
+   "assertion": {
+    "type": "latency",
+    "threshold": 500
+   },
+   "extra": {
+    "latencyMs": 640
+   },
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "cost-ok",
+   "output": "x",
+   "assertion": {
+    "type": "cost",
+    "threshold": 0.002
+   },
+   "extra": {
+    "cost": 0.0012
+   },
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "not-cost",
+   "output": "x",
+   "assertion": {
+    "type": "not-cost",
+    "threshold": 0.002
+   },
+   "extra": {
+    "cost": 0.0012
+   },
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "word-count-range",
+   "output": "one two three four",
+   "assertion": {
+    "type": "word-count",
+    "value": {
+     "min": 2,
+     "max": 3
+    }
+   },
+   "extra": {},
+   "expected": {
+    "pass": false,
+    "score": 0
+   }
+  },
+  {
+   "name": "finish-reason",
+   "output": "x",
+   "assertion": {
+    "type": "finish-reason",
+    "value": "stop"
+   },
+   "extra": {
+    "finishReason": "STOP"
+   },
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "weight-zero",
+   "output": "x",
+   "assertion": {
+    "type": "contains",
+    "value": "y",
+    "weight": 0
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 0
+   }
+  },
+  {
+   "name": "template-value",
+   "output": "订单 QY20261018",
+   "assertion": {
+    "type": "contains",
+    "value": "{{order_id}}"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  },
+  {
+   "name": "transform",
+   "output": "{\"category\":\"shipping\"}",
+   "assertion": {
+    "type": "equals",
+    "value": "shipping",
+    "transform": "JSON.parse(output).category"
+   },
+   "extra": {},
+   "expected": {
+    "pass": true,
+    "score": 1
+   }
+  }
+ ],
+ "aggregate": [
+  {
+   "name": "weighted-threshold",
+   "output": "refund QY1",
+   "test": {
+    "threshold": 0.7,
+    "assert": [
+     {
+      "type": "contains",
+      "value": "refund",
+      "weight": 3
+     },
+     {
+      "type": "contains",
+      "value": "QY2"
+     }
+    ]
+   },
+   "expected": {
+    "pass": true,
+    "score": 0.75,
+    "namedScores": {}
+   }
+  },
+  {
+   "name": "all-must-pass",
+   "output": "refund QY1",
+   "test": {
+    "assert": [
+     {
+      "type": "contains",
+      "value": "refund",
+      "weight": 3
+     },
+     {
+      "type": "contains",
+      "value": "QY2"
+     }
+    ]
+   },
+   "expected": {
+    "pass": false,
+    "score": 0.75,
+    "namedScores": {}
+   }
+  },
+  {
+   "name": "assert-set",
+   "output": "refund QY1",
+   "test": {
+    "assert": [
+     {
+      "type": "assert-set",
+      "threshold": 0.5,
+      "assert": [
+       {
+        "type": "contains",
+        "value": "refund"
+       },
+       {
+        "type": "contains",
+        "value": "QY2"
+       }
+      ]
+     },
+     {
+      "type": "icontains",
+      "value": "qy1"
+     }
+    ]
+   },
+   "expected": {
+    "pass": true,
+    "score": 0.75,
+    "namedScores": {}
+   }
+  },
+  {
+   "name": "metrics",
+   "output": "abc",
+   "test": {
+    "assert": [
+     {
+      "type": "contains",
+      "value": "a",
+      "metric": "m"
+     },
+     {
+      "type": "contains",
+      "value": "z",
+      "metric": "m",
+      "weight": 3
+     }
+    ]
+   },
+   "expected": {
+    "pass": false,
+    "score": 0.25,
+    "namedScores": {
+     "m": 0.25
+    }
+   }
+  }
+ ]
+}

@@ -1,378 +1,190 @@
+// ABOUTME: 评测项目（工作副本）的结构与校验：配置原文、运行列表、基线、逐项复核与发布判断。
 import { isRecord, boundedText } from "./project.ts";
+import type { Baseline, Gate } from "./compare.ts";
+import { defaultGate } from "./compare.ts";
+import type { RunStats } from "./results.ts";
+
 export type Decision = "pending" | "accept" | "reject";
+export type ReleaseDecision = "pending" | "ship" | "hold" | "block";
 export interface Review {
   decision: Decision;
   note: string;
 }
-export interface Report {
+export interface Release {
+  decision: ReleaseDecision;
+  note: string;
+}
+export type RunOrigin = "local" | "import" | "sample" | "official";
+export interface RunRef {
   id: string;
   name: string;
-  raw: string;
+  createdAt: string;
+  origin: RunOrigin;
+  stats: RunStats;
 }
 export interface EvalProject {
-  reports: Report[];
-  activeId: string;
-  baseline: number;
+  version: 2;
+  config: string;
+  runs: RunRef[];
+  current: string;
+  baseline: Baseline;
   reviews: Record<string, Review>;
-  suite: string;
+  releases: Record<string, Release>;
+  gate: Gate;
 }
-export interface Cell {
-  key: string;
-  test: number;
-  column: number;
-  prompt: string;
-  provider: string;
-  label: string;
-  input: string;
-  output: string;
-  pass: boolean;
-  score: number | null;
-  latency: number | null;
-  cost: number | null;
-  reason: string;
-  assertions: string;
-}
-export interface Evaluation {
-  cells: Cell[];
-  columns: { index: number; label: string; provider: string }[];
-  tests: number[];
-  timestamp: string;
-}
-export const sampleSuite = JSON.stringify(
-  {
-    description: "模板与断言检查（回显，不调用模型）",
-    mode: "echo",
-    prompts: [
-      { label: "原始版本", raw: "{{input}}" },
-      { label: "修订版本", raw: "Reviewed: {{input}}" },
-    ],
-    tests: [
-      {
-        vars: { input: "shipping date" },
-        assert: [{ type: "contains", value: "Reviewed:" }],
-      },
-      {
-        vars: { input: "item count" },
-        assert: [{ type: "not-contains", value: "undefined" }],
-      },
-    ],
-  },
-  null,
-  2,
-);
+
+export const PROJECT_LIMIT = 880_000;
+export const DRAFT_LIMIT = 1_500_000;
+export const CONFIG_LIMIT = 600_000;
+export const MAX_RUNS = 60;
+export const runIdPattern = /^[A-Za-z0-9_-]{6,80}$/;
+
+export const blankConfig = `# promptfooconfig.yaml
+description: 新的评测
+prompts:
+  - label: 版本 A
+    raw: |
+      请用一句话回答：{{question}}
+providers:
+  - id: echo
+    label: 回显（模板检查）
+tests:
+  - description: 示例用例
+    vars:
+      question: 退货需要几天到账？
+    assert:
+      - type: icontains
+        value: 退货
+`;
 export const emptyProject: EvalProject = {
-  reports: [],
-  activeId: "",
-  baseline: 0,
+  version: 2,
+  config: blankConfig,
+  runs: [],
+  current: "",
+  baseline: { kind: "none" },
   reviews: {},
-  suite: sampleSuite,
+  releases: {},
+  gate: defaultGate,
 };
-const text = (value: unknown, limit = 10000) => boundedText(value, limit);
-const display = (v: unknown) =>
-  typeof v === "string" ? v : JSON.stringify(v ?? "", null, 2);
-function number(v: unknown): number | null {
-  return typeof v === "number" && Number.isFinite(v) ? v : null;
-}
-export function parseEvaluation(raw: string): Evaluation {
-  if (new TextEncoder().encode(raw).length > 600000)
-    throw new Error("单份评测结果不能超过 600 KB。请先筛选或分批导出。");
-  let value: unknown;
-  try {
-    value = JSON.parse(raw);
-  } catch {
-    throw new Error("结果文件不是完整 JSON。");
+
+const text = (v: unknown, max: number) => boundedText(v, max);
+function stats(v: unknown): RunStats {
+  if (!isRecord(v)) throw new Error("运行统计无效。");
+  const out = {} as RunStats;
+  for (const k of ["total", "pass", "fail", "error", "columns", "tests"] as const) {
+    const x = v[k];
+    if (typeof x !== "number" || !Number.isSafeInteger(x) || x < 0) throw new Error("运行统计无效。");
+    out[k] = x;
   }
-  const summary =
-    isRecord(value) && isRecord(value.results) ? value.results : value;
-  if (
-    !isRecord(summary) ||
-    summary.version !== 3 ||
-    !Array.isArray(summary.results) ||
-    !summary.results.length ||
-    summary.results.length > 400
-  )
-    throw new Error(
-      "需要 Promptfoo v3 summary（1–400 个结果），也支持外层 results 字段。",
-    );
-  const columns = new Map<
-    number,
-    { index: number; label: string; provider: string }
-  >();
-  const seen = new Set<string>();
-  const cells = summary.results.map((row: unknown): Cell => {
-    if (
-      !isRecord(row) ||
-      !Number.isSafeInteger(row.testIdx) ||
-      !Number.isSafeInteger(row.promptIdx) ||
-      Number(row.testIdx) < 0 ||
-      Number(row.promptIdx) < 0 ||
-      typeof row.success !== "boolean" ||
-      !isRecord(row.prompt) ||
-      !isRecord(row.provider)
-    )
-      throw new Error("评测条目缺少用例、版本或成功状态。");
-    const test = Number(row.testIdx),
-      column = Number(row.promptIdx),
-      key = `${test}:${column}`;
-    if (seen.has(key)) throw new Error("结果中出现重复的用例与版本组合。");
-    seen.add(key);
-    const label = text(row.prompt.label ?? `版本 ${column + 1}`, 300),
-      provider = text(row.provider.id, 500);
-    const previous = columns.get(column);
-    if (
-      previous &&
-      (previous.label !== label || previous.provider !== provider)
-    )
-      throw new Error("同一版本列的名称或提供者不一致。");
-    columns.set(column, { index: column, label, provider });
-    const response = isRecord(row.response) ? row.response : {},
-      grading = isRecord(row.gradingResult) ? row.gradingResult : {},
-      testCase = isRecord(row.testCase) ? row.testCase : {};
-    const output = text(display(response.output), 50000);
-    const input = text(display(row.vars ?? testCase.vars ?? {}), 16000);
+  return out;
+}
+function baselineValue(v: unknown): Baseline {
+  if (!isRecord(v)) return { kind: "none" };
+  if (v.kind === "prompt" && typeof v.prompt === "string" && v.prompt.length <= 2000) return { kind: "prompt", prompt: v.prompt };
+  if (v.kind === "run" && typeof v.runId === "string" && runIdPattern.test(v.runId)) return { kind: "run", runId: v.runId };
+  if (v.kind === "none") return { kind: "none" };
+  throw new Error("对照基线无效。");
+}
+function gateValue(v: unknown): Gate {
+  if (v === undefined) return defaultGate;
+  if (!isRecord(v)) throw new Error("发布门槛无效。");
+  const rate = Number(v.minPassRate),
+    reg = Number(v.maxRegressions);
+  if (!Number.isFinite(rate) || rate < 0 || rate > 1) throw new Error("通过率门槛需在 0–100% 之间。");
+  if (!Number.isSafeInteger(reg) || reg < 0 || reg > 100000) throw new Error("允许退步数无效。");
+  return { minPassRate: rate, maxRegressions: reg, allowErrors: v.allowErrors === true };
+}
+function keyed<T>(v: unknown, decode: (x: Record<string, unknown>) => T, max: number, what: string): Record<string, T> {
+  if (v === undefined) return {};
+  if (!isRecord(v)) throw new Error(`${what}无效。`);
+  const out: Record<string, T> = {};
+  const entries = Object.entries(v);
+  if (entries.length > max) throw new Error(`${what}超过 ${max} 条。`);
+  for (const [k, x] of entries) {
+    if (["__proto__", "constructor", "prototype"].includes(k) || k.length > 300 || !isRecord(x)) throw new Error(`${what}无效。`);
+    out[k] = decode(x);
+  }
+  return out;
+}
+
+function decode(v: unknown, max: number): EvalProject {
+  if (!isRecord(v)) throw new Error("项目结构无效。");
+  if (v.version !== 2) return legacy(v, max);
+  if (!Array.isArray(v.runs) || v.runs.length > MAX_RUNS) throw new Error(`运行记录需为列表，最多 ${MAX_RUNS} 次。`);
+  const runs = v.runs.map((r: unknown): RunRef => {
+    if (!isRecord(r) || typeof r.id !== "string" || !runIdPattern.test(r.id)) throw new Error("运行记录无效。");
+    if (!["local", "import", "sample", "official"].includes(String(r.origin))) throw new Error("运行来源无效。");
     return {
-      key,
-      test,
-      column,
-      label,
-      provider,
-      input,
-      output,
-      prompt: text(display(row.prompt.raw), 30000),
-      pass: row.success,
-      score: number(row.score),
-      latency: number(row.latencyMs),
-      cost: number(row.cost),
-      reason: text(
-        display(
-          grading.reason ??
-            row.error ??
-            (row.success ? "所有断言通过" : "未通过"),
-        ),
-      ),
-      assertions: text(
-        display(grading.componentResults ?? testCase.assert ?? []),
-        20000,
-      ),
+      id: r.id,
+      name: text(r.name, 200),
+      createdAt: text(r.createdAt, 40),
+      origin: r.origin as RunOrigin,
+      stats: stats(r.stats),
     };
   });
-  return {
-    cells,
-    columns: [...columns.values()].sort((a, b) => a.index - b.index),
-    tests: [...new Set(cells.map((c) => c.test))].sort((a, b) => a - b),
-    timestamp: typeof summary.timestamp === "string" ? summary.timestamp : "",
+  if (new Set(runs.map((r) => r.id)).size !== runs.length) throw new Error("运行 ID 重复。");
+  const current = text(v.current ?? "", 80);
+  if (current && !runs.some((r) => r.id === current)) throw new Error("当前运行不存在。");
+  const result: EvalProject = {
+    version: 2,
+    config: text(v.config, CONFIG_LIMIT),
+    runs,
+    current,
+    baseline: baselineValue(v.baseline),
+    reviews: keyed(
+      v.reviews,
+      (x) => {
+        if (!["pending", "accept", "reject"].includes(String(x.decision))) throw new Error("复核记录无效。");
+        return { decision: x.decision as Decision, note: text(x.note ?? "", 6000) };
+      },
+      20000,
+      "复核记录",
+    ),
+    releases: keyed(
+      v.releases,
+      (x) => {
+        if (!["pending", "ship", "hold", "block"].includes(String(x.decision))) throw new Error("发布判断无效。");
+        return { decision: x.decision as ReleaseDecision, note: text(x.note ?? "", 6000) };
+      },
+      2000,
+      "发布判断",
+    ),
+    gate: gateValue(v.gate),
   };
-}
-function decodeProject(v: unknown, maxBytes: number): EvalProject {
-  if (
-    !isRecord(v) ||
-    !Array.isArray(v.reports) ||
-    v.reports.length > 10 ||
-    !isRecord(v.reviews)
-  )
-    throw new Error("项目结构无效。");
-  const reports = v.reports.map((r: unknown): Report => {
-    if (
-      !isRecord(r) ||
-      typeof r.id !== "string" ||
-      !/^[A-Za-z0-9_-]{1,120}$/.test(r.id)
-    )
-      throw new Error("报告结构无效。");
-    const raw = text(r.raw, 600000);
-    parseEvaluation(raw);
-    return { id: text(r.id, 120), name: text(r.name, 120), raw };
-  });
-  if (new Set(reports.map((r) => r.id)).size !== reports.length)
-    throw new Error("报告 ID 重复。");
-  const reviews: Record<string, Review> = {};
-  for (const [key, value] of Object.entries(v.reviews)) {
-    if (
-      ["__proto__", "constructor", "prototype"].includes(key) ||
-      key.length > 250 ||
-      !isRecord(value) ||
-      !["pending", "accept", "reject"].includes(String(value.decision))
-    )
-      throw new Error("复核记录无效。");
-    reviews[key] = {
-      decision: value.decision as Decision,
-      note: text(value.note, 6000),
-    };
-  }
-  if (Object.keys(reviews).length > 1000) throw new Error("复核记录超过容量。");
-  const activeId = text(v.activeId, 120);
-  if (activeId && !reports.some((r) => r.id === activeId))
-    throw new Error("选中的报告不存在。");
-  const baseline = Number(v.baseline);
-  if (!Number.isSafeInteger(baseline) || baseline < 0)
-    throw new Error("基线列无效。");
-  const result = {
-    reports,
-    activeId,
-    baseline,
-    reviews,
-    suite: text(v.suite, 60000),
-  };
-  if (new TextEncoder().encode(JSON.stringify(result)).length > maxBytes)
+  if (new TextEncoder().encode(JSON.stringify(result)).length > max)
     throw new Error(
-      maxBytes === 750000
-        ? "项目超过750KB，请导出并将评测分成多个项目。当前输入将保留为草稿。"
-        : "工作草稿已达到1.3MB容量，请先导出并拆分项目。",
+      max === PROJECT_LIMIT
+        ? "项目超过 880KB（多为复核意见或配置过长），当前输入保留为草稿；请导出后拆分。"
+        : "工作草稿已达到 1.5MB 容量，请先导出并拆分。",
     );
   return result;
 }
+/** 0.4 项目（reports 内嵌原始 JSON、suite 为 JSON 套件）只保留配置与复核；报告由服务端迁移进运行表。 */
+function legacy(v: Record<string, unknown>, max: number): EvalProject {
+  if (!Array.isArray(v.reports) || typeof v.suite !== "string") throw new Error("项目结构无效。");
+  return decode({ ...emptyProject, config: legacySuiteToYaml(v.suite) }, max);
+}
+export function legacySuiteToYaml(suite: string): string {
+  try {
+    const s: unknown = JSON.parse(suite);
+    if (!isRecord(s) || !Array.isArray(s.prompts) || !Array.isArray(s.tests)) return blankConfig;
+    const lines = [`# 由 0.4 的 JSON 套件转换`, `description: ${JSON.stringify(String(s.description ?? "评测套件"))}`, "prompts:"];
+    for (const p of s.prompts)
+      if (isRecord(p)) lines.push(`  - label: ${JSON.stringify(String(p.label ?? "版本"))}`, `    raw: ${JSON.stringify(String(p.raw ?? ""))}`);
+    lines.push("providers:", "  - id: echo", "    label: 回显（模板检查）", "tests:");
+    for (const t of s.tests)
+      if (isRecord(t)) lines.push(`  - vars: ${JSON.stringify(t.vars ?? {})}`, `    assert: ${JSON.stringify(t.assert ?? [])}`);
+    return lines.join("\n") + "\n";
+  } catch {
+    return blankConfig;
+  }
+}
+
 export function validateProject(v: unknown): EvalProject {
-  return decodeProject(v, 750000);
+  return decode(v, PROJECT_LIMIT);
 }
 export function restoreProjectDraft(v: unknown): EvalProject {
-  return decodeProject(v, 1300000);
+  return decode(v, DRAFT_LIMIT);
 }
-const referenceSyntax =
-  /^\s*(?:file|package|portkey|langfuse|helicone|javascript|typescript|python|exec|shell):/i;
-function literal(value: unknown, max: number) {
-  const out = text(value, max);
-  if (/[{][{%#]/.test(out) || referenceSyntax.test(out))
-    throw new Error("数据字段必须是字面文本，不能包含模板或外部引用。");
-  return out;
-}
-const reservedVariables = new Set([
-  "env",
-  "context",
-  "provider",
-  "prompt",
-  "test",
-  "vars",
-  "config",
-  "constructor",
-  "prototype",
-  "__proto__",
-]);
-export function validateSuite(value: unknown) {
-  if (
-    !isRecord(value) ||
-    !["echo", "model"].includes(String(value.mode)) ||
-    !Array.isArray(value.prompts) ||
-    value.prompts.length < 1 ||
-    value.prompts.length > 4 ||
-    !Array.isArray(value.tests) ||
-    value.tests.length < 1 ||
-    value.tests.length > 25
-  )
-    throw new Error(
-      "测试套件需要 mode=echo/model、1–4 个 prompts 和 1–25 个 tests。",
-    );
-  const prompts = value.prompts.map((p: unknown) => {
-    if (!isRecord(p)) throw new Error("提示版本格式无效。");
-    const raw = text(p.raw, 8000);
-    if (
-      /{[%#]/.test(raw) ||
-      referenceSyntax.test(raw) ||
-      /{{/.test(raw.replace(/{{\s*[A-Za-z][A-Za-z0-9_]{0,40}\s*}}/g, "")) ||
-      Array.from(raw.matchAll(/{{(.*?)}}/gs)).some(
-        (m) => !/^\s*[A-Za-z][A-Za-z0-9_]{0,40}\s*$/.test(m[1]),
-      )
-    )
-      throw new Error("提示只支持 {{变量名}} 替换。");
-    return { label: literal(p.label, 100), raw };
-  });
-  if (new Set(prompts.map((p) => p.label)).size !== prompts.length)
-    throw new Error("提示版本名称不能重复。");
-  const tests = value.tests.map((t: unknown) => {
-    if (
-      !isRecord(t) ||
-      !isRecord(t.vars) ||
-      !Array.isArray(t.assert) ||
-      t.assert.length < 1 ||
-      t.assert.length > 10
-    )
-      throw new Error("每个用例需要 vars 和 1–10 个 assert。");
-    const vars: Record<string, string> = {};
-    for (const [key, v] of Object.entries(t.vars)) {
-      if (
-        !/^[A-Za-z][A-Za-z0-9_]{0,40}$/.test(key) ||
-        reservedVariables.has(key)
-      )
-        throw new Error("变量名无效。");
-      vars[key] = literal(v, 8000);
-      if (vars[key].trim().startsWith("file://"))
-        throw new Error("变量不能引用本地文件。");
-    }
-    if (Object.keys(vars).length > 12)
-      throw new Error("每个用例最多12个变量。");
-    return {
-      vars,
-      assert: t.assert.map((a: unknown) => {
-        if (
-          !isRecord(a) ||
-          !["contains", "not-contains", "equals", "is-json"].includes(
-            String(a.type),
-          )
-        )
-          throw new Error(
-            "断言仅支持 contains、not-contains、equals、is-json。",
-          );
-        return a.type === "is-json"
-          ? { type: "is-json" }
-          : { type: String(a.type), value: literal(a.value, 8000) };
-      }),
-    };
-  });
-  for (const prompt of prompts)
-    for (const match of prompt.raw.matchAll(
-      /{{\s*([A-Za-z][A-Za-z0-9_]{0,40})\s*}}/g,
-    )) {
-      if (
-        reservedVariables.has(match[1]) ||
-        tests.some((t) => !Object.hasOwn(t.vars, match[1]))
-      )
-        throw new Error(
-          "每个提示变量都必须由所有用例显式提供，且不能使用保留名称。",
-        );
-    }
-  const suite = {
-    description: literal(value.description ?? "评测套件", 300),
-    mode: String(value.mode),
-    prompts,
-    tests,
-  };
-  if (new TextEncoder().encode(JSON.stringify(suite)).length > 60000)
-    throw new Error("测试套件不能超过60KB。");
-  return suite;
-}
-export const reviewKey = (reportId: string, cell: Cell) =>
-  `${reportId}:${cell.key}`;
-export function reviewCsv(report: Report, reviews: Record<string, Review>) {
-  const quote = (v: unknown) =>
-    '"' +
-    String(v ?? "")
-      .replace(/^[\t\r\n ]*[=+@-]/, "'$&")
-      .replaceAll('"', '""') +
-    '"';
-  const rows = [
-    [
-      "用例",
-      "版本",
-      "提供者",
-      "结果",
-      "分数",
-      "耗时毫秒",
-      "人工判断",
-      "复核意见",
-      "实际输出",
-    ],
-    ...parseEvaluation(report.raw).cells.map((c) => {
-      const r = reviews[reviewKey(report.id, c)];
-      return [
-        c.test + 1,
-        c.label,
-        c.provider,
-        c.pass ? "通过" : "失败",
-        c.score ?? "",
-        c.latency ?? "",
-        r?.decision ?? "pending",
-        r?.note ?? "",
-        c.output,
-      ];
-    }),
-  ];
-  return "\ufeff" + rows.map((row) => row.map(quote).join(",")).join("\r\n");
-}
+export const reviewKey = (runId: string, cellKey: string) => `${runId}:${cellKey}`;
+export const releaseKey = (runId: string, colKey: string) => `${runId}:${colKey}`;

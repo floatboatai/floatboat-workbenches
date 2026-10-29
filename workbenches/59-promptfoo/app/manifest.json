@@ -3,9 +3,9 @@
   "appId": "workbench.8faf7ebf-85d9-4974-b0bf-b5b4e7b6151c",
   "registryName": "promptfoo-studio",
   "name": "Promptfoo 评测台",
-  "description": "测试用例、提示版本、失败差异与发布复核",
-  "version": "0.4.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "description": "用例×提示版本×provider 评测矩阵：本机断言、录制回放、基线差异与逐项发布判断",
+  "version": "0.9.0",
+  "changelog": "0.9.0：Node 内执行评测（21 类确定性断言、javascript 沙箱、weight/threshold/assert-set）；回放录制输出、echo、脚本与 Floatboat 模型 provider；promptfooconfig.yaml 与结果 JSON 导入导出；运行对比、基线差异、发布门槛；CSV/HTML 报告；36 用例示例评测集；任务回执恢复与草稿导入。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
@@ -16,16 +16,39 @@
   "server": "dist/server/index.mjs",
   "ui": "dist/ui",
   "migrations": "migrations",
-  "capabilities": [],
+  "capabilities": [
+    "llm"
+  ],
   "contributions": [],
   "dependencies": [],
   "resources": [
     {
-      "id": "evaluation-example",
+      "id": "sample-config",
       "kind": "file",
       "role": "asset",
       "location": "project",
-      "path": "samples/promptfoo-example.json"
+      "path": "samples/promptfooconfig.yaml"
+    },
+    {
+      "id": "sample-recording",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "samples/recorded-run.json"
+    },
+    {
+      "id": "upstream-notices",
+      "kind": "directory",
+      "role": "asset",
+      "location": "project",
+      "path": "notices"
+    },
+    {
+      "id": "acceptance-notes",
+      "kind": "file",
+      "role": "asset",
+      "location": "project",
+      "path": "ACCEPTANCE.md"
     }
   ]
 }
