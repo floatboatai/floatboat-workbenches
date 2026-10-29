@@ -6,9 +6,7 @@ import { artMarks, chartMarks, type Mark } from "../shared/marks";
 import { THEME_DEFS, fontStack, type Theme } from "../shared/themes";
 import { useMedia } from "./media-client";
 
-const PPI = 96;
-const px = (inch: number) => inch * PPI;
-const ptPx = (pt: number) => (pt * PPI) / 72;
+import { CANVAS_RESET, listStyle, ptPx, px, textStyle } from "./prim-style";
 const c = (hex: string) => `#${hex}`;
 
 function arcPath(m: Extract<Mark, { k: "arc" }>): string {
@@ -94,19 +92,7 @@ function PrimView({ p, theme, pick, active }: { p: Prim; theme: Theme; pick?: (f
       return (
         <div
           {...common}
-          style={{
-            ...box(p.x, p.y, p.w, p.h),
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: p.valign === "top" ? "flex-start" : p.valign === "middle" ? "center" : "flex-end",
-            textAlign: p.align,
-            color: c(p.color),
-            fontFamily: fontStack(p.head && theme.serifHead),
-            fontSize: ptPx(p.size),
-            fontWeight: p.bold ? 700 : 400,
-            fontStyle: p.italic ? "italic" : undefined,
-            lineHeight: p.lh,
-          }}
+          style={{ ...box(p.x, p.y, p.w, p.h), ...textStyle(p, fontStack(p.head && theme.serifHead)) }}
         >
           <span className="prim-text">{p.text}</span>
         </div>
@@ -115,7 +101,7 @@ function PrimView({ p, theme, pick, active }: { p: Prim; theme: Theme; pick?: (f
       const size = ptPx(p.size);
       const indent = px(bulletIndent(p.size));
       return (
-        <ul {...common} style={{ ...box(p.x, p.y, p.w, p.h), color: c(p.color), fontFamily: fontStack(false), fontSize: size, lineHeight: p.lh, listStyle: "none", margin: 0, padding: 0 }}>
+        <ul {...common} style={{ ...box(p.x, p.y, p.w, p.h), ...listStyle(p, fontStack(false)) }}>
           {p.items.map((item, i) => (
             <li key={i} style={{ position: "relative", paddingLeft: indent, marginBottom: i < p.items.length - 1 ? p.gap * size : 0 }}>
               <span aria-hidden="true" className="prim-marker" style={{ color: c(p.markerColor), width: indent, ...(p.marker === "dot" ? { fontSize: "0.55em", lineHeight: p.lh / 0.55 } : {}) }}>
@@ -167,7 +153,7 @@ export const SlideView = memo(function SlideView({
   const scale = width / px(SLIDE_W);
   return (
     <div className="slide-frame" style={{ width, height: (width * SLIDE_H) / SLIDE_W }}>
-      <div className="slide-canvas" style={{ width: px(SLIDE_W), height: px(SLIDE_H), transform: `scale(${scale})` }}>
+      <div className="slide-canvas" style={{ ...CANVAS_RESET, width: px(SLIDE_W), height: px(SLIDE_H), transform: `scale(${scale})` }}>
         {prims.map((p, i) => (
           <PrimView key={i} p={p} theme={theme} pick={pick} active={active} />
         ))}

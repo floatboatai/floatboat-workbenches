@@ -18,8 +18,12 @@
 ### 命令（Node 22.22.0）
 
 - `pnpm workbench check presenton`：manifest、依赖、类型、构建通过；保留共享 `autosave-client.ts` 的 `WORKBENCH_LARGE_MODULE` 提示。
-- `pnpm workbench test presenton`：**47/47** 通过（之前 29）。新增：生成规则（示例版式序列、表格转图表与排除列、结论文字、关键数字/引语出处、目标页数与密度、无标题与英文资料、确定性）、资料解析与压缩、.docx/HTML/CSV/GB18030 读入、0.4 迁移、草稿/正式模型边界（900 KB）、便携 v2 含图片、Presenton 请求映射与导入、Markdown 讲义、PPTX 解包（12 页、bar+doughnut 两个图表部件、项目符号与编号、备注、媒体、每段至多一个 `a:pPr`、缺图报错）、PDF 结构（xref 偏移、UTF-16 标题、JPEG 校验）、所有版式×主题几何在画布内、Host 通道 mock（可用/未连接/截断/资料过少）。原有 Presenton 连接器、任务账本、提交防重与自动保存测试保留并适配新模型。
-- `pnpm workbench package presenton`：`workbenches/61-presenton/artifacts/presenton-studio-0.9.0.fbworkbench`，79 个文件，不含业务数据；SHA-256 `04586eea0a392b17edf7f4583742bff61ee4fdd6a41d04fef3f4967d01cf61ec`。
+- `pnpm workbench test presenton`：**49/49** 通过（之前 29）。新增：生成规则（示例版式序列、表格转图表与排除列、结论文字、关键数字/引语出处、目标页数与密度、无标题与英文资料、确定性）、资料解析与压缩、.docx/HTML/CSV/GB18030 读入、0.4 迁移、草稿/正式模型边界（900 KB）、便携 v2 含图片、Presenton 请求映射与导入、Markdown 讲义、PPTX 解包（12 页、bar+doughnut 两个图表部件、项目符号与编号、备注、媒体、每段至多一个 `a:pPr`、缺图报错）、PDF 结构（xref 偏移、UTF-16 标题、JPEG 校验）、所有版式×主题几何在画布内、Host 通道 mock（可用/未连接/截断/资料过少）。原有 Presenton 连接器、任务账本、提交防重与自动保存测试保留并适配新模型。
+- `pnpm workbench package presenton`：`workbenches/61-presenton/artifacts/presenton-studio-0.9.0.fbworkbench`，81 个文件，不含业务数据；SHA-256 `0632894cda04bce9e810dfbf2f313962ed4ca9b4c34cc345a01e2661b096989c`。
+
+### 复核修复：缩略图要点排版与页码角标
+
+主线复核截图发现缩略轨要点页的续行居中、缩进错乱，页码角标压住标题。根因：缩略图放在 `<button>` 里，浏览器默认 `text-align: center`，加上本应用按钮样式的 `white-space: nowrap`；HTML 渲染器的文字图元显式设了对齐，但列表图元和画布根没有，于是缩略图里的要点继承了居中与不换行，而舞台、PDF（Canvas 左对齐 + 悬挂缩进）和 PPTX（`marL`/`indent` 悬挂缩进、无居中）本身正确。修复：`ui/prim-style.ts` 给画布根重置对齐/换行/字重/字距，列表与文字图元显式声明 `textAlign`、`whiteSpace`、字重；页码改为缩略图左侧独立一列，不再叠在画面上。回归测试 `tests/prim-style.test.ts`（2 项）：示例全部页的列表/文字样式不依赖继承，且同一要点页在 PPTX 中为左对齐悬挂缩进。修复后重拍截图，浏览器流程 41 项重跑全部通过，3× 放大的第 3、4 页缩略图与舞台排版一致。
 
 ### 真实浏览器（puppeteer-core + 本机 Chrome，空数据目录，Host 未连接，未配置 PRESENTON_URL）
 

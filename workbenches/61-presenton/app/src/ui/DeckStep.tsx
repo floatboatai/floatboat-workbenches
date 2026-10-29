@@ -105,7 +105,7 @@ export function DeckStep({ doc, go }: { doc: Doc; go: (s: Step) => void }) {
             <li key={s.id} data-id={s.id}>
               <button type="button" className={s.id === slide.id ? "thumb current" : "thumb"} aria-current={s.id === slide.id ? "true" : undefined} aria-label={`第 ${i + 1} 页：${s.title || "未命名"}`} onClick={() => select(s.id)}>
                 <span className="thumb-num">{i + 1}</span>
-                <SlideView slide={s} themeId={doc.data.theme} index={i} total={slides.length} deckTitle={deckTitle} width={narrow ? 108 : 150} />
+                <SlideView slide={s} themeId={doc.data.theme} index={i} total={slides.length} deckTitle={deckTitle} width={narrow ? 108 : 140} />
               </button>
             </li>
           ))}

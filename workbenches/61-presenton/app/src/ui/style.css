@@ -826,33 +826,36 @@ fieldset.segmented {
   gap: 10px;
 }
 .thumb {
-  position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: 18px auto;
+  gap: 4px;
+  align-items: start;
   width: 100%;
   min-height: 0;
-  padding: 0 0 0 0;
-  border: 2px solid transparent;
+  padding: 3px 3px 3px 0;
+  border: 0;
   border-radius: 6px;
   background: transparent;
 }
-.thumb.current {
-  border-color: var(--accent);
-}
 .thumb .slide-frame {
   border-radius: 3px;
+  outline: 2px solid transparent;
+  outline-offset: 1px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.15);
 }
+.thumb.current .slide-frame {
+  outline-color: var(--accent);
+}
 .thumb-num {
-  position: absolute;
-  z-index: 1;
-  left: -1px;
-  top: -1px;
-  min-width: 20px;
-  padding: 1px 5px;
-  border-radius: 4px 0 4px 0;
-  background: rgb(20 24 32 / 0.72);
-  color: #fff;
+  padding-top: 1px;
+  text-align: right;
+  color: var(--muted);
   font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.thumb.current .thumb-num {
+  color: var(--accent);
+  font-weight: 700;
 }
 .add-slide {
   width: 100%;
@@ -1306,7 +1309,7 @@ fieldset.segmented {
   }
   .rail li {
     flex: none;
-    width: 112px;
+    width: 134px;
   }
   .add-slide {
     align-self: center;
