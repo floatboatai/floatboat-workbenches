@@ -21,7 +21,7 @@
   "package": {
     "path": "artifacts/deerflow-studio-0.9.0.fbworkbench",
     "files": 72,
-    "sha256": "f785d7207339bf0db288b71db1d61fc2c595e3380fb862358be5f9f4641b508b"
+    "sha256": "237cc24ab21ab37c9f7c0ed92915a0e9f4863f4dee98701867f44b4c2b5906c0"
   },
   "recoveryExportImportReload": {
     "passed": true,

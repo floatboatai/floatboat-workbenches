@@ -312,5 +312,6 @@ export function timecode(seconds: number, fps = 30) {
   const f = Math.floor((s - whole) * fps + 1e-6);
   const h = Math.floor(whole / 3600), m = Math.floor((whole % 3600) / 60), sec = whole % 60;
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${h ? pad(h) + ":" : ""}${pad(m)}:${pad(sec)}:${pad(f)}`;
+  // SMPTE HH:MM:SS:FF; always show hours so a 24-second cut never reads as 24 minutes.
+  return `${pad(h)}:${pad(m)}:${pad(sec)}:${pad(f)}`;
 }
