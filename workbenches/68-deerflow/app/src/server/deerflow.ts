@@ -53,6 +53,8 @@ export function connectionMessage(e: unknown, base: URL) {
   if (cause.message === "bad port") return `端口 ${base.port} 属于受限端口，请换用 DeerFlow 的实际端口（默认 2026）。`;
   if (isRecord(e) && (e.name === "TimeoutError" || e.name === "AbortError")) return `连接 ${base.origin} 超时，请确认服务已启动。`;
   if (code === "ECONNREFUSED") return `${base.origin} 没有服务在监听（ECONNREFUSED）。请先启动DeerFlow，或检查端口。`;
+  // A service that stopped or restarted closes pooled keep-alive sockets; Linux reports this before ECONNREFUSED.
+  if (code === "ECONNRESET" || code === "UND_ERR_SOCKET") return `${base.origin} 断开了连接（${code}）。服务可能刚重启或已停止，请确认DeerFlow已启动后重试。`;
   if (code === "ENOTFOUND") return `无法解析 ${base.hostname}（ENOTFOUND），请检查地址。`;
   if (code) return `无法连接 ${base.origin}（${code}）。`;
   const detail = typeof cause.message === "string" && cause.message ? cause.message : isRecord(e) && typeof e.message === "string" && e.message !== "fetch failed" ? e.message : "网络错误";

@@ -186,12 +186,24 @@ test("service check reads the model list; refused, unauthorized and wrong servic
   } finally {
     await new Promise<void>((r) => server.close(() => r()));
   }
-  const refused = await checkService(base);
-  assert.equal(refused.reachable, false);
-  assert.match(refused.message, /ECONN/);
-  assert.doesNotMatch(refused.message, /fetch failed/);
+  // The stopped service may surface as a closed pooled socket or a refusal, depending on the platform.
+  const stopped = await checkService(base);
+  assert.equal(stopped.reachable, false);
+  assert.match(stopped.message, /(ECONNREFUSED|ECONNRESET|UND_ERR_SOCKET)）。.*请/);
+  assert.doesNotMatch(stopped.message, /fetch failed/);
+  const refused = await checkService(await closedPort());
+  assert.match(refused.message, /ECONNREFUSED.*请先启动DeerFlow/);
   assert.equal((await checkService(null)).configured, false);
 });
+/** A loopback port nothing listens on and no client has pooled a socket for. */
+async function closedPort() {
+  const server = createServer();
+  await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+  const a = server.address();
+  if (!a || typeof a === "string") throw new Error("no address");
+  await new Promise<void>((r) => server.close(() => r()));
+  return new URL("http://127.0.0.1:" + a.port);
+}
 test("service address: loopback HTTP or remote HTTPS only; saved address is used when no environment variable is set", () => {
   assert.equal(validateServiceUrl("http://localhost:2026/x").origin, "http://localhost:2026");
   assert.throws(() => validateServiceUrl("http://deerflow.example.com"), /HTTPS/);

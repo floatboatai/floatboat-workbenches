@@ -180,5 +180,11 @@ test("HTTP read adapter follows the documented state path; refused connections g
   } finally {
     await new Promise<void>((r) => server.close(() => r()));
   }
-  await assert.rejects(fetchNative("research-1", url), (e: Error) => /ECONN(REFUSED|RESET)/.test(e.message) && !/fetch failed/.test(e.message));
+  // A stopped service may surface as a closed pooled socket or a refusal, depending on the platform.
+  await assert.rejects(fetchNative("research-1", url), (e: Error) => /(ECONNREFUSED|ECONNRESET|UND_ERR_SOCKET)）。.*请/.test(e.message) && !/fetch failed/.test(e.message));
+  const idle = createServer();
+  await new Promise<void>((r) => idle.listen(0, "127.0.0.1", r));
+  const port = (idle.address() as { port: number }).port;
+  await new Promise<void>((r) => idle.close(() => r()));
+  await assert.rejects(fetchNative("research-1", new URL("http://127.0.0.1:" + port)), /ECONNREFUSED.*请先启动DeerFlow/);
 });
