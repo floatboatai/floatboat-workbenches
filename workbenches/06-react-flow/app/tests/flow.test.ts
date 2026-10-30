@@ -11,6 +11,7 @@ import {
   topoOrder,
 } from "../src/contracts/engine.ts";
 import {
+  repairGeneratedFlow,
   restoreFlowDraft,
   signature,
   validateFlow,
@@ -19,7 +20,8 @@ import {
   type PipelineEdge,
   type PipelineNode,
 } from "../src/contracts/flow.ts";
-import { defaultConfig, opKinds, type OpKind } from "../src/contracts/ops.ts";
+import { defaultConfig, opKinds, spec, type OpKind } from "../src/contracts/ops.ts";
+import { describeConfig, GENERATE_ATTEMPTS, parseModelJson } from "../src/contracts/repair.ts";
 import { seed, templates } from "../src/contracts/templates.ts";
 import { createStore, StoreError } from "../src/server/store.ts";
 
@@ -287,6 +289,74 @@ test("旧版 0.3 单链文件自动转换并可运行", () => {
   assert.equal(flow.lastRun, undefined);
   const out = runPipeline(flow).results.output.view;
   assert.equal(out?.type === "text" && out.text, "结果：HELLO");
+});
+
+test("AI 生成稿：可识别的偏差被修正并说明，修正后的候选可运行；正式文档仍严格校验", () => {
+  // 用户反馈：模型把 filter.mode 写成 "and"，整份候选被“筛选行·mode：选项无效”拒绝。
+  const raw = {
+    nodes: [
+      { id: "in", type: "op", position: { x: 0, y: 0 }, data: { op: "csvInput", label: "销售明细", config: { csv: "地区,金额\n华东,10\n华南,5\n华东,7", delimiter: "comma" } } },
+      { id: "f", type: "op", position: { x: 280, y: 0 }, data: { op: "filter", label: "金额大于 6", config: { mode: "and", conditions: { column: "金额", op: ">", value: "6" } } } },
+      { id: "g", type: "op", data: { op: "group", label: "按地区汇总", config: { by: "地区", aggregations: [{ op: "SUM", column: "金额", as: "合计" }] } } },
+      { id: "s", type: "op", position: { x: 840, y: 0 }, data: { op: "sort", label: "排序", config: { keys: [{ column: "合计", direction: "descending" }] } } },
+      { id: "x", type: "op", position: { x: 1120, y: 0 }, data: { op: "pivotTable", label: "透视", config: {} } },
+    ],
+    edges: [
+      { id: "e1", source: "in", sourceHandle: "output", target: "f", targetHandle: "input" },
+      { id: "e2", source: "f", sourceHandle: "out", target: "g", targetHandle: "in" },
+      { id: "e3", source: "g", target: "s" },
+      { id: "e4", source: "s", target: "x" },
+      { id: "e5", source: "in", target: "g" },
+    ],
+  };
+  assert.throws(() => validateGeneratedFlow(raw), /选项无效/);
+  const { flow, repairs } = repairGeneratedFlow(raw);
+  const config = (id: string) => flow.nodes.find((n) => n.id === id)!.data.config;
+  assert.equal(config("f").mode, "all");
+  assert.deepEqual(config("f").conditions, [{ column: "金额", op: "gt", value: "6" }]);
+  assert.equal(config("in").delimiter, ",");
+  assert.deepEqual(config("g").by, ["地区"]);
+  assert.equal((config("g").aggregations as { op: string }[])[0].op, "sum");
+  assert.equal((config("s").keys as { direction: string }[])[0].direction, "desc");
+  assert.deepEqual(flow.nodes.find((n) => n.id === "g")!.position, { x: 560, y: 0 });
+  assert.deepEqual(flow.nodes.map((n) => n.id), ["in", "f", "g", "s"]);
+  assert.deepEqual(flow.edges.map((e) => `${e.source}.${e.sourceHandle}>${e.target}.${e.targetHandle}`), ["in.out>f.in", "f.out>g.in", "g.out>s.in"]);
+  for (const note of ["「金额大于 6」·mode：\"and\" 已改为 \"all\"", "pivotTable", "第 4 条连线", "第 5 条连线重复连接"])
+    assert.ok(repairs.some((r) => r.includes(note)), `missing repair note: ${note}\n${repairs.join("\n")}`);
+  assert.deepEqual(validateFlow(flow), flow);
+  const sorted = runPipeline(flow).results.s;
+  assert.equal(sorted.status, "ok");
+  const out = sorted.outputs.out;
+  assert.deepEqual(out?.type === "table" && out.rows, [{ 地区: "华东", 合计: 17 }]);
+  // 无法识别的取值回到默认值并说明；没有可用节点时给出可操作的提示。
+  const odd = repairGeneratedFlow({ nodes: [{ id: "f", data: { op: "filter", config: { mode: "whatever" } } }], edges: [] });
+  assert.equal(odd.flow.nodes[0].data.config.mode, "all");
+  assert.match(odd.repairs[0], /不是可选值（all\|any）.*默认值 "all"/);
+  // 写错字段名的内容会丢失，修正说明列出被忽略的字段和可用字段。
+  const misplaced = repairGeneratedFlow({ nodes: [{ id: "c", data: { op: "csvInput", config: { text: "a,b\n1,2" } } }], edges: [] });
+  assert.match(misplaced.repairs[0], /不支持的配置 text 已忽略（可用：csv、delimiter/);
+  assert.throws(() => repairGeneratedFlow({ nodes: [{ data: { op: "nope" } }], edges: [] }), /没有返回可用的节点/);
+  assert.throws(() => repairGeneratedFlow({ nodes: "x" }), /缺少 nodes 或 edges/);
+});
+
+test("模型回复：容忍围栏与说明文字；漏写括号的回复判为不完整，由路由重新生成", () => {
+  assert.deepEqual(parseModelJson('```json\n{"nodes":[],"edges":[]}\n```'), { nodes: [], edges: [] });
+  assert.deepEqual(parseModelJson('下面是流水线：\n{"nodes":[],"edges":[]}\n可直接采用。'), { nodes: [], edges: [] });
+  // 实测 gemini-3.8-flash 回复：group 节点的 config 后只写了 "}}"，节点对象没有闭合。
+  const missingBrace =
+    '{"nodes":[{"id":"g","data":{"op":"group","config":{"by":["类别"]}},{"id":"s","data":{"op":"sort","config":{}}}],"edges":[]}';
+  assert.equal(parseModelJson(missingBrace), undefined);
+  assert.equal(parseModelJson("抱歉，无法生成。"), undefined);
+  assert.ok(GENERATE_ATTEMPTS >= 3);
+});
+
+test("AI 提示词的配置说明由字段结构生成，列出全部可选值", () => {
+  for (const op of opKinds) {
+    const text = describeConfig(op);
+    for (const field of Object.values(spec(op).config))
+      if (field.kind === "enum") for (const value of field.values) assert.ok(text.includes(JSON.stringify(value)), `${op} ${value}`);
+  }
+  assert.match(describeConfig("filter"), /mode:"all"\|"any" 之一，默认 "all"/);
 });
 
 test("AI 生成稿剔除运行记录；项目保存与版本冲突", () => {

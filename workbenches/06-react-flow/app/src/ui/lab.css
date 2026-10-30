@@ -1235,6 +1235,22 @@ li[data-stale] .log-detail {
   border: 1px solid var(--line);
   border-radius: 6px;
 }
+.repairs {
+  margin: 8px 0;
+  font-size: 12px;
+}
+.repairs summary {
+  color: var(--warn);
+  cursor: pointer;
+}
+.repairs ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  max-height: 160px;
+  overflow-y: auto;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
 
 /* 窄屏：节点架折叠为按钮，画布在上，检查器、控制台依次在下 */
 @media (max-width: 960px) {

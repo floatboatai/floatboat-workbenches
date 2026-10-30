@@ -301,7 +301,7 @@ export function defaultConfig(op: OpKind): Record<string, unknown> {
   return config;
 }
 
-function fieldDefault(field: Field): unknown {
+export function fieldDefault(field: Field): unknown {
   if (field.kind === "strings" || field.kind === "list") return [];
   return field.default;
 }
@@ -320,7 +320,7 @@ function normalizeFields(fields: Record<string, Field>, source: Record<string, u
   return result;
 }
 
-function normalizeField(field: Field, value: unknown, where: string): unknown {
+export function normalizeField(field: Field, value: unknown, where: string): unknown {
   if (value === undefined) return fieldDefault(field);
   const fail = (message: string) => {
     throw new Error(`${where}：${message}`);

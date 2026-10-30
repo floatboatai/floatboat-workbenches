@@ -1,6 +1,7 @@
 // ABOUTME: 流水线文档（节点、带端口的连线、上次运行记录）的结构校验、草稿恢复与旧版单链转换。
 import { isRecord, boundedText } from "./project.ts";
 import { isOpKind, normalizeConfig, spec, type OpKind } from "./ops.ts";
+import { repairConfig } from "./repair.ts";
 import type { Cell, Preview } from "./values.ts";
 
 export const MAX_NODES = 80;
@@ -168,6 +169,79 @@ export const restoreFlowDraft = (value: unknown): FlowDocument => decode(value, 
 export function validateGeneratedFlow(value: unknown): FlowDocument {
   if (!isRecord(value)) throw new Error("流水线配置无效。");
   return validateFlow({ nodes: value.nodes, edges: value.edges });
+}
+
+/**
+ * 修正模型返回的流水线：配置按字段修正，不支持的节点与无法对上的连线移除，缺失的标识和位置补齐。
+ * 每处修正写入 repairs 供用户核对；结果仍经 validateFlow 严格校验。
+ */
+export function repairGeneratedFlow(value: unknown): { flow: FlowDocument; repairs: string[] } {
+  if (!isRecord(value) || !Array.isArray(value.nodes) || !Array.isArray(value.edges))
+    throw new Error("模型返回的流水线缺少 nodes 或 edges，请调整要求重试。");
+  const repairs: string[] = [];
+  if (value.nodes.length > MAX_NODES) repairs.push(`节点超过 ${MAX_NODES} 个，只保留前 ${MAX_NODES} 个。`);
+  const ids = new Map<string, PipelineNode>();
+  const nodes: PipelineNode[] = [];
+  value.nodes.slice(0, MAX_NODES).forEach((node, index) => {
+    const data = isRecord(node) && isRecord(node.data) ? node.data : {};
+    if (!isRecord(node) || !isOpKind(data.op)) {
+      repairs.push(`第 ${index + 1} 个节点的类型 ${JSON.stringify(data.op ?? null)} 不受支持，已移除。`);
+      return;
+    }
+    const op = data.op;
+    const label = typeof data.label === "string" && data.label.trim() ? data.label.slice(0, 80) : spec(op).title;
+    const original = typeof node.id === "string" || typeof node.id === "number" ? String(node.id) : "";
+    let id = /^[A-Za-z0-9_-]{1,80}$/.test(original) && !ids.has(original) ? original : "";
+    for (let n = index + 1; !id || ids.has(id); n++) id = `n${n}`;
+    const position = isRecord(node.position) && finite(node.position.x) && finite(node.position.y)
+      ? { x: node.position.x as number, y: node.position.y as number }
+      : { x: index * 280, y: 0 };
+    const repaired: PipelineNode = {
+      id,
+      type: "op",
+      position,
+      data: { op, label, config: repairConfig(op, data.config, `「${label}」`, repairs) },
+    };
+    nodes.push(repaired);
+    if (original && !ids.has(original)) ids.set(original, repaired);
+    ids.set(id, repaired);
+  });
+  const port = (ports: { id: string }[], handle: unknown, what: string) => {
+    if (handle === undefined || handle === null) return ports[0]?.id;
+    if (ports.some((item) => item.id === handle)) return handle as string;
+    // 只有一个端口时，写错的端口名只能指它。
+    if (ports.length === 1) {
+      repairs.push(`${what}端口 ${JSON.stringify(handle)} 已改为 ${ports[0].id}。`);
+      return ports[0].id;
+    }
+    return undefined;
+  };
+  const taken = new Set<string>();
+  const edgeIds = new Set<string>();
+  const edges: PipelineEdge[] = [];
+  value.edges.slice(0, MAX_EDGES).forEach((edge, index) => {
+    const where = `第 ${index + 1} 条连线`;
+    if (!isRecord(edge)) return void repairs.push(`${where}格式无效，已移除。`);
+    const source = ids.get(String(edge.source)),
+      target = ids.get(String(edge.target));
+    if (!source || !target || source === target)
+      return void repairs.push(`${where}没有连接两个已有节点，已移除。`);
+    const sourceHandle = port(spec(source.data.op).outputs, edge.sourceHandle, `${where}的输出`);
+    const targetHandle = port(spec(target.data.op).inputs, edge.targetHandle, `${where}的输入`);
+    if (!sourceHandle || !targetHandle)
+      return void repairs.push(`${where}（${source.data.label} → ${target.data.label}）的端口不存在，已移除。`);
+    const slot = target.id + ":" + targetHandle;
+    if (taken.has(slot))
+      return void repairs.push(`${where}重复连接「${target.data.label}」的同一输入，已移除。`);
+    taken.add(slot);
+    let id = typeof edge.id === "string" && /^[A-Za-z0-9_-]{1,80}$/.test(edge.id) && !edgeIds.has(edge.id) ? edge.id : "";
+    for (let n = index + 1; !id || edgeIds.has(id); n++) id = `e${n}`;
+    edgeIds.add(id);
+    edges.push({ id, source: source.id, sourceHandle, target: target.id, targetHandle });
+  });
+  if (!nodes.length)
+    throw new Error(`模型没有返回可用的节点（${repairs.slice(0, 3).join(" ") || "nodes 为空"}），请调整要求重试。`);
+  return { flow: validateFlow({ nodes, edges }), repairs };
 }
 
 /** 结构签名：不含位置与运行记录。 */

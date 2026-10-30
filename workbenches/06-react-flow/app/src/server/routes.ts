@@ -2,6 +2,8 @@ import type { WorkbenchServer } from "../../sdk/runtime.mjs";
 import { WorkbenchHostError } from "../../sdk/host.mjs";
 import { isRecord } from "../contracts/project";
 import { createStore, StoreError } from "./store";
+import { GENERATE_ATTEMPTS, parseModelJson } from "../contracts/repair";
+
 export function registerRoutes<T>(
   app: WorkbenchServer,
   validate: (value: unknown) => T,
@@ -73,27 +75,24 @@ export function registerRoutes<T>(
         body.prompt.length > 12000
       )
         throw new Error("请输入 1–12000 个字符的要求。");
-      const result = await app.host.llm.generateText(
-        {
-          prompt: body.prompt,
-          system:
-            instructions +
-            " 只返回一个完整 JSON 对象，不要附加 Markdown 围栏或解释文字。",
-          maxOutputTokens: 6000,
-        },
-        { timeoutMs: 90000 },
-      );
-      const text = result.text
-        .trim()
-        .replace(/^```(?:json)?\s*/, "")
-        .replace(/\s*```$/, "");
-      let value: unknown;
-      try {
-        value = JSON.parse(text);
-      } catch {
-        throw new Error("模型返回的内容不是完整 JSON，请调整要求重试。");
+      // 模型偶尔漏写括号（实测 gemini-3.8-flash 约五次一次），JSON 不完整时自动重新生成。
+      for (let attempt = 1; attempt <= GENERATE_ATTEMPTS; attempt++) {
+        const result = await app.host.llm.generateText(
+          {
+            prompt: body.prompt,
+            system:
+              instructions +
+              " 只返回一个完整 JSON 对象，不要附加 Markdown 围栏或解释文字。",
+            maxOutputTokens: 6000,
+          },
+          { timeoutMs: 90000 },
+        );
+        const value = parseModelJson(result.text);
+        if (value !== undefined) return validateGenerated(value);
       }
-      return validateGenerated(value);
+      throw new Error(
+        `模型连续 ${GENERATE_ATTEMPTS} 次返回的内容都不是完整 JSON，请简化要求后重试。`,
+      );
     } catch (error) {
       return fail(error);
     }

@@ -199,6 +199,7 @@ export function AiDraft({
   busy,
   error,
   suggestion,
+  repairs,
   onGenerate,
   onApply,
   onDiscard,
@@ -208,6 +209,7 @@ export function AiDraft({
   busy: boolean;
   error: string;
   suggestion: FlowDocument | null;
+  repairs: string[];
   onGenerate: () => void;
   onApply: () => void;
   onDiscard: () => void;
@@ -281,6 +283,16 @@ export function AiDraft({
               </li>
             ))}
           </ol>
+          {repairs.length ? (
+            <details className="repairs">
+              <summary>已自动修正 {repairs.length} 处模型输出，采用前请核对</summary>
+              <ul>
+                {repairs.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
           <div className="file-actions">
             <button type="button" className="primary" onClick={onApply}>
               采用候选（{suggestion.nodes.length} 个节点）

@@ -13,7 +13,8 @@ export function usePipelineFiles() {
   });
   const [aiBusy, setAiBusy] = useState(false),
     [aiError, setAiError] = useState(""),
-    [suggestion, setSuggestion] = useState<FlowDocument | null>(null);
+    [suggestion, setSuggestion] = useState<FlowDocument | null>(null),
+    [repairs, setRepairs] = useState<string[]>([]);
   const generation = useRef(0);
   useEffect(() => {
     generation.current++;
@@ -23,12 +24,15 @@ export function usePipelineFiles() {
     const raw = project.draft.__aiSuggestion;
     if (raw === undefined) {
       setSuggestion(null);
+      setRepairs([]);
       return;
     }
     try {
       setSuggestion(validateGeneratedFlow(raw));
+      setRepairs(repairNotes(raw));
     } catch {
       setSuggestion(null);
+      setRepairs([]);
     }
   }, [project.documentKey, project.draft.__aiSuggestion]);
   function discardSuggestion() {
@@ -44,7 +48,9 @@ export function usePipelineFiles() {
     setAiBusy(true);
     setAiError("");
     try {
-      const result = validateGeneratedFlow(await request("/api/generate", { method: "POST", body: JSON.stringify({ prompt }) }));
+      const raw = await request("/api/generate", { method: "POST", body: JSON.stringify({ prompt }) });
+      // 服务端已修正并说明偏差；修正说明随候选保存，刷新后仍可核对。
+      const result = { ...validateGeneratedFlow(raw), repairs: repairNotes(raw) };
       if (token === generation.current) project.setDraft((extra) => ({ ...extra, __aiSuggestion: result }));
     } catch (e) {
       if (token === generation.current) setAiError(e instanceof Error ? e.message : "生成失败，请重试。");
@@ -52,8 +58,15 @@ export function usePipelineFiles() {
       setAiBusy(false);
     }
   }
-  return { ...project, aiBusy, aiError, suggestion, generate, discardSuggestion };
+  return { ...project, aiBusy, aiError, suggestion, repairs, generate, discardSuggestion };
 }
+
+const repairNotes = (raw: unknown): string[] =>
+  raw !== null && typeof raw === "object" && Array.isArray((raw as { repairs?: unknown }).repairs)
+    ? ((raw as { repairs: unknown[] }).repairs.filter((item) => typeof item === "string") as string[])
+        .slice(0, 30)
+        .map((item) => item.slice(0, 300))
+    : [];
 
 export function Notice({ error, notice, onDismiss }: { error: string; notice: string; onDismiss: () => void }) {
   if (!error && !notice) return null;

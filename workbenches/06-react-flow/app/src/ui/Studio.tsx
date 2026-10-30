@@ -396,6 +396,7 @@ export function Studio() {
           busy={p.aiBusy}
           error={p.aiError}
           suggestion={p.suggestion}
+          repairs={p.repairs}
           onGenerate={() => void p.generate(typeof p.draft.aiPrompt === "string" ? p.draft.aiPrompt : "")}
           onApply={() => {
             if (!p.suggestion) return;
