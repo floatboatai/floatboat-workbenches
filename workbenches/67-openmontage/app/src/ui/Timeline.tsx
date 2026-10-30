@@ -178,7 +178,7 @@ export const TimelineView = memo(function TimelineView({
           <div className="tl-ruler" onPointerDown={scrub} title="点击或拖动定位播放头">
             {ticks.map((s) => (
               <span key={s} className="tick" style={{ left: s * zoom }}>
-                {timecode(s, timeline.settings.fps).replace(/:\d\d$/, "")}
+                {timecode(s, timeline.settings.fps).replace(/:\d\d$/, "").replace(/^00:/, "")}
               </span>
             ))}
           </div>

@@ -61,6 +61,7 @@ test("fade envelope ramps in and out and is full in between", () => {
 test("video layers draw lower tracks first and text above all pictures", () => {
   const order = visualOrder(sampleTimeline()).map((k) => k.id);
   assert.deepEqual(order, ["v-main", "v-over", "t-sub", "t-title"]);
-  assert.equal(timecode(61.5, 30), "01:01:15");
+  assert.equal(timecode(61.5, 30), "00:01:01:15");
+  assert.equal(timecode(24.2, 30), "00:00:24:06");
   assert.equal(timecode(3725, 25), "01:02:05:00");
 });

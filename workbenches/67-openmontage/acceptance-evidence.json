@@ -309,10 +309,10 @@
     "sha256": "0b6a061503e92f755c0a965df7afd2d9a3c58d82d3d931cb5f000e10579a3ca5"
   },
   "package": {
-    "at": "2026-10-29T12:03:49.912021+00:00",
+    "at": "2026-10-29T13:26:15+00:00",
     "filename": "openmontage-studio-0.9.0.fbworkbench",
-    "bytes": 2762775,
-    "sha256": "b32553321af3cf5424a78f8569cd47bd26733afbb3aaa9f8243f3aa3d5fa7a92",
+    "bytes": 2762855,
+    "sha256": "180734a079c7343e37b37337de4d9290f69582e389ebb23eaa87d7aec42328e4",
     "crc": "passed",
     "transferHashesVerified": 71,
     "sourceFilesMatched": 61,

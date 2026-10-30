@@ -19,7 +19,7 @@
 ### 构建与测试
 - `pnpm workbench check deerflow`：manifest、锁文件、类型与构建通过（仅保留共享 autosave-client 体积提示）。
 - `pnpm workbench test deerflow`：53 项通过（之前 19 项）。新增覆盖：模板计划/确认规则/模型计划校验、DeerFlow 简报、检索合并保持编号与备注、本地底稿、Markdown/HTML 导出与转义、v1 升级、引用解析与交付门禁、示例完整性、大会话压缩；检索夹具（直读、Jina 回退、GitHub README、404/PDF 错误码、Exa 结果与私网结果丢弃、GitHub 限额说明、ECONNREFUSED）、SSRF（回环/链路本地/内网名/映射地址/DNS 解析后拒绝）、代理选择；mock Host 合同（状态、`generateObject` 计划、`generateText` 报告与编造编号、离线 503）；SSE 解码、帧摘要、断线后按 Last-Event-ID 续接且不重复 POST、gap 改读完整状态、反复失败暂停、页面事件流回放与收尾、`/api/models` 检查与授权/拒绝连接说明、地址配置；自动保存提交幂等、未完成网址草稿、冲突保护。原有运行账本测试（持久命令、丢回执只读恢复、模型白名单拒绝、地址变更保护、官方载荷与幂等键）全部保留。
-- `pnpm package`：`artifacts/deerflow-studio-0.9.0.fbworkbench`，72 个文件，不含业务数据，SHA-256 `006357c78f72cd113a6c88944e6dfe364f16b481d14d696a72a4192361e28639`。
+- `pnpm package`：`artifacts/deerflow-studio-0.9.0.fbworkbench`，72 个文件，不含业务数据，SHA-256 `237cc24ab21ab37c9f7c0ed92915a0e9f4863f4dee98701867f44b4c2b5906c0`。
 
 ### 真实浏览器（空数据目录，1440×900）——55 项检查全部通过
 1. 首屏为已完成示例，页面加载只请求本机 API；导出 Markdown（参考来源 [1]–[7]）与独立 HTML（表格、`#source-n` 锚点）并核对文件内容；点击报告中的 [4] 定位并展开来源 [4]。
@@ -56,3 +56,7 @@ App/PlanStage/ExecuteStage/DeerFlowPanel/ReportStage/SourcesPanel/FileMenu/style
 ## 收尾复核
 
 2026-10-29 重新运行 check 与 53 项应用测试通过。更新安装包，使包内 REQUIREMENTS.md、DESIGN.md、ENGINEERING.md 与最终源码一致；逐文件核对代码和文档，资源声明按模板打包规则规范化。原包留存于本地验收归档。
+
+## PR 复核修复
+
+2026-10-29 PR #3 的 CI 在 Linux 上失败 2 项：服务停止后复用 keep-alive 连接报 `UND_ERR_SOCKET`，不是 `ECONNREFUSED`，提示只剩错误码。提交 `21c9991` 将 `ECONNRESET`、`UND_ERR_SOCKET` 解释为服务刚重启或已停止并给出下一步，拒绝连接改用从未连接过的端口测试。check 与 53 项应用测试通过，按该源码重新打包，SHA-256 已更新为上方数值。

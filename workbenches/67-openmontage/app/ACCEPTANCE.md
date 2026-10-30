@@ -56,3 +56,7 @@
 - 模板 `check`/`test` 会争用 SDK 生成目录，须串行执行；未修改共享工具链。包采用模板固定源码清单，ACCEPTANCE 留在源码仓库，不属于包内固定三份说明文档。
 
 证据目录：`archive/2026-10-29-workbench-depth/openmontage/`（工作区）。主要文件：`browser-evidence.json`、`depth-evidence.json`、`browser-final.log`、`depth-final.log`、`export-probe.json`、`mobile-export-probe.json`、`export-final-grid.png`、`package-verification.json`。仅本项目录和截图提交，不推送、不更新共享目录或飞书。
+
+## PR 复核修复
+
+2026-10-29 时间码改为固定 `HH:MM:SS:FF`（如 24 秒成片显示 `00:00:24:06`），避免被读成分钟；时间轴刻度仍显示 `MM:SS`。check 与 25 项应用测试通过，1440 与 375 宽浏览器复核监视器与时间轴无挤压、无 console 错误。重新打包，新哈希记录在 `acceptance-evidence.json`。仓库截图拍摄于修改前，监视器仍是旧格式。
