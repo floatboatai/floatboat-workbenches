@@ -1,6 +1,6 @@
 # 写作台
 
-版本 **0.9.0**。基于 Tiptap 3.32.0 的方案、报告与 SOP 写作编辑器：一张连续的稿纸，左侧章节目录，按需打开的写作助手。不需要 Floatboat Host 即可完成写作、导入和导出；只有写作助手调用 Host 模型。
+版本 **0.9.1**。基于 Tiptap 3.32.0 的方案、报告与 SOP 写作编辑器：一张连续的稿纸，左侧章节目录，按需打开的写作助手。不需要 Floatboat Host 即可完成写作、导入和导出；只有写作助手调用 Host 模型。
 
 ![写作台](../../docs/screenshots/tiptap.png)
 
@@ -22,7 +22,7 @@
 
 ## 验收
 
-功能验收与结构审查分开记录，见 [app/ACCEPTANCE.md](app/ACCEPTANCE.md)。业务测试 23 项。真实 Chrome（Playwright，空数据目录，Host 离线）走通：首开不建档、选区浮条、链接拒绝 `javascript:`、`/` 插入表格与任务、表格行列操作、10 MB 图片压缩嵌入与替代文字/缩放、对齐快捷键、目录跳转、刷新恢复全部结构；延迟保存期间继续输入、回包丢失重试幂等、空标题草稿恢复；Markdown/HTML/JSON 导出内容校验，Markdown/JSON/恢复草稿导入为新文稿；菜单 Esc 与焦点、删除、375 px。Host 已连接时完成一次真实生成 → 刷新保留 → 插入。源包：`artifacts/tiptap-studio-0.9.0.fbworkbench`；客户端实际导入尚未验收。
+功能验收与结构审查分开记录，见 [app/ACCEPTANCE.md](app/ACCEPTANCE.md)。业务测试 23 项。真实 Chrome（Playwright，空数据目录，Host 离线）走通：首开不建档、选区浮条、链接拒绝 `javascript:`、`/` 插入表格与任务、表格行列操作、10 MB 图片压缩嵌入与替代文字/缩放、对齐快捷键、目录跳转、刷新恢复全部结构；延迟保存期间继续输入、回包丢失重试幂等、空标题草稿恢复；Markdown/HTML/JSON 导出内容校验，Markdown/JSON/恢复草稿导入为新文稿；菜单 Esc 与焦点、删除、375 px。Host 已连接时完成一次真实生成 → 刷新保留 → 插入。源包：`artifacts/tiptap-studio-0.9.1.fbworkbench`；客户端实际导入尚未验收。
 
 边界：文字 300,000 字符、整份文稿（含图片）1.6 MB、导入文件 8 MB。对齐在 Markdown 中丢失；不支持 SVG、HTML/Word 导入、协作与分页。
 

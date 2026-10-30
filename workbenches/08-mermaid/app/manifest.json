@@ -4,8 +4,8 @@
   "registryName": "mermaid-studio",
   "name": "Mermaid 图形工坊",
   "description": "Mermaid 源码 IDE：语法高亮与错误定位、17 个图类型模板、主题/手绘风格、缩放预览，导出 SVG/PNG 并自动保存",
-  "version": "0.9.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "version": "0.9.2",
+  "changelog": "AI 功能默认使用 gemini-3.8-flash：工作台 SDK 在调用未指定模型时固定使用该模型，不再随 Floatboat 远端配置变化。应用其余功能不变。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

@@ -153,6 +153,8 @@ const sharedPaths = [
   /^scripts\/blueprints\//u,
   /^\.github\/workflows\/workbenches\.yml$/u,
   /^package\.json$/u,
+  // The pinned template supplies every project's SDK and build tooling.
+  /^template\.lock\.json$/u,
 ];
 
 /**

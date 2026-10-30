@@ -34,9 +34,23 @@ export async function ensurePinnedTemplate(root) {
       "Template cache contains local changes. Preserve them before refreshing the pinned template.",
     );
   const head = await exec("git", ["rev-parse", "HEAD"], { cwd: cache });
-  if (head.stdout.trim() !== lock.commit)
+  if (head.stdout.trim() !== lock.commit) {
+    // A cache cloned before the lock moved does not have the new commit yet.
+    const present = await exec(
+      "git",
+      ["cat-file", "-e", `${lock.commit}^{commit}`],
+      { cwd: cache },
+    ).then(
+      () => true,
+      () => false,
+    );
+    if (!present)
+      await runCommand("git", ["fetch", "--", lock.repository, lock.commit], {
+        cwd: cache,
+      });
     await runCommand("git", ["checkout", "--detach", lock.commit], {
       cwd: cache,
     });
+  }
   return cache;
 }

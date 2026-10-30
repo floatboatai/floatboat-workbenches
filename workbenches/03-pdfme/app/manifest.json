@@ -4,8 +4,8 @@
   "registryName": "pdfme-studio",
   "name": "纸张工坊",
   "description": "报价单、证书、标签与合同模板批量生成工作台",
-  "version": "0.9.0",
-  "changelog": "注册 @pdfme/schemas 全部 26 种字段（表格、图片、二维码与各类条码、变量文本、日期时间、选择与勾选、图形）且统一嵌入中文字体；可导入现有 PDF 作底图（40 MB / 100 页）并以真实渲染的缩略图翻页；填写与预览改用原生 Form/Viewer；批量数据导入 CSV/JSON、逐行校验、合并 PDF 或 ZIP；字段中文命名与改名；报价单、发货标签、结业证书三个示例；模板菜单收纳文件操作。",
+  "version": "0.9.1",
+  "changelog": "AI 功能默认使用 gemini-3.8-flash：工作台 SDK 在调用未指定模型时固定使用该模型，不再随 Floatboat 远端配置变化。应用其余功能不变。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

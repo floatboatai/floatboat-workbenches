@@ -50,7 +50,7 @@
     "slug": "excalidraw",
     "directory": "workbenches/01-excalidraw",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "presentation": {
       "screenshots": [
         {
@@ -111,7 +111,7 @@
     "slug": "markmap",
     "directory": "workbenches/02-markmap",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "presentation": {
       "screenshots": [
         {
@@ -171,7 +171,7 @@
     "slug": "pdfme",
     "directory": "workbenches/03-pdfme",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -231,7 +231,7 @@
     "slug": "tiptap",
     "directory": "workbenches/04-tiptap",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -291,7 +291,7 @@
     "slug": "pptxgenjs",
     "directory": "workbenches/05-pptxgenjs",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -351,7 +351,7 @@
     "slug": "react-flow",
     "directory": "workbenches/06-react-flow",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -412,7 +412,7 @@
     "slug": "surveyjs-form-library",
     "directory": "workbenches/07-surveyjs-form-library",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "presentation": {
       "screenshots": [
         {
@@ -470,7 +470,7 @@
     "slug": "mermaid",
     "directory": "workbenches/08-mermaid",
     "status": "local-verified",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "presentation": {
       "screenshots": [
         {
@@ -529,7 +529,7 @@
     "slug": "swagger-ui",
     "directory": "workbenches/09-swagger-ui",
     "status": "local-verified",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "presentation": {
       "screenshots": [
         {
@@ -589,7 +589,7 @@
     "slug": "vega-lite",
     "directory": "workbenches/10-vega-lite",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -650,7 +650,7 @@
     "slug": "observable-plot",
     "directory": "workbenches/11-observable-plot",
     "status": "local-verified",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "presentation": {
       "screenshots": [
         {
@@ -2949,7 +2949,7 @@
     "slug": "presenton",
     "directory": "workbenches/61-presenton",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "presentation": {
       "screenshots": [
         {
@@ -3038,7 +3038,7 @@
     "slug": "graphify",
     "directory": "workbenches/63-graphify",
     "status": "local-verified",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "verification": {
       "build": "passed",
       "tests": 26,
@@ -3209,7 +3209,7 @@
     "slug": "agent-reach",
     "directory": "workbenches/66-agent-reach",
     "status": "local-verified",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "verification": {
       "build": "passed",
       "tests": 34,

@@ -550,6 +550,8 @@ test("shared tooling rebuilds everything but releases nothing new", () => {
     "scripts/blueprints/autosave-client.ts",
     "scripts/workbench.mjs",
     ".github/workflows/workbenches.yml",
+    // The pinned template supplies the SDK and build tooling of every project.
+    "template.lock.json",
   ]) {
     const plan = planWorkbenches(all, {
       baseCatalog: all,

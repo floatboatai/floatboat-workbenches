@@ -4,8 +4,8 @@
   "registryName": "graphify-studio",
   "name": "知识地图 · Graphify",
   "description": "多份代码、文档与文本在本机抽取知识图谱：社区、力导向地图、路径、原文定位与报告导出",
-  "version": "0.9.0",
-  "changelog": "0.9.0：无需 Python 即可在 Node 内从文件夹/多份文件抽取图谱（符号、导入、调用、继承、标题、链接、术语与共现）；Louvain 社区检测、力导向地图、按社区着色与筛选、原文定位、路径与全文检索；导出 graph.json、GraphML、HTML 与 Markdown 报告；Graphify Python 服务与 Floatboat 模型命名为可选增强；131 节点示例资料集。",
+  "version": "0.9.1",
+  "changelog": "AI 功能默认使用 gemini-3.8-flash：工作台 SDK 在调用未指定模型时固定使用该模型，不再随 Floatboat 远端配置变化。应用其余功能不变。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

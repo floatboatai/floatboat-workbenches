@@ -4,8 +4,8 @@
   "registryName": "markmap-studio",
   "name": "Markmap 工作台",
   "description": "研究与会议脑图工作台：长文/纪要转大纲与交互思维导图",
-  "version": "0.3.1",
-  "changelog": "共享自动保存修复：成功保存后立即切换文档不再误报“本机缓存尚未修复”。",
+  "version": "0.3.2",
+  "changelog": "AI 功能默认使用 gemini-3.8-flash：工作台 SDK 在调用未指定模型时固定使用该模型，不再随 Floatboat 远端配置变化。应用其余功能不变。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

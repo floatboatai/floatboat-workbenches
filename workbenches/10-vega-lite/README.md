@@ -1,6 +1,6 @@
 # Vega-Lite 图表实验台
 
-版本 **0.9.0**。编辑后自动保存，不必反复点击保存按钮。
+版本 **0.9.1**。编辑后自动保存，不必反复点击保存按钮。
 
 以图表为主的实验台：左上是白色图纸，右侧是 Vega-Lite 规格检查器，下方是数据窗。首次打开就有一张真实的三城气温图和它的数据，无需 Floatboat 即可完成导入、编辑、导出。
 
@@ -29,6 +29,6 @@ AI 拟定使用 Floatboat Host 模型，会看到当前数据集的字段与前�
 
 业务测试 20 项；真实 Chrome 验收记录见 [app/ACCEPTANCE.md](app/ACCEPTANCE.md)（功能 local-verified，结构审查单列）。
 
-源包：`artifacts/vega-lite-studio-0.9.0.fbworkbench`。通过 Floatboat「我的 → 工作台 → 导入工作台」安装。源包不含项目数据；客户端实际导入与真实 Host 模型调用尚未验收。
+源包：`artifacts/vega-lite-studio-0.9.1.fbworkbench`。通过 Floatboat「我的 → 工作台 → 导入工作台」安装。源包不含项目数据；客户端实际导入与真实 Host 模型调用尚未验收。
 
 上游与许可见 [NOTICE.md](NOTICE.md)。

@@ -4,8 +4,8 @@
   "registryName": "pptxgenjs-studio",
   "name": "演示编排室",
   "description": "母版版式、原生图表与表格的 PPTX 演示编辑器",
-  "version": "0.9.0",
-  "changelog": "重建为真正的演示编辑器：10 种版式母版、富文本、图片、可编辑表格、原生图表与数据表、形状；舞台选择/拖动/缩放/吸附、撤销重做；品牌主题与 16:9/16:10/4:3；导出原生 PPTX 与含图片的项目 JSON。",
+  "version": "0.9.1",
+  "changelog": "AI 功能默认使用 gemini-3.8-flash：工作台 SDK 在调用未指定模型时固定使用该模型，不再随 Floatboat 远端配置变化。应用其余功能不变。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

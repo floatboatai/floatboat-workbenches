@@ -4,8 +4,8 @@
   "registryName": "react-flow-studio",
   "name": "数据流水线（React Flow）",
   "description": "本地数据流水线 IDE：拖入节点、带类型端口连线，在浏览器中确定性地清洗、变换、汇总 CSV/JSON/日志并导出结果",
-  "version": "0.9.0",
-  "changelog": "重做为数据流水线 IDE：20 种带类型节点、分支合并 DAG、Worker 执行与超时、节点上显示状态与预览、撤销重做/复制粘贴/自动布局、模板库与流水线 JSON 导入导出。",
+  "version": "0.9.1",
+  "changelog": "修复 AI 起草：模型写错的选项（如筛选的 mode 写成 and）、端口和字段会自动修正并在候选下列出，不再整份失败；回复 JSON 不完整时自动重试；提示词列出每个字段的全部可选值。AI 默认使用 gemini-3.8-flash。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {

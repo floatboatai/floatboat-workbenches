@@ -114,6 +114,12 @@
 - 验收：check、24 项测试、打包通过；7 组浏览器流程针对按官方协议编写的模拟服务（与真实 ComfyUI v0.43.0 CPU 无模型实例核对过消息顺序与错误格式）。**真实生成未验证**；截图中的产物图片来自模拟服务。
 - 0.9.1：只补商店介绍。0.9.0 是首次上架，上传时商品尚不存在，介绍图没有写入作者资料，因此发布版本里没有介绍图。0.9.1 上传时商品已存在，介绍图和说明会随新版本一起冻结。应用代码与 0.9.0 相同。
 
+## SDK 默认模型 gemini-3.8-flash（2026-10-30）
+
+模板 SDK（floatboat-workbench-template `93210ec`）在 `generateText`、`generateObject`、`streamText` 未指定模型时填入 `DEFAULT_LLM_MODEL = 'gemini-3.8-flash'`，显式指定的模型不变。此前未指定模型时由 Floatboat 的 utility 模型决定，可被远端配置改变。`template.lock.json` 改钉该提交，并列入 CI 共享工具（变更时全部重建）。
+
+未指定模型、依赖默认值的 14 个工作台各升一个补丁版本重新发布：Excalidraw、Markmap、pdfme、Tiptap、PptxGenJS、React Flow、SurveyJS、Mermaid、Swagger UI、Vega-Lite、Observable Plot、Presenton、Graphify、Agent-Reach。已在代码中写明 gemini-3.8-flash 的 7 个工作台下次发布时随新 SDK 更新。React Flow 0.9.1 同时修复 AI 起草（见其 ACCEPTANCE）。
+
 ## 发布通道
 
 CI 的上传接口只暂存回执，不进入商店审核。后端 PR [AOE-HQ/aoe-backend#414](https://github.com/AOE-HQ/aoe-backend/pull/414) 新增 `POST /api/workbenches/publish`；已部署并启用 `FLOATBOAT_PUBLISH_ENABLED=true`：2026-10-29 的重跑中 56 个包全部上传，54 个提交为待审核版本，CircuitJS（GPL）按规则跳过，Oasis 因包内缺少 `LICENSE` 被拒，已补齐。说明见[自动打包与官方上传](ci-packages.md#提交商店审核)。

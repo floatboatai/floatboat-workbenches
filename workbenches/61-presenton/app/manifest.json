@@ -4,8 +4,8 @@
   "registryName": "presenton-studio",
   "name": "Presenton 工作台",
   "description": "资料 → 大纲 → 成稿的演示文稿生成台",
-  "version": "0.9.0",
-  "changelog": "重建为不依赖服务的生成工作流：读入资料（md/txt/docx/html/csv），本地确定性生成大纲（表格→原生图表、数字→关键数字、时间线、对比、引语），11 种版式与 5 套主题的舞台逐页编辑（图表数据、图片、版式切换），导出 PPTX（原生图表与备注）与 PDF；Floatboat 模型起草与 Presenton 服务为可选通道，均有状态与重新检查。",
+  "version": "0.9.1",
+  "changelog": "AI 功能默认使用 gemini-3.8-flash：工作台 SDK 在调用未指定模型时固定使用该模型，不再随 Floatboat 远端配置变化。应用其余功能不变。",
   "sdkVersion": "1.0.0",
   "runtime": "node22-sqlite-v1",
   "build": {
